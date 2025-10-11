@@ -1,1 +1,1 @@
-from .routes import rentals_bp
+from .routes import rentals_bp  # noqa: F401

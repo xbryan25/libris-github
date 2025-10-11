@@ -1,1 +1,1 @@
-from .routes import purchases_bp
+from .routes import purchases_bp  # noqa: F401

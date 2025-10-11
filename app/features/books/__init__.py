@@ -1,1 +1,1 @@
-from .routes import books_bp
+from .routes import books_bp  # noqa: F401

@@ -175,8 +175,11 @@ cd app
 # Create virtual environment using pipenv
 pipenv shell
 
-# Install dependencies
-pipenv install
+# Install dependencies and dev dependencies
+pipenv install --dev
+
+# Install pre-commit
+pre-commit install
 
 # Run Flask app
 flask run
@@ -185,6 +188,14 @@ flask run
 ### 🧼 Coding Guidelines
 
 - Follow the **PEP8** style guide for Flask (Python).
+  - Occasionally run `pre-commit run --all-files` in the terminal to check for linting, formatting, and type hints even when not planning to commit.
+  - If you only want to run a specific tool instead of all hooks, you can do so:
+    - Formatting:
+      - `pre-commit run black --all-files`
+    - Linting:
+      - `pre-commit run flake8 --all-files`
+    - Type checking:
+      - `pre-commit run mypy --all-files`
 - Follow **ESLint** rules for Nuxt (JavaScript/TypeScript).
 - Keep commits clean and meaningful.
 - Do not commit `.env` or credentials.

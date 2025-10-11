@@ -1,3 +1,2 @@
-
 class BookRepository:
     pass
