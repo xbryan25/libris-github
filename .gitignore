@@ -49,3 +49,6 @@ Thumbs.db
 *.wmv
 
 .mypy_cache/
+
+.env
+.flaskenv
