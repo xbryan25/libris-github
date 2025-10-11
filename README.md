@@ -147,8 +147,18 @@ This prevents confusion, broken tracking, and pull request errors.
 
 #### Frontend (Nuxt)
 
-To be added...
+##### ⚙️ Loading the Nuxt server
 
+```bash
+# Go to the nuxt directory
+cd app/nuxt
+
+# Install dependencies and dev dependencies (this will take a long time)
+npm install
+
+# Run Nuxt dev server
+npm run dev
+```
 #### Backend (Flask)
 
 ##### ⚙️ Environment Configuration
@@ -169,7 +179,7 @@ Before running the Flask app, make sure to configure your environment files.
 ##### ⚙️ Loading the Flask server
 
 ```bash
-# Go to backend directory
+# Go to the directory
 cd app
 
 # Create virtual environment using pipenv

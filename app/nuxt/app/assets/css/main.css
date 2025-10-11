@@ -1,0 +1,72 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Temporary fix for NuxtUI chip bug, where --color-*-400 and --color-*-500 is not defined, solution is just to declare it here */
+@theme static {
+
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+
+  --color-yellow-400: #facc15;
+  --color-yellow-500: #eab308;
+
+  --color-lime-400: #a3e635;
+  --color-lime-500: #84cc16;
+
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #0ea5e9;
+
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+
+  --color-violet-400: #a78bfa;
+  --color-violet-500: #8b5cf6;
+
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+
+  --color-fuchsia-400: #e879f9;
+  --color-fuchsia-500: #d946ef;
+
+  --color-pink-400: #f472b6;
+  --color-pink-500: #ec4899;
+
+  --color-rose-400: #fb7185;
+  --color-rose-500: #f43f5e;
+
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #71717a;
+
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+
+  --color-stone-400: #a8a29e;
+  --color-stone-500: #78716c;
+}
