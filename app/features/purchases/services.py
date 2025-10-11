@@ -1,0 +1,2 @@
+class PurchaseServices:
+    pass

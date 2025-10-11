@@ -1,0 +1,2 @@
+class WalletControllers:
+    pass
