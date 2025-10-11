@@ -1,0 +1,3 @@
+
+class NotificationControllers:
+    pass
