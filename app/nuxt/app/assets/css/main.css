@@ -70,3 +70,79 @@
   --color-stone-400: #a8a29e;
   --color-stone-500: #78716c;
 }
+
+/* Color Theme Bridge */
+:root {
+  /* Base Neutrals */
+  --color-background: theme(colors.zinc.100);
+  --color-surface: theme(colors.white);
+  --color-surface-hover: theme(colors.zinc.200);
+  --color-border: theme(colors.zinc.300);
+
+  /* Text */
+  --color-text-base: theme(colors.zinc.800);
+  --color-text-muted: theme(colors.zinc.500);
+
+  /* Accent */
+  --color-accent: theme(colors.green.700);
+  --color-accent-hover: theme(colors.green.600);
+  --color-accent-active: theme(colors.green.800);
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-background: theme(colors.zinc.900);
+  --color-surface: theme(colors.zinc.950);
+  --color-surface-hover: theme(colors.zinc.800);
+  --color-border: theme(colors.zinc.800);
+
+  --color-text-base: theme(colors.zinc.100);
+  --color-text-muted: theme(colors.zinc.400);
+
+  --color-accent: theme(colors.green.600);
+  --color-accent-hover: theme(colors.green.500);
+  --color-accent-active: theme(colors.green.300);
+}
+
+@layer utilities {
+  /* Text Colors */
+  .text-base {
+    color: var(--color-text-base);
+  }
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+  .text-accent {
+    color: var(--color-accent);
+  }
+
+  /* Backgrounds */
+  .bg-background {
+    background-color: var(--color-background);
+  }
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+  .bg-surface-hover {
+    background-color: var(--color-surface-hover);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  /* Borders */
+  .border-base {
+    border-color: var(--color-border);
+  }
+
+  /* Hover and Active Defaults */
+  .hover\:bg-surface-hover:hover {
+    background-color: var(--color-surface-hover);
+  }
+  .hover\:bg-accent:hover {
+    background-color: var(--color-accent);
+  }
+  .active\:bg-accent-active:active {
+    background-color: var(--color-accent-active);
+  }
+}
