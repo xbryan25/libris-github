@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     '@nuxt/devtools',
     '@nuxt/icon',
     '@nuxt/eslint',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    '@nuxtjs/color-mode'
   ],
   devServer: {
     host: '127.0.0.1',
@@ -28,6 +29,12 @@ export default defineNuxtConfig({
   },
   icon: {
     mode: 'css',
-    cssLayer: 'base'
+    cssLayer: 'base',
+    customCollections: [
+      {
+        prefix: 'icons',
+        dir: './app/assets/icons/',
+      },
+    ],
   }
 })
