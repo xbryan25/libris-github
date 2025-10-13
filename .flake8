@@ -1,0 +1,15 @@
+[flake8]
+# Match Black's default line length
+max-line-length = 88
+
+# Ignore some rules Black intentionally breaks
+extend-ignore = E203, W503
+
+# Exclude files/folders you don't want to lint
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .venv,
+    venv
