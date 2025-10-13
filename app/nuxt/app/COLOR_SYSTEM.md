@@ -23,14 +23,16 @@ The color system is built on **CSS custom properties** (variables) that adapt au
 
 ### When to Use Each Token
 
-- **`--color-background`**: Main app background, page canvas
-- **`--color-surface`**: Elevated elements (cards, modals, navigation)
-- **`--color-surface-hover`**: Interactive surface states (buttons, list items)
-- **`--color-base`**: Visual separators, input borders, dividing lines
-- **`--color-text`**: Primary content, headings, body text
-- **`--color-text-muted`**: Supporting text, captions, labels
-- **`--color-accent`**: CTAs, links, brand elements, focus states
-- **`--color-accent-active`**: Pressed buttons, active selections
+| Token                   | Tailwind Classes                                      | Use Cases                                    |
+| ----------------------- | ----------------------------------------------------- | -------------------------------------------- |
+| `--color-background`    | `.bg-background`                                      | Main app background, page canvas             |
+| `--color-surface`       | `.bg-surface`                                         | Elevated elements (cards, modals, navigation) |
+| `--color-surface-hover` | `.bg-surface-hover`, `.hover:bg-surface-hover`        | Interactive surface states (buttons, list items) |
+| `--color-base`          | `.border-base`                                        | Visual separators, input borders, dividing lines |
+| `--color-text`          | `.text-base`                                          | Primary content, headings, body text         |
+| `--color-text-muted`    | `.text-muted`                                         | Supporting text, captions, labels            |
+| `--color-accent`        | `.bg-accent`, `.text-accent`, `.hover:bg-accent`      | CTAs, links, brand elements, focus states    |
+| `--color-accent-active` | `.active:bg-accent-active`                            | Pressed buttons, active selections           |
 
 ## Visual Reference
 
