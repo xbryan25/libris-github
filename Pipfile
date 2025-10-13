@@ -5,8 +5,9 @@ name = "pypi"
 
 [packages]
 flask = "*"
-flask-cors = "*"
 python-dotenv = "*"
+flask-cors = "*"
+psycopg = {extras = ["pool", "binary"], version = "*"}
 
 [dev-packages]
 pre-commit = "*"
