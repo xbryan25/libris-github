@@ -1,11 +1,13 @@
 <script setup lang="ts">
   const route = useRoute()
+  const noNavbarPages = ['/','/signin', '/signup']
+  const showNavbar = computed(() => !noNavbarPages.includes(route.path))
 </script>
 
 <template>
   <div class="min-h-screen w-full flex flex-col bg-background text-base">
     <!-- Navbar -->
-    <nav class="w-full border-b border-base bg-surface">
+    <nav v-if="showNavbar" class="w-full border-b border-base bg-surface">
       <div class="w-full flex items-center justify-between px-6 py-4">
         <!-- Logo -->
         <div class="flex items-center gap-2 ml-8">
