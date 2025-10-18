@@ -1,4 +1,19 @@
-<script lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{
+  authType: string;
+}>();
+
+const state = reactive({
+  email: '',
+  password: '',
+  username: '',
+  confirmPassword: '',
+});
+
+const testInputs = (eventData: any) => {
+  console.log(eventData);
+};
+</script>
 
 <template>
   <div class="flex flex-col gap-10 box-border px-[10%] pb-[10%] max-w-2xl w-full">
@@ -13,13 +28,18 @@
       <h3>Open the door to endless reading — your next book awaits.</h3>
     </div>
 
-    <UForm class="space-y-4">
+    <UForm
+      :validate="(state) => validateAuthForm(state, props.authType)"
+      :state="state"
+      class="space-y-4"
+      @submit="(event) => testInputs(event.data)"
+    >
       <UFormField label="Email" name="email">
-        <UInput class="w-90" />
+        <UInput v-model="state.email" class="w-90" />
       </UFormField>
 
       <UFormField label="Password" name="password">
-        <UInput type="password" class="w-90" />
+        <UInput v-model="state.password" type="password" class="w-90" />
       </UFormField>
 
       <!-- Change to NuxtLink later -->
