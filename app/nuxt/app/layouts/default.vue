@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  const route = useRoute()
-  const noNavbarPages = ['/','/signin', '/signup']
-  const showNavbar = computed(() => !noNavbarPages.includes(route.path))
+const route = useRoute();
+const noNavbarPages = ['/', '/login', '/signup'];
+const showNavbar = computed(() => !noNavbarPages.includes(route.path));
 </script>
 
 <template>
@@ -19,11 +19,11 @@
           <!-- Dashboard -->
           <NuxtLink
             to="/dashboard"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/dashboard'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
             <Icon name="ri:dashboard-line" class="w-5 h-5 flex-shrink-0" />
@@ -33,11 +33,11 @@
           <!-- Browse -->
           <NuxtLink
             to="/browse"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/browse'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
             <Icon name="ph:magnifying-glass-bold" class="w-5 h-5" />
@@ -47,11 +47,11 @@
           <!-- My Library -->
           <NuxtLink
             to="/library"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/library'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
             <Icon name="lucide:book-open" class="w-5 h-5 flex-shrink-0" />
@@ -61,11 +61,11 @@
           <!-- Rentals -->
           <NuxtLink
             to="/rentals"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/rentals'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
             <Icon name="ci-calendar" class="w-5 h-5 flex-shrink-0" />
@@ -75,25 +75,28 @@
           <!-- Purchases -->
           <NuxtLink
             to="/purchases"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/purchases'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
-            <Icon name="material-symbols:shopping-cart-outline-rounded" class="w-5 h-5 flex-shrink-0" />
+            <Icon
+              name="material-symbols:shopping-cart-outline-rounded"
+              class="w-5 h-5 flex-shrink-0"
+            />
             <span>Purchases</span>
           </NuxtLink>
 
           <!-- Profile -->
           <NuxtLink
             to="/profile"
-            :class="[ 
+            :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
               route.path === '/profile'
                 ? 'bg-accent text-white'
-                : 'hover:bg-surface-hover hover:text-accent text-base'
+                : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
           >
             <Icon name="lucide:circle-user" class="w-5 h-5 flex-shrink-0" />
@@ -107,12 +110,14 @@
           </div>
 
           <!-- Notifications -->
-          <button class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base transition-colors">
+          <button
+            class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base transition-colors"
+          >
             <Icon name="mdi:bell-outline" class="w-5 h-5" />
           </button>
 
           <!-- Color Mode Toggle -->
-          <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors"/>
+          <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors" />
         </div>
       </div>
     </nav>
