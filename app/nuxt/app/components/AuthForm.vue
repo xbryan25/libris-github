@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import { useUserLogin } from '~/composables/useUserLogin';
+
 const props = defineProps<{
   authType: string;
 }>();
 
 const state = reactive({
-  email: '',
+  emailAddress: '',
   password: '',
   username: '',
   confirmPassword: '',
 });
 
-const testInputs = (eventData: any) => {
-  console.log(eventData);
+const onSubmit = (eventData: { emailAddress: string; password: string }) => {
+  useUserLogin(eventData.emailAddress, eventData.password);
 };
 </script>
 
@@ -32,10 +34,10 @@ const testInputs = (eventData: any) => {
       :validate="(state) => validateAuthForm(state, props.authType)"
       :state="state"
       class="space-y-4"
-      @submit="(event) => testInputs(event.data)"
+      @submit="(event) => onSubmit(event.data)"
     >
-      <UFormField label="Email" name="email">
-        <UInput v-model="state.email" class="w-90" />
+      <UFormField label="Email Address" name="emailAddress">
+        <UInput v-model="state.emailAddress" class="w-90" />
       </UFormField>
 
       <UFormField label="Password" name="password">

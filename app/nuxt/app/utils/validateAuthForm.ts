@@ -2,7 +2,7 @@ import type {FormError} from '@nuxt/ui';
 
 export function validateAuthForm (state: any, authType: string): FormError[] {
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailAddressRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^.{8,}$/;
 
     const whitespaceRegex = /^\s*$/;
@@ -10,12 +10,12 @@ export function validateAuthForm (state: any, authType: string): FormError[] {
     const errors: { name: string, message: string }[] = [];
 
     if (authType === 'login'){
-        if (!state.email || whitespaceRegex.test(state.email)) {
-            errors.push({ name: 'email', message: 'Email is required.' });
-        } else if (state.email && !emailRegex.test(state.email)) {
+        if (!state.emailAddress || whitespaceRegex.test(state.emailAddress)) {
+            errors.push({ name: 'emailAddress', message: 'Email address is required.' });
+        } else if (state.emailAddress && !emailAddressRegex.test(state.emailAddress)) {
             errors.push({
-                name: 'email',
-                message: 'Wrong email format.',
+                name: 'emailAddress',
+                message: 'Wrong email address format.',
             });
         }
 
