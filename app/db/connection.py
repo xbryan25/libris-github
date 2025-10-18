@@ -68,19 +68,3 @@ class Database:
         if hasattr(self, "pool") and not self.pool.closed:
             self.pool.close()
         Database._instance = None
-
-    def test_supabase_connection(self):
-        try:
-            with self.get_conn() as conn:
-                with conn.cursor() as cur:
-                    cur.execute("SELECT version();")
-                    row = cur.fetchone()
-
-                    if row is not None:
-                        print("✅ Connected successfully!")
-                        print("PostgreSQL version:", row["version"])
-                    else:
-                        print("❌ Query returned no result")
-
-        except Exception as e:
-            raise e

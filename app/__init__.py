@@ -1,9 +1,12 @@
 from flask import Flask, current_app
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 from .config import Config
 
 from .db.connection import Database
+
+jwt = JWTManager()
 
 
 def create_app():
@@ -12,7 +15,8 @@ def create_app():
 
     app.config.from_object(Config)
 
-    CORS(app, origins=["*"], supports_credentials=True)
+    jwt.init_app(app)
+    CORS(app, origins=["http://127.0.0.1:3000"], supports_credentials=True)
 
     from .features import blueprints
 
@@ -21,12 +25,6 @@ def create_app():
         app.register_blueprint(bp, url_prefix=f"/api/{name}")
 
     with app.app_context():
-        # Comment the line below when testing
         current_app.extensions["db"] = Database()
-
-        # Uncomment the next three lines when testing
-        # db = Database()
-        # current_app.extensions['db'] = db
-        # db.test_supabase_connection()
 
     return app
