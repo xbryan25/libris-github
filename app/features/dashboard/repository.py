@@ -18,7 +18,6 @@ class DashboardRepository:
                 books_sold, books_bought, total_earnings
         """
         db = current_app.extensions["db"]
-        print(user_id)
 
         params = tuple([user_id] * 11)
 
