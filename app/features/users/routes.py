@@ -1,6 +1,8 @@
 from flask import Blueprint, Response
 from .controllers import UserControllers
 
+from flask_jwt_extended import jwt_required
+
 users_bp = Blueprint("users_bp", __name__)
 
 
@@ -41,3 +43,57 @@ def user_login() -> tuple[Response, int]:
     """
 
     return UserControllers.user_login_controller()
+
+
+@users_bp.route("/me", methods=["GET"])
+@jwt_required()
+def get_current_user() -> tuple[Response, int]:
+    """
+    Retrieve the currently authenticated user's information.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It returns the username associated with the authenticated session.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        username: The username of the currently authenticated user.
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.get_current_user_controller()
+
+
+@users_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh_access_token() -> tuple[Response, int]:
+    """
+    Generate a new access token using a valid refresh token.
+
+    This endpoint requires a valid refresh token (HTTP-only cookie).
+    It issues a new access token and updates the access token cookie without requiring the user to log in again.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        accessTokenExpiresAt: Timestamp (in milliseconds) indicating when the new access token will expire.
+
+    Possible errors:
+
+        401 if the refresh token is missing or invalid.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.refresh_access_token_controller()

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { useUserLogin } from '~/composables/useUserLogin';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
 const props = defineProps<{
   authType: string;
+}>();
+
+const emit = defineEmits<{
+  (e: 'onSubmitLogin', email: string, password: string): void;
 }>();
 
 const state = reactive({
@@ -12,8 +16,10 @@ const state = reactive({
   confirmPassword: '',
 });
 
-const onSubmit = (eventData: { emailAddress: string; password: string }) => {
-  useUserLogin(eventData.emailAddress, eventData.password);
+const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
+  if (props.authType === 'login') {
+    emit('onSubmitLogin', event.data.emailAddress, event.data.password);
+  }
 };
 </script>
 
@@ -34,7 +40,7 @@ const onSubmit = (eventData: { emailAddress: string; password: string }) => {
       :validate="(state) => validateAuthForm(state, props.authType)"
       :state="state"
       class="space-y-4"
-      @submit="(event) => onSubmit(event.data)"
+      @submit="(event) => onSubmit(event)"
     >
       <UFormField label="Email Address" name="emailAddress">
         <UInput v-model="state.emailAddress" class="w-90" />

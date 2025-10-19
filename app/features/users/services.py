@@ -35,3 +35,22 @@ class UserServices:
             return user_dataclass
 
         return None
+
+    @staticmethod
+    def get_username_service(user_id) -> str | None:
+        """
+        Get the username of a user using the user_id.
+
+        Args:
+            user_id (str): user_id of the user.
+
+        Returns:
+            str: The username of the user if found, otherwise None.
+        """
+
+        username_dict = UserRepository.get_username(user_id)
+
+        if username_dict is None:
+            return None
+
+        return username_dict["username"]

@@ -25,3 +25,25 @@ class UserRepository:
             ),
             (email_address,),
         )
+
+    @staticmethod
+    def get_username(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the username of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's username in the format (None if no matching user):
+                {"username": str}
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.GET_COLUMN_BY_PK.format(
+                column="username", table="users", pk="user_id"
+            ),
+            (user_id,),
+        )

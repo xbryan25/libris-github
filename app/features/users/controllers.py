@@ -5,6 +5,7 @@ from flask_jwt_extended import (
     set_access_cookies,
     create_refresh_token,
     set_refresh_cookies,
+    get_jwt_identity,
 )
 
 import traceback
@@ -57,6 +58,51 @@ class UserControllers:
                 resp,
                 refresh_token,
                 max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
+            )
+
+            return resp, 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_current_user_controller() -> tuple[Response, int]:
+        "Retrieve the currently authenticated user's username."
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            username = UserServices.get_username_service(user_id)
+
+            return jsonify({"username": username}), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def refresh_access_token_controller() -> tuple[Response, int]:
+        "Generate a new access token using a valid refresh token."
+
+        try:
+            # Get user ID from the refresh token
+            identity = get_jwt_identity()
+
+            new_access_token = create_access_token(identity=identity)
+
+            expires_at = (
+                datetime.now(timezone.utc)
+                + timedelta(seconds=current_app.config["COOKIE_MAX_AGE"])
+            ).timestamp() * 1000
+
+            resp = make_response({"accessTokenExpiresAt": expires_at})
+
+            set_access_cookies(
+                resp, new_access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
             )
 
             return resp, 200
