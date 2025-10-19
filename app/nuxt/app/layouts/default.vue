@@ -107,18 +107,18 @@
           </div>
 
           <!-- Notifications -->
-          <button class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base transition-colors">
+          <button class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors">
             <Icon name="mdi:bell-outline" class="w-5 h-5" />
           </button>
 
           <!-- Color Mode Toggle -->
-          <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors"/>
+          <ColorModeButton class="hover:text-accent hover:bg-surface-hover cursor-pointer transition-colors"/>
         </div>
       </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 flex justify-center items-center bg-background">
+    <main class="flex-1 mx-15 justify-center items-center bg-background">
       <NuxtPage />
     </main>
   </div>
