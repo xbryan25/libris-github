@@ -1,5 +1,9 @@
 <script setup lang="ts">
-// Placeholder page script
+import auth from '~/middleware/auth';
+
+definePageMeta({
+  middleware: auth,
+});
 </script>
 
 <template>
