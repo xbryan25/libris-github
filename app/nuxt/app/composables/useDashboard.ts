@@ -40,6 +40,7 @@ export const useDashboard = () => {
   }
 
   const fetchUsername = async () => {
+    loading.value = true
     error.value = null
     try {
       const res = await $fetch<{ username: string }>(`${API_URL}/api/users/me`, {
@@ -48,6 +49,8 @@ export const useDashboard = () => {
       username.value = res.username
     } catch (e: any) {
       error.value = e?.message || 'Failed to fetch username'
+    } finally {
+      loading.value = false
     }
   }
 
