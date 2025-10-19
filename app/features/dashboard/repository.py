@@ -1,5 +1,5 @@
 from flask import current_app
-from app.db.queries.common import CommonQueries
+from app.db.queries.dashboard_queries import DashboardQueries
 
 
 class DashboardRepository:
@@ -21,7 +21,7 @@ class DashboardRepository:
 
         params = tuple([user_id] * 11)
 
-        result = db.fetch_one(CommonQueries.DASHBOARD_COUNTS, params)
+        result = db.fetch_one(DashboardQueries.DASHBOARD_COUNTS, params)
 
         if result:
             return {
