@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import guest from '~/middleware/guest';
 import { useAuthStore } from '~/stores/useAuthStore';
+
+definePageMeta({
+  middleware: guest,
+});
 
 const toast = useToast();
 const auth = useAuthStore();
