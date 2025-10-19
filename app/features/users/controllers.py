@@ -6,6 +6,7 @@ from flask_jwt_extended import (
     create_refresh_token,
     set_refresh_cookies,
     get_jwt_identity,
+    unset_jwt_cookies,
 )
 
 import traceback
@@ -59,6 +60,27 @@ class UserControllers:
                 refresh_token,
                 max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
             )
+
+            return resp, 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def user_logout_controller() -> tuple[Response, int]:
+        """Unsets both access and refresh tokens."""
+
+        try:
+            resp = make_response(
+                {
+                    "messageTitle": "Logout successful.",
+                    "message": "Your session has been cleared.",
+                }
+            )
+
+            # Clears both access and refresh cookies
+            unset_jwt_cookies(resp)
 
             return resp, 200
 

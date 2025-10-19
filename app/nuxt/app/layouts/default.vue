@@ -118,6 +118,8 @@ const showNavbar = computed(() => !noNavbarPages.includes(route.path));
 
           <!-- Color Mode Toggle -->
           <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors" />
+
+          <LogoutButton />
         </div>
       </div>
     </nav>

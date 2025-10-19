@@ -18,6 +18,9 @@ class Database:
     _instance = None
     _max_retries = 2
 
+    # type hint for mypy
+    pool: ConnectionPool | None
+
     def __new__(cls) -> "Database":
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
@@ -27,16 +30,21 @@ class Database:
     def _connect_pool(self) -> None:
         """Initialize a connection pool."""
 
+        if hasattr(self, "pool") and self.pool is not None and not self.pool.closed:
+            self.pool.close()
+
         self.pool = ConnectionPool(
             conninfo=current_app.config["DATABASE_URL"],
             max_size=5,
             kwargs={"row_factory": dict_row},
         )
 
-    def get_conn(self):
+    def get_conn(self) -> Any:
         """Get a pooled connection (context-managed). Reconnect if pool closed."""
-        if self.pool.closed:
+        if self.pool is None or self.pool.closed:
             self._connect_pool()
+
+        assert self.pool is not None
         return self.pool.connection()
 
     def execute_query(self, query: Query, params: Any = None) -> None:
@@ -104,6 +112,6 @@ class Database:
 
     def close(self) -> None:
         """Close the pool and reset the singleton."""
-        if hasattr(self, "pool") and not self.pool.closed:
+        if hasattr(self, "pool") and self.pool is not None and not self.pool.closed:
             self.pool.close()
         Database._instance = None

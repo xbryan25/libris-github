@@ -45,6 +45,36 @@ def user_login() -> tuple[Response, int]:
     return UserControllers.user_login_controller()
 
 
+@users_bp.route("/logout", methods=["POST"])
+def user_logout() -> tuple[Response, int]:
+    """
+    Log out a user and clear their session.
+
+    This endpoint removes authentication cookies to log out the user. It clears both the access and refresh tokens
+    from the client browser.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        messageTitle: A short success message.
+
+        message: A confirmation that the session has been cleared.
+
+    Possible errors:
+
+        500 if an unexpected error occurs during processing.
+
+    Additional notes:
+
+        Both access and refresh cookies are cleared using unset_jwt_cookies().
+    """
+
+    return UserControllers.user_logout_controller()
+
+
 @users_bp.route("/me", methods=["GET"])
 @jwt_required()
 def get_current_user() -> tuple[Response, int]:
