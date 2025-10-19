@@ -17,3 +17,15 @@ class CommonQueries:
     GET_BY_SPECIFIC_COLUMN = "SELECT * FROM {table} WHERE {column} = %s"
     GET_COLUMN_BY_PK = "SELECT {column} FROM {table} WHERE {pk} = %s"
     CHECK_IF_EXISTS = "SELECT EXISTS (SELECT 1 FROM {table} WHERE {column} = %s)"
+    DASHBOARD_COUNTS = """
+    SELECT
+      (SELECT COUNT(*) FROM rented_books WHERE user_id = %s) AS books_borrowed,
+      (SELECT COUNT(*) FROM rented_books WHERE user_id = %s AND rent_status = 'ongoing') AS currently_lending,
+      (SELECT COUNT(*) FROM rented_books WHERE user_id = %s AND rent_status = 'pending') AS currently_renting,
+      (SELECT COUNT(*) FROM purchased_books WHERE user_id = %s AND purchase_status = 'completed') AS books_sold,
+      (SELECT COUNT(*) FROM purchased_books WHERE user_id = %s AND purchase_status IN ('approved', 'pending')) AS books_bought,
+      (
+        COALESCE((SELECT SUM(total_rent_cost) FROM rented_books WHERE user_id = %s AND rent_status = 'completed'), 0)
+        + COALESCE((SELECT SUM(total_buy_cost) FROM purchased_books WHERE user_id = %s AND purchase_status = 'completed'), 0)
+      ) AS total_earnings;
+    """
