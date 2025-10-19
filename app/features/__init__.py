@@ -1,4 +1,4 @@
-from dashboard import dashboard_bp
+from .dashboard import dashboard_bp
 from .books import books_bp
 from .notifications import notifications_bp
 from .purchases import purchases_bp
