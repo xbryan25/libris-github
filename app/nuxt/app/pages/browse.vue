@@ -7,7 +7,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="flex items-center justify-center h-screen">
-    <h1 class="text-5xl font-bold text-primary">Browse Page</h1>
+  <div class="flex flex-col items-center justify-center w-full">
+    <BookList />
   </div>
 </template>
