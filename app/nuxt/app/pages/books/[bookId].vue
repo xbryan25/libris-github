@@ -1,0 +1,13 @@
+<script setup lang="ts">
+import auth from '~/middleware/auth';
+
+definePageMeta({
+  middleware: auth,
+});
+</script>
+
+<template>
+  <div class="flex items-center justify-center h-screen">
+    <h1 class="text-5xl font-bold text-primary">My Specific Book Page</h1>
+  </div>
+</template>

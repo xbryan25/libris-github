@@ -4,32 +4,11 @@ const genreValue = ref('All Genres');
 
 const statusItems = ref(['For Rent', 'For Sale', 'Both']);
 const statusValue = ref('For Rent');
-
-const cards = ref([
-  {
-    title: 'Icons',
-    description: 'Nuxt UI integrates with Nuxt Icon to access over 200,000+ icons from Iconify.',
-    icon: 'i-lucide-smile',
-    to: '/docs/getting-started/integrations/icons',
-  },
-  {
-    title: 'Fonts',
-    description: 'Nuxt UI integrates with Nuxt Fonts to provide plug-and-play font optimization.',
-    icon: 'i-lucide-a-large-small',
-    to: '/docs/getting-started/integrations/fonts',
-  },
-  {
-    title: 'Color Mode',
-    description: 'Nuxt UI integrates with Nuxt Color Mode to switch between light and dark.',
-    icon: 'i-lucide-sun-moon',
-    to: '/docs/getting-started/integrations/color-mode',
-  },
-]);
 </script>
 
 <template>
-  <div class="w-full flex flex-col px-10">
-    <div class="mt-5 p-5 bg-surface-hover rounded-lg">
+  <div class="h-full w-full flex flex-col items-center px-10">
+    <div class="mt-5 p-5 bg-surface-hover rounded-lg w-full">
       <div class="flex gap-5">
         <UInput
           icon="i-lucide-search"
@@ -43,13 +22,17 @@ const cards = ref([
       </div>
     </div>
 
-    <div class="h-auto py-5">
+    <div ref="elementRef" class="flex-1 py-5 w-full">
       <div
         class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center justify-center gap-4 h-full grid-rows-1 sm:grid-rows-[auto]"
       >
-        <BookCard v-for="n in 8" :key="n" />
+        <BookCard v-for="n in 3" :key="n" card-type="hasContent" />
+
+        <BookCard v-for="n in 2" :key="n" card-type="empty" />
       </div>
     </div>
+
+    <UPagination v-model:page="page" :total="100" class="pt-5" />
   </div>
 </template>
 

@@ -1,14 +1,20 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{
+  cardType: string;
+}>();
+</script>
 
 <template>
-  <div class="w-full h-[400px] text-white flex flex-col items-center justify-center">
+  <NuxtLink
+    v-if="props.cardType === 'hasContent'"
+    to="/books/ID-OF-BOOK-SHOULD-BE-DISPLAYED-HERE"
+    class="w-full h-[400px] flex flex-col items-center justify-center transition-transform duration-300 hover:scale-103 cursor-pointer"
+  >
     <div class="flex-[2] w-full rounded-t-xl overflow-hidden">
       <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />
     </div>
 
-    <div
-      class="flex-1 flex flex-col gap-[10px] px-5 py-4 bg-surface-hover text-white w-full rounded-b-xl"
-    >
+    <div class="flex-1 flex flex-col gap-[10px] px-5 py-4 bg-surface-hover w-full rounded-b-xl">
       <div class="flex-1 flex flex-col gap-1 items-center pb-1">
         <UTooltip text="The Passion WithinThe Passion WithinThe Passion Within">
           <p class="text-lg text-left font-semibold text-base truncate w-full">
@@ -58,5 +64,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
+
+  <div v-else class="w-full h-[400px] flex flex-col items-center justify-center bg-transparent" />
 </template>
