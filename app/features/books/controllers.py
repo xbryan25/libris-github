@@ -8,6 +8,8 @@ from app.exceptions.custom_exceptions import InvalidParameterError
 
 from app.utils import dict_keys_to_camel, asdict_enum_safe
 
+from typing import Any, cast
+
 # from psycopg.errors import UniqueViolation, ForeignKeyViolation
 
 
@@ -24,11 +26,9 @@ class BookControllers:
                 "books_per_page": int(request.args.get("booksPerPage", 0)),
                 "page_number": int(request.args.get("pageNumber", 0)),
                 "search_value": (request.args.get("searchValue") or "").strip(),
-                "genre": request.args.get("genre", "all genres"),
+                "genre": request.args.get("genre", "all genres").lower(),
                 "availability": request.args.get("availability", "for rent").lower(),
             }
-
-            print(params)
 
             if params["books_per_page"] < 0:
                 raise InvalidParameterError(
@@ -50,12 +50,12 @@ class BookControllers:
 
             return (
                 jsonify(
-                    {
-                        "entities": [
-                            dict_keys_to_camel(asdict_enum_safe(book_details))
-                            for book_details in books
-                        ]
-                    }
+                    [
+                        dict_keys_to_camel(
+                            cast(dict[str, Any], asdict_enum_safe(book_details))
+                        )
+                        for book_details in books
+                    ]
                 ),
                 200,
             )

@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import type { Book } from '~/types';
+
 const props = defineProps<{
   cardType: string;
+  bookDetails?: Book | null;
 }>();
+
+console.log(props.bookDetails);
 </script>
 
 <template>
   <NuxtLink
     v-if="props.cardType === 'hasContent'"
-    to="/books/ID-OF-BOOK-SHOULD-BE-DISPLAYED-HERE"
+    :to="`/books/${props.bookDetails?.bookId}`"
     class="w-full h-[400px] flex flex-col items-center justify-center transition-transform duration-300 hover:scale-103 cursor-pointer"
   >
     <div class="flex-[2] w-full rounded-t-xl overflow-hidden">
@@ -17,25 +22,44 @@ const props = defineProps<{
     <div class="flex-1 flex flex-col gap-[10px] px-5 py-4 bg-surface-hover w-full rounded-b-xl">
       <div class="flex-1 flex flex-col gap-1 items-center pb-1">
         <UTooltip text="The Passion WithinThe Passion WithinThe Passion Within">
-          <p class="text-lg text-left font-semibold text-base truncate w-full">
-            The Passion WithinThe Passion Within
+          <p class="text-lg text-center font-semibold text-base truncate w-full">
+            {{ props.bookDetails?.title }}
           </p>
         </UTooltip>
 
         <UTooltip text="by Sam Huertas" class="flex-[3]">
-          <p class="text-left text-xs text-base truncate">by Sam Huertas</p>
+          <p class="text-left text-xs text-base truncate">by {{ props.bookDetails?.author }}</p>
         </UTooltip>
 
         <USeparator color="primary" type="solid" class="flex-1" />
 
         <UTooltip text="samalexis" class="flex-[3]">
-          <p class="text-left text-xs text-base truncate w-full">Owned by: samalexis</p>
+          <p class="text-left text-xs text-base truncate w-full">
+            Owned by: {{ props.bookDetails?.ownerUsername }}
+          </p>
         </UTooltip>
       </div>
 
       <div class="flex gap-2 items-start">
-        <UBadge class="font-bold rounded-full">For rent</UBadge>
-        <UBadge color="error" class="font-bold rounded-full">For sale</UBadge>
+        <UBadge
+          v-if="
+            ['rent', 'both'].includes(
+              props.bookDetails?.availability ? props.bookDetails?.availability : '',
+            )
+          "
+          class="font-bold rounded-full"
+          >For rent</UBadge
+        >
+        <UBadge
+          v-if="
+            ['purchase', 'both'].includes(
+              props.bookDetails?.availability ? props.bookDetails?.availability : '',
+            )
+          "
+          color="error"
+          class="font-bold rounded-full"
+          >For sale</UBadge
+        >
       </div>
 
       <div class="flex flex-col gap-1">
@@ -47,7 +71,9 @@ const props = defineProps<{
 
           <div class="flex items-center">
             <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent" />
-            <p class="text-xs text-primary font-semibold">4/day</p>
+            <p class="text-xs text-primary font-semibold">
+              {{ props.bookDetails?.dailyRentPrice }}/day
+            </p>
           </div>
         </div>
 
@@ -59,7 +85,9 @@ const props = defineProps<{
 
           <div class="flex items-center">
             <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent" />
-            <p class="text-xs text-primary font-semibold">50</p>
+            <p class="text-xs text-primary font-semibold">
+              {{ props.bookDetails?.purchasePrice }}
+            </p>
           </div>
         </div>
       </div>

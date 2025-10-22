@@ -46,7 +46,7 @@ def convert_book_dict(book: dict) -> Book:
 
     return Book(
         book_id=book["book_id"],
-        title=book["first_name"] if book.get("first_name") is not None else "-",
+        title=book["title"] if book.get("title") is not None else "-",
         author=book["author"] if book.get("author") is not None else "-",
         genre=book["genre"] if book.get("genre") is not None else "-",
         condition=(

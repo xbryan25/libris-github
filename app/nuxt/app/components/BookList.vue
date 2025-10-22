@@ -1,9 +1,38 @@
 <script setup lang="ts">
+import type { Book } from '~/types';
+
+const booksData = ref<Book[]>([]);
+
 const genreItems = ref(['All Genres', 'Horror', 'Fantasy', 'Action']);
 const genreValue = ref('All Genres');
 
-const statusItems = ref(['For Rent', 'For Sale', 'Both']);
-const statusValue = ref('For Rent');
+const statusItems = ref(['All', 'For Rent', 'For Sale', 'Both']);
+const statusValue = ref('All');
+
+const booksPerPage = ref(8);
+const pageNumber = ref(1);
+
+const searchValue = ref('');
+const genre = ref('All Genres');
+const availability = ref('All');
+
+const loadBooks = async () => {
+  const options = {
+    booksPerPage: booksPerPage.value,
+    pageNumber: pageNumber.value,
+    searchValue: searchValue.value,
+    genre: genre.value,
+    availability: availability.value,
+  };
+
+  const data = await useBooks(options);
+
+  booksData.value = data;
+};
+
+onMounted(async () => {
+  await loadBooks();
+});
 </script>
 
 <template>
@@ -22,31 +51,25 @@ const statusValue = ref('For Rent');
       </div>
     </div>
 
-    <div ref="elementRef" class="flex-1 py-5 w-full">
+    <div class="flex-1 pt-5 w-full">
       <div
-        class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] place-items-center justify-center gap-4 h-full grid-rows-1 sm:grid-rows-[auto]"
+        class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] place-items-center justify-center gap-2 h-full grid-rows-1 sm:grid-rows-[auto]"
       >
-        <BookCard v-for="n in 3" :key="n" card-type="hasContent" />
+        <!-- <BookCard v-for="n in 10" :key="n" card-type="hasContent" />
 
-        <BookCard v-for="n in 2" :key="n" card-type="empty" />
+        <BookCard v-for="n in 1" :key="n" card-type="empty" /> -->
+
+        <BookCard
+          v-for="book in booksData"
+          :key="book.bookId"
+          card-type="hasContent"
+          :book-details="book"
+        />
+
+        <BookCard v-for="_ in 4" :key="_" card-type="empty" />
       </div>
     </div>
 
-    <UPagination v-model:page="page" :total="100" class="pt-5" />
+    <UPagination v-model:page="pageNumber" :total="100" class="py-5" />
   </div>
 </template>
-
-<!-- <div class="flex-1 grid grid-rows-2 grid-cols-5 place-items-center gap-4">
-        <PetCard
-          v-for="pet in petList"
-          :key="pet.petId"
-          :name="pet.name"
-          :status="pet.status"
-          :petFirstImageUrl="pet.petFirstImageUrl"
-          :petId="pet.petId"
-          :petShelter="pet.petShelter"
-          :isNotDummy="true"
-        />
-
-        <PetCard v-for="_ in dummyFramesToLoad" :key="_" :isNotDummy="false" />
-      </div> -->
