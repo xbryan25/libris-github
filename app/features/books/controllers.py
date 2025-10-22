@@ -1,2 +1,80 @@
+from flask import request, jsonify, Response
+
+import traceback
+
+from .services import BookServices
+
+from app.exceptions.custom_exceptions import InvalidParameterError
+
+from app.utils import dict_keys_to_camel, asdict_enum_safe
+
+# from psycopg.errors import UniqueViolation, ForeignKeyViolation
+
+
 class BookControllers:
-    pass
+
+    @staticmethod
+    def get_many_books_controller() -> tuple[Response, int]:
+        """Retrieve details of different books based on pagination, optional search, genre, and availability filters."""
+
+        ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
+
+        try:
+            params = {
+                "books_per_page": int(request.args.get("booksPerPage", 0)),
+                "page_number": int(request.args.get("pageNumber", 0)),
+                "search_value": (request.args.get("searchValue") or "").strip(),
+                "genre": request.args.get("genre", "all genres"),
+                "availability": request.args.get("availability", "for rent").lower(),
+            }
+
+            print(params)
+
+            if params["books_per_page"] < 0:
+                raise InvalidParameterError(
+                    f"Invalid 'booksPerPage' value: '{params['books_per_page']}'. Must be a positive integer."
+                )
+
+            if params["page_number"] < 0:
+                raise InvalidParameterError(
+                    f"Invalid 'pageNumber' value: '{params['page_number']}'. Must be a positive integer."
+                )
+
+            if params["availability"] not in ALLOWED_AVAILABILITY_FILTERS:
+                raise InvalidParameterError(
+                    f"""Invalid 'availability' value: '{params['availability']}'.
+                    Must be one of: ['for rent', 'for sale', 'both', 'all']."""
+                )
+
+            books = BookServices.get_many_books_service(params)
+
+            return (
+                jsonify(
+                    {
+                        "entities": [
+                            dict_keys_to_camel(asdict_enum_safe(book_details))
+                            for book_details in books
+                        ]
+                    }
+                ),
+                200,
+            )
+
+        except InvalidParameterError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400
+
+        except (ValueError, TypeError):
+            traceback.print_exc()
+            return (
+                jsonify(
+                    {
+                        "error": "Invalid query parameter. 'rowsPerPage' and 'pageNumber' must be positive integers."
+                    }
+                ),
+                400,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
