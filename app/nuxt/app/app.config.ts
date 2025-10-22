@@ -3,6 +3,9 @@ export default defineAppConfig({
     colors: {
       primary: 'green',
       neutral: 'zinc'
+    },
+    skeleton: {
+      base: 'animate-pulse rounded-md bg-elevated'
     }
   }
 })

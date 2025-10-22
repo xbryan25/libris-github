@@ -17,7 +17,7 @@ definePageMeta({
 
         <div class="flex items-center space-x-6">
           <NuxtLink
-            to="/signin"
+            to="/login"
             class="px-4 py-2 rounded-lg font-semibold text-xl text-gray-800 hover:bg-[#8CFFB6] transition-colors"
           >
             Sign-in
