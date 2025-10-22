@@ -16,3 +16,4 @@ class Book:
     security_deposit: int
     purchase_price: int
     owner_id: str
+    owner_username: str

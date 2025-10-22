@@ -74,4 +74,5 @@ def convert_book_dict(book: dict) -> Book:
             int(book["purchase_price"]) if book.get("purchase_price") is not None else 0
         ),
         owner_id=book["owner_id"],
+        owner_username=book["owner_username"],
     )

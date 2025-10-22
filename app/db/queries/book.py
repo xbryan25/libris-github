@@ -1,9 +1,11 @@
 class BookQueries:
     GET_MANY_BOOKS = (
-        "SELECT * FROM books "
-        "WHERE {search_by} ILIKE %s "
-        "AND genre ILIKE %s "
-        "AND availability::text ILIKE %s "
+        "SELECT b.*, u.username AS owner_username "
+        "FROM books as b "
+        "JOIN users as u ON b.owner_id = u.user_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND b.genre ILIKE %s "
+        "AND b.availability::text ILIKE %s "
         "ORDER BY {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
