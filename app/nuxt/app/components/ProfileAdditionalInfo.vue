@@ -1,13 +1,26 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Profile } from '~/composables/UseProfile'
+import { useProfileEdit } from '~/composables/useProfileEdit'
 
 interface Props {
   profile: Profile | null
   loading: boolean
   error: string | null
+  isCurrentUser?: boolean // Whether this is the current user's profile
+  isEditing?: boolean // Whether we're in edit mode
+  editForm?: any // The edit form data
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  startEdit: []
+  save: []
+  cancel: []
+}>()
+
+const editForm = computed(() => props.editForm || {})
 </script>
 
 <template>
@@ -81,23 +94,28 @@ defineProps<Props>()
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">First Name</div>
-            <div class="text-[20px] text-muted">{{profile?.first_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.first_name}}</div>
+            <UInput v-else v-model="editForm.first_name" placeholder="First Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Middle Name</div>
-            <div class="text-[20px] text-muted">{{profile?.middle_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.middle_name}}</div>
+            <UInput v-else v-model="editForm.middle_name" placeholder="Middle Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Last Name</div>
-            <div class="text-[20px] text-muted">{{profile?.last_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.last_name}}</div>
+            <UInput v-else v-model="editForm.last_name" placeholder="Last Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Date of Birth</div>
-            <div class="text-[20px] text-muted">{{profile?.date_of_birth}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.date_of_birth}}</div>
+            <UInput v-else v-model="editForm.date_of_birth" type="date" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base whitespace-nowrap">Phone Number</div>
-            <div class="text-[20px] text-muted">{{profile?.phone_number}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.phone_number}}</div>
+            <UInput v-else v-model="editForm.phone_number" placeholder="Phone Number" />
           </div>
         </div>
       </div>
@@ -105,27 +123,61 @@ defineProps<Props>()
       <USeparator orientation="vertical" class="h-[300px]" type="solid" />
 
       <div class="flex flex-col w-1/2 space-y-8">
-        <div class="text-[32px] font-bold text-base">Address</div>
+        <div class="flex justify-between items-center">
+          <div class="text-[32px] font-bold text-base">Address</div>
+          <div class="flex items-center space-x-2">
+            <UButton 
+              v-if="isCurrentUser && !isEditing"
+              @click="$emit('startEdit')"
+              icon="i-heroicons-pencil"
+              color="primary"
+              variant="solid"
+              size="sm"
+            />
+            <div v-if="isCurrentUser && isEditing" class="flex space-x-2">
+              <UButton 
+                @click="$emit('save', editForm)"
+                color="primary"
+                size="sm"
+              >
+                Save
+              </UButton>
+              <UButton 
+                @click="$emit('cancel')"
+                color="neutral"
+                variant="outline"
+                size="sm"
+              >
+                Cancel
+              </UButton>
+            </div>
+          </div>
+        </div>
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
-            <div class="text-[20px] text-muted">{{profile?.address?.country}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.country}}</div>
+            <UInput v-else v-model="editForm.address.country" placeholder="Country" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">City</div>
-            <div class="text-[20px] text-muted">{{profile?.address?.city}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.city}}</div>
+            <UInput v-else v-model="editForm.address.city" placeholder="City" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Barangay</div>
-            <div class="text-[20px] text-muted">{{profile?.address?.barangay}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.barangay}}</div>
+            <UInput v-else v-model="editForm.address.barangay" placeholder="Barangay" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Street</div>
-            <div class="text-[20px] text-muted">{{profile?.address?.street}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.street}}</div>
+            <UInput v-else v-model="editForm.address.street" placeholder="Street" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Postal Code</div>
-            <div class="text-[20px] text-muted">{{profile?.address?.postal_code}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.postal_code}}</div>
+            <UInput v-else v-model="editForm.address.postal_code" placeholder="Postal Code" />
           </div>
         </div>
       </div>

@@ -209,6 +209,40 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def update_user_profile_controller() -> tuple[Response, int]:
+        "Update the authenticated user's profile information."
+
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            profile_data = request.get_json()
+            if not profile_data:
+                return jsonify({"message": "No data provided"}), 400
+
+            # Update profile information
+            profile_success = UserServices.update_user_profile_service(
+                user_id, profile_data
+            )
+
+            # Update address if provided
+            address_success = True
+            if "address" in profile_data:
+                address_success = UserServices.update_user_address_service(
+                    user_id, profile_data["address"]
+                )
+
+            if profile_success and address_success:
+                return jsonify({"message": "Profile updated successfully"}), 200
+            else:
+                return jsonify({"message": "Failed to update profile"}), 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def get_other_user_trust_score_comparison_controller(
         user_id: str,
     ) -> tuple[Response, int]:

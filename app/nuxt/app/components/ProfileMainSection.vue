@@ -3,17 +3,29 @@ import TrustScoreDetails from './TrustScoreDetails.vue'
 import type { Profile } from '~/composables/UseProfile'
 import { computed, onMounted, watch } from 'vue'
 import { useTrustScoreComparison } from '~/composables/useTrustScoreComparison'
+import { useProfileEdit } from '~/composables/useProfileEdit'
 
 interface Props {
   profile: Profile | null
   loading: boolean
   error: string | null
   userId?: string // Optional user ID for other users' profiles
+  isCurrentUser?: boolean // Whether this is the current user's profile
+  isEditing?: boolean // Whether we're in edit mode
+  editForm?: any // The edit form data
 }
 
 const props = defineProps<Props>()
 
 const { comparison, fetchComparison, getComparisonText } = useTrustScoreComparison(props.userId)
+const { saving, error: editError, success, startEditing, cancelEditing, saveProfile } = useProfileEdit()
+
+const editForm = computed(() => props.editForm || {})
+const isEditing = computed(() => props.isEditing || false)
+
+const emit = defineEmits<{
+  profileUpdated: [profile: any]
+}>()
 
 const trustScoreBadge = computed(() => {
   if (!props.profile?.trust_score) return { text: 'Unknown', color: 'bg-gray-500' }
@@ -36,6 +48,21 @@ watch(() => props.profile, (newProfile) => {
     fetchComparison()
   }
 }, { immediate: true })
+
+const handleEdit = () => {
+  startEditing(props.profile)
+}
+
+const handleSave = async () => {
+  const updatedProfile = await saveProfile()
+  if (updatedProfile) {
+    emit('profileUpdated', updatedProfile)
+  }
+}
+
+const handleCancel = () => {
+  cancelEditing()
+}
 
 onMounted(() => {
   console.log('ProfileMainSection mounted, profile:', props.profile)
@@ -92,7 +119,11 @@ onMounted(() => {
 
       <div class="flex flex-col justify-center">
         <div class="text-[42px] font-bold text-base">{{profile?.username}}</div>
-        <div class="text-[35px] font-bold text-base">{{profile?.first_name}} {{ profile?.middle_name?.charAt(0) }}. {{profile?.last_name}}</div>
+        
+        <div class="text-[35px] font-bold text-base">
+          {{profile?.first_name}} {{ profile?.middle_name?.charAt(0) }}. {{profile?.last_name}}
+        </div>
+        
         <div class="text-[25px] font-bold text-muted">Joined since {{profile?.account_activated_at}}</div>
       </div>
 
@@ -114,6 +145,7 @@ onMounted(() => {
         </div>
 
         <div class="text-[15px] font-semibold text-muted">{{ getComparisonText() }}</div>
+        
       </div>
     </div>
   </UCard>

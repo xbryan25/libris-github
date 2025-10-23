@@ -12,3 +12,11 @@ class UserQueries:
         "SELECT AVG(trust_score) as average_trust_score, COUNT(*) as total_users "
         "FROM users WHERE trust_score IS NOT NULL"
     )
+    UPDATE_USER_PROFILE = (
+        "UPDATE users SET first_name = %s, middle_name = %s, last_name = %s, "
+        "date_of_birth = %s, phone_number = %s WHERE user_id = %s"
+    )
+    UPDATE_USER_ADDRESS = (
+        "UPDATE user_address SET country = %s, city = %s, barangay = %s, "
+        "street = %s, postal_code = %s WHERE user_id = %s"
+    )

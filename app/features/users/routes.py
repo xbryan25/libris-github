@@ -264,3 +264,43 @@ def get_other_user_trust_score_comparison(user_id: str) -> tuple[Response, int]:
     """
 
     return UserControllers.get_other_user_trust_score_comparison_controller(user_id)
+
+
+@users_bp.route("/profile/me", methods=["PUT"])
+@jwt_required()
+def update_user_profile() -> tuple[Response, int]:
+    """
+    Update the authenticated user's profile information.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It allows updating personal information and address details.
+
+    Request body:
+
+        A JSON object containing the fields to update:
+            - first_name (optional): User's first name
+            - middle_name (optional): User's middle name
+            - last_name (optional): User's last name
+            - date_of_birth (optional): User's date of birth
+            - phone_number (optional): User's phone number
+            - address (optional): Object containing address fields:
+                - country (optional): User's country
+                - city (optional): User's city
+                - barangay (optional): User's barangay
+                - street (optional): User's street
+                - postal_code (optional): User's postal code
+
+    Response JSON:
+
+        message: Success or error message
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        400 if no data is provided.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.update_user_profile_controller()

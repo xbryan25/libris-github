@@ -84,6 +84,68 @@ class UserRepository:
         )
 
     @staticmethod
+    def update_user_profile(user_id: str, profile_data: dict) -> bool:
+        """
+        Update user profile information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            profile_data (dict): Dictionary containing profile fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        db = current_app.extensions["db"]
+
+        try:
+            db.execute_query(
+                UserQueries.UPDATE_USER_PROFILE,
+                (
+                    profile_data.get("first_name"),
+                    profile_data.get("middle_name"),
+                    profile_data.get("last_name"),
+                    profile_data.get("date_of_birth"),
+                    profile_data.get("phone_number"),
+                    user_id,
+                ),
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def update_user_address(user_id: str, address_data: dict) -> bool:
+        """
+        Update user address information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            address_data (dict): Dictionary containing address fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        db = current_app.extensions["db"]
+
+        try:
+            db.execute_query(
+                UserQueries.UPDATE_USER_ADDRESS,
+                (
+                    address_data.get("country"),
+                    address_data.get("city"),
+                    address_data.get("barangay"),
+                    address_data.get("street"),
+                    address_data.get("postal_code"),
+                    user_id,
+                ),
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
     def get_user_address(user_id: str) -> dict[str, str] | None:
         """
         Retrieve the address information of a user by their user_id.

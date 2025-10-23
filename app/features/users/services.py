@@ -90,6 +90,36 @@ class UserServices:
         return address_info
 
     @staticmethod
+    def update_user_profile_service(user_id: str, profile_data: dict) -> bool:
+        """
+        Update user profile information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            profile_data (dict): Dictionary containing profile fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        return UserRepository.update_user_profile(user_id, profile_data)
+
+    @staticmethod
+    def update_user_address_service(user_id: str, address_data: dict) -> bool:
+        """
+        Update user address information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            address_data (dict): Dictionary containing address fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        return UserRepository.update_user_address(user_id, address_data)
+
+    @staticmethod
     def get_trust_score_comparison_service(
         user_trust_score: int,
     ) -> dict[str, Any] | None:
