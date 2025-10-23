@@ -127,3 +127,38 @@ def refresh_access_token() -> tuple[Response, int]:
     """
 
     return UserControllers.refresh_access_token_controller()
+
+
+@users_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile_info() -> tuple[Response, int]:
+    """
+    Retrieve the profile information of the currently authenticated user.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It returns the user's profile details such as name, date of birth, and contact information.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        A dictionary containing the user's profile information:
+            - username
+            - accountActivatedAt
+            - firstName
+            - middleName
+            - lastName
+            - dateOfBirth
+            - phoneNumber
+            - address (which includes country, city, barangay, street, postalCode)
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.get_profile_info_controller()

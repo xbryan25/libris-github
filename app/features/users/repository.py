@@ -1,5 +1,5 @@
 from app.db.queries.common import CommonQueries
-
+from app.db.queries.user_queries import UserQueries
 from flask import current_app
 
 
@@ -45,5 +45,24 @@ class UserRepository:
             CommonQueries.GET_COLUMN_BY_PK.format(
                 column="username", table="users", pk="user_id"
             ),
+            (user_id,),
+        )
+
+    @staticmethod
+    def get_profile_info(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the profile information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's profile information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_PROFILE_INFO,
             (user_id,),
         )

@@ -132,3 +132,24 @@ class UserControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_profile_info_controller() -> tuple[Response, int]:
+        "Retrieve the profile information of the currently authenticated user."
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            profile_info = UserServices.get_profile_info_service(user_id)
+
+            if profile_info is None:
+                return jsonify({"message": "User profile not found."}), 404
+
+            return jsonify(profile_info), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

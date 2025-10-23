@@ -54,3 +54,19 @@ class UserServices:
             return None
 
         return username_dict["username"]
+
+    @staticmethod
+    def get_profile_info_service(user_id: str) -> dict[str, str] | None:
+        """
+        Get the profile information of a user using the user_id.
+
+        Args:
+            user_id (str): user_id of the user.
+
+        Returns:
+            dict: A dictionary containing the user's profile information (None if no matching user).
+        """
+
+        profile_info = UserRepository.get_profile_info(user_id)
+
+        return profile_info
