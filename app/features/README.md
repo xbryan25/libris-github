@@ -104,4 +104,7 @@ Response → Returned to controller, formatted for API
 
 ### 🔔 Notifications
 - **notifications** – Stores in-app notifications for users
+
+### Dashboard
+- **dashboard** - Displays users' stats (e.g count of books borrowed, currently lengind, etc) in dashboard page
   
