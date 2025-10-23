@@ -129,7 +129,7 @@ def refresh_access_token() -> tuple[Response, int]:
     return UserControllers.refresh_access_token_controller()
 
 
-@users_bp.route("/profile", methods=["GET"])
+@users_bp.route("/profile/me", methods=["GET"])
 @jwt_required()
 def get_profile_info() -> tuple[Response, int]:
     """
@@ -162,3 +162,38 @@ def get_profile_info() -> tuple[Response, int]:
     """
 
     return UserControllers.get_profile_info_controller()
+
+
+@users_bp.route("/profile/<user_id>", methods=["GET"])
+@jwt_required()
+def get_user_profile_info(user_id: str) -> tuple[Response, int]:
+    """
+    Retrieve the profile information of a user by their user ID.
+
+    This endpoint does not require authentication and can be accessed publicly.
+    It returns the user's profile details such as name, date of birth, and contact information.
+
+    Request parameters:
+
+        user_id (str): The unique identifier of the user whose profile information is to be retrieved.
+
+    Response JSON:
+
+        A dictionary containing the user's profile information:
+            - username
+            - accountActivatedAt
+            - firstName
+            - middleName
+            - lastName
+            - dateOfBirth
+            - phoneNumber
+            - address (which includes country, city, barangay, street, postalCode)
+
+    Possible errors:
+
+        404 if no user is found with the provided user ID.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.get_other_user_profile_controller(user_id)

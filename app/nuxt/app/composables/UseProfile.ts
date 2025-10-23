@@ -22,7 +22,7 @@ export type Profile = {
 
 const API_URL = import.meta.env.VITE_API_URL
 
-export const useProfile = () => {
+export const useProfile = (userId?: string) => {
   const profile = ref<Profile | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -31,7 +31,10 @@ export const useProfile = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<Profile>(`${API_URL}/api/users/profile`, {
+      const url = userId
+        ? `${API_URL}/api/users/profile/${userId}`   
+        : `${API_URL}/api/users/profile/me`    
+      const res = await $fetch<Profile>(url, {
         credentials: 'include'
       })
       res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-GB', {

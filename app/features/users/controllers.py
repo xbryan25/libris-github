@@ -156,3 +156,23 @@ class UserControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_other_user_profile_controller(user_id: str) -> tuple[Response, int]:
+        "Retrieve the full profile (personal + address) of another user by user_id."
+
+        try:
+            profile_info = UserServices.get_profile_info_service(user_id)
+            address_info = UserServices.get_user_address_service(user_id)
+
+            if profile_info is None:
+                return jsonify({"message": "User not found."}), 404
+
+            if address_info:
+                profile_info["address"] = address_info
+
+            return jsonify(profile_info), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
