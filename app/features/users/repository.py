@@ -68,6 +68,22 @@ class UserRepository:
         )
 
     @staticmethod
+    def get_trust_score_stats() -> dict[str, float] | None:
+        """
+        Retrieve trust score statistics from all users.
+
+        Returns:
+            dict: A dictionary containing average trust score and total user count (None if no data).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_TRUST_SCORE_STATS,
+            (),
+        )
+
+    @staticmethod
     def get_user_address(user_id: str) -> dict[str, str] | None:
         """
         Retrieve the address information of a user by their user_id.

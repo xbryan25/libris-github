@@ -196,3 +196,71 @@ def get_user_profile_info(user_id: str) -> tuple[Response, int]:
     """
 
     return UserControllers.get_other_user_profile_controller(user_id)
+
+
+@users_bp.route("/trust-score-comparison", methods=["GET"])
+@jwt_required()
+def get_trust_score_comparison() -> tuple[Response, int]:
+    """
+    Retrieve trust score comparison statistics for the authenticated user.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It returns comparison statistics showing how the user's trust score compares to other users.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        A dictionary containing trust score comparison statistics:
+            - user_trust_score: The user's current trust score
+            - average_trust_score: The average trust score across all users
+            - total_users: Total number of users in the system
+            - percentage_difference: How much higher/lower the user's score is (as percentage)
+            - is_above_average: Boolean indicating if user is above average
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        404 if the user's trust score is not found or statistics are not available.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.get_trust_score_comparison_controller()
+
+
+@users_bp.route("/trust-score-comparison/<user_id>", methods=["GET"])
+@jwt_required()
+def get_other_user_trust_score_comparison(user_id: str) -> tuple[Response, int]:
+    """
+    Retrieve trust score comparison statistics for another user by their user ID.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the requesting user.
+    It returns comparison statistics showing how the specified user's trust score compares to other users.
+
+    Request parameters:
+
+        user_id (str): The unique identifier of the user whose trust score comparison is to be retrieved.
+
+    Response JSON:
+
+        A dictionary containing trust score comparison statistics:
+            - user_trust_score: The specified user's current trust score
+            - average_trust_score: The average trust score across all users
+            - total_users: Total number of users in the system
+            - percentage_difference: How much higher/lower the user's score is (as percentage)
+            - is_above_average: Boolean indicating if user is above average
+
+    Possible errors:
+
+        401 if the requesting user is not authenticated or the token is missing/invalid.
+
+        404 if the specified user's trust score is not found or statistics are not available.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return UserControllers.get_other_user_trust_score_comparison_controller(user_id)

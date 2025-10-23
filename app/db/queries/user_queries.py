@@ -8,3 +8,7 @@ class UserQueries:
         "WHERE u.user_id = %s"
     )
     GET_USER_ADDRESS = "SELECT country, city, barangay, street, postal_code FROM user_address WHERE user_id = %s LIMIT 1"
+    GET_TRUST_SCORE_STATS = (
+        "SELECT AVG(trust_score) as average_trust_score, COUNT(*) as total_users "
+        "FROM users WHERE trust_score IS NOT NULL"
+    )

@@ -88,3 +88,38 @@ class UserServices:
         address_info = UserRepository.get_user_address(user_id)
 
         return address_info
+
+    @staticmethod
+    def get_trust_score_comparison_service(
+        user_trust_score: int,
+    ) -> dict[str, Any] | None:
+        """
+        Get trust score comparison statistics for a user.
+
+        Args:
+            user_trust_score (int): The user's trust score to compare.
+
+        Returns:
+            dict: A dictionary containing comparison statistics (None if no data).
+        """
+
+        stats = UserRepository.get_trust_score_stats()
+
+        if not stats or not stats.get("average_trust_score"):
+            return None
+
+        average_score = float(stats["average_trust_score"])
+        total_users = int(stats["total_users"])
+
+        # Calculate percentage difference
+        percentage_difference = (
+            (user_trust_score - average_score) / average_score
+        ) * 100
+
+        return {
+            "user_trust_score": user_trust_score,
+            "average_trust_score": round(average_score, 1),
+            "total_users": total_users,
+            "percentage_difference": round(percentage_difference, 1),
+            "is_above_average": percentage_difference > 0,
+        }

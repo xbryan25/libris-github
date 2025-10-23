@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import TrustScoreDetails from './TrustScoreDetails.vue'
 import type { Profile } from '~/composables/UseProfile'
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useTrustScoreComparison } from '~/composables/useTrustScoreComparison'
 
 interface Props {
   profile: Profile | null
   loading: boolean
   error: string | null
+  userId?: string // Optional user ID for other users' profiles
 }
 
 const props = defineProps<Props>()
+
+const { comparison, fetchComparison, getComparisonText } = useTrustScoreComparison(props.userId)
 
 const trustScoreBadge = computed(() => {
   if (!props.profile?.trust_score) return { text: 'Unknown', color: 'bg-gray-500' }
@@ -22,6 +26,23 @@ const trustScoreBadge = computed(() => {
   if (score >= 251) return { text: 'Decent', color: 'bg-[#FACC15]' }
   if (score >= 51) return { text: 'Bad', color: 'bg-[#CA8A04]' }
   return { text: 'Poor', color: 'bg-[#000000]' }
+})
+
+// Watch for changes to the profile prop
+watch(() => props.profile, (newProfile) => {
+  console.log('Profile changed:', newProfile)
+  if (newProfile?.trust_score) {
+    console.log('Fetching trust score comparison...')
+    fetchComparison()
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  console.log('ProfileMainSection mounted, profile:', props.profile)
+  if (props.profile?.trust_score) {
+    console.log('Fetching trust score comparison...')
+    fetchComparison()
+  }
 })
 </script>
 
@@ -67,7 +88,7 @@ const trustScoreBadge = computed(() => {
           class="w-full h-full object-cover"
         />
       </div>
-      <Icon v-else name="icons:exchange" class="w-35 h-35 rounded-full" />
+      <Icon v-else name="heroicons:user-circle" class="w-35 h-35 rounded-full" />
 
       <div class="flex flex-col justify-center">
         <div class="text-[42px] font-bold text-base">{{profile?.username}}</div>
@@ -92,7 +113,7 @@ const trustScoreBadge = computed(() => {
           </UBadge>
         </div>
 
-        <div class="text-[15px] font-semibold text-muted">19% more than other people</div>
+        <div class="text-[15px] font-semibold text-muted">{{ getComparisonText() }}</div>
       </div>
     </div>
   </UCard>

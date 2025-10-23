@@ -176,3 +176,63 @@ class UserControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_trust_score_comparison_controller() -> tuple[Response, int]:
+        "Retrieve trust score comparison statistics for the authenticated user."
+
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            # Get user's trust score first
+            profile_info = UserServices.get_profile_info_service(user_id)
+            if not profile_info or not profile_info.get("trust_score"):
+                return jsonify({"message": "User trust score not found."}), 404
+
+            user_trust_score = int(profile_info["trust_score"])
+            comparison_stats = UserServices.get_trust_score_comparison_service(
+                user_trust_score
+            )
+
+            if not comparison_stats:
+                return (
+                    jsonify({"message": "Trust score statistics not available."}),
+                    404,
+                )
+
+            return jsonify(comparison_stats), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_other_user_trust_score_comparison_controller(
+        user_id: str,
+    ) -> tuple[Response, int]:
+        "Retrieve trust score comparison statistics for another user by user_id."
+
+        try:
+            # Get the other user's trust score first
+            profile_info = UserServices.get_profile_info_service(user_id)
+            if not profile_info or not profile_info.get("trust_score"):
+                return jsonify({"message": "User trust score not found."}), 404
+
+            other_user_trust_score = int(profile_info["trust_score"])
+            comparison_stats = UserServices.get_trust_score_comparison_service(
+                other_user_trust_score
+            )
+
+            if not comparison_stats:
+                return (
+                    jsonify({"message": "Trust score statistics not available."}),
+                    404,
+                )
+
+            return jsonify(comparison_stats), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
