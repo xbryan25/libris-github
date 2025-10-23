@@ -1,7 +1,7 @@
 <template>
     <UCard class="w-[1500px] h-[350px] bg-surface border-base flex items-stretch px-10">
       <div class="flex w-full items-start justify-between space-x-10">
-        <!-- Personal Information -->
+        
         <div class="flex flex-col w-1/2 space-y-8">
           <div class="text-[32px] font-bold text-base">Personal Information</div>
           <div class="grid grid-cols-3 gap-x-20 gap-y-8">
@@ -28,10 +28,8 @@
           </div>
         </div>
   
-        <!-- Vertical Separator -->
         <USeparator orientation="vertical" class="h-[300px]" type="solid" />
   
-        <!-- Address -->
         <div class="flex flex-col w-1/2 space-y-8">
           <div class="text-[32px] font-bold text-base">Address</div>
           <div class="grid grid-cols-3 gap-x-20 gap-y-8">
