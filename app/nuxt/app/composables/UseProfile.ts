@@ -32,11 +32,14 @@ export const useProfile = (userId?: string) => {
     error.value = null
     try {
       const url = userId
-        ? `${API_URL}/api/users/profile/${userId}`   
-        : `${API_URL}/api/users/profile/me`    
-      const res = await $fetch<Profile>(url, {
+        ? `${API_URL}/api/users/profile/${userId}`
+        : `${API_URL}/api/users/profile/me`
+
+      const options: any = {
         credentials: 'include'
-      })
+      }
+
+      const res = await $fetch<Profile>(url, options)
       res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'short',

@@ -170,7 +170,6 @@ def get_user_profile_info(user_id: str) -> tuple[Response, int]:
     """
     Retrieve the profile information of a user by their user ID.
 
-    This endpoint does not require authentication and can be accessed publicly.
     It returns the user's profile details such as name, date of birth, and contact information.
 
     Request parameters:
