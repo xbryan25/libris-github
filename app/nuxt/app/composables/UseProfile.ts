@@ -18,6 +18,7 @@ export type Profile = {
   account_activated_at: string
   address?: Address
   trust_score: number
+  profile_image_url?: string
 }
 
 const API_URL = import.meta.env.VITE_API_URL

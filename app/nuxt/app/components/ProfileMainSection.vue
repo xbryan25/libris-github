@@ -60,7 +60,14 @@ const trustScoreBadge = computed(() => {
 
   <UCard v-else class="w-[1500px] h-[250px] bg-surface border-base flex items-stretch px-10">
     <div class="flex items-center justify-start space-x-6 flex-grow">
-      <Icon name="icons:exchange" class="w-35 h-35 rounded-full" />
+      <div v-if="profile?.profile_image_url" class="w-35 h-35 rounded-full overflow-hidden">
+        <img 
+          :src="profile.profile_image_url" 
+          :alt="`${profile.first_name} ${profile.last_name}'s profile picture`"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <Icon v-else name="icons:exchange" class="w-35 h-35 rounded-full" />
 
       <div class="flex flex-col justify-center">
         <div class="text-[42px] font-bold text-base">{{profile?.username}}</div>
