@@ -62,8 +62,14 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center py-12">
+      <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-accent" />
+      <span class="ml-2 text-muted">Loading books...</span>
+    </div>
+
     <!-- Books Section -->
-    <div class="w-full">
+    <div v-else class="w-full">
       <div class="mx-auto py-7">
         <div class="bg-surface rounded-lg p-6 w-full border border-base">
           <div class="flex justify-between items-center mb-6">
@@ -79,8 +85,16 @@ onMounted(() => {
             </button>
           </div>
 
+          <!-- Empty State -->
+          <div v-if="currentBooks.length === 0" class="text-center py-12">
+            <UIcon name="i-heroicons-book-open" class="w-16 h-16 text-muted mx-auto" />
+            <p class="text-muted mt-4 text-lg">No books found in this section</p>
+            <p class="text-sm text-muted mt-2">{{ getEmptyStateMessage(activeTab) }}</p>
+          </div>
+
           <!-- Books Carousel -->
           <UCarousel
+            v-else
             v-slot="{ item }"
             :items="currentBooks"
             :ui="{
