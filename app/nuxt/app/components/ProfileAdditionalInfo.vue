@@ -94,27 +94,27 @@ const editForm = computed(() => props.editForm || {})
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">First Name</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.first_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.first_name">{{profile?.first_name}}</div>
             <UInput v-else v-model="editForm.first_name" placeholder="First Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Middle Name</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.middle_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.middle_name">{{profile?.middle_name}}</div>
             <UInput v-else v-model="editForm.middle_name" placeholder="Middle Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Last Name</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.last_name}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.last_name">{{profile?.last_name}}</div>
             <UInput v-else v-model="editForm.last_name" placeholder="Last Name" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Date of Birth</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.date_of_birth}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.date_of_birth">{{profile?.date_of_birth}}</div>
             <UInput v-else v-model="editForm.date_of_birth" type="date" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base whitespace-nowrap">Phone Number</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.phone_number}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.phone_number">{{profile?.phone_number}}</div>
             <UInput v-else v-model="editForm.phone_number" placeholder="Phone Number" />
           </div>
         </div>
@@ -156,27 +156,27 @@ const editForm = computed(() => props.editForm || {})
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.country}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.country">{{profile?.address?.country}}</div>
             <UInput v-else v-model="editForm.address.country" placeholder="Country" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">City</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.city}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.city">{{profile?.address?.city}}</div>
             <UInput v-else v-model="editForm.address.city" placeholder="City" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Barangay</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.barangay}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.barangay">{{profile?.address?.barangay}}</div>
             <UInput v-else v-model="editForm.address.barangay" placeholder="Barangay" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Street</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.street}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.street">{{profile?.address?.street}}</div>
             <UInput v-else v-model="editForm.address.street" placeholder="Street" />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Postal Code</div>
-            <div v-if="!isEditing" class="text-[20px] text-muted">{{profile?.address?.postal_code}}</div>
+            <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.postal_code">{{profile?.address?.postal_code}}</div>
             <UInput v-else v-model="editForm.address.postal_code" placeholder="Postal Code" />
           </div>
         </div>

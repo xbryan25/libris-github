@@ -118,9 +118,9 @@ onMounted(() => {
       <Icon v-else name="heroicons:user-circle" class="w-35 h-35 rounded-full" />
 
       <div class="flex flex-col justify-center">
-        <div class="text-[42px] font-bold text-base">{{profile?.username}}</div>
+        <div class="text-[42px] font-bold text-base truncate" :title="profile?.username">{{profile?.username}}</div>
         
-        <div class="text-[35px] font-bold text-base">
+        <div class="text-[35px] font-bold text-base truncate max-w-[400px]" :title="`${profile?.first_name} ${profile?.middle_name?.charAt(0)}. ${profile?.last_name}`">
           {{profile?.first_name}} {{ profile?.middle_name?.charAt(0) }}. {{profile?.last_name}}
         </div>
         
