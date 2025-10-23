@@ -6,6 +6,8 @@ from .config import Config
 
 from .db.connection import Database
 
+import os
+
 jwt = JWTManager()
 
 
@@ -24,7 +26,8 @@ def create_app():
     for name, bp in blueprints.items():
         app.register_blueprint(bp, url_prefix=f"/api/{name}")
 
-    with app.app_context():
-        current_app.extensions["db"] = Database()
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
+        with app.app_context():
+            current_app.extensions["db"] = Database()
 
     return app

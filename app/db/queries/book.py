@@ -6,6 +6,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.genre ILIKE %s "
         "AND b.availability::text ILIKE %s "
+        "AND b.owner_id != %s "
         "ORDER BY {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )

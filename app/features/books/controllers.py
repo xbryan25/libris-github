@@ -2,6 +2,8 @@ from flask import request, jsonify, Response
 
 import traceback
 
+from flask_jwt_extended import get_jwt_identity
+
 from .services import BookServices
 
 from app.exceptions.custom_exceptions import InvalidParameterError
@@ -22,6 +24,12 @@ class BookControllers:
         ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
 
         try:
+
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
             params = {
                 "books_per_page": int(request.args.get("booksPerPage", 0)),
                 "page_number": int(request.args.get("pageNumber", 0)),
@@ -46,7 +54,7 @@ class BookControllers:
                     Must be one of: ['for rent', 'for sale', 'both', 'all']."""
                 )
 
-            books = BookServices.get_many_books_service(params)
+            books = BookServices.get_many_books_service(user_id, params)
 
             return (
                 jsonify(

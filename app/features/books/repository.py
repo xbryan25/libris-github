@@ -5,11 +5,12 @@ from flask import current_app
 
 class BookRepository:
     @staticmethod
-    def get_many_books(params) -> list[dict[str, str]]:
+    def get_many_books(user_id, params) -> list[dict[str, str]]:
         """
         Retrieve a paginated list of books based on search, genre, and availability filters.
 
         Args:
+            user_id (str): user_id of the user to prevent getting books that the current user owns.
             params (dict): A dictionary of query parameters. Expected keys include:
                 - "books_per_page" (str): The number of book details to retrieve.
                 - "page_number" (str): This number will be multiplied by books_per_page then serve as the offset for pagination.
@@ -42,5 +43,12 @@ class BookRepository:
             BookQueries.GET_MANY_BOOKS.format(
                 search_by="title", sort_field="RANDOM()", sort_order="ASC"
             ),
-            (search_pattern, genre, availability, params["books_per_page"], offset),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+                params["books_per_page"],
+                offset,
+            ),
         )

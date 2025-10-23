@@ -8,12 +8,13 @@ from app.utils.converters import convert_book_dict
 class BookServices:
 
     @staticmethod
-    def get_many_books_service(params) -> list[Book]:
+    def get_many_books_service(user_id, params) -> list[Book]:
         """
         Retrieve details of different books based on pagination, optional search, genre, and availability filters.
 
         Args:
-            params (dict): A dictionary containing the pagination details,  optional search, genre, and availability filters.
+            user_id (str): user_id of the user to prevent getting books that the current user owns.
+            params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
                 Expected keys include:
                     - "books_per_page" (str): The number of book details to retrieve.
                     - "page_number" (str): This number will be multiplied by books_per_page then serve as the
@@ -26,7 +27,7 @@ class BookServices:
             list[Book]: A list of Book dataclass instances representing books_per_page students.
         """
 
-        books = BookRepository.get_many_books(params)
+        books = BookRepository.get_many_books(user_id, params)
 
         book_dataclasses = []
 
