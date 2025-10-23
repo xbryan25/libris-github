@@ -135,18 +135,21 @@ class UserControllers:
 
     @staticmethod
     def get_profile_info_controller() -> tuple[Response, int]:
-        "Retrieve the profile information of the currently authenticated user."
+        "Retrieve the full profile (personal + address) of the authenticated user."
 
         try:
             user_id = get_jwt_identity()
-
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_info = UserServices.get_profile_info_service(user_id)
+            address_info = UserServices.get_user_address_service(user_id)
 
             if profile_info is None:
                 return jsonify({"message": "User profile not found."}), 404
+
+            if address_info:
+                profile_info["address"] = address_info
 
             return jsonify(profile_info), 200
 

@@ -7,4 +7,4 @@ class UserQueries:
         "JOIN user_address a ON u.user_id = a.user_id "
         "WHERE u.user_id = %s"
     )
-    GET_USER_ADDRESS = "SELECT country, city, barangay, street, postal_code FROM user_addresses WHERE user_id = %s LIMIT 1"
+    GET_USER_ADDRESS = "SELECT country, city, barangay, street, postal_code FROM user_address WHERE user_id = %s LIMIT 1"

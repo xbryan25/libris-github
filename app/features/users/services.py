@@ -4,6 +4,8 @@ from app.common.dataclasses import User
 
 from app.utils import convert_user_dict
 
+from typing import Any
+
 
 class UserServices:
 
@@ -56,7 +58,7 @@ class UserServices:
         return username_dict["username"]
 
     @staticmethod
-    def get_profile_info_service(user_id: str) -> dict[str, str] | None:
+    def get_profile_info_service(user_id: str) -> dict[str, Any] | None:
         """
         Get the profile information of a user using the user_id.
 
@@ -70,3 +72,19 @@ class UserServices:
         profile_info = UserRepository.get_profile_info(user_id)
 
         return profile_info
+
+    @staticmethod
+    def get_user_address_service(user_id: str) -> dict[str, str] | None:
+        """
+        Get the address information of a user using the user_id.
+
+        Args:
+            user_id (str): user_id of the user.
+
+        Returns:
+            dict: A dictionary containing the user's address information (None if no matching user).
+        """
+
+        address_info = UserRepository.get_user_address(user_id)
+
+        return address_info

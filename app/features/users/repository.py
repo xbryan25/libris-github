@@ -66,3 +66,22 @@ class UserRepository:
             UserQueries.GET_PROFILE_INFO,
             (user_id,),
         )
+
+    @staticmethod
+    def get_user_address(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the address information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's address information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_USER_ADDRESS,
+            (user_id,),
+        )
