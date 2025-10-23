@@ -123,7 +123,7 @@ const showNavbar = computed(() => !noNavbarPages.includes(route.path));
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 mx-15 justify-center items-center bg-background">
+    <main class="flex-1 justify-center items-center bg-background">
       <NuxtPage />
     </main>
   </div>
