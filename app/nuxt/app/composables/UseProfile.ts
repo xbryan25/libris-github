@@ -17,6 +17,7 @@ export type Profile = {
   phone_number: string
   account_activated_at: string
   address?: Address
+  trust_score: number
 }
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -32,6 +33,16 @@ export const useProfile = () => {
     try {
       const res = await $fetch<Profile>(`${API_URL}/api/users/profile`, {
         credentials: 'include'
+      })
+      res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
+      res.date_of_birth = new Date(res.date_of_birth).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
       })
       profile.value = res
     } catch (e: any) {
