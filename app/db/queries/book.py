@@ -1,12 +1,16 @@
 class BookQueries:
     GET_MANY_BOOKS = (
         "SELECT b.*, u.username AS owner_username "
-        "FROM books as b "
-        "JOIN users as u ON b.owner_id = u.user_id "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
         "WHERE b.{search_by} ILIKE %s "
         "AND b.genre ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
         "ORDER BY {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
