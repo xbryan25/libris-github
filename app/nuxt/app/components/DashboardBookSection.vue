@@ -1,3 +1,42 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import DashboardBookCard from './DashboardBookCard.vue'
+import { useBooks } from '~/composables/useUserBooks'
+
+const { booksData, loading, error, fetchBooksData } = useBooks()
+
+const activeTab = ref<'renting' | 'bought' | 'rented-by-others' | 'bought-by-others'>('renting')
+
+const tabs = [
+  { id: 'renting', label: "Books I'm Renting", icon: 'lucide:book-open' },
+  { id: 'bought', label: 'Books I Bought', icon: 'ph:magnifying-glass-bold' },
+  { id: 'rented-by-others', label: "Books I'm Lending", icon: 'ci-calendar' },
+  { id: 'bought-by-others', label: "Books I've Sold", icon: 'ci-calendar' }
+] as const
+
+const currentSection = computed(() => {
+  return tabs.find(tab => tab.id === activeTab.value) || tabs[0]
+})
+
+const currentBooks = computed(() => {
+  return booksData.value[activeTab.value] || []
+})
+
+const getEmptyStateMessage = (tab: string) => {
+  const messages: Record<string, string> = {
+    'renting': "You haven't rented any books yet. Start exploring available books!",
+    'bought': "You haven't purchased any books yet. Check out our collection!",
+    'rented-by-others': "No one is renting your books yet. List more books to get started!",
+    'bought-by-others': "You haven't sold any books yet. List your books for sale!"
+  }
+  return messages[tab] || "No books found in this section"
+}
+
+onMounted(() => {
+  fetchBooksData()
+})
+</script>
+
 <template>
   <div class="w-full bg-background">
     <!-- Navigation Tabs -->
@@ -13,6 +52,7 @@
               ? 'bg-accent text-white'
               : 'bg-surface text-foreground hover:bg-surface-hover'
           ]"
+          :disabled="loading"
         >
           <div class="flex items-center gap-1">
             <Icon :name="tab.icon"/>
@@ -31,7 +71,10 @@
               <Icon :name="currentSection.icon" />
               <span class="text-3xl">{{ currentSection.label }}</span>
             </h2>
-            <button class="px-4 py-2 bg-surface-hover hover:bg-accent hover:text-white rounded-md font-medium cursor-pointer transition-colors">
+            <button 
+              v-if="currentBooks.length > 0"
+              class="px-4 py-2 bg-surface-hover hover:bg-accent hover:text-white rounded-md font-medium cursor-pointer transition-colors"
+            >
               See more
             </button>
           </div>
@@ -57,125 +100,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import DashboardBookCard from './DashboardBookCard.vue'
-
-const activeTab = ref('renting')
-
-const tabs = [
-  { id: 'renting', label: "Books I'm Renting", icon: 'lucide:book-open' },
-  { id: 'bought', label: 'Books I Bought', icon: 'ph:magnifying-glass-bold' },
-  { id: 'rented-by-others', label: "Books I'm Lending", icon: 'ci-calendar' },
-  { id: 'bought-by-others', label: "Books I've Sold", icon: 'ci-calendar' }
-]
-
-// Sample data for each section
-const booksData = {
-  renting: [
-    {
-      id: 1,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 2,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 3,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 4,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 5,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 6,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    },
-    {
-      id: 7,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    }
-  ],
-  bought: [
-    {
-      id: 4,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://m.media-amazon.com/images/I/61M+d+buZVL._SL1500_.jpg',
-      from: 'xbryan25',
-      cost: '50'
-    }
-  ],
-  'rented-by-others': [
-    {
-      id: 5,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-      by: 'xbryan25',
-      returnDate: 'October 1, 2025',
-      cost: '50'
-    }
-  ],
-  'bought-by-others': [
-    {
-      id: 6,
-      title: 'The Passion Within',
-      author: 'J.K. Rowling',
-      image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-      by: 'xbryan25',
-      cost: '50'
-    }
-  ]
-}
-
-const currentSection = computed(() => {
-  return tabs.find(tab => tab.id === activeTab.value)
-})
-
-const currentBooks = computed(() => {
-  return booksData[activeTab.value] || []
-})
-</script>

@@ -86,7 +86,7 @@ const costLabel = computed(() => {
       
       <!-- Date info -->
       <div v-if="dateText" class="flex items-center gap-1 text-xs mb-1">
-        <Icon name="mingcute:time-line" class="w-3 h-3" />
+        <Icon name="mingcute:time-line" class="w-4 h-4" />
         <span>{{ dateText }}</span>
       </div>
       
