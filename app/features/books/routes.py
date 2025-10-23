@@ -56,3 +56,37 @@ def get_many_books() -> tuple[Response, int]:
     """
 
     return BookControllers.get_many_books_controller()
+
+
+@books_bp.route("/total-count", methods=["GET"])
+@jwt_required()
+def get_total_book_count() -> tuple[Response, int]:
+    """
+    Retrieve the total number of books based on pagination, optional search, genre, and availability filters.
+
+    This endpoint requires authentication via a valid access token (HTTP-only cookie).
+    It returns the total count books, filtered by pagination and optionally by search, genre,
+    and availability.
+
+    Query parameters:
+
+        searchValue: The value to search for (optional).
+
+        genre: The genre or category of books to filter by.
+
+        availability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        totalCount: The total number of students matching the provided filters.
+
+    Possible errors:
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return BookControllers.get_total_book_count_controller()

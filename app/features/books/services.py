@@ -36,3 +36,23 @@ class BookServices:
             book_dataclasses.append(convert_book_dict(book))
 
         return book_dataclasses
+
+    @staticmethod
+    def get_total_book_count_service(user_id, params) -> int:
+        """
+        Retrieve the total count of books based on pagination, optional search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary containing the optional search, genre, and availability filters.
+                Expected keys include:
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+        Returns:
+            int: The total book count, with search, genre, and availability filters being optionally applied.
+        """
+
+        print(BookRepository.get_total_book_count(user_id, params))
+
+        return BookRepository.get_total_book_count(user_id, params)["count"]

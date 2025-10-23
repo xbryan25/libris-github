@@ -52,3 +52,39 @@ class BookRepository:
                 offset,
             ),
         )
+
+    @staticmethod
+    def get_total_book_count(user_id, params) -> dict[str, int]:
+        """
+        Retrieve the total number of books based on search, genre, and availability filters.
+
+        Args:
+            user_id (str): user_id of the user to prevent getting books that the current user owns.
+            params (dict): A dictionary of query parameters. Expected keys include:
+                - "search_value" (str): The value to search for.
+                - "genre" (str): The genre or category of books to filter by.
+                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+        Returns:
+             dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
+        """
+
+        db = current_app.extensions["db"]
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        return db.fetch_one(
+            BookQueries.GET_BOOKS_COUNT.format(search_by="title"),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+            ),
+        )
