@@ -92,17 +92,23 @@ class UserServices:
     @staticmethod
     def update_user_profile_service(user_id: str, profile_data: dict) -> bool:
         """
-        Update user profile information.
-
-        Args:
-            user_id (str): The unique ID of the user.
-            profile_data (dict): Dictionary containing profile fields to update.
-
-        Returns:
-            bool: True if update was successful, False otherwise.
+        Update user profile information while preserving existing values
+        when only some fields are sent (e.g., only updating profile image).
         """
+        try:
+            existing_profile = UserRepository.get_user_profile(user_id)
+            if not existing_profile:
+                return False
 
-        return UserRepository.update_user_profile(user_id, profile_data)
+            # Merge existing data with incoming data — only overwrite provided keys
+            merged_data = existing_profile.copy()
+            merged_data.update({k: v for k, v in profile_data.items() if v is not None})
+
+            return UserRepository.update_user_profile(user_id, merged_data)
+
+        except Exception as e:
+            print("Error updating user profile:", e)
+            return False
 
     @staticmethod
     def update_user_address_service(user_id: str, address_data: dict) -> bool:

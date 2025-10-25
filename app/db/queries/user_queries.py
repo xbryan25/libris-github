@@ -14,9 +14,13 @@ class UserQueries:
     )
     UPDATE_USER_PROFILE = (
         "UPDATE users SET first_name = %s, middle_name = %s, last_name = %s, "
-        "date_of_birth = %s, phone_number = %s WHERE user_id = %s"
+        "date_of_birth = %s, phone_number = %s, profile_image_url = %s WHERE user_id = %s"
     )
     UPDATE_USER_ADDRESS = (
         "UPDATE user_address SET country = %s, city = %s, barangay = %s, "
         "street = %s, postal_code = %s WHERE user_id = %s"
+    )
+    GET_USER_PROFILE = (
+        "SELECT first_name, middle_name, last_name, date_of_birth, phone_number, profile_image_url "
+        "FROM users WHERE user_id = %s"
     )

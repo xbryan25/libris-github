@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TrustScoreDetails from './TrustScoreDetails.vue'
+import ProfilePictureUpload from './ProfilePictureUpload.vue'
 import type { Profile } from '~/composables/UseProfile'
 import { computed, onMounted, watch } from 'vue'
 import { useTrustScoreComparison } from '~/composables/useTrustScoreComparison'
@@ -25,6 +26,7 @@ const isEditing = computed(() => props.isEditing || false)
 
 const emit = defineEmits<{
   profileUpdated: [profile: any]
+  imageUpdated: [imageUrl: string]
 }>()
 
 const trustScoreBadge = computed(() => {
@@ -62,6 +64,10 @@ const handleSave = async () => {
 
 const handleCancel = () => {
   cancelEditing()
+}
+
+const handleImageUpdate = (imageUrl: string) => {
+  emit('imageUpdated', imageUrl)
 }
 
 onMounted(() => {
@@ -108,7 +114,13 @@ onMounted(() => {
 
   <UCard v-else class="w-[1500px] h-[250px] bg-surface border-base flex items-stretch px-10">
     <div class="flex items-center justify-start space-x-6 flex-grow">
-      <div v-if="profile?.profile_image_url" class="w-35 h-35 rounded-full overflow-hidden">
+      <ProfilePictureUpload
+        v-if="isCurrentUser"
+        :current-image-url="profile?.profile_image_url"
+        :user-id="profile?.username || ''"
+        @image-updated="handleImageUpdate"
+      />
+      <div v-else-if="profile?.profile_image_url" class="w-35 h-35 rounded-full overflow-hidden">
         <img 
           :src="profile.profile_image_url" 
           :alt="`${profile.first_name} ${profile.last_name}'s profile picture`"

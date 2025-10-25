@@ -304,3 +304,13 @@ def update_user_profile() -> tuple[Response, int]:
     """
 
     return UserControllers.update_user_profile_controller()
+
+
+@users_bp.route("/profile/me", methods=["PATCH"])
+@jwt_required()
+def patch_user_profile() -> tuple[Response, int]:
+    """
+    Partially update authenticated user's profile. Only fields provided in the
+    JSON body will be updated; other fields remain unchanged.
+    """
+    return UserControllers.patch_user_profile_controller()

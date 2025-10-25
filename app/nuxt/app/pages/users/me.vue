@@ -32,6 +32,10 @@ const handleProfileUpdate = async (updatedData: any) => {
   await fetchProfile()
 }
 
+const handleImageUpdate = async (imageUrl: string) => {
+  await fetchProfile()
+}
+
 onMounted(() => {
   fetchProfile()
 })
@@ -48,6 +52,7 @@ onMounted(() => {
         :is-editing="isEditing"
         :edit-form="editForm"
         @profile-updated="handleProfileUpdate"
+        @image-updated="handleImageUpdate"
       />
       <ProfileAdditionalInfo 
         :profile="profile" 

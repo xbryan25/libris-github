@@ -270,3 +270,52 @@ class UserControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def patch_user_profile_controller() -> tuple[Response, int]:
+        "Partially update the authenticated user's profile."
+
+        try:
+            user_id = get_jwt_identity()
+            print("JWT user_id:", user_id)  # <-- add this
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            profile_data = request.get_json()
+            print("PATCH request body:", profile_data)  # <-- add this
+
+            if not profile_data:
+                return jsonify({"message": "No data provided"}), 400
+
+            # Update only provided fields
+            profile_success = True
+            address_success = True
+
+            if "profile_image_url" in profile_data or any(
+                k in profile_data
+                for k in [
+                    "first_name",
+                    "middle_name",
+                    "last_name",
+                    "date_of_birth",
+                    "phone_number",
+                ]
+            ):
+                profile_success = UserServices.update_user_profile_service(
+                    user_id, profile_data
+                )
+
+            if "address" in profile_data:
+                address_success = UserServices.update_user_address_service(
+                    user_id, profile_data["address"]
+                )
+
+            if profile_success and address_success:
+                return jsonify({"message": "Profile updated successfully"}), 200
+            else:
+                return jsonify({"message": "Failed to update profile"}), 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

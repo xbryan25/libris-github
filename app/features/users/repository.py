@@ -107,6 +107,7 @@ class UserRepository:
                     profile_data.get("last_name"),
                     profile_data.get("date_of_birth"),
                     profile_data.get("phone_number"),
+                    profile_data.get("profile_image_url"),
                     user_id,
                 ),
             )
@@ -161,5 +162,24 @@ class UserRepository:
 
         return db.fetch_one(
             UserQueries.GET_USER_ADDRESS,
+            (user_id,),
+        )
+
+    @staticmethod
+    def get_user_profile(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the profile information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's profile information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_USER_PROFILE,
             (user_id,),
         )
