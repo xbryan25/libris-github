@@ -74,7 +74,14 @@ console.log(props.bookDetails);
       </div>
 
       <div class="flex flex-col gap-1">
-        <div class="flex gap-2 items-center">
+        <div
+          v-if="
+            ['rent', 'both'].includes(
+              props.bookDetails?.availability ? props.bookDetails?.availability : '',
+            )
+          "
+          class="flex gap-2 items-center"
+        >
           <div class="flex-1 flex gap-1 items-center">
             <Icon name="solar:clock-circle-bold" class="w-5 h-5 text-base" />
             <p class="flex-1 text-sm font-semibold text-base">Rent</p>
@@ -88,7 +95,14 @@ console.log(props.bookDetails);
           </div>
         </div>
 
-        <div class="flex gap-2 items-center">
+        <div
+          v-if="
+            ['purchase', 'both'].includes(
+              props.bookDetails?.availability ? props.bookDetails?.availability : '',
+            )
+          "
+          class="flex gap-2 items-center"
+        >
           <div class="flex-1 flex gap-1 items-center">
             <Icon name="solar:cart-large-2-bold-duotone" class="w-5 h-5 text-base" />
             <p class="flex-1 text-sm font-semibold text-base">Buy</p>
@@ -101,6 +115,15 @@ console.log(props.bookDetails);
             </p>
           </div>
         </div>
+
+        <div
+          v-if="
+            ['rent', 'purchase'].includes(
+              props.bookDetails?.availability ? props.bookDetails?.availability : '',
+            )
+          "
+          class="flex gap-2 items-center h-5"
+        ></div>
       </div>
     </div>
   </NuxtLink>
