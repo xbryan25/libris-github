@@ -12,7 +12,7 @@ from app.utils.date_utils import DateUtils
 class BookServices:
 
     @staticmethod
-    def get_many_books_service(user_id, params) -> list[Book]:
+    def get_books_for_book_list_service(user_id, params) -> list[Book]:
         """
         Retrieve details of different books based on pagination, optional search, genre, and availability filters.
 
@@ -37,7 +37,7 @@ class BookServices:
         elif params["availability"] == "for sale":
             params["availability"] = "purchase"
 
-        books = BookRepository.get_many_books(user_id, params)
+        books = BookRepository.get_books_for_book_list(user_id, params)
 
         book_dataclasses = []
 

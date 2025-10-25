@@ -1,6 +1,6 @@
 import type { Book } from "~/types"
 
-export function useBooksForBrowse(options?: {
+export function useBooksForBookList(options?: {
                                 booksPerPage?: number, 
                                 pageNumber?: number, 
                                 searchValue?: string, 
@@ -10,7 +10,7 @@ export function useBooksForBrowse(options?: {
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  return $fetch<Book[]>(`${apiUrl}/api/books/`, {
+  return $fetch<Book[]>(`${apiUrl}/api/books/book-list-books`, {
     method: 'GET',
     credentials: 'include',
     query: {

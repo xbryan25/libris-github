@@ -1,8 +1,6 @@
-type UseEntitiesResponse = {
-    totalCount: number
-}
 
-export function useTotalBookCount(options?: {
+
+export function useTotalBookCountForBookList(options?: {
                                 searchValue?: string, 
                                 bookGenre?: string,
                                 bookAvailability: string,
@@ -10,7 +8,7 @@ export function useTotalBookCount(options?: {
 
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  return $fetch<UseEntitiesResponse>(`${apiUrl}/api/books/total-count`, {
+  return $fetch<{totalCount: number}>(`${apiUrl}/api/books/book-list-books-count`, {
     method: 'GET',
     credentials: 'include',
     query: {

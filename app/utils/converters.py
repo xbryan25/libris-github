@@ -75,4 +75,5 @@ def convert_book_dict(book: dict) -> Book:
         ),
         owner_id=book["owner_id"],
         owner_username=book["owner_username"],
+        first_image_url=book["first_image_url"],
     )

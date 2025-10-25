@@ -32,7 +32,7 @@ class BookControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_many_books_controller() -> tuple[Response, int]:
+    def get_books_for_book_list_controller() -> tuple[Response, int]:
         """Retrieve details of different books based on pagination, optional search, genre, and availability filters."""
 
         ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
@@ -69,7 +69,7 @@ class BookControllers:
                     Must be one of: ['for rent', 'for sale', 'both', 'all']."""
                 )
 
-            books = BookServices.get_many_books_service(user_id, params)
+            books = BookServices.get_books_for_book_list_service(user_id, params)
 
             return (
                 jsonify(

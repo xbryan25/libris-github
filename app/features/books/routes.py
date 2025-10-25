@@ -6,9 +6,9 @@ from flask_jwt_extended import jwt_required
 books_bp = Blueprint("books_bp", __name__)
 
 
-@books_bp.route("/", methods=["GET"])
+@books_bp.route("/book-list-books", methods=["GET"])
 @jwt_required()
-def get_many_books() -> tuple[Response, int]:
+def get_books_for_book_list() -> tuple[Response, int]:
     """
     Retrieve details of different books based on pagination, optional search, genre, and availability filters.
 
@@ -55,10 +55,10 @@ def get_many_books() -> tuple[Response, int]:
         500 if an unexpected error occurs during processing.
     """
 
-    return BookControllers.get_many_books_controller()
+    return BookControllers.get_books_for_book_list_controller()
 
 
-@books_bp.route("/total-count", methods=["GET"])
+@books_bp.route("/book-list-books-count", methods=["GET"])
 @jwt_required()
 def get_total_book_count() -> tuple[Response, int]:
     """

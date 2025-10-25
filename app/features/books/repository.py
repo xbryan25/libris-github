@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 class BookRepository:
     @staticmethod
-    def get_many_books(user_id, params) -> list[dict[str, str]]:
+    def get_books_for_book_list(user_id, params) -> list[dict[str, str]]:
         """
         Retrieve a paginated list of books based on search, genre, and availability filters.
 
@@ -41,7 +41,7 @@ class BookRepository:
 
         # Randomized
         return db.fetch_all(
-            BookQueries.GET_MANY_BOOKS.format(
+            BookQueries.GET_BOOKS_FOR_BOOK_LIST.format(
                 search_by="title", sort_field="RANDOM()", sort_order="ASC"
             ),
             (
@@ -81,7 +81,7 @@ class BookRepository:
         )
 
         return db.fetch_one(
-            BookQueries.GET_BOOKS_COUNT.format(search_by="title"),
+            BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(search_by="title"),
             (
                 search_pattern,
                 genre,

@@ -12,4 +12,5 @@ export interface Book {
     purchasePrice: number
     ownerId: string
     ownerUsername: string
+    firstImageUrl: string | null
 };

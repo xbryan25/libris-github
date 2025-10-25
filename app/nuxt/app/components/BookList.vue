@@ -58,10 +58,8 @@ const loadBooks = async () => {
     bookAvailability: props.headerState.selectedBookAvailability,
   };
 
-  const data = await useBooksForBrowse(options);
+  const data = await useBooksForBookList(options);
   booksData.value = data;
-
-  console.log(booksData.value);
 };
 
 const getTotalBookCount = async () => {
@@ -71,7 +69,7 @@ const getTotalBookCount = async () => {
     bookAvailability: props.headerState.selectedBookAvailability,
   };
 
-  const { totalCount }: { totalCount: number } = await useTotalBookCount(options);
+  const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
 
   totalBookCount.value = totalCount;
 };
@@ -93,8 +91,6 @@ const checkIfBeyondPageLimit = () => {
   // If current page exceeds total pages, clamp it down
   if (pageNumber.value > totalPages) {
     pageNumber.value = totalPages;
-
-    console.log('reachhh heree?');
   }
 
   // If there are no records, reset to page 1

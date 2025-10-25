@@ -17,3 +17,4 @@ class Book:
     purchase_price: int
     owner_id: str
     owner_username: str
+    first_image_url: str
