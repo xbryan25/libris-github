@@ -2,6 +2,14 @@
 import type { Book } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
+const props = defineProps<{
+  headerState: {
+    searchValue: string;
+    selectedBookGenre: string;
+    selectedBookAvailability: string;
+  };
+}>();
+
 const booksData = ref<Book[]>([]);
 
 const gridContainer = ref<HTMLElement | null>(null);
@@ -9,19 +17,9 @@ const gridContainer = ref<HTMLElement | null>(null);
 const cardWidth = 225;
 const cardHeight = 400;
 
-const genreItems = ref(['All Genres', 'Horror', 'Fantasy', 'Action']);
-const genreValue = ref('All Genres');
-
-const statusItems = ref(['All', 'For Rent', 'For Sale', 'Both']);
-const statusValue = ref('All');
-
 const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
-
-const searchValue = ref('');
-const genre = ref('All Genres');
-const availability = ref('All');
 
 function getGridCapacity() {
   if (!gridContainer.value) return 0;
@@ -54,14 +52,17 @@ const loadBooks = async () => {
 
   isFetching.value = true;
   booksPerPage.value = capacity;
+
   console.log(`booksPerPage: ${booksPerPage.value}`);
+
+  console.log(props.headerState);
 
   const options = {
     booksPerPage: booksPerPage.value,
     pageNumber: pageNumber.value,
-    searchValue: searchValue.value,
-    genre: genre.value,
-    availability: availability.value,
+    searchValue: props.headerState.searchValue,
+    bookGenre: props.headerState.selectedBookGenre,
+    bookAvailability: props.headerState.selectedBookAvailability,
   };
 
   const data = await useBooks(options);
@@ -72,9 +73,9 @@ const loadBooks = async () => {
 
 const getTotalBookCount = async () => {
   const options = {
-    searchValue: searchValue.value,
-    genre: genre.value,
-    availability: availability.value,
+    searchValue: props.headerState.searchValue,
+    bookGenre: props.headerState.selectedBookGenre,
+    bookAvailability: props.headerState.selectedBookAvailability,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalBookCount(options);
@@ -109,18 +110,31 @@ const checkIfBeyondPageLimit = () => {
 
 const debouncedLoadBooks = useDebounceFn(async () => {
   await loadBooks();
-}, 300);
+}, 700);
 
 const debouncedLoadBookCount = useDebounceFn(async () => {
   await getTotalBookCount();
 
   checkIfBeyondPageLimit();
-}, 300);
+}, 700);
 
 const handleResize = async () => {
   await debouncedLoadBooks();
   await debouncedLoadBookCount();
 };
+
+watch(
+  [
+    () => props.headerState.searchValue,
+    () => props.headerState.selectedBookAvailability,
+    () => props.headerState.selectedBookGenre,
+  ],
+  async () => {
+    console.log(props.headerState);
+    await debouncedLoadBooks();
+    await debouncedLoadBookCount();
+  },
+);
 
 onMounted(async () => {
   await debouncedLoadBooks();
@@ -135,20 +149,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col items-center px-10">
-    <div class="mt-5 p-5 bg-surface-hover rounded-lg w-full">
-      <div class="flex gap-5">
-        <UInput
-          icon="i-lucide-search"
-          size="xl"
-          variant="outline"
-          placeholder="Search books..."
-          class="flex-[4] bg-surface-hover"
-        />
-        <USelectMenu v-model="genreValue" :items="genreItems" size="xl" class="flex-1" />
-        <USelectMenu v-model="statusValue" :items="statusItems" size="xl" class="flex-1" />
-      </div>
-    </div>
+  <div class="h-full w-full flex flex-col items-center">
+    <!-- <BookListHeader /> -->
 
     <div class="flex-1 pt-5 w-full">
       <div

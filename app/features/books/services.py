@@ -27,6 +27,12 @@ class BookServices:
             list[Book]: A list of Book dataclass instances representing books_per_page students.
         """
 
+        # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
+        if params["availability"] == "for rent":
+            params["availability"] = "rent"
+        elif params["availability"] == "for sale":
+            params["availability"] = "purchase"
+
         books = BookRepository.get_many_books(user_id, params)
 
         book_dataclasses = []
@@ -53,6 +59,27 @@ class BookServices:
             int: The total book count, with search, genre, and availability filters being optionally applied.
         """
 
-        print(BookRepository.get_total_book_count(user_id, params))
+        # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
+        if params["availability"] == "for rent":
+            params["availability"] = "rent"
+        elif params["availability"] == "for sale":
+            params["availability"] = "purchase"
 
         return BookRepository.get_total_book_count(user_id, params)["count"]
+
+    @staticmethod
+    def get_book_genres_service() -> list[str]:
+        """
+        Retrieve a list of available genres.
+
+        Returns:
+            [str]: A list containing all available book genres.
+        """
+
+        dict_book_genres: list[dict[str, str]] = BookRepository.get_book_genres()
+
+        book_genres = [
+            dict_book_genre["book_genre_name"] for dict_book_genre in dict_book_genres
+        ]
+
+        return book_genres

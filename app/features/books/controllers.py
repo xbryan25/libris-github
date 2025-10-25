@@ -34,8 +34,10 @@ class BookControllers:
                 "books_per_page": int(request.args.get("booksPerPage", 0)),
                 "page_number": int(request.args.get("pageNumber", 0)),
                 "search_value": (request.args.get("searchValue") or "").strip(),
-                "genre": request.args.get("genre", "all genres").lower(),
-                "availability": request.args.get("availability", "for rent").lower(),
+                "genre": request.args.get("bookGenre", "all genres").lower(),
+                "availability": request.args.get(
+                    "bookAvailability", "for rent"
+                ).lower(),
             }
 
             if params["books_per_page"] < 0:
@@ -102,8 +104,10 @@ class BookControllers:
 
             params = {
                 "search_value": (request.args.get("searchValue") or "").strip(),
-                "genre": request.args.get("genre", "all genres").lower(),
-                "availability": request.args.get("availability", "for rent").lower(),
+                "genre": request.args.get("bookGenre", "all genres").lower(),
+                "availability": request.args.get(
+                    "bookAvailability", "for rent"
+                ).lower(),
             }
 
             if params["availability"] not in ALLOWED_AVAILABILITY_FILTERS:
@@ -132,6 +136,20 @@ class BookControllers:
                 ),
                 400,
             )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_book_genres_controller() -> tuple[Response, int]:
+        """Retrieve the a list of available genres."""
+
+        try:
+
+            book_genres = BookServices.get_book_genres_service()
+
+            return jsonify(book_genres), 200
 
         except Exception as e:
             traceback.print_exc()

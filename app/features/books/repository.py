@@ -1,4 +1,4 @@
-from app.db.queries import BookQueries
+from app.db.queries import BookQueries, CommonQueries
 
 from flask import current_app
 
@@ -87,4 +87,23 @@ class BookRepository:
                 availability,
                 user_id,
             ),
+        )
+
+    @staticmethod
+    def get_book_genres() -> list[dict[str, str]]:
+        """
+        Retrieve a list of available genres.
+
+        Returns:
+             dict[str, str]: A dictionary containing the list of available genres.
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_all(
+            CommonQueries.GET_COLUMNS_FROM_TABLE.format(
+                columns="book_genre_name",
+                table="book_genres",
+                order_column="book_genre_name",
+            )
         )

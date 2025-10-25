@@ -40,9 +40,9 @@ def get_many_books() -> tuple[Response, int]:
 
             author: The author of the book.
 
-            genre: The primary genre of the book.
+            bookGenre: The primary genre of the book.
 
-            availability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+            bookAvailability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
 
             daily_rent_price: The daily rent price of the book.
 
@@ -72,9 +72,9 @@ def get_total_book_count() -> tuple[Response, int]:
 
         searchValue: The value to search for (optional).
 
-        genre: The genre or category of books to filter by.
+        bookGenre: The genre or category of books to filter by.
 
-        availability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+        bookAvailability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
 
     Request body:
 
@@ -90,3 +90,28 @@ def get_total_book_count() -> tuple[Response, int]:
     """
 
     return BookControllers.get_total_book_count_controller()
+
+
+@books_bp.route("/book-genres", methods=["GET"])
+@jwt_required()
+def get_book_genres() -> tuple[Response, int]:
+    """
+    Retrieve all book genres.
+
+    This endpoint requires authentication via a valid access token (HTTP-only cookie).
+    It returns a list of all available book genres.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        [str]: A list containing all available book genres.
+
+    Possible errors:
+        401: If the user is not authenticated or the token is invalid.
+        500 if an unexpected error occurs during processing.
+    """
+
+    return BookControllers.get_book_genres_controller()

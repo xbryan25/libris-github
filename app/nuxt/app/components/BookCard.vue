@@ -5,8 +5,6 @@ const props = defineProps<{
   cardType: string;
   bookDetails?: Book | null;
 }>();
-
-console.log(props.bookDetails);
 </script>
 
 <template>
@@ -21,19 +19,19 @@ console.log(props.bookDetails);
 
     <div class="flex-1 flex flex-col gap-[10px] px-5 py-4 bg-surface-hover w-full rounded-b-xl">
       <div class="flex-1 flex flex-col gap-1 items-center pb-1">
-        <UTooltip text="The Passion WithinThe Passion WithinThe Passion Within">
+        <UTooltip :text="props.bookDetails?.title">
           <p class="text-lg text-center font-semibold text-base truncate w-full">
             {{ props.bookDetails?.title }}
           </p>
         </UTooltip>
 
-        <UTooltip text="by Sam Huertas" class="flex-[3]">
+        <UTooltip :text="props.bookDetails?.author" class="flex-[3]">
           <p class="text-left text-xs text-base truncate">by {{ props.bookDetails?.author }}</p>
         </UTooltip>
 
         <USeparator color="primary" type="solid" class="flex-1" />
 
-        <UTooltip text="samalexis" class="flex-[3]">
+        <UTooltip :text="props.bookDetails?.ownerUsername" class="flex-[3]">
           <p class="text-left text-xs text-base truncate w-full">
             Owned by: {{ props.bookDetails?.ownerUsername }}
           </p>
@@ -48,7 +46,7 @@ console.log(props.bookDetails);
             )
           "
           class="font-bold rounded-full"
-          >For rent</UBadge
+          >For Rent</UBadge
         >
         <UBadge
           v-if="
@@ -58,7 +56,7 @@ console.log(props.bookDetails);
           "
           color="error"
           class="font-bold rounded-full"
-          >For sale</UBadge
+          >For Sale</UBadge
         >
       </div>
 
