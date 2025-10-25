@@ -14,7 +14,7 @@ const props = defineProps<{
     class="w-full h-[400px] flex flex-col items-center justify-center transition-transform duration-300 hover:scale-103 cursor-pointer"
   >
     <div class="flex-[2] w-full rounded-t-xl overflow-hidden">
-      <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />
+      <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />/
     </div>
 
     <div class="flex-1 flex flex-col gap-[10px] px-5 py-4 bg-surface-hover w-full rounded-b-xl">

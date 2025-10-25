@@ -38,10 +38,10 @@ def create_app():
     # @app.teardown_appcontext
     # def close_db(exception=None):
     #     db = app.extensions.get("db")
-    #     if db:
+    #     if db and db.pool and not db.pool.closed:
     #         db.close()
 
-    # Extra safety: ensure clean shutdown even on Ctrl+C or reloader exit
+    # Close pool gracefully only when the app exits
     atexit.register(lambda: app.extensions.get("db") and app.extensions["db"].close())
 
     return app

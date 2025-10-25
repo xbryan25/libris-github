@@ -1,6 +1,6 @@
 import type { Book } from "~/types"
 
-export function useBooks(options?: {
+export function useBooksForBrowse(options?: {
                                 booksPerPage?: number, 
                                 pageNumber?: number, 
                                 searchValue?: string, 

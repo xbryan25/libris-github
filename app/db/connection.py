@@ -67,7 +67,7 @@ class Database:
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                 return
@@ -85,7 +85,7 @@ class Database:
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                         return cur.fetchall()
@@ -104,7 +104,7 @@ class Database:
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                         return cur.fetchone()
@@ -122,7 +122,7 @@ class Database:
         """Close the pool gracefully."""
         if self.pool and not self.pool.closed:
             try:
-                self.pool.close()
+                self.pool.close(timeout=5)
                 logger.info("Database connection pool closed cleanly")
             except Exception as e:
                 logger.error(f"Error closing database pool: {e}")

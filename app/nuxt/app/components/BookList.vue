@@ -21,7 +21,7 @@ const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
 
-function getGridCapacity() {
+const getGridCapacity = () => {
   if (!gridContainer.value) return 0;
 
   const width = gridContainer.value.offsetWidth;
@@ -40,22 +40,15 @@ function getGridCapacity() {
 
   // Return whichever is greater
   return Math.max(visibleCount, minCount);
-}
+};
 
 const isFetching = ref(false);
 
 const loadBooks = async () => {
-  if (isFetching.value) return;
-
   const capacity = getGridCapacity();
   if (capacity <= 0) return;
 
-  isFetching.value = true;
   booksPerPage.value = capacity;
-
-  console.log(`booksPerPage: ${booksPerPage.value}`);
-
-  console.log(props.headerState);
 
   const options = {
     booksPerPage: booksPerPage.value,
@@ -65,10 +58,10 @@ const loadBooks = async () => {
     bookAvailability: props.headerState.selectedBookAvailability,
   };
 
-  const data = await useBooks(options);
+  const data = await useBooksForBrowse(options);
   booksData.value = data;
 
-  isFetching.value = false;
+  console.log(booksData.value);
 };
 
 const getTotalBookCount = async () => {
@@ -81,14 +74,16 @@ const getTotalBookCount = async () => {
   const { totalCount }: { totalCount: number } = await useTotalBookCount(options);
 
   totalBookCount.value = totalCount;
-
-  console.log(`total book count: ${totalBookCount.value}`);
 };
 
 watch(
   () => pageNumber.value,
   async () => {
+    isFetching.value = true;
+
     await debouncedLoadBooks();
+
+    isFetching.value = false;
   },
 );
 
@@ -119,8 +114,12 @@ const debouncedLoadBookCount = useDebounceFn(async () => {
 }, 700);
 
 const handleResize = async () => {
+  isFetching.value = true;
+
   await debouncedLoadBooks();
   await debouncedLoadBookCount();
+
+  isFetching.value = false;
 };
 
 watch(
@@ -130,15 +129,22 @@ watch(
     () => props.headerState.selectedBookGenre,
   ],
   async () => {
-    console.log(props.headerState);
+    isFetching.value = true;
+
     await debouncedLoadBooks();
     await debouncedLoadBookCount();
+
+    isFetching.value = false;
   },
 );
 
 onMounted(async () => {
+  isFetching.value = true;
+
   await debouncedLoadBooks();
   await debouncedLoadBookCount();
+
+  isFetching.value = false;
 
   window.addEventListener('resize', handleResize);
 });
@@ -150,21 +156,35 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="h-full w-full flex flex-col items-center">
-    <!-- <BookListHeader /> -->
+    <div class="flex-1 pt-5 w-full relative">
+      <div
+        v-if="isFetching"
+        class="absolute inset-0 flex justify-center items-center bg-background z-5"
+      >
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-accent" />
+        <span class="ml-2 text-muted">Loading books...</span>
+      </div>
 
-    <div class="flex-1 pt-5 w-full">
+      <div
+        v-if="!isFetching && booksData.length == 0"
+        class="absolute inset-0 flex justify-center items-center bg-background z-5"
+      >
+        <UIcon name="heroicons:x-mark-16-solid" class="w-12 h-12 animate-bounce text-accent" />
+        <span class="ml-2 text-muted">No books here...</span>
+      </div>
+
       <div
         ref="gridContainer"
-        class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] place-items-center justify-center gap-2 auto-rows-max"
+        class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] place-items-center justify-center gap-2 auto-rows-max min-h-[820px]"
       >
-        <BookCard
+        <BookListCard
           v-for="book in booksData"
           :key="book.bookId"
           card-type="hasContent"
           :book-details="book"
         />
 
-        <BookCard
+        <BookListCard
           v-for="_ in Math.max(0, booksPerPage - booksData.length)"
           :key="_"
           card-type="empty"
