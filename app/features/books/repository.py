@@ -1,9 +1,114 @@
-from typing import Any, Optional
+from app.db.queries import BookQueries, CommonQueries
+
 from flask import current_app
-from app.db.queries.book_queries import BookQueries
+from typing import Any, Optional
 
 
 class BookRepository:
+    @staticmethod
+    def get_books_for_book_list(user_id, params) -> list[dict[str, str]]:
+        """
+        Retrieve a paginated list of books based on search, genre, and availability filters.
+
+        Args:
+            user_id (str): user_id of the user to prevent getting books that the current user owns.
+            params (dict): A dictionary of query parameters. Expected keys include:
+                - "books_per_page" (str): The number of book details to retrieve.
+                - "page_number" (str): This number will be multiplied by books_per_page then serve as the offset for pagination.
+                - "search_value" (str): The value to search for.
+                - "genre" (str): The genre or category of books to filter by.
+                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+        Returns:
+            list[dict]: A list of book records matching the given filters, where each record is represented as a dictionary.
+        """
+
+        db = current_app.extensions["db"]
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["books_per_page"]
+        )
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        # Randomized
+        return db.fetch_all(
+            BookQueries.GET_BOOKS_FOR_BOOK_LIST.format(
+                search_by="title", sort_field="RANDOM()", sort_order="ASC"
+            ),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+                params["books_per_page"],
+                offset,
+            ),
+        )
+
+    @staticmethod
+    def get_total_book_count(user_id, params) -> dict[str, int]:
+        """
+        Retrieve the total number of books based on search, genre, and availability filters.
+
+        Args:
+            user_id (str): user_id of the user to prevent getting books that the current user owns.
+            params (dict): A dictionary of query parameters. Expected keys include:
+                - "search_value" (str): The value to search for.
+                - "genre" (str): The genre or category of books to filter by.
+                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+        Returns:
+             dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
+        """
+
+        db = current_app.extensions["db"]
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        return db.fetch_one(
+            BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(search_by="title"),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+            ),
+        )
+
+    @staticmethod
+    def get_book_genres() -> list[dict[str, str]]:
+        """
+        Retrieve a list of available genres.
+
+        Returns:
+             dict[str, str]: A dictionary containing the list of available genres.
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_all(
+            CommonQueries.GET_COLUMNS_FROM_TABLE.format(
+                columns="book_genre_name",
+                table="book_genres",
+                order_column="book_genre_name",
+            )
+        )
+
     @staticmethod
     def get_book_details(book_id: str) -> Optional[dict[str, Any]]:
         """
@@ -31,7 +136,7 @@ class BookRepository:
 
         params = tuple([book_id] * 11)
 
-        return db.fetch_one(BookQueries.BOOK_DETAILS, params)
+        return db.fetch_one(BookQueries.GET_BOOK_DETAILS, params)
 
     @staticmethod
     def get_book_images(book_id: str) -> list[dict[str, Any]]:
@@ -50,7 +155,7 @@ class BookRepository:
 
         params = tuple([book_id] * 11)
 
-        return db.fetch_all(BookQueries.BOOK_IMAGES, params)
+        return db.fetch_all(BookQueries.GET_BOOK_IMAGES, params)
 
     @staticmethod
     def get_renting_books(user_id: str) -> list[dict[str, Any]]:
@@ -71,12 +176,11 @@ class BookRepository:
                 - return_date (datetime): Due date for return
                 - cost (int): Total rent cost
         """
-
         db = current_app.extensions["db"]
 
         params = (user_id,)
 
-        return db.fetch_all(BookQueries.RENTED_BOOKS, params)
+        return db.fetch_all(BookQueries.GET_RENTED_BOOKS, params)
 
     @staticmethod
     def get_bought_books(user_id: str) -> list[dict[str, Any]]:
@@ -101,7 +205,7 @@ class BookRepository:
 
         params = (user_id,)
 
-        return db.fetch_all(BookQueries.BOUGHT_BOOKS, params)
+        return db.fetch_all(BookQueries.GET_BOUGHT_BOOKS, params)
 
     @staticmethod
     def get_lent_books(user_id: str) -> list[dict[str, Any]]:
@@ -127,7 +231,7 @@ class BookRepository:
 
         params = (user_id,)
 
-        return db.fetch_all(BookQueries.LENT_BOOKS, params)
+        return db.fetch_all(BookQueries.GET_LENT_BOOKS, params)
 
     @staticmethod
     def get_sold_books(user_id: str) -> list[dict[str, Any]]:
@@ -152,4 +256,4 @@ class BookRepository:
 
         params = (user_id,)
 
-        return db.fetch_all(BookQueries.SOLD_BOOKS, params)
+        return db.fetch_all(BookQueries.GET_SOLD_BOOKS, params)

@@ -1,4 +1,4 @@
-from flask import Flask, current_app
+from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -6,7 +6,13 @@ from .config import Config
 
 from .db.connection import Database
 
+import os
+
+import atexit
+
 jwt = JWTManager()
+
+db = None  # global reference
 
 
 def create_app():
@@ -24,7 +30,18 @@ def create_app():
     for name, bp in blueprints.items():
         app.register_blueprint(bp, url_prefix=f"/api/{name}")
 
-    with app.app_context():
-        current_app.extensions["db"] = Database()
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true" or not app.debug:
+        db = Database()
+        db.init_app(app)
+        app.extensions["db"] = db
+
+    # @app.teardown_appcontext
+    # def close_db(exception=None):
+    #     db = app.extensions.get("db")
+    #     if db and db.pool and not db.pool.closed:
+    #         db.close()
+
+    # Close pool gracefully only when the app exits
+    atexit.register(lambda: app.extensions.get("db") and app.extensions["db"].close())
 
     return app

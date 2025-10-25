@@ -32,6 +32,10 @@ class UserControllers:
                 user_login_details.get("password"),
             )
 
+            print(
+                f"{user_login_details.get("emailAddress")} + {user_login_details.get("password")}"
+            )
+
             if not user:
                 return jsonify({"error": "Invalid credentials."}), 401
 

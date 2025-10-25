@@ -1,6 +1,6 @@
 from datetime import datetime, date
-from app.common.constants import GenderEnum
-from app.common.dataclasses import User
+from app.common.constants import GenderEnum, BookConditionEnum, BookAvailabilityEnum
+from app.common.dataclasses import User, Book
 
 
 def convert_user_dict(user: dict) -> User:
@@ -38,4 +38,42 @@ def convert_user_dict(user: dict) -> User:
             else datetime.fromisoformat(user["profile_completed"])
         ),
         profile_image_url=user.get("profile_image_url"),
+    )
+
+
+def convert_book_dict(book: dict) -> Book:
+    """Converts dict from db to a Book class instance"""
+
+    return Book(
+        book_id=book["book_id"],
+        title=book["title"] if book.get("title") is not None else "-",
+        author=book["author"] if book.get("author") is not None else "-",
+        genre=book["genre"] if book.get("genre") is not None else "-",
+        condition=(
+            BookConditionEnum(book["condition"])
+            if book.get("condition") is not None
+            else BookConditionEnum("new")
+        ),
+        description=book["description"] if book.get("description") is not None else "-",
+        availability=(
+            BookAvailabilityEnum(book["availability"])
+            if book.get("availability") is not None
+            else BookAvailabilityEnum("rent")
+        ),
+        daily_rent_price=(
+            int(book["daily_rent_price"])
+            if book.get("daily_rent_price") is not None
+            else 0
+        ),
+        security_deposit=(
+            int(book["security_deposit"])
+            if book.get("security_deposit") is not None
+            else 0
+        ),
+        purchase_price=(
+            int(book["purchase_price"]) if book.get("purchase_price") is not None else 0
+        ),
+        owner_id=book["owner_id"],
+        owner_username=book["owner_username"],
+        first_image_url=book["first_image_url"],
     )
