@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import auth from '~/middleware/auth';
 import { onMounted } from 'vue'
 import { useProfile } from '~/composables/UseProfile'
 import ProfileMainSection from '~/components/ProfileMainSection.vue'
@@ -8,6 +9,10 @@ const route = useRoute()
 const userId = route.params.id as string
 
 const { profile, fetchProfile, loading, error } = useProfile(userId)
+
+definePageMeta({
+  middleware: auth,
+});
 
 onMounted(() => {
   fetchProfile()

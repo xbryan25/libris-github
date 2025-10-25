@@ -2,6 +2,7 @@ type UserLoginResponse = {
     messageTitle: string
     message: string
     username: string
+    user_id: string
     accessTokenExpiresAt: number
 }
 

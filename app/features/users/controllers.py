@@ -100,7 +100,7 @@ class UserControllers:
 
             username = UserServices.get_username_service(user_id)
 
-            return jsonify({"username": username}), 200
+            return jsonify({"username": username, "user_id": user_id}), 200
 
         except Exception as e:
             traceback.print_exc()
