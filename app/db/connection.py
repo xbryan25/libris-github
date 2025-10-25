@@ -42,7 +42,7 @@ class Database:
             conninfo=conninfo,
             min_size=2,
             max_size=3,
-            kwargs={"row_factory": dict_row},
+            kwargs={"row_factory": dict_row, "prepare_threshold": None},
         )
 
         logger.info("Database connection pool initialized")
