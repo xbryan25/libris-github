@@ -159,19 +159,19 @@ function onSave() {
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">First Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.first_name">{{profile?.first_name}}</div>
-            <UInput v-else v-model="editForm.first_name" @input="validateField('first_name')" placeholder="First Name"   :class="errorMap.first_name ? 'border border-red-500' : ''" />
+            <UInput v-else v-model="editForm.first_name" @input="validateField('first_name')" placeholder="First Name" :color="errorMap.first_name ? 'error' : 'primary'" />
             <span v-if="errorMap.first_name" class="text-red-500 text-sm">{{ errorMap.first_name }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Middle Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.middle_name">{{profile?.middle_name}}</div>
-            <UInput v-else v-model="editForm.middle_name" @input="validateField('middle_name')" placeholder="Middle Name" :class="errorMap.middle_name ? 'border border-red-500' : ''" />
+            <UInput v-else v-model="editForm.middle_name" @input="validateField('middle_name')" placeholder="Middle Name" :color="errorMap.middle_name ? 'error' : 'primary'" />
             <span v-if="errorMap.middle_name" class="text-red-500 text-sm">{{ errorMap.middle_name }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Last Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.last_name">{{profile?.last_name}}</div>
-            <UInput v-else v-model="editForm.last_name" @input="validateField('last_name')" placeholder="Last Name" :class="errorMap.last_name ? 'border border-red-500' : ''" />
+            <UInput v-else v-model="editForm.last_name" @input="validateField('last_name')" placeholder="Last Name" :color="errorMap.last_name ? 'error' : 'primary'" />
             <span v-if="errorMap.last_name" class="text-red-500 text-sm">{{ errorMap.last_name }}</span>
           </div>
           <div class="flex flex-col">
@@ -182,7 +182,7 @@ function onSave() {
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base whitespace-nowrap">Phone Number</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.phone_number">{{profile?.phone_number}}</div>
-            <UInput v-else v-model="editForm.phone_number" @input="validateField('phone_number')" placeholder="Phone Number" :class="errorMap.phone_number ? 'border border-red-500' : ''" />
+            <UInput v-else v-model="editForm.phone_number" @input="validateField('phone_number')" placeholder="Phone Number" :color="errorMap.phone_number ? 'error' : 'primary'" />
             <span v-if="errorMap.phone_number" class="text-red-500 text-sm">{{ errorMap.phone_number }}</span>
           </div>
         </div>
@@ -225,7 +225,7 @@ function onSave() {
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.country">{{profile?.address?.country}}</div>
-            <UInput v-else v-model="editForm.address.country" @input="validateField('address.country')" placeholder="Country" :class="errorMap['address.country'] ? 'border border-red-500' : ''" />
+            <UInput v-else v-model="editForm.address.country" @input="validateField('address.country')" placeholder="Country" :color="errorMap['address.country'] ? 'error' : 'primary'" />
             <span v-if="errorMap['address.country']" class="text-red-500 text-sm">{{ errorMap['address.country'] }}</span>
           </div>
           <div class="flex flex-col">
