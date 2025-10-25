@@ -1,5 +1,5 @@
 from flask import current_app
-from app.db.queries.dashboard_queries import DashboardQueries
+from app.db.queries import DashboardQueries
 
 
 class DashboardRepository:

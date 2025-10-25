@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DashboardBookSection from '~/components/DashboardBookSection.vue';
 import auth from '~/middleware/auth';
 import { onMounted } from 'vue';
 import { useDashboard } from '~/composables/useDashboard';
@@ -15,14 +16,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col justify-start items-start h-screen w-screen mt-4 ml-15">
+  <div class="flex flex-col min-h-screen w-full pt-4 px-4 md:px-8 lg:px-15">
     <div class="text-[42px] font-bold text-base">Welcome back, {{ username }}!</div>
     <div class="text-sm text-muted ml-1">Here’s your activity overview.</div>
 
-    <div class="flex justify-center w-full mt-4">
-      <div class="grid grid-cols-6 gap-6 mt-4">
+    <div class="w-full mt-4">
+      <div class="flex flex-wrap justify-center gap-6">
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <UIcon name="i-heroicons-book-open" class="text-5xl text-[#3B82F6]" />
           <div class="text-2xl font-bold mt-2">{{ summary.books_borrowed }}</div>
@@ -30,7 +31,7 @@ onMounted(() => {
         </UCard>
 
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <UIcon name="i-heroicons-book-open" class="text-5xl text-[#3B82F6]" />
           <div class="text-2xl font-bold mt-2">{{ summary.currently_lending }}</div>
@@ -38,7 +39,7 @@ onMounted(() => {
         </UCard>
 
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <UIcon name="i-heroicons-book-open" class="text-5xl text-[#3B82F6]" />
           <div class="text-2xl font-bold mt-2">{{ summary.currently_renting }}</div>
@@ -46,7 +47,7 @@ onMounted(() => {
         </UCard>
 
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <UIcon name="i-heroicons-book-open" class="text-5xl text-[#3B82F6]" />
           <div class="text-2xl font-bold mt-2">{{ summary.books_sold }}</div>
@@ -54,7 +55,7 @@ onMounted(() => {
         </UCard>
 
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <UIcon name="i-heroicons-book-open" class="text-5xl text-[#3B82F6]" />
           <div class="text-2xl font-bold mt-2">{{ summary.books_bought }}</div>
@@ -62,13 +63,15 @@ onMounted(() => {
         </UCard>
 
         <UCard
-          class="w-[250px] h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
+          class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
           <Icon name="fluent:book-coins-20-regular" class="text-5xl text-accent" />
           <div class="text-2xl font-bold mt-2">{{ summary.total_earnings }}</div>
           <div class="text-sm text-neutral mt-1">Total Earnings</div>
         </UCard>
       </div>
+
+      <DashboardBookSection class="pt-10" />
     </div>
   </div>
 </template>
