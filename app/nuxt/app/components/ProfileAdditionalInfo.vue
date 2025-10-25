@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, toRef } from 'vue'
 import type { Profile } from '~/composables/UseProfile'
 import { useProfileEdit } from '~/composables/useProfileEdit'
+import { validateProfileForm } from '@/utils/validateProfileEdit'
+
+const errorMap = ref<Record<string, string>>({})
 
 interface Props {
   profile: Profile | null
@@ -21,6 +24,67 @@ const emit = defineEmits<{
 }>()
 
 const editForm = computed(() => props.editForm || {})
+
+const isEditingRef = toRef(props, 'isEditing')
+
+// Clear errors when editing is cancelled or when editing starts
+watch(isEditingRef, (isEditing) => {
+  if (!isEditing) {
+    errorMap.value = {}
+  } else {
+    errorMap.value = {}
+  }
+})
+
+// Real-time validation for fields
+watch(
+  () => editForm.value.first_name,
+  (val) => {
+    validateField('first_name')
+  }
+)
+
+watch(
+  () => editForm.value.middle_name,
+  (val) => {
+    validateField('middle_name')
+  }
+)
+
+watch(
+  () => editForm.value.last_name,
+  (val) => {
+    validateField('last_name')
+  }
+)
+
+watch(
+  () => editForm.value.phone_number,
+  (val) => {
+    validateField('phone_number')
+  }
+)
+
+watch(
+  () => editForm.value.address?.country,
+  (val) => {
+    validateField('address.country')
+  }
+)
+
+function validateField(field: string) {
+  const tempState = { ...editForm.value }
+  const allErrors = validateProfileForm(tempState)
+  const fieldError = allErrors.find(e => e.name === field)
+  if (fieldError) errorMap.value[field] = fieldError.message
+  else delete errorMap.value[field]
+}
+
+function onSave() {
+  const errors = validateProfileForm(editForm.value)
+  errorMap.value = Object.fromEntries(errors.map(e => [e.name, e.message]))
+  if (errors.length === 0) emit('save')
+} 
 </script>
 
 <template>
@@ -95,17 +159,20 @@ const editForm = computed(() => props.editForm || {})
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">First Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.first_name">{{profile?.first_name}}</div>
-            <UInput v-else v-model="editForm.first_name" placeholder="First Name" />
+            <UInput v-else v-model="editForm.first_name" @input="validateField('first_name')" placeholder="First Name"   :class="errorMap.first_name ? 'border border-red-500' : ''" />
+            <span v-if="errorMap.first_name" class="text-red-500 text-sm">{{ errorMap.first_name }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Middle Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.middle_name">{{profile?.middle_name}}</div>
-            <UInput v-else v-model="editForm.middle_name" placeholder="Middle Name" />
+            <UInput v-else v-model="editForm.middle_name" @input="validateField('middle_name')" placeholder="Middle Name" :class="errorMap.middle_name ? 'border border-red-500' : ''" />
+            <span v-if="errorMap.middle_name" class="text-red-500 text-sm">{{ errorMap.middle_name }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Last Name</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.last_name">{{profile?.last_name}}</div>
-            <UInput v-else v-model="editForm.last_name" placeholder="Last Name" />
+            <UInput v-else v-model="editForm.last_name" @input="validateField('last_name')" placeholder="Last Name" :class="errorMap.last_name ? 'border border-red-500' : ''" />
+            <span v-if="errorMap.last_name" class="text-red-500 text-sm">{{ errorMap.last_name }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Date of Birth</div>
@@ -115,7 +182,8 @@ const editForm = computed(() => props.editForm || {})
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base whitespace-nowrap">Phone Number</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.phone_number">{{profile?.phone_number}}</div>
-            <UInput v-else v-model="editForm.phone_number" placeholder="Phone Number" />
+            <UInput v-else v-model="editForm.phone_number" @input="validateField('phone_number')" placeholder="Phone Number" :class="errorMap.phone_number ? 'border border-red-500' : ''" />
+            <span v-if="errorMap.phone_number" class="text-red-500 text-sm">{{ errorMap.phone_number }}</span>
           </div>
         </div>
       </div>
@@ -136,7 +204,7 @@ const editForm = computed(() => props.editForm || {})
             />
             <div v-if="isCurrentUser && isEditing" class="flex space-x-2">
               <UButton 
-                @click="$emit('save', editForm)"
+                @click="onSave"
                 color="primary"
                 size="sm"
               >
@@ -157,7 +225,8 @@ const editForm = computed(() => props.editForm || {})
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
             <div v-if="!isEditing" class="text-[20px] text-muted truncate" :title="profile?.address?.country">{{profile?.address?.country}}</div>
-            <UInput v-else v-model="editForm.address.country" placeholder="Country" />
+            <UInput v-else v-model="editForm.address.country" @input="validateField('address.country')" placeholder="Country" :class="errorMap['address.country'] ? 'border border-red-500' : ''" />
+            <span v-if="errorMap['address.country']" class="text-red-500 text-sm">{{ errorMap['address.country'] }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">City</div>

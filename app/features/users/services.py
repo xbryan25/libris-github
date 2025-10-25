@@ -141,7 +141,6 @@ class UserServices:
         average_score = float(stats["average_trust_score"])
         total_users = int(stats["total_users"])
 
-        # Calculate percentage difference
         percentage_difference = (
             (user_trust_score - average_score) / average_score
         ) * 100

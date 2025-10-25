@@ -9,10 +9,10 @@ interface Props {
   profile: Profile | null
   loading: boolean
   error: string | null
-  userId?: string // Optional user ID for other users' profiles
-  isCurrentUser?: boolean // Whether this is the current user's profile
-  isEditing?: boolean // Whether we're in edit mode
-  editForm?: any // The edit form data
+  userId?: string 
+  isCurrentUser?: boolean 
+  isEditing?: boolean 
+  editForm?: any 
 }
 
 const props = defineProps<Props>()
@@ -40,7 +40,7 @@ const trustScoreBadge = computed(() => {
   return { text: 'Poor', color: 'bg-[#000000]' }
 })
 
-// Watch for changes to the profile prop
+
 watch(() => props.profile, (newProfile) => {
   console.log('Profile changed:', newProfile)
   if (newProfile?.trust_score) {
