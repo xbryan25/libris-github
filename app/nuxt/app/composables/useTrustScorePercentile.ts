@@ -45,11 +45,10 @@ export const useTrustScorePercentile = (userId?: string) => {
     }
 
     const getPercentileText = () => {
-        if (!percentile.value) return 'Loading...'
-    
-        const rounded = Math.round(percentile.value.trust_score_percentile)
+        const p = percentile.value?.trust_score_percentile
+        if (p === null || p === undefined) return ' - '
+        const rounded = Math.round(p)
         return `Better than ${rounded}% of users`
-    }
-
+      }
     return { percentile, loading, error, fetchPercentile, getPercentileText }
 }

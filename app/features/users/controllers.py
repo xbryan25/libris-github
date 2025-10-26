@@ -147,13 +147,17 @@ class UserControllers:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_info = UserServices.get_profile_info_service(user_id)
-            address_info = UserServices.get_user_address_service(user_id)
 
             if profile_info is None:
                 return jsonify({"message": "User profile not found."}), 404
 
-            if address_info:
-                profile_info["address"] = address_info
+            profile_info["address"] = {
+                "country": profile_info.pop("country", None),
+                "city": profile_info.pop("city", None),
+                "barangay": profile_info.pop("barangay", None),
+                "street": profile_info.pop("street", None),
+                "postal_code": profile_info.pop("postal_code", None),
+            }
 
             return jsonify(profile_info), 200
 
@@ -167,13 +171,17 @@ class UserControllers:
 
         try:
             profile_info = UserServices.get_profile_info_service(user_id)
-            address_info = UserServices.get_user_address_service(user_id)
 
             if profile_info is None:
                 return jsonify({"message": "User not found."}), 404
 
-            if address_info:
-                profile_info["address"] = address_info
+            profile_info["address"] = {
+                "country": profile_info.pop("country", None),
+                "city": profile_info.pop("city", None),
+                "barangay": profile_info.pop("barangay", None),
+                "street": profile_info.pop("street", None),
+                "postal_code": profile_info.pop("postal_code", None),
+            }
 
             return jsonify(profile_info), 200
 

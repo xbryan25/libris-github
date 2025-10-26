@@ -41,16 +41,30 @@ export const useProfile = (userId?: string) => {
       }
 
       const res = await $fetch<Profile>(url, options)
-      res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-US', {
-        month: 'long',
-        day: '2-digit',
-        year: 'numeric'
-      })
-      res.date_of_birth = new Date(res.date_of_birth).toLocaleDateString('en-US', {
-        month: 'long',
-        day: '2-digit',
-        year: 'numeric'
-      })
+      if (!res.address) {
+        res.address = {
+          street: '-',
+          barangay: '-',
+          city: '-',
+          country: '-',
+          postal_code: '-'
+        }
+      }
+
+      if (res.account_activated_at)
+        res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-US', {
+          month: 'long',
+          day: '2-digit',
+          year: 'numeric'
+        })
+
+      if (res.date_of_birth)
+        res.date_of_birth = new Date(res.date_of_birth).toLocaleDateString('en-US', {
+          month: 'long',
+          day: '2-digit',
+          year: 'numeric'
+        })
+
       profile.value = res
     } catch (e: any) {
       error.value = e?.message || 'Failed to fetch profile info'

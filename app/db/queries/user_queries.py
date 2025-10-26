@@ -4,7 +4,7 @@ class UserQueries:
         "u.phone_number, u.account_activated_at, u.trust_score, u.profile_image_url, "
         "a.country, a.city, a.barangay, a.street, a.postal_code "
         "FROM users u "
-        "JOIN user_address a ON u.user_id = a.user_id "
+        "LEFT JOIN user_address a ON u.user_id = a.user_id "
         "WHERE u.user_id = %s"
     )
     GET_USER_ADDRESS = "SELECT country, city, barangay, street, postal_code FROM user_address WHERE user_id = %s LIMIT 1"

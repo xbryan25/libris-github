@@ -31,10 +31,11 @@ const emit = defineEmits<{
 }>()
 
 const trustScoreBadge = computed(() => {
-  if (!props.profile?.trust_score) return { text: 'Unknown', color: 'bg-gray-500' }
-  
+  if (props.profile?.trust_score === null || props.profile?.trust_score === undefined)
+    return { text: 'Unknown', color: 'bg-gray-500' }
+
   const score = props.profile.trust_score
-  
+
   if (score >= 951) return { text: 'Perfect', color: 'bg-[#15803D]' }
   if (score >= 751) return { text: 'Exceptional', color: 'bg-[#22C55E]' }
   if (score >= 500) return { text: 'Good', color: 'bg-[#84CC16]' }
@@ -71,6 +72,28 @@ const handleImageUpdate = (imageUrl: string) => {
   emit('imageUpdated', imageUrl)
 }
 
+const formattedFullName = computed(() => {
+  const first = props.profile?.first_name?.trim() || ''
+  const middle = props.profile?.middle_name?.trim() || ''
+  const last = props.profile?.last_name?.trim() || ''
+
+  if (!first && !middle && !last) return '-'
+
+  if (first && last && middle)
+    return `${first} ${middle.charAt(0)}. ${last}`
+  if (first && last)
+    return `${first} ${last}`
+  if (first && middle)
+    return `${first} ${middle.charAt(0)}.`
+  if (middle && last)
+    return `${middle.charAt(0)}. ${last}`
+  if (first)
+    return first
+  if (last)
+    return last
+  return '-'
+})
+
 onMounted(() => {
   console.log('ProfileMainSection mounted, profile:', props.profile)
   if (props.profile?.trust_score) {
@@ -78,6 +101,8 @@ onMounted(() => {
     fetchPercentile()
   }
 })
+
+
 </script>
 
 <template>
@@ -131,13 +156,16 @@ onMounted(() => {
       <Icon v-else name="heroicons:user-circle" class="w-35 h-35 rounded-full" />
 
       <div class="flex flex-col justify-center">
-        <div class="text-[42px] font-bold text-base truncate" :title="profile?.username">{{profile?.username}}</div>
+        <div class="text-[42px] font-bold text-base truncate" :title="profile?.username">{{profile?.username || '-' }}</div>
         
-        <div class="text-[35px] font-bold text-base truncate max-w-[50%px]" :title="`${profile?.first_name} ${profile?.middle_name?.charAt(0)}. ${profile?.last_name}`">
-          {{profile?.first_name}} {{ profile?.middle_name?.charAt(0) }}. {{profile?.last_name}}
+        <div
+          class="text-[35px] font-bold text-base truncate max-w-[400px]"
+          :title="formattedFullName"
+        >
+          {{ formattedFullName }}
         </div>
         
-        <div class="text-[25px] font-bold text-muted">Joined since {{profile?.account_activated_at}}</div>
+        <div class="text-[25px] font-bold text-muted">Joined since {{profile?.account_activated_at || '-' }}</div>
       </div>
 
       <div class="flex items-center h-full">
