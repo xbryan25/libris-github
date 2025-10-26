@@ -67,7 +67,8 @@ export const useProfileEdit = () => {
       const dataToSave = formData || editForm
 
       const filteredData = JSON.parse(JSON.stringify(dataToSave, (key, value) => {
-        if (value === '' || value === null) return undefined
+        if (typeof value === 'string') return value.trim() 
+        if (value === undefined || value === null) return undefined
         return value
       }))
 
