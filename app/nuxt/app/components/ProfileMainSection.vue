@@ -81,7 +81,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <UCard v-if="loading" class="w-[1500px] h-[250px] bg-surface border-base flex items-stretch px-10">
+  <UCard v-if="loading" class="w-full max-w-[1500px] h-auto bg-surface border-base flex flex-col md:flex-row items-stretch px-6 py-6">
     <div class="flex items-center justify-start space-x-6 flex-grow">
       <USkeleton class="w-35 h-35 rounded-full" />
       
@@ -109,11 +109,11 @@ onMounted(() => {
     </div>
   </UCard>
   
-  <div v-else-if="error" class="w-[1500px] h-[250px] bg-surface border-base flex items-center justify-center">
+  <div v-else-if="error" class="w-full max-w-[1500px] bg-surface border-base flex items-center justify-center p-6">
     <div class="text-lg text-red-500">Error: {{ error }}</div>
   </div>
 
-  <UCard v-else class="w-[1500px] h-[250px] bg-surface border-base flex items-stretch px-10">
+  <UCard v-else class="w-full max-w-[1500px] h-auto bg-surface border-base flex flex-col md:flex-row items-stretch px-6 py-6">
     <div class="flex items-center justify-start space-x-6 flex-grow">
       <ProfilePictureUpload
         v-if="isCurrentUser"
@@ -133,7 +133,7 @@ onMounted(() => {
       <div class="flex flex-col justify-center">
         <div class="text-[42px] font-bold text-base truncate" :title="profile?.username">{{profile?.username}}</div>
         
-        <div class="text-[35px] font-bold text-base truncate max-w-[400px]" :title="`${profile?.first_name} ${profile?.middle_name?.charAt(0)}. ${profile?.last_name}`">
+        <div class="text-[35px] font-bold text-base truncate max-w-[50%px]" :title="`${profile?.first_name} ${profile?.middle_name?.charAt(0)}. ${profile?.last_name}`">
           {{profile?.first_name}} {{ profile?.middle_name?.charAt(0) }}. {{profile?.last_name}}
         </div>
         
@@ -146,7 +146,7 @@ onMounted(() => {
 
       <div class="flex flex-col">
         <div class="flex items-center space-x-2">
-          <div class="text-[38px] font-extrabold text-base">Trust Score</div>
+          <div class="text-[35px] font-extrabold text-base whitespace-nowrap">Trust Score</div>
           <TrustScoreDetails />
         </div>
 

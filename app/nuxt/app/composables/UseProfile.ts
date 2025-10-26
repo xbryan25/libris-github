@@ -41,14 +41,14 @@ export const useProfile = (userId?: string) => {
       }
 
       const res = await $fetch<Profile>(url, options)
-      res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-GB', {
+      res.account_activated_at = new Date(res.account_activated_at).toLocaleDateString('en-US', {
+        month: 'long',
         day: '2-digit',
-        month: 'short',
         year: 'numeric'
       })
-      res.date_of_birth = new Date(res.date_of_birth).toLocaleDateString('en-GB', {
+      res.date_of_birth = new Date(res.date_of_birth).toLocaleDateString('en-US', {
+        month: 'long',
         day: '2-digit',
-        month: 'short',
         year: 'numeric'
       })
       profile.value = res
