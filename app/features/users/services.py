@@ -126,35 +126,25 @@ class UserServices:
         return UserRepository.update_user_address(user_id, address_data)
 
     @staticmethod
-    def get_trust_score_comparison_service(
-        user_trust_score: int,
-    ) -> dict[str, Any] | None:
+    def get_trust_score_comparison_service(user_id: str) -> dict[str, Any] | None:
         """
-        Get trust score comparison statistics for a user.
+        Get trust score percentile for a user.
 
         Args:
-            user_trust_score (int): The user's trust score to compare.
+            user_id (str): The UUID of the user.
 
         Returns:
-            dict: A dictionary containing comparison statistics (None if no data).
+            dict: A dictionary containing trust_score_percentile (None if no data).
         """
+        stats = UserRepository.get_trust_score_percentile(user_id)
 
-        stats = UserRepository.get_trust_score_stats()
-
-        if not stats or not stats.get("average_trust_score"):
+        if not stats or stats.get("trust_score_percentile") is None:
             return None
 
-        average_score = float(stats["average_trust_score"])
-        total_users = int(stats["total_users"])
-
-        percentage_difference = (
-            (user_trust_score - average_score) / average_score
-        ) * 100
+        percentile = float(stats["trust_score_percentile"])
 
         return {
-            "user_trust_score": user_trust_score,
-            "average_trust_score": round(average_score, 1),
-            "total_users": total_users,
-            "percentage_difference": round(percentage_difference, 1),
-            "is_above_average": percentage_difference > 0,
+            "user_id": user_id,
+            "trust_score_percentile": round(percentile, 1),
+            "is_above_average": percentile > 50,
         }

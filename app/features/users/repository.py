@@ -68,20 +68,29 @@ class UserRepository:
         )
 
     @staticmethod
-    def get_trust_score_stats() -> dict[str, float] | None:
+    def get_trust_score_percentile(user_id: str) -> dict[str, float] | None:
         """
-        Retrieve trust score statistics from all users.
+        Retrieve the trust score percentile for a specific user.
+
+        Args:
+            user_id (str): The UUID of the user.
 
         Returns:
-            dict: A dictionary containing average trust score and total user count (None if no data).
+            dict: A dictionary containing trust_score_percentile (None if no data).
         """
-
         db = current_app.extensions["db"]
 
-        return db.fetch_one(
-            UserQueries.GET_TRUST_SCORE_STATS,
-            (),
+        stats = db.fetch_one(
+            UserQueries.GET_TRUST_SCORE_PERCENTILE,
+            (user_id,),
         )
+
+        if not stats or "trust_score_percentile" not in stats:
+            return None
+
+        stats["trust_score_percentile"] = float(stats["trust_score_percentile"])
+
+        return stats
 
     @staticmethod
     def update_user_profile(user_id: str, profile_data: dict) -> bool:

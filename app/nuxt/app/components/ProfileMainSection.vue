@@ -3,7 +3,7 @@ import TrustScoreDetails from './TrustScoreDetails.vue'
 import ProfilePictureUpload from './ProfilePictureUpload.vue'
 import type { Profile } from '~/composables/UseProfile'
 import { computed, onMounted, watch } from 'vue'
-import { useTrustScoreComparison } from '~/composables/useTrustScoreComparison'
+import { useTrustScorePercentile } from '~/composables/useTrustScorePercentile'
 import { useProfileEdit } from '~/composables/useProfileEdit'
 
 interface Props {
@@ -18,7 +18,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const { comparison, fetchComparison, getComparisonText } = useTrustScoreComparison(props.userId)
+const { percentile, fetchPercentile, getPercentileText } = useTrustScorePercentile(props.userId)
+
 const { saving, error: editError, success, startEditing, cancelEditing, saveProfile } = useProfileEdit()
 
 const editForm = computed(() => props.editForm || {})
@@ -46,8 +47,8 @@ const trustScoreBadge = computed(() => {
 watch(() => props.profile, (newProfile) => {
   console.log('Profile changed:', newProfile)
   if (newProfile?.trust_score) {
-    console.log('Fetching trust score comparison...')
-    fetchComparison()
+    console.log('Fetching trust score percentile...')
+    fetchPercentile()
   }
 }, { immediate: true })
 
@@ -73,8 +74,8 @@ const handleImageUpdate = (imageUrl: string) => {
 onMounted(() => {
   console.log('ProfileMainSection mounted, profile:', props.profile)
   if (props.profile?.trust_score) {
-    console.log('Fetching trust score comparison...')
-    fetchComparison()
+    console.log('Fetching trust score percentile...')
+    fetchPercentile()
   }
 })
 </script>
@@ -156,7 +157,7 @@ onMounted(() => {
           </UBadge>
         </div>
 
-        <div class="text-[15px] font-semibold text-muted">{{ getComparisonText() }}</div>
+        <div class="text-[15px] font-semibold text-muted">{{ getPercentileText() }}</div>
         
       </div>
     </div>
