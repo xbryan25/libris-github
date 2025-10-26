@@ -166,14 +166,23 @@ class BookServices:
             "book_id": book["book_id"],
             "title": book["title"],
             "author": book["author"],
-            "genre": book["genre"],
+            "genres": book["genres"],
             "condition": book["condition"],
             "description": book["description"],
             "availability": book["availability"],
-            "daily_rent_price": book["daily_rent_price"],
-            "security_deposit": book["security_deposit"],
-            "purchase_price": book["purchase_price"],
+            "daily_rent_price": (
+                int(book["daily_rent_price"]) if book["daily_rent_price"] else 0
+            ),
+            "security_deposit": (
+                int(book["security_deposit"]) if book["security_deposit"] else 0
+            ),
+            "purchase_price": (
+                int(book["purchase_price"]) if book["purchase_price"] else 0
+            ),
+            "owner_user_id": book["owner_user_id"],
             "owner_username": book["owner_username"],
+            "owner_profile_picture": book["owner_profile_picture"],
             "owner_trust_score": book["owner_trust_score"],
+            "times_rented": int(book["times_rented"]),
             "images": [img["image_url"] for img in images],
         }
