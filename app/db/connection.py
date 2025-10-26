@@ -7,52 +7,67 @@ from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row, TupleRow
 from psycopg.abc import Query
 
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class Database:
-    """Singleton class for database connection"""
+    """Thread-safe singleton for PostgreSQL connection pooling."""
 
-    _instance = None
+    _instance: Optional["Database"] = None
     _max_retries = 2
 
     # type hint for mypy
-    pool: ConnectionPool | None
+    pool: Optional[ConnectionPool] = None
 
     def __new__(cls) -> "Database":
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
-            cls._instance._connect_pool()
         return cls._instance
 
-    def _connect_pool(self) -> None:
-        """Initialize a connection pool."""
+    def init_app(self, app) -> None:
+        """
+        Explicitly initialize the connection pool using the Flask app config.
+        Should be called once from create_app().
+        """
+        if self.pool and not self.pool.closed:
+            self.close()
 
-        if hasattr(self, "pool") and self.pool is not None and not self.pool.closed:
-            self.pool.close()
+        conninfo = app.config.get("DATABASE_URL")
+        if not conninfo:
+            raise RuntimeError("DATABASE_URL is not configured in Flask app.")
 
         self.pool = ConnectionPool(
-            conninfo=current_app.config["DATABASE_URL"],
-            max_size=5,
-            kwargs={"row_factory": dict_row},
+            conninfo=conninfo,
+            min_size=2,
+            max_size=3,
+            kwargs={"row_factory": dict_row, "prepare_threshold": None},
         )
 
-    def get_conn(self) -> Any:
-        """Get a pooled connection (context-managed). Reconnect if pool closed."""
-        if self.pool is None or self.pool.closed:
-            self._connect_pool()
+        logger.info("Database connection pool initialized")
 
+    def get_conn(self):
+        """Get a pooled connection (context-managed)."""
+        if not self.pool or self.pool.closed:
+            logger.warning("Connection pool was closed; reconnecting...")
+            self.reconnect()
         assert self.pool is not None
         return self.pool.connection()
+
+    def reconnect(self):
+        """Reconnect using current Flask app config."""
+        try:
+            self.init_app(current_app)
+        except RuntimeError:
+            logger.error("Cannot reconnect — current_app not ready.")
 
     def execute_query(self, query: Query, params: Any = None) -> None:
         """For INSERT, UPDATE, DELETE queries."""
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                 return
@@ -61,19 +76,16 @@ class Database:
                     logger.warning(
                         f"OperationalError on attempt {attempt+1}, reconnecting..."
                     )
-                    self._connect_pool()
+                    self.reconnect()
                 else:
                     raise
-            except Exception as e:
-                raise e
-        return None
 
     def fetch_all(self, query: Query, params: Any = None) -> list[TupleRow] | None:
         """For SELECT queries returning multiple rows."""
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                         return cur.fetchall()
@@ -82,11 +94,9 @@ class Database:
                     logger.warning(
                         f"OperationalError on attempt {attempt+1}, reconnecting..."
                     )
-                    self._connect_pool()
+                    self.reconnect()
                 else:
                     raise
-            except Exception as e:
-                raise e
         return None
 
     def fetch_one(self, query: Query, params: Any = None) -> TupleRow | None:
@@ -94,7 +104,7 @@ class Database:
         for attempt in range(self._max_retries + 1):
             try:
                 with self.get_conn() as conn:
-                    conn.autocommit = True
+
                     with conn.cursor() as cur:
                         cur.execute(query, params)
                         return cur.fetchone()
@@ -103,15 +113,18 @@ class Database:
                     logger.warning(
                         f"OperationalError on attempt {attempt+1}, reconnecting..."
                     )
-                    self._connect_pool()
+                    self.reconnect()
                 else:
                     raise
-            except Exception as e:
-                raise e
         return None
 
-    def close(self) -> None:
-        """Close the pool and reset the singleton."""
-        if hasattr(self, "pool") and self.pool is not None and not self.pool.closed:
-            self.pool.close()
-        Database._instance = None
+    def close(self):
+        """Close the pool gracefully."""
+        if self.pool and not self.pool.closed:
+            try:
+                self.pool.close(timeout=5)
+                logger.info("Database connection pool closed cleanly")
+            except Exception as e:
+                logger.error(f"Error closing database pool: {e}")
+            self.pool = None
+            Database._instance = None

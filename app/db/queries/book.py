@@ -1,5 +1,40 @@
 class BookQueries:
-    BOOK_DETAILS = """
+    GET_BOOKS_FOR_BOOK_LIST = (
+        "SELECT b.*, u.username AS owner_username, bi.image_url as first_image_url "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id != %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "ORDER BY {sort_field} {sort_order} "
+        "LIMIT %s OFFSET %s"
+    )
+
+    GET_BOOK_COUNT_FOR_BOOK_LIST = (
+        "SELECT COUNT(b.*) "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id != %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+    )
+
+    GET_BOOK_DETAILS = """
             SELECT
                 b.book_id,
                 b.title,
@@ -18,14 +53,14 @@ class BookQueries:
             WHERE b.book_id = %s
             """
 
-    BOOK_IMAGES = """
+    GET_BOOK_IMAGES = """
         SELECT image_url, order_num
         FROM book_images
         WHERE book_id = %s
         ORDER BY order_num
     """
 
-    RENTED_BOOKS = """
+    GET_RENTED_BOOKS = """
             SELECT
                 b.book_id AS id,
                 b.title,
@@ -42,7 +77,7 @@ class BookQueries:
             AND rb.rent_status IN ('ongoing');
             """
 
-    BOUGHT_BOOKS = """
+    GET_BOUGHT_BOOKS = """
             SELECT
                 b.book_id as id,
                 b.title,
@@ -57,7 +92,7 @@ class BookQueries:
             WHERE pb.user_id = %s AND pb.purchase_status = 'completed'
             """
 
-    LENT_BOOKS = """
+    GET_LENT_BOOKS = """
             SELECT
                 b.book_id as id,
                 b.title,
@@ -73,7 +108,7 @@ class BookQueries:
             WHERE b.owner_id = %s AND rb.rent_status IN ('ongoing')
         """
 
-    SOLD_BOOKS = """
+    GET_SOLD_BOOKS = """
             SELECT
                 b.book_id as id,
                 b.title,
