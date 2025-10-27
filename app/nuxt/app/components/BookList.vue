@@ -126,12 +126,16 @@ watch(
   ],
   async () => {
     isFetching.value = true;
-
-    await debouncedLoadBooks();
-    await debouncedLoadBookCount();
-
-    isFetching.value = false;
+    try {
+      await debouncedLoadBooks();
+      await debouncedLoadBookCount();
+    } catch (err) {
+      console.error('Error loading books:', err);
+    } finally {
+      isFetching.value = false;
+    }
   },
+  { deep: true },
 );
 
 onMounted(async () => {

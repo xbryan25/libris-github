@@ -5,8 +5,6 @@ const props = defineProps<{
   cardType: string;
   bookDetails?: Book | null;
 }>();
-
-console.log(props.bookDetails);
 </script>
 
 <template>

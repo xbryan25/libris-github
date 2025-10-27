@@ -1,7 +1,7 @@
 export function useBookGenres(){
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const { $apiFetch } = useNuxtApp();
 
-  return $fetch<string[]>(`${apiUrl}/api/books/book-genres`, {
+  return $apiFetch<string[]>(`/api/books/book-genres`, {
     method: 'GET',
     credentials: 'include',
   });
