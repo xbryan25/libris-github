@@ -71,7 +71,18 @@ const costLabel = computed(() => {
     class="flex-shrink-0 border border-base rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg bg-surface-hover cursor-pointer"
   >
     <div class="w-full h-72 overflow-hidden">
-      <img :src="book.image" :alt="book.title" class="w-full h-full object-cover" />
+      <NuxtImg
+        v-if="props.book?.image"
+        :src="props.book?.image"
+        class="w-full h-full object-cover"
+        alt="Auth image"
+      />
+      <NuxtImg
+        v-else
+        src="/images/noImageImage.jpg"
+        class="w-full h-full object-cover"
+        alt="Auth image"
+      />
     </div>
 
     <div class="p-4 text-base">
