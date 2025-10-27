@@ -42,8 +42,8 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         return db.fetch_one(
-            CommonQueries.GET_COLUMN_BY_PK.format(
-                column="username", table="users", pk="user_id"
+            CommonQueries.GET_COLUMN_BY_FIELD.format(
+                column="username", table="users", field="user_id"
             ),
             (user_id,),
         )

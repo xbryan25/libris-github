@@ -10,6 +10,18 @@ const headerState = reactive({
   selectedBookGenre: 'All Genres',
   selectedBookAvailability: 'All',
 });
+
+const currentWalletBalance = ref(0);
+const isFetching = ref(false);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 </script>
 
 <template>
@@ -31,7 +43,9 @@ const headerState = reactive({
 
         <div class="flex items-center gap-2">
           <Icon name="fluent:book-coins-20-regular" class="w-8 h-8 text-accent" />
-          <h1 class="font-bold text-3xl text-accent">75</h1>
+
+          <h1 v-if="isFetching" class="font-bold text-3xl text-accent">-</h1>
+          <h1 v-else class="font-bold text-3xl text-accent">{{ currentWalletBalance }}</h1>
         </div>
       </div>
     </div>
