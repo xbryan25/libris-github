@@ -12,7 +12,7 @@ const headerState = reactive({
 });
 
 const currentWalletBalance = ref(0);
-const isFetching = ref(false);
+const isFetching = ref(true);
 
 onMounted(async () => {
   isFetching.value = true;

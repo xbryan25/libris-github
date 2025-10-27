@@ -2,6 +2,18 @@
 const route = useRoute();
 const noNavbarPages = ['/', '/login', '/signup'];
 const showNavbar = computed(() => !noNavbarPages.includes(route.path));
+
+const currentWalletBalance = ref(0);
+const isFetching = ref(true);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 </script>
 
 <template>
@@ -106,11 +118,15 @@ const showNavbar = computed(() => !noNavbarPages.includes(route.path));
           <!-- Readits Display -->
           <div class="flex items-center rounded-md px-3 py-2 gap-1.5">
             <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
-            <span class="text-xl font-semibold text-accent">75</span>
+
+            <span v-if="isFetching" class="text-xl font-semibold text-accent">-</span>
+            <span v-else class="text-xl font-semibold text-accent">{{ currentWalletBalance }}</span>
           </div>
 
           <!-- Notifications -->
-          <button class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors">
+          <button
+            class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
+          >
             <Icon name="mdi:bell-outline" class="w-5 h-5" />
           </button>
 
