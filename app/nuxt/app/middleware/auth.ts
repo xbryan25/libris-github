@@ -31,6 +31,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
             const response = await useCurrentUser(runType, cookie)
             auth.username = response.username
             auth.isAuthenticated = true
+            auth.user_id = response.user_id
 
         } catch {
             // If access_token_cookie does not exist, refresh access_token_cookie
@@ -46,6 +47,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
         if (!auth.accessTokenExpiresAt || now > auth.accessTokenExpiresAt - 30_000) {
             const data = await useRefreshAccessToken(runType, cookie)
             auth.accessTokenExpiresAt = data?.accessTokenExpiresAt
+        }
+
+         // --- Debug logging ---
+        const logPrefix = isServer ? '[SSR]' : '[Client]'
+        console.log(logPrefix, 'Route path:', to.path)
+        console.log(logPrefix, 'Route params:', to.params)
+        console.log(logPrefix, 'Logged-in user_id:', auth.user_id)
+
+        // --- Redirect if user navigates to their own ID ---
+        if (to.params.id) {
+        if (to.params.id === auth.user_id) {
+            console.log(logPrefix, 'Redirecting to /users/me')
+            return navigateTo('/users/me')
+        } else {
+            console.log(logPrefix, 'Viewing another user profile:', to.params.id)
+        }
         }
 
     } catch {

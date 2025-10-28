@@ -1,5 +1,6 @@
 type CurrentUserResponse = {
     username: string
+	user_id: string
 }
 
 export function useCurrentUser(loadType: string, cookie?) {
