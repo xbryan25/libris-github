@@ -91,10 +91,10 @@ const showNavbar = computed(() => !noNavbarPages.includes(route.path));
 
           <!-- Profile -->
           <NuxtLink
-            to="/profile"
+            to="/users/me"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/profile'
+              route.path === '/users/me'
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
