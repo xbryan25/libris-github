@@ -154,7 +154,10 @@ const getBadgeColorClasses = (color: string) => {
                     <span class="text-2xl font-bold text-base">{{ book.owner_trust_score }}</span>
                     <span 
                       class="text-xs px-2 py-1 rounded-full font-medium"
-                      :class="ownerTrustBadge.color"
+                      :class="[
+                        ownerTrustBadge.color,
+                        ownerTrustBadge.text === 'Poor' ? 'text-white' : ''
+                      ]"
                     >
                       {{ ownerTrustBadge.text }}
                     </span>
