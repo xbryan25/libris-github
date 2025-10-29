@@ -47,8 +47,25 @@ const handlePurchase = () => {
 }
 
 const goBack = () => {
-  router.push('/browse')
+  const from = route.query.from as string
+  
+  if (from === 'browse') {
+    router.push('/browse')
+  } else if (from === 'user-collection') {
+    // Navigate back to the book owner's collection page
+    router.push(`/users/${book.value?.owner_user_id}/collection`)
+  } else {
+    // Default fallback
+    router.push('/browse')
+  }
 }
+
+const backButtonText = computed(() => {
+  const from = route.query.from as string
+  if (from === 'browse') return 'Back to Browse'
+  if (from === 'user-collection') return 'Back to Collection'
+  return 'Back to Browse'
+})
 
 const getBadgeColorClasses = (color: string) => {
   const colors: Record<string, string> = {
@@ -77,7 +94,7 @@ const getBadgeColorClasses = (color: string) => {
         class="flex items-center gap-2 mb-6 text-base hover:text-accent transition cursor-pointer"
       >
         <UIcon name="i-heroicons-arrow-left" class="text-xl" />
-        <span class="font-medium">Back to Browse</span>
+        <span class="font-medium">{{backButtonText}}</span>
       </button>
 
       <UCard class="bg-surface border-base">
