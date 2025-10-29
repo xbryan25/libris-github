@@ -15,31 +15,24 @@ const booksData = ref<Book[]>([]);
 const gridContainer = ref<HTMLElement | null>(null);
 
 const cardWidth = 225;
-const cardHeight = 400;
 
 const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
 
 const getGridCapacity = () => {
-  if (!gridContainer.value) return 0;
+  const el = gridContainer.value;
+  if (!el) return 0;
 
-  const width = gridContainer.value.offsetWidth;
-  const height = gridContainer.value.offsetHeight;
+  const width = el.clientWidth;
+  const gridGap = 12;
+  const cols = Math.max(1, Math.round((width + gridGap) / (cardWidth + gridGap)));
 
-  const gridGap = 8; // or whatever your Tailwind gap is in px
-  const cols = Math.floor((width + gridGap) / (cardWidth + gridGap));
+  const rows = 2;
 
-  const rows = Math.min(Math.floor(height / cardHeight), 2); // ✅ limit rows to 2 max
+  const total = cols * rows;
 
-  // Actual visible cards
-  const visibleCount = cols * rows;
-
-  // Minimum of 2 rows
-  const minCount = cols * 2;
-
-  // Return whichever is greater
-  return Math.max(visibleCount, minCount);
+  return total;
 };
 
 const isFetching = ref(false);
@@ -74,17 +67,6 @@ const getTotalBookCount = async () => {
   totalBookCount.value = totalCount;
 };
 
-watch(
-  () => pageNumber.value,
-  async () => {
-    isFetching.value = true;
-
-    await debouncedLoadBooks();
-
-    isFetching.value = false;
-  },
-);
-
 const checkIfBeyondPageLimit = () => {
   const totalPages = Math.ceil(totalBookCount.value / booksPerPage.value) || 1;
 
@@ -109,14 +91,40 @@ const debouncedLoadBookCount = useDebounceFn(async () => {
   checkIfBeyondPageLimit();
 }, 700);
 
-const handleResize = async () => {
+let lastCapacity = 0;
+
+const handleResize = useDebounceFn(async () => {
+  // Wait for layout to stabilize
+  await nextTick();
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  await new Promise((resolve) => setTimeout(resolve, 80));
+
+  const newCapacity = getGridCapacity();
+  if (newCapacity === lastCapacity || newCapacity <= 0) return;
+
+  lastCapacity = newCapacity;
+
   isFetching.value = true;
+  try {
+    await loadBooks();
+    checkIfBeyondPageLimit();
+  } finally {
+    isFetching.value = false;
+  }
+}, 400);
 
-  await debouncedLoadBooks();
-  await debouncedLoadBookCount();
+watch(
+  () => pageNumber.value,
+  async () => {
+    isFetching.value = true;
 
-  isFetching.value = false;
-};
+    try {
+      await debouncedLoadBooks();
+    } finally {
+      isFetching.value = false;
+    }
+  },
+);
 
 watch(
   [
@@ -126,12 +134,16 @@ watch(
   ],
   async () => {
     isFetching.value = true;
-
-    await debouncedLoadBooks();
-    await debouncedLoadBookCount();
-
-    isFetching.value = false;
+    try {
+      await debouncedLoadBooks();
+      await debouncedLoadBookCount();
+    } catch (err) {
+      console.error('Error loading books:', err);
+    } finally {
+      isFetching.value = false;
+    }
   },
+  { deep: true },
 );
 
 onMounted(async () => {
@@ -171,7 +183,13 @@ onBeforeUnmount(() => {
 
       <div
         ref="gridContainer"
-        class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] place-items-center justify-center gap-2 auto-rows-max min-h-[820px]"
+        class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-3"
+        style="
+          grid-auto-rows: 400px;
+          max-height: calc(400px * 2 + 8px);
+          min-height: calc(400px * 2 + 8px);
+          overflow: hidden;
+        "
       >
         <BookListCard
           v-for="book in booksData"

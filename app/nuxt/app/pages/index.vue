@@ -2,6 +2,7 @@
 import guest from '~/middleware/guest';
 
 definePageMeta({
+  layout: 'unauthenticated',
   middleware: guest,
 });
 </script>

@@ -46,9 +46,10 @@ class BookRepository:
             ),
             (
                 search_pattern,
-                genre,
                 availability,
                 user_id,
+                genre,
+                genre,
                 params["books_per_page"],
                 offset,
             ),

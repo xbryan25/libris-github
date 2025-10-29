@@ -8,9 +8,9 @@ export function useBooksForBookList(options?: {
                                 bookAvailability: string,
                             }){
 
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const { $apiFetch } = useNuxtApp();                            
 
-  return $fetch<Book[]>(`${apiUrl}/api/books/book-list-books`, {
+  return $apiFetch<Book[]>(`/api/books/book-list-books`, {
     method: 'GET',
     credentials: 'include',
     query: {

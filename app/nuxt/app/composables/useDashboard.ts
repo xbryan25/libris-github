@@ -9,9 +9,10 @@ type DashboardSummary = {
   total_earnings: number
 }
 
-const API_URL = import.meta.env.VITE_API_URL 
-
 export const useDashboard = () => {
+
+  const { $apiFetch } = useNuxtApp();   
+
   const summary = ref<DashboardSummary>({
     books_borrowed: 0,
     currently_lending: 0,
@@ -27,8 +28,9 @@ export const useDashboard = () => {
   const fetchSummary = async () => {
     loading.value = true
     error.value = null
+
     try {
-      const res = await $fetch<DashboardSummary>(`${API_URL}/api/dashboard/summary`, {
+      const res = await $apiFetch<DashboardSummary>(`/api/dashboard/summary`, {
         credentials: 'include'
       })
       summary.value = res
@@ -43,7 +45,7 @@ export const useDashboard = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<{ username: string }>(`${API_URL}/api/users/me`, {
+      const res = await $apiFetch<{ username: string }>(`/api/users/me`, {
         credentials: 'include' 
       })
       username.value = res.username

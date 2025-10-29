@@ -5,7 +5,6 @@ export const useAuthStore = defineStore('auth', () => {
   const user_id = ref<string | null>(null)
   const username = ref<string | null>(null)
   const isAuthenticated = ref(false)
-  const accessTokenExpiresAt = ref<number | null>(null)
 
   const login = async (email: string, password: string): Promise<{messageTitle: string, message: string}> => {
     const response = await useUserLogin(email, password)
@@ -13,19 +12,19 @@ export const useAuthStore = defineStore('auth', () => {
     user_id.value = response.user_id
     username.value = response.username
     isAuthenticated.value = true
-    accessTokenExpiresAt.value = response.accessTokenExpiresAt
 
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
   const logout = async () => {
     const response = await useUserLogout()
-
+    
+    user_id.value = null
     username.value = null
     isAuthenticated.value = false
 
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { user_id, username, isAuthenticated, accessTokenExpiresAt, login, logout }
+  return { user_id, username, isAuthenticated, login, logout }
 })
