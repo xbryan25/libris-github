@@ -1,83 +1,77 @@
 <script setup lang="ts">
-import auth from '~/middleware/auth'
-import { useBookDetails } from '~/composables/useBookDetails'
-import BookPricing from '~/components/BookPricing.vue'
+import auth from '~/middleware/auth';
+import { useBookDetails } from '~/composables/useBookDetails';
+import BookPricing from '~/components/BookPricing.vue';
 
 definePageMeta({
   middleware: auth,
-})
+});
 
-const route = useRoute()
-const router = useRouter()
-const bookId = route.params.bookId as string
+const route = useRoute();
+const router = useRouter();
+const bookId = route.params.bookId as string;
 
-const { 
-  book, 
-  loading, 
-  error, 
-  fetchBookDetails,
-  availabilityBadges,
-  ownerTrustBadge
-} = useBookDetails()
+const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBadge } =
+  useBookDetails();
 
-const currentImageIndex = ref(0)
+const currentImageIndex = ref(0);
 
 // Fetch book details on mount
 onMounted(async () => {
   try {
-    await fetchBookDetails(bookId)
+    await fetchBookDetails(bookId);
   } catch (e) {
-    console.error('Failed to fetch book details:', e)
+    console.error('Failed to fetch book details:', e);
   }
-})
+});
 
 const setImage = (index: number) => {
-  currentImageIndex.value = index
-}
+  currentImageIndex.value = index;
+};
 
 // Action handlers
 const handleRent = () => {
-  console.log('Rent book:', bookId)
+  console.log('Rent book:', bookId);
   // Navigate to rent page or open modal
-}
+};
 
 const handlePurchase = () => {
-  console.log('Purchase book:', bookId)
+  console.log('Purchase book:', bookId);
   // Navigate to purchase page or open modal
-}
+};
 
 const goBack = () => {
-  const from = route.query.from as string
-  
+  const from = route.query.from as string;
+
   if (from === 'browse') {
-    router.push('/browse')
+    router.push('/browse');
   } else if (from === 'user-collection') {
     // Navigate back to the book owner's collection page
-    router.push(`/users/${book.value?.owner_user_id}/collection`)
+    router.push(`/users/${book.value?.owner_user_id}/collection`);
   } else {
     // Default fallback
-    router.push('/browse')
+    router.push('/browse');
   }
-}
+};
 
 const backButtonText = computed(() => {
-  const from = route.query.from as string
-  if (from === 'browse') return 'Back to Browse'
-  if (from === 'user-collection') return 'Back to Collection'
-  return 'Back to Browse'
-})
+  const from = route.query.from as string;
+  if (from === 'browse') return 'Back to Browse';
+  if (from === 'user-collection') return 'Back to Collection';
+  return 'Back to Browse';
+});
 
 const getBadgeColorClasses = (color: string) => {
   const colors: Record<string, string> = {
     blue: 'bg-blue-600 text-white dark:bg-blue-500',
     red: 'bg-red-600 text-white dark:bg-red-500',
-  }
-  return colors[color] || colors.gray
-}
+  };
+  return colors[color] || colors.gray;
+};
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-background pt-4 px-4 md:px-8 lg:px-15">
+  <div class="min-h-screen w-full bg-background pt-4 pb-6 px-4 md:px-8 lg:px-15">
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center h-screen">
       <div class="text-center">
@@ -89,12 +83,12 @@ const getBadgeColorClasses = (color: string) => {
     <!-- Main Content -->
     <div v-else-if="book" class="max-w-7xl pt-3 mx-auto">
       <!-- Back Button -->
-      <button 
-        @click="goBack"
+      <button
         class="flex items-center gap-2 mb-6 text-base hover:text-accent transition cursor-pointer"
+        @click="goBack"
       >
         <UIcon name="i-heroicons-arrow-left" class="text-xl" />
-        <span class="font-medium">{{backButtonText}}</span>
+        <span class="font-medium">{{ backButtonText }}</span>
       </button>
 
       <UCard class="bg-surface border-base">
@@ -102,10 +96,12 @@ const getBadgeColorClasses = (color: string) => {
           <!-- Left Column - Images -->
           <div>
             <!-- Main Image -->
-            <div class="relative bg-zinc-200 dark:bg-zinc-800 rounded-lg overflow-hidden mb-4 aspect-[3/4]">
-              <img 
+            <div
+              class="relative bg-zinc-200 dark:bg-zinc-800 rounded-lg overflow-hidden mb-4 aspect-[3/4]"
+            >
+              <img
                 v-if="book.images.length > 0"
-                :src="book.images[currentImageIndex]" 
+                :src="book.images[currentImageIndex]"
                 :alt="book.title"
                 class="w-full h-full object-cover"
               />
@@ -121,18 +117,22 @@ const getBadgeColorClasses = (color: string) => {
                 :items="book.images"
                 :ui="{
                   item: 'basis-[85px]',
-                  container: 'gap-2'
+                  container: 'gap-2',
                 }"
                 arrows
               >
                 <button
                   @click="setImage(index)"
                   class="w-[85px] h-[115px] rounded-lg overflow-hidden border-2 transition"
-                  :class="index === currentImageIndex ? 'border-accent' : 'border-base hover:border-accent/50'"
+                  :class="
+                    index === currentImageIndex
+                      ? 'border-accent'
+                      : 'border-base hover:border-accent/50'
+                  "
                 >
-                  <img 
-                    :src="item" 
-                    :alt="`${book.title} ${index + 1}`" 
+                  <img
+                    :src="item"
+                    :alt="`${book.title} ${index + 1}`"
                     class="w-full h-full object-cover"
                   />
                 </button>
@@ -151,13 +151,13 @@ const getBadgeColorClasses = (color: string) => {
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <div class="relative">
-                      <img 
+                      <img
                         v-if="book.owner_profile_picture"
-                        :src="book.owner_profile_picture" 
+                        :src="book.owner_profile_picture"
                         :alt="book.owner_username"
                         class="w-10 h-10 rounded-full object-cover"
                       />
-                      <div 
+                      <div
                         v-else
                         class="w-10 h-10 rounded-full bg-surface flex items-center justify-center"
                       >
@@ -165,7 +165,7 @@ const getBadgeColorClasses = (color: string) => {
                       </div>
                     </div>
                     <div>
-                      <NuxtLink 
+                      <NuxtLink
                         :to="`/users/${book.owner_user_id}`"
                         class="font-medium text-base px-1 py-1 hover:text-accent rounded-md hover:bg-surface-hover transition cursor-pointer"
                       >
@@ -175,11 +175,11 @@ const getBadgeColorClasses = (color: string) => {
                   </div>
                   <div class="flex flex-col items-end">
                     <span class="text-2xl font-bold text-base">{{ book.owner_trust_score }}</span>
-                    <span 
+                    <span
                       class="text-xs px-2 py-1 rounded-full font-medium text-white"
                       :class="[
                         ownerTrustBadge.color,
-                        ownerTrustBadge.text === 'Poor' ? 'border border-white' : ''
+                        ownerTrustBadge.text === 'Poor' ? 'border border-white' : '',
                       ]"
                     >
                       {{ ownerTrustBadge.text }}
@@ -200,18 +200,20 @@ const getBadgeColorClasses = (color: string) => {
 
               <!-- Badges -->
               <div class="flex flex-wrap gap-2 mb-6">
-                <span 
-                  v-for="(genre, idx) in book.genres" 
+                <span
+                  v-for="(genre, idx) in book.genres"
                   :key="idx"
                   class="px-3 py-1 bg-surface border border-base rounded-full text-sm text-base"
                 >
                   {{ genre }}
                 </span>
-                <span class="px-3 py-1 bg-yellow-400 text-zinc-900 rounded-full text-sm font-medium capitalize">
+                <span
+                  class="px-3 py-1 bg-yellow-400 text-zinc-900 rounded-full text-sm font-medium capitalize"
+                >
                   {{ book.condition }}
                 </span>
-                <span 
-                  v-for="(badge, idx) in availabilityBadges" 
+                <span
+                  v-for="(badge, idx) in availabilityBadges"
                   :key="`avail-${idx}`"
                   class="px-3 py-1 rounded-full text-sm font-medium"
                   :class="getBadgeColorClasses(badge.color)"
