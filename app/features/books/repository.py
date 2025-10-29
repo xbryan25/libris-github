@@ -131,10 +131,12 @@ class BookRepository:
                 - purchase_price (int): Price if the book is for sale
                 - owner_username (str): Username of the book's owner
                 - owner_trust_score (int): Trust score of the owner
+                - times_rented (int): Number of times the book is rented
+                - owner_user_id (str): The id of the book owner
         """
         db = current_app.extensions["db"]
 
-        params = tuple([book_id] * 11)
+        params = (book_id,)
 
         return db.fetch_one(BookQueries.GET_BOOK_DETAILS, params)
 
@@ -153,7 +155,7 @@ class BookRepository:
         """
         db = current_app.extensions["db"]
 
-        params = tuple([book_id] * 11)
+        params = (book_id,)
 
         return db.fetch_all(BookQueries.GET_BOOK_IMAGES, params)
 
