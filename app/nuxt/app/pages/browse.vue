@@ -25,9 +25,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="flex flex-col items-center justify-center w-full min-h-screen pt-4 px-4 md:px-8 lg:px-15"
-  >
+  <div class="flex flex-col items-center w-full min-h-screen pt-4 px-4 md:px-8 lg:px-15">
     <div class="flex w-full px-10 py-5">
       <div class="flex-1 flex flex-col gap-1">
         <div class="flex items-center gap-2">
