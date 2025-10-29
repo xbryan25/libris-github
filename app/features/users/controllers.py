@@ -13,8 +13,6 @@ import traceback
 
 from .services import UserServices
 
-from datetime import datetime, timedelta, timezone
-
 
 class UserControllers:
     @staticmethod
@@ -32,27 +30,17 @@ class UserControllers:
                 user_login_details.get("password"),
             )
 
-            print(
-                f"{user_login_details.get("emailAddress")} + {user_login_details.get("password")}"
-            )
-
             if not user:
                 return jsonify({"error": "Invalid credentials."}), 401
 
             access_token = create_access_token(identity=user.user_id)
             refresh_token = create_refresh_token(identity=user.user_id)
 
-            expires_at = (
-                datetime.now(timezone.utc)
-                + timedelta(seconds=current_app.config["COOKIE_MAX_AGE"])
-            ).timestamp() * 1000
-
             resp = make_response(
                 {
                     "username": user.username,
                     "messageTitle": "Login successful.",
                     "message": "Enjoy your session!",
-                    "accessTokenExpiresAt": expires_at,
                 }
             )
 
@@ -120,12 +108,7 @@ class UserControllers:
 
             new_access_token = create_access_token(identity=identity)
 
-            expires_at = (
-                datetime.now(timezone.utc)
-                + timedelta(seconds=current_app.config["COOKIE_MAX_AGE"])
-            ).timestamp() * 1000
-
-            resp = make_response({"accessTokenExpiresAt": expires_at})
+            resp = make_response({"message": "access_token refreshed successfully."})
 
             set_access_cookies(
                 resp, new_access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
