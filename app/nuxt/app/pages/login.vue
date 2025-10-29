@@ -3,6 +3,7 @@ import guest from '~/middleware/guest';
 import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
+  layout: 'unauthenticated',
   middleware: guest,
 });
 
