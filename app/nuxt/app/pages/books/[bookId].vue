@@ -140,6 +140,12 @@ const getBadgeColorClasses = (color: string) => {
                         :alt="book.owner_username"
                         class="w-10 h-10 rounded-full object-cover"
                       />
+                      <div 
+                        v-else
+                        class="w-10 h-10 rounded-full bg-surface flex items-center justify-center"
+                      >
+                        <Icon name="heroicons:user-solid" class="w-7 h-7 text-muted" />
+                      </div>
                     </div>
                     <div>
                       <NuxtLink 
@@ -153,10 +159,10 @@ const getBadgeColorClasses = (color: string) => {
                   <div class="flex flex-col items-end">
                     <span class="text-2xl font-bold text-base">{{ book.owner_trust_score }}</span>
                     <span 
-                      class="text-xs px-2 py-1 rounded-full font-medium"
+                      class="text-xs px-2 py-1 rounded-full font-medium text-white"
                       :class="[
                         ownerTrustBadge.color,
-                        ownerTrustBadge.text === 'Poor' ? 'text-white' : ''
+                        ownerTrustBadge.text === 'Poor' ? 'border border-white' : ''
                       ]"
                     >
                       {{ ownerTrustBadge.text }}
