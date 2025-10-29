@@ -30,6 +30,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.username = response.username
         auth.isAuthenticated = true
 
+         // --- Debug logging ---
+        const logPrefix = isServer ? '[SSR]' : '[Client]'
+        console.log(logPrefix, 'Route path:', to.path)
+        console.log(logPrefix, 'Route params:', to.params)
+        console.log(logPrefix, 'Logged-in user_id:', auth.user_id)
+
+        // --- Redirect if user navigates to their own ID ---
+        if (to.params.id) {
+            if (to.params.id === auth.user_id) {
+                console.log(logPrefix, 'Redirecting to /users/me')
+                return navigateTo('/users/me')
+            } else {
+                console.log(logPrefix, 'Viewing another user profile:', to.params.id)
+            }
+        }
+
     } catch {
         auth.username = null
         auth.isAuthenticated = false

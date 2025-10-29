@@ -254,7 +254,8 @@ def get_bought_by_others() -> tuple[Response, int]:
     return BookControllers.get_sold_controller()
 
 
-@books_bp.route("/books/<string:book_id>", methods=["GET"])
+@books_bp.route("/<string:book_id>", methods=["GET"])
+@jwt_required()
 def get_book_details(book_id: str) -> tuple[Response, int]:
     """
     Retrieve detailed information about a specific book.

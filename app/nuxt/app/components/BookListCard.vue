@@ -5,12 +5,29 @@ const props = defineProps<{
   cardType: string;
   bookDetails?: Book | null;
 }>();
+
+const route = useRoute();
+
+// Determine which page we're coming from
+const bookLink = computed(() => {
+  let from = 'browse'; // default
+
+  if (route.path.includes('/collection')) {
+    // If we're on a user's collection page, use the book owner's username
+    const username = props.bookDetails?.ownerUsername;
+    from = 'user-collection';
+  }
+
+  return `/books/${props.bookDetails?.bookId}?from=${from}`;
+});
+
+console.log(props.bookDetails);
 </script>
 
 <template>
   <NuxtLink
     v-if="props.cardType === 'hasContent'"
-    :to="`/books/${props.bookDetails?.bookId}`"
+    :to="bookLink"
     class="w-full h-[400px] flex flex-col items-center justify-center transition-transform duration-300 hover:scale-103 cursor-pointer"
   >
     <div class="flex-[2] w-full rounded-t-xl overflow-hidden">

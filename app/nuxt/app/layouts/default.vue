@@ -12,6 +12,16 @@ onMounted(async () => {
 
   isFetching.value = false;
 });
+
+const isActive = (path: string) => {
+  if (route.path === path) return true;
+
+  if (route.path.startsWith('/books/') && route.query.from) {
+    if (path === '/browse' && route.query.from === 'browse') return true;
+  }
+
+  return false;
+};
 </script>
 
 <template>
@@ -31,7 +41,7 @@ onMounted(async () => {
             to="/dashboard"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/dashboard'
+              isActive('/dashboard')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
@@ -45,7 +55,7 @@ onMounted(async () => {
             to="/browse"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/browse'
+              isActive('/browse')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
@@ -59,7 +69,7 @@ onMounted(async () => {
             to="/library"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/library'
+              isActive('/library')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
@@ -73,7 +83,7 @@ onMounted(async () => {
             to="/rentals"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/rentals'
+              isActive('/rentals')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
@@ -87,7 +97,7 @@ onMounted(async () => {
             to="/purchases"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/purchases'
+              isActive('/purchases')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
@@ -101,10 +111,10 @@ onMounted(async () => {
 
           <!-- Profile -->
           <NuxtLink
-            to="/profile"
+            to="/users/me"
             :class="[
               'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-              route.path === '/profile'
+              isActive('/users/me')
                 ? 'bg-accent text-white'
                 : 'hover:bg-surface-hover hover:text-accent text-base',
             ]"
