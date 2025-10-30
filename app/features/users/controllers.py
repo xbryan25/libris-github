@@ -99,6 +99,19 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def get_username_from_user_id_controller(user_id) -> tuple[Response, int]:
+        "Retrieve the username of a user by their user ID."
+
+        try:
+            username = UserServices.get_username_service(user_id)
+
+            return jsonify({"username": username}), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def refresh_access_token_controller() -> tuple[Response, int]:
         "Generate a new access token using a valid refresh token."
 

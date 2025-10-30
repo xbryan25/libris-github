@@ -102,6 +102,33 @@ def get_current_user() -> tuple[Response, int]:
     return UserControllers.get_current_user_controller()
 
 
+@users_bp.route("/username/<string:user_id>", methods=["GET"])
+@jwt_required()
+def get_username_from_user_id(user_id: str) -> tuple[Response, int]:
+    """
+    Retrieve the username of a user by their user ID.
+
+    It returns the user's username.
+
+    Request parameters:
+
+        user_id (str): The unique identifier of the user whose username is to be retrieved.
+
+    Response JSON:
+
+        username: The username of the user whose username is to be retrieved.
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        404 if no user is found with the provided user ID.
+
+        500 if an unexpected error occurs during processing.
+    """
+    return UserControllers.get_username_from_user_id_controller(user_id)
+
+
 @users_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh_access_token() -> tuple[Response, int]:
