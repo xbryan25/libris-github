@@ -25,7 +25,7 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const useProfile = (userId?: string) => {
   const profile = ref<Profile | null>(null)
-  const loading = ref(false)
+  const loading = ref(true)
   const error = ref<string | null>(null)
 
   const fetchProfile = async () => {

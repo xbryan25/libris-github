@@ -30,3 +30,11 @@ class UserQueries:
         "SELECT first_name, middle_name, last_name, date_of_birth, phone_number, profile_image_url "
         "FROM users WHERE user_id = %s"
     )
+    GET_LIBRARY_DETAILS = (
+        DASHBOARD_COUNTS
+    ) = """
+            SELECT
+            (SELECT COUNT(*) FROM books WHERE owner_id = %s) AS books_owned,
+            (SELECT COUNT(*) FROM rented_books WHERE user_id = %s) AS books_rented,
+            (SELECT COUNT(*) FROM purchased_books WHERE user_id = %s AND purchase_status = 'completed') AS books_bought
+            """

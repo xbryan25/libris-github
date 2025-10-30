@@ -192,3 +192,27 @@ class UserRepository:
             UserQueries.GET_USER_PROFILE,
             (user_id,),
         )
+
+    @staticmethod
+    def get_library_details(user_id: str) -> dict[str, int] | None:
+        """
+        Retrieve the number of owned, rented, and bought books for a specific user.
+
+        Args:
+            user_id (str): The unique identifier of the user.
+
+        Returns:
+            dict: A dictionary containing the total number of books the user owns, has rented, and has bought, in the format:
+                {
+                    "owned_books": int,
+                    "rented_books": int,
+                    "bought_books": int
+                }
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_LIBRARY_DETAILS,
+            (user_id, user_id, user_id),
+        )
