@@ -148,3 +148,25 @@ class UserServices:
             "trust_score_percentile": round(percentile, 1),
             "is_above_average": percentile > 50,
         }
+
+    @staticmethod
+    def get_library_details_service(user_id) -> dict[str, int] | None:
+        """
+        Retrieve the number of owned, rented, and bought books for a specific user.
+
+        Args:
+            user_id (str): The unique identifier of the user.
+
+        Returns:
+            dict: A dictionary containing the counts of books associated with the user, with the following keys:
+                - owned (int): The number of books the user owns.
+                - rented (int): The total number of books the user has rented (past and present).
+                - bought (int): The number of books the user has purchased.
+        """
+
+        library_details_dict = UserRepository.get_library_details(user_id)
+
+        if library_details_dict is None:
+            return None
+
+        return library_details_dict

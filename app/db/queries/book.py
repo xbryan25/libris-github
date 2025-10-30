@@ -27,6 +27,50 @@ class BookQueries:
         "LIMIT %s OFFSET %s"
     )
 
+    GET_BOOKS_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER = (
+        "SELECT DISTINCT ON (b.book_id) "
+        "b.*, u.username AS owner_username, bi.image_url AS first_image_url "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND ("
+        "    %s = '%%' "
+        "    OR EXISTS ("
+        "        SELECT 1 FROM book_genre_links bgl2 "
+        "        JOIN book_genres bg2 ON bgl2.book_genre_id = bg2.book_genre_id "
+        "        WHERE bgl2.book_id = b.book_id "
+        "        AND bg2.book_genre_name ILIKE %s"
+        "    )"
+        ") "
+        "ORDER BY b.book_id, {sort_field} {sort_order} "
+        "LIMIT %s OFFSET %s"
+    )
+
+    GET_BOOK_COUNT_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER = (
+        "SELECT COUNT(DISTINCT b.book_id) "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+    )
+
     GET_BOOK_COUNT_FOR_BOOK_LIST = (
         "SELECT COUNT(DISTINCT b.book_id) "
         "FROM books AS b "

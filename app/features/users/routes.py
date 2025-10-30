@@ -102,6 +102,33 @@ def get_current_user() -> tuple[Response, int]:
     return UserControllers.get_current_user_controller()
 
 
+@users_bp.route("/username/<string:user_id>", methods=["GET"])
+@jwt_required()
+def get_username_from_user_id(user_id: str) -> tuple[Response, int]:
+    """
+    Retrieve the username of a user by their user ID.
+
+    It returns the user's username.
+
+    Request parameters:
+
+        user_id (str): The unique identifier of the user whose username is to be retrieved.
+
+    Response JSON:
+
+        username: The username of the user whose username is to be retrieved.
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        404 if no user is found with the provided user ID.
+
+        500 if an unexpected error occurs during processing.
+    """
+    return UserControllers.get_username_from_user_id_controller(user_id)
+
+
 @users_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh_access_token() -> tuple[Response, int]:
@@ -287,3 +314,27 @@ def patch_user_profile() -> tuple[Response, int]:
     JSON body will be updated; other fields remain unchanged.
     """
     return UserControllers.patch_user_profile_controller()
+
+
+@users_bp.route("/library-details/<string:user_id>", methods=["GET"])
+@jwt_required()
+def get_library_details(user_id: str) -> tuple[Response, int]:
+    """
+    Retrieve the number of owned, rented, and bought books for a specific user.
+
+    Request parameters:
+        user_id (str): The unique identifier of the user whose book counts are to be retrieved.
+
+    Response JSON:
+        owned_count (int): The total number of books owned by the user.
+        rented_count (int):The total number of books the user has rented (past and present).
+        bought_count (int): The total number of books purchased by the user.
+
+    Possible Errors:
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        404 if no user found with the provided user ID.
+
+        500 if an unexpected error occurred during processing.
+    """
+    return UserControllers.get_library_details_controller(user_id)

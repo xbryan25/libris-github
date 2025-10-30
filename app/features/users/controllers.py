@@ -13,6 +13,8 @@ import traceback
 
 from .services import UserServices
 
+from app.utils.camel_case_converter import dict_keys_to_camel
+
 
 class UserControllers:
     @staticmethod
@@ -93,6 +95,19 @@ class UserControllers:
             username = UserServices.get_username_service(user_id)
 
             return jsonify({"username": username, "user_id": user_id}), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_username_from_user_id_controller(user_id) -> tuple[Response, int]:
+        "Retrieve the username of a user by their user ID."
+
+        try:
+            username = UserServices.get_username_service(user_id)
+
+            return jsonify({"username": username}), 200
 
         except Exception as e:
             traceback.print_exc()
@@ -197,7 +212,7 @@ class UserControllers:
 
     @staticmethod
     def update_user_profile_controller() -> tuple[Response, int]:
-        "Update the authenticated user's profile information."
+        """Update the authenticated user's profile information."""
 
         try:
             user_id = get_jwt_identity()
@@ -250,7 +265,7 @@ class UserControllers:
 
     @staticmethod
     def patch_user_profile_controller() -> tuple[Response, int]:
-        "Partially update the authenticated user's profile."
+        """Partially update the authenticated user's profile."""
 
         try:
             user_id = get_jwt_identity()
@@ -292,6 +307,19 @@ class UserControllers:
                 return jsonify({"message": "Profile updated successfully"}), 200
             else:
                 return jsonify({"message": "Failed to update profile"}), 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_library_details_controller(user_id) -> tuple[Response, int]:
+        """Retrieve the number of owned, rented, and bought books for a specific user."""
+
+        try:
+            library_details = UserServices.get_library_details_service(user_id)
+
+            return jsonify(dict_keys_to_camel(library_details or {})), 200
 
         except Exception as e:
             traceback.print_exc()
