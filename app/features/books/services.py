@@ -12,12 +12,13 @@ from app.utils.date_utils import DateUtils
 class BookServices:
 
     @staticmethod
-    def get_books_for_book_list_service(user_id, params) -> list[Book]:
+    def get_books_for_book_list_service(
+        params, get_books_from_a_specific_user
+    ) -> list[Book]:
         """
         Retrieve details of different books based on pagination, optional search, genre, and availability filters.
 
         Args:
-            user_id (str): user_id of the user to prevent getting books that the current user owns.
             params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
                 Expected keys include:
                     - "books_per_page" (str): The number of book details to retrieve.
@@ -26,9 +27,13 @@ class BookServices:
                     - "search_value" (str): The value to search for.
                     - "genre" (str): The genre or category of books to filter by.
                     - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
+                                        other user, get all books that that user owns
+            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
+                                                        or only from a specific user
 
         Returns:
-            list[Book]: A list of Book dataclass instances representing books_per_page students.
+            list[Book]: A list of Book dataclass instances representing books_per_page books.
         """
 
         # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
@@ -37,7 +42,9 @@ class BookServices:
         elif params["availability"] == "for sale":
             params["availability"] = "purchase"
 
-        books = BookRepository.get_books_for_book_list(user_id, params)
+        books = BookRepository.get_books_for_book_list(
+            params, get_books_from_a_specific_user
+        )
 
         book_dataclasses = []
 
@@ -48,7 +55,9 @@ class BookServices:
         return book_dataclasses
 
     @staticmethod
-    def get_total_book_count_service(user_id, params) -> int:
+    def get_total_book_count_service(
+        params, get_book_count_from_a_specific_user
+    ) -> int:
         """
         Retrieve the total count of books based on pagination, optional search, genre, and availability filters.
 
@@ -58,6 +67,10 @@ class BookServices:
                     - "search_value" (str): The value to search for.
                     - "genre" (str): The genre or category of books to filter by.
                     - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from
+                                        other user, count all books that that user owns
+            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be
+                                                        from everyoneor only from a specific user
 
         Returns:
             int: The total book count, with search, genre, and availability filters being optionally applied.
@@ -69,7 +82,9 @@ class BookServices:
         elif params["availability"] == "for sale":
             params["availability"] = "purchase"
 
-        return BookRepository.get_total_book_count(user_id, params)["count"]
+        return BookRepository.get_total_book_count(
+            params, get_book_count_from_a_specific_user
+        )["count"]
 
     @staticmethod
     def get_book_genres_service() -> list[str]:

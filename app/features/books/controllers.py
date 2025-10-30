@@ -37,9 +37,12 @@ class BookControllers:
 
         ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
 
+        get_books_from_a_specific_user = False
+
         try:
 
             user_id = get_jwt_identity()
+
             if not user_id:
                 return jsonify({"message": "Not authenticated."}), 401
 
@@ -51,7 +54,13 @@ class BookControllers:
                 "availability": request.args.get(
                     "bookAvailability", "for rent"
                 ).lower(),
+                "user_id": request.args.get("userId"),
             }
+
+            if params["user_id"]:
+                get_books_from_a_specific_user = True
+            else:
+                params["user_id"] = user_id
 
             if params["books_per_page"] < 0:
                 raise InvalidParameterError(
@@ -69,7 +78,9 @@ class BookControllers:
                     Must be one of: ['for rent', 'for sale', 'both', 'all']."""
                 )
 
-            books = BookServices.get_books_for_book_list_service(user_id, params)
+            books = BookServices.get_books_for_book_list_service(
+                params, get_books_from_a_specific_user
+            )
 
             return (
                 jsonify(
@@ -104,6 +115,8 @@ class BookControllers:
 
         ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
 
+        get_book_count_from_a_specific_user = False
+
         try:
 
             user_id = get_jwt_identity()
@@ -117,7 +130,13 @@ class BookControllers:
                 "availability": request.args.get(
                     "bookAvailability", "for rent"
                 ).lower(),
+                "user_id": request.args.get("userId"),
             }
+
+            if params["user_id"]:
+                get_book_count_from_a_specific_user = True
+            else:
+                params["user_id"] = user_id
 
             if params["availability"] not in ALLOWED_AVAILABILITY_FILTERS:
                 raise InvalidParameterError(
@@ -126,7 +145,7 @@ class BookControllers:
                 )
 
             total_book_count = BookServices.get_total_book_count_service(
-                user_id, params
+                params, get_book_count_from_a_specific_user
             )
 
             return jsonify({"totalCount": total_book_count}), 200

@@ -8,6 +8,7 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
   };
+  userId?: string;
 }>();
 
 const booksData = ref<Book[]>([]);
@@ -49,6 +50,7 @@ const loadBooks = async () => {
     searchValue: props.headerState.searchValue,
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
+    userId: props.userId,
   };
 
   const data = await useBooksForBookList(options);
@@ -60,6 +62,7 @@ const getTotalBookCount = async () => {
     searchValue: props.headerState.searchValue,
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
+    userId: props.userId,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
@@ -186,8 +189,8 @@ onBeforeUnmount(() => {
         class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-3"
         style="
           grid-auto-rows: 400px;
-          max-height: calc(400px * 2 + 8px);
-          min-height: calc(400px * 2 + 8px);
+          max-height: calc(400px * 2 + 12px);
+          min-height: calc(400px * 2 + 12px);
           overflow: hidden;
         "
       >
