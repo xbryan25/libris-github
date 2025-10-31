@@ -13,7 +13,7 @@ class BookQueries:
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
-        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
         "AND ("
         "    %s = '%%' "
         "    OR EXISTS ("
@@ -41,7 +41,7 @@ class BookQueries:
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
-        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
         "AND ("
         "    %s = '%%' "
         "    OR EXISTS ("
@@ -68,7 +68,7 @@ class BookQueries:
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
-        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
     )
 
     GET_BOOK_COUNT_FOR_BOOK_LIST = (
@@ -84,7 +84,7 @@ class BookQueries:
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
-        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
     )
 
     GET_BOOK_DETAILS = """
