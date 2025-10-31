@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user_id = ref<string | null>(null)
   const username = ref<string | null>(null)
   const isAuthenticated = ref(false)
   const accessTokenExpiresAt = ref<number | null>(null)
@@ -10,10 +9,15 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (email: string, password: string): Promise<{messageTitle: string, message: string}> => {
     const response = await useUserLogin(email, password)
 
-    user_id.value = response.user_id
     username.value = response.username
     isAuthenticated.value = true
     accessTokenExpiresAt.value = response.accessTokenExpiresAt
+
+    return {messageTitle: response.messageTitle, message: response.message}
+  }
+
+  const signup = async (username: string, email: string, password: string): Promise<{messageTitle: string, message: string}> => {
+    const response = await useUserSignup(username, email, password)
 
     return {messageTitle: response.messageTitle, message: response.message}
   }
@@ -27,5 +31,5 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { user_id, username, isAuthenticated, accessTokenExpiresAt, login, logout }
+  return { username, isAuthenticated, accessTokenExpiresAt, login, signup, logout }
 })

@@ -45,6 +45,43 @@ def user_login() -> tuple[Response, int]:
     return UserControllers.user_login_controller()
 
 
+@users_bp.route("/signup", methods=["POST"])
+def user_signup() -> tuple[Response, int]:
+    """
+    Register a new user account.
+
+    This endpoint expects a JSON body containing 'username', 'emailAddress', and 'password'.
+    If registration is successful, the server creates a new user account and initializes
+    a readit wallet with a balance of 0.
+
+    Request body:
+
+        username: The desired username for the new account.
+
+        emailAddress: The email address of the user.
+
+        password: The password for the new account.
+
+    Response JSON:
+
+        messageTitle: A short success message.
+
+        message: A friendly message for the user.
+
+    Possible errors:
+
+        400 if the email already exists or validation fails.
+
+        500 if an unexpected error occurs during processing.
+
+    Additional notes:
+
+        User wallet is initialized with balance 0.
+    """
+
+    return UserControllers.user_signup_controller()
+
+
 @users_bp.route("/logout", methods=["POST"])
 def user_logout() -> tuple[Response, int]:
     """
@@ -127,163 +164,3 @@ def refresh_access_token() -> tuple[Response, int]:
     """
 
     return UserControllers.refresh_access_token_controller()
-
-
-@users_bp.route("/profile/me", methods=["GET"])
-@jwt_required()
-def get_profile_info() -> tuple[Response, int]:
-    """
-    Retrieve the profile information of the currently authenticated user.
-
-    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
-    It returns the user's profile details such as name, date of birth, and contact information.
-
-    Request body:
-
-        None. This endpoint does not require any input data.
-
-    Response JSON:
-
-        A dictionary containing the user's profile information:
-            - username
-            - accountActivatedAt
-            - firstName
-            - middleName
-            - lastName
-            - dateOfBirth
-            - phoneNumber
-            - address (which includes country, city, barangay, street, postalCode)
-
-    Possible errors:
-
-        401 if the user is not authenticated or the token is missing/invalid.
-
-        500 if an unexpected error occurs during processing.
-    """
-
-    return UserControllers.get_profile_info_controller()
-
-
-@users_bp.route("/profile/<user_id>", methods=["GET"])
-@jwt_required()
-def get_user_profile_info(user_id: str) -> tuple[Response, int]:
-    """
-    Retrieve the profile information of a user by their user ID.
-
-    It returns the user's profile details such as name, date of birth, and contact information.
-
-    Request parameters:
-
-        user_id (str): The unique identifier of the user whose profile information is to be retrieved.
-
-    Response JSON:
-
-        A dictionary containing the user's profile information:
-            - username
-            - accountActivatedAt
-            - firstName
-            - middleName
-            - lastName
-            - dateOfBirth
-            - phoneNumber
-            - address (which includes country, city, barangay, street, postalCode)
-
-    Possible errors:
-
-        404 if no user is found with the provided user ID.
-
-        500 if an unexpected error occurs during processing.
-    """
-
-    return UserControllers.get_other_user_profile_controller(user_id)
-
-
-@users_bp.route("/trust-score-percentile", methods=["GET"])
-@jwt_required()
-def get_trust_score_percentile() -> tuple[Response, int]:
-    """
-    Retrieve trust score percentile for the authenticated user.
-
-    Returns JSON:
-        - user_id: ID of the authenticated user
-        - trust_score_percentile: User's trust score percentile among all users
-        - is_above_average: True if percentile > 50, else False
-
-    Possible errors:
-        401 if not authenticated
-        404 if statistics not available
-        500 for unexpected errors
-    """
-    return UserControllers.get_trust_score_comparison_controller()
-
-
-@users_bp.route("/trust-score-percentile/<string:user_id>", methods=["GET"])
-@jwt_required()
-def get_other_user_trust_score_percentile(user_id: str) -> tuple[Response, int]:
-    """
-    Retrieve trust score percentile for another user by ID.
-
-    Args:
-        user_id (str): ID of the user to query
-
-    Returns JSON:
-        - user_id: ID of the specified user
-        - trust_score_percentile: User's trust score percentile among all users
-        - is_above_average: True if percentile > 50, else False
-
-    Possible errors:
-        401 if not authenticated
-        404 if statistics not available
-        500 for unexpected errors
-    """
-    return UserControllers.get_other_user_trust_score_comparison_controller(user_id)
-
-
-@users_bp.route("/profile/me", methods=["PUT"])
-@jwt_required()
-def update_user_profile() -> tuple[Response, int]:
-    """
-    Update the authenticated user's profile information.
-
-    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
-    It allows updating personal information and address details.
-
-    Request body:
-
-        A JSON object containing the fields to update:
-            - first_name (optional): User's first name
-            - middle_name (optional): User's middle name
-            - last_name (optional): User's last name
-            - date_of_birth (optional): User's date of birth
-            - phone_number (optional): User's phone number
-            - address (optional): Object containing address fields:
-                - country (optional): User's country
-                - city (optional): User's city
-                - barangay (optional): User's barangay
-                - street (optional): User's street
-                - postal_code (optional): User's postal code
-
-    Response JSON:
-
-        message: Success or error message
-
-    Possible errors:
-
-        401 if the user is not authenticated or the token is missing/invalid.
-
-        400 if no data is provided.
-
-        500 if an unexpected error occurs during processing.
-    """
-
-    return UserControllers.update_user_profile_controller()
-
-
-@users_bp.route("/profile/me", methods=["PATCH"])
-@jwt_required()
-def patch_user_profile() -> tuple[Response, int]:
-    """
-    Partially update authenticated user's profile. Only fields provided in the
-    JSON body will be updated; other fields remain unchanged.
-    """
-    return UserControllers.patch_user_profile_controller()

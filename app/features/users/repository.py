@@ -1,6 +1,8 @@
 from app.db.queries.common import CommonQueries
-from app.db.queries.user_queries import UserQueries
+
 from flask import current_app
+
+from werkzeug.security import generate_password_hash
 
 
 class UserRepository:
@@ -49,146 +51,42 @@ class UserRepository:
         )
 
     @staticmethod
-    def get_profile_info(user_id: str) -> dict[str, str] | None:
+    def create_user(username: str, email_address: str, password: str) -> str:
         """
-        Retrieve the profile information of a user by their user_id.
+        Create a new user in the database.
 
         Args:
-            user_id (str): The unique ID of the user.
+            username (str): The username for the new user.
+            email_address (str): The email address for the new user.
+            password (str): The plain text password (will be hashed).
 
         Returns:
-            dict: A dictionary containing the user's profile information (None if no matching user).
+            str: The user_id of the newly created user.
         """
 
         db = current_app.extensions["db"]
 
-        return db.fetch_one(
-            UserQueries.GET_PROFILE_INFO,
-            (user_id,),
+        hashed_password = generate_password_hash(password)
+
+        result = db.fetch_one(
+            "INSERT INTO users (username, email_address, password) VALUES (%s, %s, %s) RETURNING user_id",
+            (username, email_address, hashed_password),
         )
 
-    @staticmethod
-    def get_trust_score_percentile(user_id: str) -> dict[str, float] | None:
-        """
-        Retrieve the trust score percentile for a specific user.
-
-        Args:
-            user_id (str): The UUID of the user.
-
-        Returns:
-            dict: A dictionary containing trust_score_percentile (None if no data).
-        """
-        db = current_app.extensions["db"]
-
-        stats = db.fetch_one(
-            UserQueries.GET_TRUST_SCORE_PERCENTILE,
-            (user_id,),
-        )
-
-        if not stats or "trust_score_percentile" not in stats:
-            return None
-
-        stats["trust_score_percentile"] = float(stats["trust_score_percentile"])
-
-        return stats
+        return str(result["user_id"])
 
     @staticmethod
-    def update_user_profile(user_id: str, profile_data: dict) -> bool:
+    def initialize_wallet(user_id: str) -> None:
         """
-        Update user profile information.
+        Initialize a wallet for a new user with balance of 0.
 
         Args:
-            user_id (str): The unique ID of the user.
-            profile_data (dict): Dictionary containing profile fields to update.
-
-        Returns:
-            bool: True if update was successful, False otherwise.
+            user_id (str): The user_id of the user to initialize wallet for.
         """
 
         db = current_app.extensions["db"]
 
-        try:
-            db.execute_query(
-                UserQueries.UPDATE_USER_PROFILE,
-                (
-                    profile_data.get("first_name"),
-                    profile_data.get("middle_name"),
-                    profile_data.get("last_name"),
-                    profile_data.get("date_of_birth"),
-                    profile_data.get("phone_number"),
-                    profile_data.get("profile_image_url"),
-                    user_id,
-                ),
-            )
-            return True
-        except Exception:
-            return False
-
-    @staticmethod
-    def update_user_address(user_id: str, address_data: dict) -> bool:
-        """
-        Update user address information.
-
-        Args:
-            user_id (str): The unique ID of the user.
-            address_data (dict): Dictionary containing address fields to update.
-
-        Returns:
-            bool: True if update was successful, False otherwise.
-        """
-
-        db = current_app.extensions["db"]
-
-        try:
-            db.execute_query(
-                UserQueries.UPDATE_USER_ADDRESS,
-                (
-                    address_data.get("country"),
-                    address_data.get("city"),
-                    address_data.get("barangay"),
-                    address_data.get("street"),
-                    address_data.get("postal_code"),
-                    user_id,
-                ),
-            )
-            return True
-        except Exception:
-            return False
-
-    @staticmethod
-    def get_user_address(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the address information of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's address information (None if no matching user).
-        """
-
-        db = current_app.extensions["db"]
-
-        return db.fetch_one(
-            UserQueries.GET_USER_ADDRESS,
-            (user_id,),
-        )
-
-    @staticmethod
-    def get_user_profile(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the profile information of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's profile information (None if no matching user).
-        """
-
-        db = current_app.extensions["db"]
-
-        return db.fetch_one(
-            UserQueries.GET_USER_PROFILE,
-            (user_id,),
+        db.execute(
+            "INSERT INTO wallets (user_id, balance) VALUES (%s, %s)",
+            (user_id, 0),
         )
