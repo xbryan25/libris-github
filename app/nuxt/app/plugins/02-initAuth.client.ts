@@ -4,7 +4,7 @@ export default defineNuxtPlugin(async () => {
   const auth = useAuthStore()
 
   try {
-    const response = await useCurrentUser('client')
+    const response = await useCurrentUser()
     auth.username = response.username
     auth.isAuthenticated = true
   } catch {
