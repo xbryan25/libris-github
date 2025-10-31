@@ -1,0 +1,1 @@
+import{e as t,c as s,o as a,a as n}from"#entry";const o={class:"flex items-center justify-center w-full"},f=t({__name:"rentals",setup(r){return(l,e)=>(a(),s("div",o,[...e[0]||(e[0]=[n("h1",{class:"text-5xl font-bold text-primary"},"Rentals Page",-1)])]))}});export{f as default};
