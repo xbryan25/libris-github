@@ -11,10 +11,6 @@ export default defineNuxtConfig({
       },
   },
 
-  image: {
-    dir: 'public/images'
-  },
-
   compatibilityDate: '2025-07-15',
   components: [
     {
