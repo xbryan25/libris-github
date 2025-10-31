@@ -11,14 +11,16 @@ const route = useRoute();
 // Determine which page we're coming from
 const bookLink = computed(() => {
   let from = 'browse'; // default
+  let query = `from=${from}`;
 
   if (route.path.includes('/collection')) {
-    // If we're on a user's collection page, use the book owner's username
-    const username = props.bookDetails?.ownerUsername;
     from = 'user-collection';
+    // Extract the user ID from the current route
+    const userId = route.params.id;
+    query = `from=${from}&collectionOwnerId=${userId}`;
   }
 
-  return `/books/${props.bookDetails?.bookId}?from=${from}`;
+  return `/books/${props.bookDetails?.bookId}?${query}`;
 });
 
 console.log(props.bookDetails);
