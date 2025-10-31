@@ -106,7 +106,19 @@ class BookQueries:
                 ARRAY_AGG(DISTINCT bg.book_genre_name) FILTER (WHERE bg.book_genre_name IS NOT NULL),
                 ARRAY['General']::text[]
             ) AS genres,
-            COUNT(DISTINCT CASE WHEN rb.rent_status = 'completed' THEN rb.rental_id END) AS times_rented
+            COUNT(DISTINCT CASE WHEN rb.rent_status = 'completed' THEN rb.rental_id END) AS times_rented,
+            -- Check if book is currently rented (ongoing status)
+            EXISTS(
+                SELECT 1 FROM rented_books rb2
+                WHERE rb2.book_id = b.book_id
+                AND rb2.rent_status = 'ongoing'
+            ) AS is_rented,
+            -- Check if book has been purchased (completed status)
+            EXISTS(
+                SELECT 1 FROM purchased_books pb
+                WHERE pb.book_id = b.book_id
+                AND pb.purchase_status = 'completed'
+            ) AS is_purchased
         FROM books b
         JOIN users u ON b.owner_id = u.user_id
         LEFT JOIN book_genre_links bgl ON b.book_id = bgl.book_id
