@@ -16,6 +16,11 @@ const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBa
 
 const currentImageIndex = ref(0);
 
+const isBookUnavailable = computed(() => {
+  if (!book.value) return false;
+  return book.value.is_rented || book.value.is_purchased;
+});
+
 // Fetch book details on mount
 onMounted(async () => {
   try {
@@ -78,6 +83,25 @@ const getBadgeColorClasses = (color: string) => {
         <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-accent" />
         <p class="text-muted mt-2">Loading book details...</p>
       </div>
+    </div>
+
+    <!-- Book Unavailable State -->
+    <div v-else-if="isBookUnavailable" class="flex items-center justify-center h-screen">
+      <UCard class="bg-surface border-base max-w-md">
+        <div class="text-center p-6">
+          <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 class="text-2xl font-bold text-base mb-2">Book Currently Unavailable</h2>
+          <p class="text-muted mb-4">
+            This book is {{ book?.is_rented ? 'currently rented' : 'purchased' }} and cannot be viewed at this time.
+          </p>
+          <button
+            @click="goBack"
+            class="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition cursor-pointer"
+          >
+            Go Back
+          </button>
+        </div>
+      </UCard>
     </div>
 
     <!-- Main Content -->
