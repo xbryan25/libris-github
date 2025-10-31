@@ -166,7 +166,9 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_other_user_profile_controller(user_id: str):
+    def get_other_user_profile_controller(user_id: str) -> tuple[Response, int]:
+        "Retrieve the full profile (personal + address) of another user by user_id."
+
         try:
             try:
                 uuid.UUID(user_id)
