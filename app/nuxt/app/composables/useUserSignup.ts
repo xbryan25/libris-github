@@ -1,7 +1,7 @@
 export const useUserSignup = async (username: string, emailAddress: string, password: string) => {
-  const config = useRuntimeConfig()
+  const apiURL = import.meta.env.VITE_API_URL;
   
-  const response = await $fetch(`${config.public.apiBaseUrl}/users/signup`, {
+  return $fetch(`${apiURL}/api/users/signup`, {
     method: 'POST',
     credentials: 'include',
     body: {
@@ -11,5 +11,4 @@ export const useUserSignup = async (username: string, emailAddress: string, pass
     },
   })
 
-  return response
 }

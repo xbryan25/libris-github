@@ -69,7 +69,7 @@ class UserRepository:
         hashed_password = generate_password_hash(password)
 
         result = db.fetch_one(
-            "INSERT INTO users (username, email_address, password) VALUES (%s, %s, %s) RETURNING user_id",
+            "INSERT INTO users (username, email_address, password_hash, trust_score) VALUES (%s, %s, %s, 0) RETURNING user_id",
             (username, email_address, hashed_password),
         )
 
@@ -86,7 +86,7 @@ class UserRepository:
 
         db = current_app.extensions["db"]
 
-        db.execute(
-            "INSERT INTO wallets (user_id, balance) VALUES (%s, %s)",
+        db.execute_query(
+            "INSERT INTO readits_wallets (user_id, balance) VALUES (%s, %s)",
             (user_id, 0),
         )
