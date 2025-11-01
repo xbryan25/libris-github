@@ -11,6 +11,8 @@ from flask_jwt_extended import (
 
 import traceback
 
+import uuid
+
 from .services import UserServices
 
 from app.utils.camel_case_converter import dict_keys_to_camel
@@ -168,6 +170,11 @@ class UserControllers:
         "Retrieve the full profile (personal + address) of another user by user_id."
 
         try:
+            try:
+                uuid.UUID(user_id)
+            except ValueError:
+                return jsonify({"message": "Invalid user ID format."}), 400
+
             profile_info = UserServices.get_profile_info_service(user_id)
 
             if profile_info is None:
