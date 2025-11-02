@@ -125,7 +125,7 @@ const props = defineProps<{
           />
 
           <div class="flex gap-2 pt-2">
-            <UButton class="flex-1 justify-center cursor-pointer">
+            <UButton class="flex-1 justify-center cursor-pointer" @click="openEditModal = true">
               <Icon name="material-symbols:edit" class="w-5 h-5 text-bg" />
               <p>Edit</p>
             </UButton>

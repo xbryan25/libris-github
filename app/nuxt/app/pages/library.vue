@@ -10,6 +10,14 @@ const headerState = reactive({
   selectedBookGenre: 'All Genres',
   selectedBookAvailability: 'All',
 });
+
+
+const isOpenAddEditBookModal = ref(false);
+
+const openAddEditBookModal = () => {
+  isOpenAddEditBookModal.value = true;
+};
+
 </script>
 
 <template>
@@ -25,7 +33,7 @@ const headerState = reactive({
       </div>
 
       <div class="flex-1 flex justify-end pt-5">
-        <UButton class="w-40 justify-center cursor-pointer">
+        <UButton class="w-40 justify-center cursor-pointer" @click="openAddEditBookModal">
           <Icon name="material-symbols:add" class="w-8 h-8 text-bg" />
           <p class="font-bold text-xl">Add Book</p>
         </UButton>
@@ -46,5 +54,12 @@ const headerState = reactive({
     />
 
     <MyLibraryBookList :header-state="headerState" />
+
+    <AddEditBookModal
+      :is-open-add-edit-book-modal="isOpenAddEditBookModal"
+      @update:open-add-edit-book-modal="
+        (newIsOpenAddEditBookModal) => (isOpenAddEditBookModal = newIsOpenAddEditBookModal)
+      "
+    />
   </div>
 </template>
