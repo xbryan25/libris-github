@@ -1,4 +1,4 @@
-import type { Book } from "~/types"
+import type { MyLibraryBook } from "~/types"
 
 export function useBooksForMyLibrary(options?: {
                                 booksPerPage?: number, 
@@ -10,7 +10,7 @@ export function useBooksForMyLibrary(options?: {
 
   const { $apiFetch } = useNuxtApp();                            
 
-  return $apiFetch<Book[]>(`/api/books/my-library-books`, {
+  return $apiFetch<MyLibraryBook[]>(`/api/books/my-library-books`, {
     method: 'GET',
     credentials: 'include',
     query: {

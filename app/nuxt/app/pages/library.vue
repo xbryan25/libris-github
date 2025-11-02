@@ -34,13 +34,13 @@ const headerState = reactive({
 
     <BookListHeader
       :header-state="headerState"
-      @update:search-value="(newSearchValue) => (headerState.searchValue = newSearchValue)"
+      @update:search-value="(newSearchValue: string) => (headerState.searchValue = newSearchValue)"
       @update:selected-book-genre="
-        (newSelectedBookAvailability) =>
+        (newSelectedBookAvailability: string) =>
           (headerState.selectedBookGenre = newSelectedBookAvailability)
       "
       @update:selected-book-availability="
-        (newSelectedBookAvailability) =>
+        (newSelectedBookAvailability: string) =>
           (headerState.selectedBookAvailability = newSelectedBookAvailability)
       "
     />

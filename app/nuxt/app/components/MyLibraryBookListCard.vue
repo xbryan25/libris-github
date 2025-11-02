@@ -6,7 +6,7 @@ const props = defineProps<{
   bookDetails?: MyLibraryBook | null;
 }>();
 
-console.log(props.bookDetails?.rentStatus);
+
 </script>
 
 <template>

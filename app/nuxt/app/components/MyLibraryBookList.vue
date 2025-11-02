@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Book } from '~/types';
+import type { MyLibraryBook } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
   userId?: string;
 }>();
 
-const booksData = ref<Book[]>([]);
+const booksData = ref<MyLibraryBook[]>([]);
 
 const gridContainer = ref<HTMLElement | null>(null);
 
@@ -116,6 +116,18 @@ const handleResize = useDebounceFn(async () => {
   }
 }, 400);
 
+const debouncedHandler = useDebounceFn(async () => {
+  isFetching.value = true;
+  try {
+    await debouncedLoadBooks();
+    await debouncedLoadBookCount();
+  } catch (err) {
+    console.error('Error loading books:', err);
+  } finally {
+    isFetching.value = false;
+  }
+}, 500);
+
 watch(
   () => pageNumber.value,
   async () => {
@@ -146,6 +158,7 @@ watch(
       isFetching.value = false;
     }
   },
+  () => debouncedHandler()
   { deep: true },
 );
 
