@@ -15,5 +15,5 @@ class CommonQueries:
     DELETE_BY_ID = "DELETE FROM {table} WHERE {pk} = %s"
     GET_COLUMNS_FROM_TABLE = "SELECT {columns} FROM {table} ORDER BY {order_column} ASC"
     GET_BY_SPECIFIC_COLUMN = "SELECT * FROM {table} WHERE {column} = %s"
-    GET_COLUMN_BY_PK = "SELECT {column} FROM {table} WHERE {pk} = %s"
+    GET_COLUMN_BY_FIELD = "SELECT {column} FROM {table} WHERE {field} = %s"
     CHECK_IF_EXISTS = "SELECT EXISTS (SELECT 1 FROM {table} WHERE {column} = %s)"

@@ -30,3 +30,26 @@ class UserQueries:
         "SELECT first_name, middle_name, last_name, date_of_birth, phone_number, profile_image_url "
         "FROM users WHERE user_id = %s"
     )
+    GET_LIBRARY_DETAILS = """
+            SELECT
+                (
+                    SELECT COUNT(*)
+                    FROM books AS b
+                    LEFT JOIN purchased_books AS p ON b.book_id = p.book_id
+                    WHERE b.owner_id = %s
+                    AND (p.purchase_status IS NULL OR p.purchase_status != 'completed')
+                ) AS books_owned,
+
+                (
+                    SELECT COUNT(*)
+                    FROM rented_books AS r
+                    WHERE r.user_id = %s
+                ) AS books_rented,
+
+                (
+                    SELECT COUNT(*)
+                    FROM purchased_books AS p2
+                    WHERE p2.user_id = %s
+                    AND p2.purchase_status = 'completed'
+                ) AS books_bought
+        """

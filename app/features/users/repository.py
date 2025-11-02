@@ -1,4 +1,5 @@
 from app.db.queries.common import CommonQueries
+from app.db.queries.user_queries import UserQueries
 
 from flask import current_app
 
@@ -44,8 +45,8 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         return db.fetch_one(
-            CommonQueries.GET_COLUMN_BY_PK.format(
-                column="username", table="users", pk="user_id"
+            CommonQueries.GET_COLUMN_BY_FIELD.format(
+                column="username", table="users", field="user_id"
             ),
             (user_id,),
         )
@@ -89,4 +90,173 @@ class UserRepository:
         db.execute_query(
             "INSERT INTO readits_wallets (user_id, balance) VALUES (%s, %s)",
             (user_id, 0),
+        )
+
+    @staticmethod
+    def get_profile_info(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the profile information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's profile information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_PROFILE_INFO,
+            (user_id,),
+        )
+
+    @staticmethod
+    def get_trust_score_percentile(user_id: str) -> dict[str, float] | None:
+        """
+        Retrieve the trust score percentile for a specific user.
+
+        Args:
+            user_id (str): The UUID of the user.
+
+        Returns:
+            dict: A dictionary containing trust_score_percentile (None if no data).
+        """
+        db = current_app.extensions["db"]
+
+        stats = db.fetch_one(
+            UserQueries.GET_TRUST_SCORE_PERCENTILE,
+            (user_id,),
+        )
+
+        if not stats or "trust_score_percentile" not in stats:
+            return None
+
+        stats["trust_score_percentile"] = float(stats["trust_score_percentile"])
+
+        return stats
+
+    @staticmethod
+    def update_user_profile(user_id: str, profile_data: dict) -> bool:
+        """
+        Update user profile information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            profile_data (dict): Dictionary containing profile fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        db = current_app.extensions["db"]
+
+        try:
+            db.execute_query(
+                UserQueries.UPDATE_USER_PROFILE,
+                (
+                    profile_data.get("first_name"),
+                    profile_data.get("middle_name"),
+                    profile_data.get("last_name"),
+                    profile_data.get("date_of_birth"),
+                    profile_data.get("phone_number"),
+                    profile_data.get("profile_image_url"),
+                    user_id,
+                ),
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def update_user_address(user_id: str, address_data: dict) -> bool:
+        """
+        Update user address information.
+
+        Args:
+            user_id (str): The unique ID of the user.
+            address_data (dict): Dictionary containing address fields to update.
+
+        Returns:
+            bool: True if update was successful, False otherwise.
+        """
+
+        db = current_app.extensions["db"]
+
+        try:
+            db.execute_query(
+                UserQueries.UPDATE_USER_ADDRESS,
+                (
+                    address_data.get("country"),
+                    address_data.get("city"),
+                    address_data.get("barangay"),
+                    address_data.get("street"),
+                    address_data.get("postal_code"),
+                    user_id,
+                ),
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def get_user_address(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the address information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's address information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_USER_ADDRESS,
+            (user_id,),
+        )
+
+    @staticmethod
+    def get_user_profile(user_id: str) -> dict[str, str] | None:
+        """
+        Retrieve the profile information of a user by their user_id.
+
+        Args:
+            user_id (str): The unique ID of the user.
+
+        Returns:
+            dict: A dictionary containing the user's profile information (None if no matching user).
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_USER_PROFILE,
+            (user_id,),
+        )
+
+    @staticmethod
+    def get_library_details(user_id: str) -> dict[str, int] | None:
+        """
+        Retrieve the number of owned, rented, and bought books for a specific user.
+
+        Args:
+            user_id (str): The unique identifier of the user.
+
+        Returns:
+            dict: A dictionary containing the total number of books the user owns, has rented, and has bought, in the format:
+                {
+                    "owned_books": int,
+                    "rented_books": int,
+                    "bought_books": int
+                }
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            UserQueries.GET_LIBRARY_DETAILS,
+            (user_id, user_id, user_id),
         )

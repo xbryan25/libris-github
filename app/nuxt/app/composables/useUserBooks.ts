@@ -18,9 +18,9 @@ type BooksData = {
   'bought-by-others': Book[]
 }
 
-const API_URL = import.meta.env.VITE_API_URL
-
 export const useBooks = () => {
+  const { $apiFetch } = useNuxtApp();   
+
   const booksData = ref<BooksData>({
     renting: [],
     bought: [],
@@ -35,7 +35,7 @@ export const useBooks = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<BooksData>(`${API_URL}/api/books/my-books`, {
+      const res = await $apiFetch<BooksData>(`/api/books/my-books`, {
         credentials: 'include'
       })
       booksData.value = res
@@ -50,7 +50,7 @@ export const useBooks = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<{ renting: Book[] }>(`${API_URL}/api/books/my-books/renting`, {
+      const res = await $apiFetch<{ renting: Book[] }>(`/api/books/my-books/renting`, {
         credentials: 'include'
       })
       booksData.value.renting = res.renting
@@ -65,7 +65,7 @@ export const useBooks = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<{ bought: Book[] }>(`${API_URL}/api/books/my-books/bought`, {
+      const res = await $apiFetch<{ bought: Book[] }>(`/api/books/my-books/bought`, {
         credentials: 'include'
       })
       booksData.value.bought = res.bought
@@ -80,7 +80,7 @@ export const useBooks = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<{ 'rented-by-others': Book[] }>(`${API_URL}/api/books/my-books/lent`, {
+      const res = await $apiFetch<{ 'rented-by-others': Book[] }>(`/api/books/my-books/lent`, {
         credentials: 'include'
       })
       booksData.value['rented-by-others'] = res['rented-by-others']
@@ -95,7 +95,7 @@ export const useBooks = () => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<{ 'bought-by-others': Book[] }>(`${API_URL}/api/books/my-books/sold`, {
+      const res = await $apiFetch<{ 'bought-by-others': Book[] }>(`/api/books/my-books/sold`, {
         credentials: 'include'
       })
       booksData.value['bought-by-others'] = res['bought-by-others']

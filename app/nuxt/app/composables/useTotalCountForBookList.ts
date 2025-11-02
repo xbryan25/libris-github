@@ -1,14 +1,13 @@
 
-
 export function useTotalBookCountForBookList(options?: {
                                 searchValue?: string, 
                                 bookGenre?: string,
                                 bookAvailability: string,
                             }){
 
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const { $apiFetch } = useNuxtApp();   
 
-  return $fetch<{totalCount: number}>(`${apiUrl}/api/books/book-list-books-count`, {
+  return $apiFetch<{totalCount: number}>(`/api/books/book-list-books-count`, {
     method: 'GET',
     credentials: 'include',
     query: {

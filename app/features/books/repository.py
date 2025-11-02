@@ -6,18 +6,25 @@ from typing import Any, Optional
 
 class BookRepository:
     @staticmethod
-    def get_books_for_book_list(user_id, params) -> list[dict[str, str]]:
+    def get_books_for_book_list(
+        params, get_books_from_a_specific_user
+    ) -> list[dict[str, str]]:
         """
         Retrieve a paginated list of books based on search, genre, and availability filters.
 
         Args:
-            user_id (str): user_id of the user to prevent getting books that the current user owns.
-            params (dict): A dictionary of query parameters. Expected keys include:
-                - "books_per_page" (str): The number of book details to retrieve.
-                - "page_number" (str): This number will be multiplied by books_per_page then serve as the offset for pagination.
-                - "search_value" (str): The value to search for.
-                - "genre" (str): The genre or category of books to filter by.
-                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+            params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
+                Expected keys include:
+                    - "books_per_page" (str): The number of book details to retrieve.
+                    - "page_number" (str): This number will be multiplied by books_per_page then serve as the
+                                            offset for pagination.
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
+                                        other user, get all books that that user owns
+            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
+                                                        or only from a specific user
 
         Returns:
             list[dict]: A list of book records matching the given filters, where each record is represented as a dictionary.
@@ -39,32 +46,56 @@ class BookRepository:
             "%%" if params["availability"] == "all" else f"{params['availability']}"
         )
 
-        # Randomized
-        return db.fetch_all(
-            BookQueries.GET_BOOKS_FOR_BOOK_LIST.format(
-                search_by="title", sort_field="RANDOM()", sort_order="ASC"
-            ),
-            (
-                search_pattern,
-                genre,
-                availability,
-                user_id,
-                params["books_per_page"],
-                offset,
-            ),
-        )
+        # Both fetches are randomized
+
+        if get_books_from_a_specific_user:
+            return db.fetch_all(
+                BookQueries.GET_BOOKS_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER.format(
+                    search_by="title", sort_field="RANDOM()", sort_order="ASC"
+                ),
+                (
+                    search_pattern,
+                    availability,
+                    params["user_id"],
+                    genre,
+                    genre,
+                    params["books_per_page"],
+                    offset,
+                ),
+            )
+
+        else:
+            return db.fetch_all(
+                BookQueries.GET_BOOKS_FOR_BOOK_LIST.format(
+                    search_by="title", sort_field="RANDOM()", sort_order="ASC"
+                ),
+                (
+                    search_pattern,
+                    availability,
+                    params["user_id"],
+                    genre,
+                    genre,
+                    params["books_per_page"],
+                    offset,
+                ),
+            )
 
     @staticmethod
-    def get_total_book_count(user_id, params) -> dict[str, int]:
+    def get_total_book_count(
+        params, get_book_count_from_a_specific_user
+    ) -> dict[str, int]:
         """
         Retrieve the total number of books based on search, genre, and availability filters.
 
         Args:
-            user_id (str): user_id of the user to prevent getting books that the current user owns.
             params (dict): A dictionary of query parameters. Expected keys include:
                 - "search_value" (str): The value to search for.
                 - "genre" (str): The genre or category of books to filter by.
                 - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from other
+                                    user, count all books that that user owns
+            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be from
+                                                        everyone or only from a specific user
 
         Returns:
              dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
@@ -80,15 +111,29 @@ class BookRepository:
             "%%" if params["availability"] == "all" else f"{params['availability']}"
         )
 
-        return db.fetch_one(
-            BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(search_by="title"),
-            (
-                search_pattern,
-                genre,
-                availability,
-                user_id,
-            ),
-        )
+        if get_book_count_from_a_specific_user:
+            return db.fetch_one(
+                BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER.format(
+                    search_by="title"
+                ),
+                (
+                    search_pattern,
+                    genre,
+                    availability,
+                    params["user_id"],
+                ),
+            )
+
+        else:
+            return db.fetch_one(
+                BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(search_by="title"),
+                (
+                    search_pattern,
+                    genre,
+                    availability,
+                    params["user_id"],
+                ),
+            )
 
     @staticmethod
     def get_book_genres() -> list[dict[str, str]]:
@@ -131,10 +176,12 @@ class BookRepository:
                 - purchase_price (int): Price if the book is for sale
                 - owner_username (str): Username of the book's owner
                 - owner_trust_score (int): Trust score of the owner
+                - times_rented (int): Number of times the book is rented
+                - owner_user_id (str): The id of the book owner
         """
         db = current_app.extensions["db"]
 
-        params = tuple([book_id] * 11)
+        params = (book_id,)
 
         return db.fetch_one(BookQueries.GET_BOOK_DETAILS, params)
 
@@ -153,7 +200,7 @@ class BookRepository:
         """
         db = current_app.extensions["db"]
 
-        params = tuple([book_id] * 11)
+        params = (book_id,)
 
         return db.fetch_all(BookQueries.GET_BOOK_IMAGES, params)
 

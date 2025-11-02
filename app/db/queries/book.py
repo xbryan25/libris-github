@@ -1,6 +1,7 @@
 class BookQueries:
     GET_BOOKS_FOR_BOOK_LIST = (
-        "SELECT b.*, u.username AS owner_username, bi.image_url as first_image_url "
+        "SELECT DISTINCT ON (b.book_id) "
+        "b.*, u.username AS owner_username, bi.image_url AS first_image_url "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
@@ -9,17 +10,69 @@ class BookQueries:
         "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
         "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
         "WHERE b.{search_by} ILIKE %s "
-        "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
-        "ORDER BY {sort_field} {sort_order} "
+        "AND ("
+        "    %s = '%%' "
+        "    OR EXISTS ("
+        "        SELECT 1 FROM book_genre_links bgl2 "
+        "        JOIN book_genres bg2 ON bgl2.book_genre_id = bg2.book_genre_id "
+        "        WHERE bgl2.book_id = b.book_id "
+        "        AND bg2.book_genre_name ILIKE %s"
+        "    )"
+        ") "
+        "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
 
+    GET_BOOKS_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER = (
+        "SELECT DISTINCT ON (b.book_id) "
+        "b.*, u.username AS owner_username, bi.image_url AS first_image_url "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+        "AND ("
+        "    %s = '%%' "
+        "    OR EXISTS ("
+        "        SELECT 1 FROM book_genre_links bgl2 "
+        "        JOIN book_genres bg2 ON bgl2.book_genre_id = bg2.book_genre_id "
+        "        WHERE bgl2.book_id = b.book_id "
+        "        AND bg2.book_genre_name ILIKE %s"
+        "    )"
+        ") "
+        "ORDER BY b.book_id, {sort_field} {sort_order} "
+        "LIMIT %s OFFSET %s"
+    )
+
+    GET_BOOK_COUNT_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER = (
+        "SELECT COUNT(DISTINCT b.book_id) "
+        "FROM books AS b "
+        "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
+    )
+
     GET_BOOK_COUNT_FOR_BOOK_LIST = (
-        "SELECT COUNT(b.*) "
+        "SELECT COUNT(DISTINCT b.book_id) "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
@@ -36,22 +89,45 @@ class BookQueries:
 
     GET_BOOK_DETAILS = """
             SELECT
-                b.book_id,
-                b.title,
-                b.author,
-                b.genre,
-                b.condition,
-                b.description,
-                b.availability,
-                b.daily_rent_price,
-                b.security_deposit,
-                b.purchase_price,
-                u.username as owner_username,
-                u.trust_score as owner_trust_score
-            FROM books b
-            JOIN users u ON b.owner_id = u.user_id
-            WHERE b.book_id = %s
-            """
+            b.book_id,
+            b.title,
+            b.author,
+            b.condition,
+            b.description,
+            b.availability,
+            b.daily_rent_price,
+            b.security_deposit,
+            b.purchase_price,
+            u.user_id as owner_user_id,
+            u.username AS owner_username,
+            u.profile_image_url AS owner_profile_picture,
+            u.trust_score AS owner_trust_score,
+            COALESCE(
+                ARRAY_AGG(DISTINCT bg.book_genre_name) FILTER (WHERE bg.book_genre_name IS NOT NULL),
+                ARRAY['General']::text[]
+            ) AS genres,
+            COUNT(DISTINCT CASE WHEN rb.rent_status = 'completed' THEN rb.rental_id END) AS times_rented
+        FROM books b
+        JOIN users u ON b.owner_id = u.user_id
+        LEFT JOIN book_genre_links bgl ON b.book_id = bgl.book_id
+        LEFT JOIN book_genres bg ON bgl.book_genre_id = bg.book_genre_id
+        LEFT JOIN rented_books rb ON b.book_id = rb.book_id
+        WHERE b.book_id = %s
+        GROUP BY
+            b.book_id,
+            b.title,
+            b.author,
+            b.condition,
+            b.description,
+            b.availability,
+            b.daily_rent_price,
+            b.security_deposit,
+            b.purchase_price,
+            u.user_id,
+            u.username,
+            u.profile_image_url,
+            u.trust_score;
+        """
 
     GET_BOOK_IMAGES = """
         SELECT image_url, order_num

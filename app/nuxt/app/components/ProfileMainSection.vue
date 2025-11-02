@@ -193,7 +193,11 @@ onMounted(() => {
         <div class="flex items-center space-x-3">
           <div class="text-[40px] font-semibold text-base">{{ profile?.trust_score }}</div>
           <UBadge
-            :class="trustScoreBadge.color + ' text-white text-center px-3 py-1'"
+            :class="[
+              trustScoreBadge.color,
+              'text-white text-center px-3 py-1',
+              trustScoreBadge.text === 'Poor' ? 'border border-white' : ''
+            ]"
             variant="solid"
           >
             {{ trustScoreBadge.text }}
