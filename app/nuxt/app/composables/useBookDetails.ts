@@ -16,6 +16,8 @@ type BookDetails = {
   owner_profile_picture: string
   owner_trust_score: number
   times_rented: number
+  is_rented: boolean
+  is_purchased: boolean
   images: string[]
 }
 
