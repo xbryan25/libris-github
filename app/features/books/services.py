@@ -1,8 +1,8 @@
 from .repository import BookRepository
 
-from app.common.dataclasses import Book
+from app.common.dataclasses import Book, MyLibraryBook
 
-from app.utils.converters import convert_book_dict
+from app.utils.converters import convert_book_dict, convert_my_library_book_dict
 
 from typing import Any, Optional
 
@@ -85,6 +85,76 @@ class BookServices:
         return BookRepository.get_total_book_count(
             params, get_book_count_from_a_specific_user
         )["count"]
+
+    @staticmethod
+    def get_my_library_books_service(user_id, params) -> list[MyLibraryBook]:
+        """
+        Retrieve details of different books based on pagination, optional search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
+                Expected keys include:
+                    - "books_per_page" (str): The number of book details to retrieve.
+                    - "page_number" (str): This number will be multiplied by books_per_page then serve as the
+                                            offset for pagination.
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
+                                        other user, get all books that that user owns
+            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
+                                                        or only from a specific user
+
+        Returns:
+            list[MyLibraryBook]: A list of MyLibraryBook dataclass instances representing books_per_page books.
+        """
+
+        # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
+        if params["availability"] == "for rent":
+            params["availability"] = "rent"
+        elif params["availability"] == "for sale":
+            params["availability"] = "purchase"
+
+        my_library_books = BookRepository.get_my_library_books(user_id, params)
+
+        my_library_book_dataclasses = []
+
+        for my_library_book in my_library_books:
+            # Convert dict to dataclass before appending
+            my_library_book_dataclasses.append(
+                convert_my_library_book_dict(my_library_book)
+            )
+
+        print(my_library_book_dataclasses)
+        return my_library_book_dataclasses
+
+    @staticmethod
+    def get_total_my_library_book_count_service(user_id, params) -> int:
+        """
+        Retrieve the total count of books based on pagination, optional search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary containing the optional search, genre, and availability filters.
+                Expected keys include:
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from
+                                        other user, count all books that that user owns
+            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be
+                                                        from everyoneor only from a specific user
+
+        Returns:
+            int: The total book count, with search, genre, and availability filters being optionally applied.
+        """
+
+        # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
+        if params["availability"] == "for rent":
+            params["availability"] = "rent"
+        elif params["availability"] == "for sale":
+            params["availability"] = "purchase"
+
+        return BookRepository.get_total_my_library_book_count(user_id, params)["count"]
 
     @staticmethod
     def get_book_genres_service() -> list[str]:

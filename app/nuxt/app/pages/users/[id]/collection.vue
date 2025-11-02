@@ -63,6 +63,6 @@ onMounted(async () => {
           (headerState.selectedBookAvailability = newSelectedBookAvailability)
       "
     />
-    <BookList :header-state="headerState" :user-id="userId" />
+    <BookList book-list-variant="default" :header-state="headerState" :user-id="userId" />
   </div>
 </template>

@@ -136,6 +136,100 @@ class BookRepository:
             )
 
     @staticmethod
+    def get_my_library_books(user_id, params) -> list[dict[str, str]]:
+        """
+        Retrieve a paginated list of books based on search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
+                Expected keys include:
+                    - "books_per_page" (str): The number of book details to retrieve.
+                    - "page_number" (str): This number will be multiplied by books_per_page then serve as the
+                                            offset for pagination.
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
+                                        other user, get all books that that user owns
+            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
+                                                        or only from a specific user
+
+        Returns:
+            list[dict]: A list of book records matching the given filters, where each record is represented as a dictionary.
+        """
+
+        db = current_app.extensions["db"]
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["books_per_page"]
+        )
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        # Randomized
+        return db.fetch_all(
+            BookQueries.GET_MY_LIBRARY_BOOKS.format(
+                search_by="title", sort_field="RANDOM()", sort_order="ASC"
+            ),
+            (
+                search_pattern,
+                availability,
+                user_id,
+                genre,
+                genre,
+                params["books_per_page"],
+                offset,
+            ),
+        )
+
+    @staticmethod
+    def get_total_my_library_book_count(user_id, params) -> dict[str, int]:
+        """
+        Retrieve the total number of books based on search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary of query parameters. Expected keys include:
+                - "search_value" (str): The value to search for.
+                - "genre" (str): The genre or category of books to filter by.
+                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from other
+                                    user, count all books that that user owns
+            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be from
+                                                        everyone or only from a specific user
+
+        Returns:
+             dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
+        """
+
+        db = current_app.extensions["db"]
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        return db.fetch_one(
+            BookQueries.GET_MY_LIBRARY_BOOK_COUNT.format(search_by="title"),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+            ),
+        )
+
+    @staticmethod
     def get_book_genres() -> list[dict[str, str]]:
         """
         Retrieve a list of available genres.

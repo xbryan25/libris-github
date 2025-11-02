@@ -87,6 +87,49 @@ class BookQueries:
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
     )
 
+    GET_MY_LIBRARY_BOOKS = (
+        "SELECT DISTINCT ON (b.book_id) "
+        "b.*, rb.rent_status AS rent_status, rb.user_id AS renter_id, "
+        "   ru.username AS renter_username, ru.profile_image_url AS renter_profile_image_url, "
+        "   bi.image_url AS first_image_url "
+        "FROM books AS b "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "LEFT JOIN users AS ru ON rb.user_id = ru.user_id "
+        "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND ("
+        "    %s = '%%' "
+        "    OR EXISTS ("
+        "        SELECT 1 FROM book_genre_links bgl2 "
+        "        JOIN book_genres bg2 ON bgl2.book_genre_id = bg2.book_genre_id "
+        "        WHERE bgl2.book_id = b.book_id "
+        "        AND bg2.book_genre_name ILIKE %s"
+        "    )"
+        ") "
+        "ORDER BY b.book_id, {sort_field} {sort_order} "
+        "LIMIT %s OFFSET %s"
+    )
+
+    GET_MY_LIBRARY_BOOK_COUNT = (
+        "SELECT COUNT(DISTINCT b.book_id) "
+        "FROM books AS b "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+    )
+
     GET_BOOK_DETAILS = """
             SELECT
             b.book_id,
