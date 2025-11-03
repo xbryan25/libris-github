@@ -269,6 +269,23 @@ onMounted(async () => {
             />
           </UFormField>
 
+          <UFormField
+            v-if="state.availability === 'For Sale' || state.availability === 'Both'"
+            label="Purchase Price"
+            name="purchasePrice"
+            class="flex-1"
+          >
+            <UInput v-model="state.purchasePrice" placeholder="Add purchase price" class="w-full" />
+          </UFormField>
+
+          <div v-else class="flex-1" />
+        </div>
+
+        <div
+          v-if="state.availability === 'For Rent' || state.availability === 'Both'"
+          class="flex gap-4 w-full"
+        >
+
           <UFormField label="Daily Rent Price" name="dailyRentPrice" class="flex-1">
             <UInput
               v-model="state.dailyRentPrice"
@@ -276,19 +293,14 @@ onMounted(async () => {
               class="w-full"
             />
           </UFormField>
-        </div>
-
-        <div class="flex gap-4 w-full">
+          
+        
           <UFormField label="Security Deposit" name="securityDeposit" class="flex-1">
             <UInput
               v-model="state.securityDeposit"
               placeholder="Add security deposit"
               class="w-full"
             />
-          </UFormField>
-
-          <UFormField label="Purchase Price" name="purchasePrice" class="flex-1">
-            <UInput v-model="state.purchasePrice" placeholder="Add purchase price" class="w-full" />
           </UFormField>
         </div>
 
