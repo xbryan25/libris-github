@@ -9,8 +9,13 @@ definePageMeta({
 
 const toast = useToast();
 const auth = useAuthStore();
+const isLoading = ref(false);
 
 const onSubmitSignup = async (username: string, emailAddress: string, password: string) => {
+  if (isLoading.value) return;
+  
+  isLoading.value = true;
+  
   try {
     const { messageTitle, message } = await auth.signup(username, emailAddress, password);
     toast.add({
@@ -19,12 +24,22 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
       color: 'success',
     });
     navigateTo('/login');
-  } catch (error) {
+  } catch (error: any) {
+    let errorMessage = 'An unexpected error occurred.';
+    
+    if (error.data?.error) {
+      errorMessage = error.data.error;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     toast.add({
       title: 'Signup failed.',
-      description: error.data.error,
+      description: errorMessage,
       color: 'error',
     });
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
@@ -34,6 +49,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="signup"
+        :is-loading="isLoading"
         @on-submit-signup="(username, email, password) => onSubmitSignup(username, email, password)"
       />
     </div>

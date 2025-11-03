@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     const response = await useUserLogout()
-    
+   
     user_id.value = null
     username.value = null
     isAuthenticated.value = false
@@ -32,5 +32,5 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { user_id, username, isAuthenticated, login, logout }
+  return { user_id, username, isAuthenticated, login, signup, logout }
 })

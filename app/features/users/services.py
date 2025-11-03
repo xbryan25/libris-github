@@ -49,13 +49,18 @@ class UserServices:
             password (str): The password for the account.
 
         Returns:
-            dict: Success message if user created, None if email already exists.
+            dict: Success message if user created, error dict if email or username already exists.
         """
 
-        existing_user = UserRepository.get_user_by_email_address(email_address)
+        existing_user_by_email = UserRepository.get_user_by_email_address(email_address)
 
-        if existing_user:
-            return None
+        if existing_user_by_email:
+            return {"error": "Email address already exists.", "type": "email"}
+
+        existing_user_by_username = UserRepository.get_user_by_username(username)
+
+        if existing_user_by_username:
+            return {"error": "Username already exists.", "type": "username"}
 
         user_id = UserRepository.create_user(username, email_address, password)
 
@@ -120,12 +125,13 @@ class UserServices:
         Update user profile information while preserving existing values
         when only some fields are sent (e.g., only updating profile image).
         """
+
         try:
             existing_profile = UserRepository.get_user_profile(user_id)
+
             if not existing_profile:
                 return False
 
-            # Merge existing data with incoming data — only overwrite provided keys
             merged_data = existing_profile.copy()
             merged_data.update({k: v for k, v in profile_data.items() if v is not None})
 
@@ -161,6 +167,7 @@ class UserServices:
         Returns:
             dict: A dictionary containing trust_score_percentile (None if no data).
         """
+
         stats = UserRepository.get_trust_score_percentile(user_id)
 
         if not stats or stats.get("trust_score_percentile") is None:

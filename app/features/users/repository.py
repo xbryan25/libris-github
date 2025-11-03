@@ -1,8 +1,6 @@
 from app.db.queries.common import CommonQueries
 from app.db.queries.user_queries import UserQueries
-
 from flask import current_app
-
 from werkzeug.security import generate_password_hash
 
 
@@ -27,6 +25,27 @@ class UserRepository:
                 table="users", column="email_address"
             ),
             (email_address,),
+        )
+
+    @staticmethod
+    def get_user_by_username(username: str) -> dict[str, str] | None:
+        """
+        Retrieve a user record from the database by username.
+
+        Args:
+            username (str): The username of the user to retrieve.
+
+        Returns:
+            dict: A dictionary containing the user's details if found, otherwise None.
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.GET_BY_SPECIFIC_COLUMN.format(
+                table="users", column="username"
+            ),
+            (username,),
         )
 
     @staticmethod
@@ -122,6 +141,7 @@ class UserRepository:
         Returns:
             dict: A dictionary containing trust_score_percentile (None if no data).
         """
+
         db = current_app.extensions["db"]
 
         stats = db.fetch_one(
@@ -164,7 +184,9 @@ class UserRepository:
                     user_id,
                 ),
             )
+
             return True
+
         except Exception:
             return False
 
@@ -195,7 +217,9 @@ class UserRepository:
                     user_id,
                 ),
             )
+
             return True
+
         except Exception:
             return False
 

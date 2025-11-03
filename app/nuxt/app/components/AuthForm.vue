@@ -3,6 +3,7 @@ import type { FormSubmitEvent } from '@nuxt/ui';
 
 const props = defineProps<{
   authType: string;
+  isLoading?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +17,9 @@ const state = reactive({
   username: '',
   confirmPassword: '',
 });
+
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
   if (props.authType === 'login') {
@@ -44,22 +48,59 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
       @submit="(event) => onSubmit(event)"
     >
       <UFormField v-if="authType === 'signup'" label="Username" name="username">
-        <UInput v-model="state.username" class="w-90" />
+        <UInput v-model="state.username" class="w-100 pr-10" :disabled="isLoading" />
       </UFormField>
+
       <UFormField label="Email Address" name="emailAddress">
-        <UInput v-model="state.emailAddress" class="w-90" />
+        <UInput v-model="state.emailAddress" class="w-100 pr-10" :disabled="isLoading" />
       </UFormField>
+
       <UFormField label="Password" name="password">
-        <UInput v-model="state.password" type="password" class="w-90" />
+        <div class="relative">
+          <UInput 
+            v-model="state.password" 
+            :type="showPassword ? 'text' : 'password'" 
+            class="w-100 pr-10"
+            :disabled="isLoading"
+          />
+          <button
+            type="button"
+            @click="showPassword = !showPassword"
+            class="absolute right-23 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            :disabled="isLoading"
+          >
+            <Icon :name="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="w-5 h-5" />
+          </button>
+        </div>
       </UFormField>
       <UFormField v-if="authType === 'signup'" label="Confirm Password" name="confirmPassword">
-        <UInput v-model="state.confirmPassword" type="password" class="w-90" />
+        <div class="relative">
+          <UInput 
+            v-model="state.confirmPassword" 
+            :type="showConfirmPassword ? 'text' : 'password'" 
+            class="w-100 pr-10"
+            :disabled="isLoading"
+          />
+          <button
+            type="button"
+            @click="showConfirmPassword = !showConfirmPassword"
+            class="absolute right-23 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            :disabled="isLoading"
+          >
+            <Icon :name="showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'" class="w-5 h-5" />
+          </button>
+        </div>
       </UFormField>
       <p v-if="authType === 'login'" class="text-sm text-violet-700 dark:text-violet-500 cursor-pointer">
         Forgot your password?
       </p>
-      <UButton type="submit" class="w-90 h-9 cursor-pointer justify-center text-lg font-bold">
-        {{ authType === 'login' ? 'Login' : 'Sign Up' }}
+      <UButton 
+        type="submit" 
+        class="w-90 h-9 cursor-pointer justify-center text-lg font-bold"
+        :disabled="isLoading"
+        :loading="isLoading"
+      >
+        {{ isLoading ? 'Please wait...' : (authType === 'login' ? 'Login' : 'Sign Up') }}
       </UButton>
       <div class="flex gap-1">
         <p class="text-sm">{{ authType === 'login' ? "Don't have an account?" : "Already have an account?" }}</p>

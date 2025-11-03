@@ -10,7 +10,6 @@ from flask_jwt_extended import (
 )
 
 import traceback
-
 import uuid
 
 from .services import UserServices
@@ -19,6 +18,7 @@ from app.utils.camel_case_converter import dict_keys_to_camel
 
 
 class UserControllers:
+
     @staticmethod
     def user_login_controller() -> tuple[Response, int]:
         """Generate JWT access and refresh tokens, and set them as HTTP-only cookies after validating user credentials."""
@@ -88,7 +88,10 @@ class UserControllers:
             result = UserServices.user_signup_service(username, email_address, password)
 
             if result is None:
-                return jsonify({"error": "Email address already exists."}), 400
+                return jsonify({"error": "Signup failed."}), 400
+
+            if "error" in result:
+                return jsonify({"error": result["error"]}), 400
 
             resp = make_response(
                 {
@@ -181,6 +184,7 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
@@ -238,6 +242,7 @@ class UserControllers:
 
         try:
             user_id = str(get_jwt_identity())
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
@@ -261,20 +266,21 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_data = request.get_json()
+
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400
 
-            # Update profile information
             profile_success = UserServices.update_user_profile_service(
                 user_id, profile_data
             )
 
-            # Update address if provided
             address_success = True
+
             if "address" in profile_data:
                 address_success = UserServices.update_user_address_service(
                     user_id, profile_data["address"]
@@ -314,18 +320,19 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
-            print("JWT user_id:", user_id)  # <-- add this
+
+            print("JWT user_id:", user_id)
 
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_data = request.get_json()
-            print("PATCH request body:", profile_data)  # <-- add this
+
+            print("PATCH request body:", profile_data)
 
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400
 
-            # Update only provided fields
             profile_success = True
             address_success = True
 
