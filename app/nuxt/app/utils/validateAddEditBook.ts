@@ -45,35 +45,38 @@ export function validateAddEditBook (state: any): FormError[] {
 
 	if (!state.availability || whitespaceRegex.test(state.availability)) {
 		errors.push({ name: 'availability', message: 'Availability is required.' });
-	}
+	} else {
+		if (state.availability == 'For Sale' || state.availability == 'Both'){
+			if (!state.purchasePrice || whitespaceRegex.test(state.purchasePrice)) {
+				errors.push({ name: 'purchasePrice', message: 'Purchase price is required.' });
+	} else if (state.purchasePrice && !numberRegex.test(state.purchasePrice)) {
+					errors.push({
+							name: 'purchasePrice',
+							message: 'Should only be numbers.',
+					});
+			}
+		}
 
-	if (!state.dailyRentPrice || whitespaceRegex.test(state.dailyRentPrice)) {
-			errors.push({ name: 'dailyRentPrice', message: 'Daily rent price is required.' });
+	if (state.availability == 'For Rent' || state.availability == 'Both'){
+			if (!state.dailyRentPrice || whitespaceRegex.test(state.dailyRentPrice)) {
+				errors.push({ name: 'dailyRentPrice', message: 'Daily rent price is required.' });
 	} else if (state.dailyRentPrice && !numberRegex.test(state.dailyRentPrice)) {
-			errors.push({
-					name: 'dailyRentPrice',
-					message: 'Should only be numbers.',
-			});
-	}
+					errors.push({
+							name: 'dailyRentPrice',
+							message: 'Should only be numbers.',
+					});
+			}
 
 	if (!state.securityDeposit || whitespaceRegex.test(state.securityDeposit)) {
-			errors.push({ name: 'securityDeposit', message: 'Security deposit is required.' });
+					errors.push({ name: 'securityDeposit', message: 'Security deposit is required.' });
 	} else if (state.securityDeposit && !numberRegex.test(state.securityDeposit)) {
-			errors.push({
-					name: 'securityDeposit',
-					message: 'Should only be numbers.',
-			});
+					errors.push({
+							name: 'securityDeposit',
+							message: 'Should only be numbers.',
+					});
+			}
+		}
 	}
 
-	if (!state.purchasePrice || whitespaceRegex.test(state.purchasePrice)) {
-			errors.push({ name: 'purchasePrice', message: 'Purchase price is required.' });
-	} else if (state.purchasePrice && !numberRegex.test(state.purchasePrice)) {
-			errors.push({
-					name: 'purchasePrice',
-					message: 'Should only be numbers.',
-			});
-	}
-    
-	console.log(errors)
 	return errors;
 };

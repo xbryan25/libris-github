@@ -2,6 +2,8 @@
 
 import { validateAddEditBook } from '#imports';
 
+import draggable from 'vuedraggable';
+
 const props = defineProps<{
   isOpenAddEditBookModal: boolean;
 }>();
@@ -35,6 +37,23 @@ const maxGenres = 5;
 
 const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
+
+
+function resetState() {
+  Object.assign(state, {
+    title: '',
+    author: '',
+    genres: [],
+    condition: '',
+    bookImages: [],
+    description: '',
+    availability: '',
+    dailyRentPrice: 0,
+    securityDeposit: 0,
+    purchasePrice: 0,
+  });
+}
+
 
 const loadBookGenreItems = async () => {
   const bookGenres = await useBookGenres();
@@ -174,13 +193,26 @@ watch(
   { deep: true },
 );
 
+watch(
+  () => props.isOpenAddEditBookModal,
+  (newValue) => {
+    if (!newValue) {
+      // e.g. delay reset after modal closes
+      setTimeout(() => {
+        resetState();
+      }, 300); // delay in ms
+    }
+  },
+);
+
 onMounted(async () => {
   await loadBookGenreItems();
+  resetState();
 });
 </script>
 
 <template>
-  <UModal v-model:open="isOpenAddEditBookModal">
+  <UModal v-model:open="isOpenAddEditBookModal" :ui="{ content: 'max-w-2xl' }">
     <template #header>
       <h2 class="text-3xl font-semibold">Add New Book</h2>
     </template>
@@ -193,13 +225,13 @@ onMounted(async () => {
         @submit="() => onSubmit()"
         @error="() => onSubmitError()"
       >
-        <div class="flex gap-4 w-full">
+        <div class="flex flex-col gap-4 w-full">
           <UFormField label="Title" name="title" class="flex-1">
-            <UInput v-model="state.title" placeholder="Enter book title" />
+            <UInput v-model="state.title" placeholder="Enter book title" class="w-full" />
           </UFormField>
 
           <UFormField label="Author" name="author" class="flex-1">
-            <UInput v-model="state.author" placeholder="Enter book author" />
+            <UInput v-model="state.author" placeholder="Enter book author" class="w-full" />
           </UFormField>
         </div>
 
@@ -210,7 +242,7 @@ onMounted(async () => {
               :items="bookGenreItems"
               multiple
               placeholder="Select book genres"
-              class="w-full max-w-54 overflow-hidden text-ellipsis whitespace-nowrap"
+              class="w-full max-w-78 overflow-hidden text-ellipsis whitespace-nowrap"
               :ui="{
                 trailingIcon:
                   'group-data-[state=open]:rotate-180 transition-transform duration-200',
@@ -245,6 +277,22 @@ onMounted(async () => {
           />
         </UFormField>
 
+         <UFormField
+          v-if="state.bookImages.length > 1"
+          label="Reorder images (drag the image names)"
+          name="reorderImages"
+          class="flex-1"
+        >
+          <draggable v-model="state.bookImages" item-key="id" tag="ul" :animation="300">
+            <template #item="{ element: bookImage }">
+              <li class="list-disc list-inside cursor-move px-2 py-1 rounded mb-1 bg-surface-hover">
+                {{ bookImage.name }}
+              </li>
+            </template>
+          </draggable>
+        </UFormField>
+
+
         <UFormField label="Description" name="description" class="flex-1">
         <UTextarea
             v-model="state.description"
@@ -254,20 +302,20 @@ onMounted(async () => {
           />
         </UFormField>
 
-        <div class="flex gap-4">
-          <UFormField label="Availability" name="availability" class="flex-1">
-            <USelect
-              v-model="state.availability"
-              :items="availabilityItems"
-              placeholder="Select book availability"
-              class="w-full"
-              :ui="{
-                trailingIcon:
-                  'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                label: 'text-primary',
-              }"
-            />
-          </UFormField>
+        <UFormField label="Availability" name="availability" class="flex-1">
+          <USelect
+            v-model="state.availability"
+            :items="availabilityItems"
+            placeholder="Select book availability"
+            class="w-full"
+            :ui="{
+              trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200',
+              label: 'text-primary',
+            }"
+          />
+        </UFormField>
+
+        <div class="flex gap-4 w-full">
 
           <UFormField
             v-if="state.availability === 'For Sale' || state.availability === 'Both'"
@@ -278,15 +326,14 @@ onMounted(async () => {
             <UInput v-model="state.purchasePrice" placeholder="Add purchase price" class="w-full" />
           </UFormField>
 
-          <div v-else class="flex-1" />
-        </div>
 
-        <div
-          v-if="state.availability === 'For Rent' || state.availability === 'Both'"
-          class="flex gap-4 w-full"
-        >
+          <UFormField
+            v-if="state.availability === 'For Rent' || state.availability === 'Both'"
+            label="Daily Rent Price"
+            name="dailyRentPrice"
+            class="flex-1"
+          >
 
-          <UFormField label="Daily Rent Price" name="dailyRentPrice" class="flex-1">
             <UInput
               v-model="state.dailyRentPrice"
               placeholder="Add daily rent price"
@@ -295,7 +342,12 @@ onMounted(async () => {
           </UFormField>
           
         
-          <UFormField label="Security Deposit" name="securityDeposit" class="flex-1">
+          <UFormField
+            v-if="state.availability === 'For Rent' || state.availability === 'Both'"
+            label="Security Deposit"
+            name="securityDeposit"
+            class="flex-1"
+          >
             <UInput
               v-model="state.securityDeposit"
               placeholder="Add security deposit"
