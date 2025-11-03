@@ -9,8 +9,6 @@ export function validateAddEditBook (state: any): FormError[] {
 
 	const errors: { name: string, message: string }[] = [];
 
-	console.log(state.title)
-
 	if (!state.title || whitespaceRegex.test(state.title)) {
 			errors.push({ name: 'title', message: 'Title is required.' });
 	} else if (state.title && !titleAuthorRegex.test(state.title)) {
@@ -27,6 +25,26 @@ export function validateAddEditBook (state: any): FormError[] {
 					name: 'author',
 					message: 'Wrong author format.',
 			});
+	}
+
+	if (!state.genres || state.genres.length == 0){
+		errors.push({ name: 'genres', message: 'At least one genre is required.' });
+	}
+
+	if (!state.condition || whitespaceRegex.test(state.condition)) {
+			errors.push({ name: 'condition', message: 'Condition is required.' });
+	}
+
+	if (!state.bookImages || state.bookImages.length == 0){
+		errors.push({ name: 'bookImages', message: 'At least one image is required.' });
+	}
+	
+	if (!state.description || whitespaceRegex.test(state.description)){
+		errors.push({ name: 'description', message: 'A short description is required.' });
+	}
+
+	if (!state.availability || whitespaceRegex.test(state.availability)) {
+		errors.push({ name: 'availability', message: 'Availability is required.' });
 	}
 
 	if (!state.dailyRentPrice || whitespaceRegex.test(state.dailyRentPrice)) {
@@ -56,5 +74,6 @@ export function validateAddEditBook (state: any): FormError[] {
 			});
 	}
     
+	console.log(errors)
 	return errors;
 };

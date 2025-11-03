@@ -10,12 +10,7 @@ const emit = defineEmits<{
   (e: 'update:openAddEditBookModal', value: boolean): void;
 }>();
 
-const isOpenAddEditBookModal = computed({
-  get: () => props.isOpenAddEditBookModal,
-  set: (val: boolean) => {
-    emit('update:openAddEditBookModal', val);
-  },
-});
+
 
 const state = reactive({
   title: '',
@@ -38,10 +33,24 @@ const maxFiles = 5;
 const bookGenreItems = ref<string[]>([]);
 const maxGenres = 5;
 
+const conditionItems = ['New', 'Good', 'Used', 'Worn'];
+const availabilityItems = ['For Rent', 'For Sale', 'Both'];
+
 const loadBookGenreItems = async () => {
   const bookGenres = await useBookGenres();
 
   bookGenreItems.value = [...bookGenres];
+};
+
+const isOpenAddEditBookModal = computed({
+  get: () => props.isOpenAddEditBookModal,
+  set: (val: boolean) => {
+    emit('update:openAddEditBookModal', val);
+  },
+});
+
+const onSubmit = () => {
+  console.log(state);
 };
 
 watch(
@@ -127,8 +136,9 @@ onMounted(async () => {
     <template #body>
       <UForm
         class="flex flex-col space-y-4"
-        :validate="(state) => (console.log(state), validateAddEditBook(state))"
+        :validate="(state) => validateAddEditBook(state)"
         :state="state"
+        @submit="() => onSubmit()"
       >
         <div class="flex gap-4 w-full">
           <UFormField label="Title" name="title" class="flex-1">
@@ -141,7 +151,7 @@ onMounted(async () => {
         </div>
 
         <div class="flex gap-4">
-          <UFormField label="Genres (up to 5)" name="genre" class="flex-1">
+          <UFormField label="Genres (up to 5)" name="genres" class="flex-1">
             <USelectMenu
               v-model="state.genres"
               :items="bookGenreItems"
@@ -157,8 +167,9 @@ onMounted(async () => {
           </UFormField>
 
           <UFormField label="Condition" name="condition" class="flex-1">
-            <USelectMenu
+            <USelect
               v-model="state.condition"
+              :items="conditionItems"
               placeholder="Select book condition"
               class="w-full"
               :ui="{
@@ -170,7 +181,7 @@ onMounted(async () => {
           </UFormField>
         </div>
 
-        <UFormField label="Upload Images" name="uploadImages" class="flex-1">
+        <UFormField label="Upload Images" name="bookImages" class="flex-1">
           <UFileUpload
             v-model="state.bookImages"
             multiple
@@ -192,7 +203,9 @@ onMounted(async () => {
 
         <div class="flex gap-4">
           <UFormField label="Availability" name="availability" class="flex-1">
-            <USelectMenu
+            <USelect
+              v-model="state.availability"
+              :items="availabilityItems"
               placeholder="Select book availability"
               class="w-full"
               :ui="{
