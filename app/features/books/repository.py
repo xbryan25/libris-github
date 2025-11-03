@@ -398,3 +398,65 @@ class BookRepository:
         params = (user_id,)
 
         return db.fetch_all(BookQueries.GET_SOLD_BOOKS, params)
+
+    @staticmethod
+    def add_new_book(user_id, book_data) -> dict[str, str]:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        params = (
+            book_data["title"],
+            book_data["author"],
+            book_data["condition"],
+            book_data["description"],
+            book_data["availability"],
+            book_data["daily_rent_price"],
+            book_data["security_deposit"],
+            book_data["purchase_price"],
+            user_id,
+        )
+
+        return db.execute_query_returning(BookQueries.ADD_NEW_BOOK, params)
+
+    @staticmethod
+    def connect_book_to_genres(book_id, genres) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        genre_ids = db.fetch_all(
+            CommonQueries.GET_IDS_BY_VALUES.format(
+                table="book_genres", column="book_genre_id", field="book_genre_name"
+            ),
+            (genres,),
+        )
+
+        for genre_id in genre_ids:
+            db.execute_query(
+                BookQueries.INSERT_TO_BOOK_GENRE_LINKS,
+                (book_id, genre_id["book_genre_id"]),
+            )
+
+    @staticmethod
+    def add_book_images_to_database(book_id, uploaded_urls) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        for index, uploaded_url in enumerate(uploaded_urls):
+            db.execute_query(
+                BookQueries.INSERT_TO_BOOK_IMAGES,
+                (
+                    uploaded_url["image_url"],
+                    uploaded_url["uploaded_at"],
+                    index + 1,
+                    book_id,
+                ),
+            )

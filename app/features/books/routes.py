@@ -370,3 +370,12 @@ def get_book_details(book_id: str) -> tuple[Response, int]:
         500 if an unexpected error occurs
     """
     return BookControllers.get_book_details_controller(book_id)
+
+
+@books_bp.route("/", methods=["POST"])
+@jwt_required()
+def add_new_book() -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.add_new_book_controller()

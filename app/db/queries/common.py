@@ -17,3 +17,4 @@ class CommonQueries:
     GET_BY_SPECIFIC_COLUMN = "SELECT * FROM {table} WHERE {column} = %s"
     GET_COLUMN_BY_FIELD = "SELECT {column} FROM {table} WHERE {field} = %s"
     CHECK_IF_EXISTS = "SELECT EXISTS (SELECT 1 FROM {table} WHERE {column} = %s)"
+    GET_IDS_BY_VALUES = "SELECT {column} FROM {table} WHERE {field} = ANY(%s)"

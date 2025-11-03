@@ -8,6 +8,16 @@ from typing import Any, Optional
 
 from app.utils.date_utils import DateUtils
 
+from supabase import create_client, Client
+
+from flask import current_app
+
+import tempfile
+
+import os
+
+from datetime import datetime
+
 
 class BookServices:
 
@@ -271,3 +281,73 @@ class BookServices:
             "times_rented": int(book["times_rented"]),
             "images": [img["image_url"] for img in images],
         }
+
+    @staticmethod
+    def add_new_book_service(user_id, book_data, book_images) -> None:
+        """Add a new book (improve later)"""
+
+        # Add book details to book
+
+        book_data["condition"] = book_data["condition"].lower()
+
+        if book_data["availability"] == "For Rent":
+            book_data["availability"] = "rent"
+        elif book_data["availability"] == "For Sale":
+            book_data["availability"] = "purchase"
+        else:
+            book_data["availability"] = book_data["availability"].lower()
+
+        book_id_dict = BookRepository.add_new_book(user_id, book_data)
+
+        book_id = book_id_dict["book_id"]
+
+        # Link to book_genre_links table
+
+        BookRepository.connect_book_to_genres(book_id, book_data["genres"])
+
+        # Upload images to Supabase
+
+        parsed_book_images = []
+
+        for value in book_images.values():
+            parsed_book_images.append(value)
+
+        supabase: Client = create_client(
+            current_app.config.get("SUPABASE_URL"),
+            current_app.config.get("SUPABASE_SERVICE_KEY"),
+        )
+
+        uploaded_urls = []
+        bucket_name = "book_images"
+
+        for index, book_image in enumerate(parsed_book_images):
+            # Create a path inside the bucket
+
+            file_path = f"{book_id}-{index + 1}"
+
+            with tempfile.NamedTemporaryFile(delete=False) as tmp:
+                tmp.write(book_image.read())
+                tmp_path = tmp.name
+
+            # Upload directly from memory (no need to save locally)
+            supabase.storage.from_(bucket_name).upload(
+                file=tmp_path,
+                path=file_path,
+                file_options={
+                    "cache-control": "3600",
+                    "upsert": "false",
+                    "content-type": book_image.content_type,
+                },
+            )
+
+            os.remove(tmp_path)
+
+            # Get public URL
+            public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
+            uploaded_urls.append(
+                {"image_url": public_url, "uploaded_at": datetime.now()}
+            )
+
+        # Link to book_images table
+
+        BookRepository.add_book_images_to_database(book_id, uploaded_urls)

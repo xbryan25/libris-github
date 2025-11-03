@@ -375,3 +375,37 @@ class BookControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def add_new_book_controller() -> tuple[Response, int]:
+        """(add later)"""
+
+        try:
+            book_data = {
+                "title": request.form.get("title", "-"),
+                "author": request.form.get("author", "-"),
+                "condition": request.form.get("condition", "-"),
+                "genres": request.form.getlist("genres"),
+                "description": request.form.get("description", "-"),
+                "availability": request.form.get("availability", "-"),
+                "daily_rent_price": int(request.form.get("dailyRentPrice", 0) or 0),
+                "security_deposit": int(request.form.get("securityDeposit", 0) or 0),
+                "purchase_price": int(request.form.get("purchasePrice", 0) or 0),
+            }
+
+            book_images = request.files
+
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            BookServices.add_new_book_service(user_id, book_data, book_images)
+
+            return (
+                jsonify({"message": f"'{book_data['title']}' added successfully."}),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

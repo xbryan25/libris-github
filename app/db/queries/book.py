@@ -241,3 +241,34 @@ class BookQueries:
             LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
             WHERE b.owner_id = %s AND pb.purchase_status = 'completed'
         """
+
+    ADD_NEW_BOOK = """
+        INSERT INTO books (
+            title,
+            author,
+            condition,
+            description,
+            availability,
+            daily_rent_price,
+            security_deposit,
+            purchase_price,
+            owner_id
+        )
+        VALUES (
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s
+        ) RETURNING book_id
+    """
+
+    INSERT_TO_BOOK_GENRE_LINKS = (
+        "INSERT INTO book_genre_links (book_id, book_genre_id) VALUES (%s, %s)"
+    )
+
+    INSERT_TO_BOOK_IMAGES = "INSERT INTO book_images (image_url, uploaded_at, order_num, book_id) VALUES (%s, %s, %s, %s)"

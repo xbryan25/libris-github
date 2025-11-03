@@ -49,8 +49,60 @@ const isOpenAddEditBookModal = computed({
   },
 });
 
-const onSubmit = () => {
-  console.log(state);
+const onSubmit = async () => {
+  try {
+    const bookFormData = new FormData();
+    bookFormData.append('title', state.title);
+    bookFormData.append('author', state.author);
+    bookFormData.append('condition', state.condition);
+    bookFormData.append('description', state.description);
+    bookFormData.append('availability', state.availability);
+    bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
+    bookFormData.append('securityDeposit', state.securityDeposit.toString());
+    bookFormData.append('purchasePrice', state.purchasePrice.toString());
+
+    for (const genre of state.genres) {
+      bookFormData.append('genres', genre);
+    }
+
+    for (const bookImage of state.bookImages) {
+      bookFormData.append('bookImages', bookImage);
+    }
+
+    const data = await useCreateBook(bookFormData);
+
+    toast.add({
+      title: 'Success',
+      description: `'${data.message}' has been added to your library.`,
+      color: 'success',
+    });
+
+    isOpenAddEditBookModal.value = false;
+  } catch (error) {
+    let errorMessage;
+
+    if (error instanceof Error) {
+      errorMessage = error.message; // fetch error reason
+    }
+
+    if (typeof error === 'object' && error !== null && 'data' in error) {
+      errorMessage = (error as any).data.error;
+    }
+
+    toast.add({
+      title: 'Error',
+      description: errorMessage,
+      color: 'error',
+    });
+  }
+};
+
+const onSubmitError = () => {
+  toast.add({
+    title: 'Error with inputs',
+    description: `Resolve issues to add a book.`,
+    color: 'error',
+  });
 };
 
 watch(
@@ -139,6 +191,7 @@ onMounted(async () => {
         :validate="(state) => validateAddEditBook(state)"
         :state="state"
         @submit="() => onSubmit()"
+        @error="() => onSubmitError()"
       >
         <div class="flex gap-4 w-full">
           <UFormField label="Title" name="title" class="flex-1">
