@@ -379,3 +379,12 @@ def add_new_book() -> tuple[Response, int]:
     (add later)
     """
     return BookControllers.add_new_book_controller()
+
+
+@books_bp.route("/<string:book_id>", methods=["PATCH"])
+@jwt_required()
+def edit_a_book(book_id) -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.edit_a_book_controller(book_id)

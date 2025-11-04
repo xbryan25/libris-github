@@ -1,6 +1,6 @@
 import type {FormError} from '@nuxt/ui';
 
-export function validateAddEditBook (state: any): FormError[] {
+export function validateAddEditBook (state: any, formType: string): FormError[] {
 
 	const titleAuthorRegex = /^[A-Za-z\s.'-]+$/;
 	const numberRegex = /^[0-9]+$/;
@@ -35,7 +35,9 @@ export function validateAddEditBook (state: any): FormError[] {
 			errors.push({ name: 'condition', message: 'Condition is required.' });
 	}
 
-	if (!state.bookImages || state.bookImages.length == 0){
+	if (formType === 'add' && (!state.bookImages || state.bookImages.length == 0)){
+		errors.push({ name: 'bookImages', message: 'At least one image is required.' });
+	} else if (formType === 'edit' && (state.existingBookImageUrls.length == 0 && state.bookImages.length == 0)){
 		errors.push({ name: 'bookImages', message: 'At least one image is required.' });
 	}
 	

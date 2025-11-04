@@ -409,3 +409,42 @@ class BookControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def edit_a_book_controller(book_id: str) -> tuple[Response, int]:
+        """(add later)"""
+
+        try:
+            book_data = {
+                "title": request.form.get("title", "-"),
+                "author": request.form.get("author", "-"),
+                "condition": request.form.get("condition", "-"),
+                "genres_to_add": request.form.getlist("genresToAdd"),
+                "genres_to_delete": request.form.getlist("genresToDelete"),
+                "existing_book_image_urls": request.form.getlist(
+                    "existingBookImageUrls"
+                ),
+                "existing_book_image_urls_to_delete": request.form.getlist(
+                    "existingBookImageUrlsToDelete"
+                ),
+                "all_book_order": request.form.getlist("allBookOrder"),
+                "description": request.form.get("description", "-"),
+                "availability": request.form.get("availability", "-"),
+                "daily_rent_price": int(request.form.get("dailyRentPrice", 0) or 0),
+                "security_deposit": int(request.form.get("securityDeposit", 0) or 0),
+                "purchase_price": int(request.form.get("purchasePrice", 0) or 0),
+            }
+
+            book_images = request.files
+
+            BookServices.edit_a_book_service(book_id, book_data, book_images)
+
+            return (
+                jsonify(
+                    {"message": f"'{book_data['title']}' was edited successfully."}
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

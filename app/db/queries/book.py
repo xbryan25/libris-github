@@ -267,8 +267,38 @@ class BookQueries:
         ) RETURNING book_id
     """
 
+    EDIT_A_BOOK = """
+        UPDATE books
+        SET
+            title = %s,
+            author = %s,
+            condition = %s,
+            description = %s,
+            availability = %s,
+            daily_rent_price = %s,
+            security_deposit = %s,
+            purchase_price = %s
+        WHERE book_id = %s;
+    """
+
     INSERT_TO_BOOK_GENRE_LINKS = (
         "INSERT INTO book_genre_links (book_id, book_genre_id) VALUES (%s, %s)"
     )
 
+    DELETE_FROM_BOOK_GENRE_LINKS = (
+        "DELETE FROM book_genre_links WHERE book_id = %s AND book_genre_id = %s"
+    )
+
     INSERT_TO_BOOK_IMAGES = "INSERT INTO book_images (image_url, uploaded_at, order_num, book_id) VALUES (%s, %s, %s, %s)"
+
+    REMOVE_FROM_BOOK_IMAGES = (
+        "DELETE FROM book_images WHERE book_id = %s AND image_url = %s"
+    )
+
+    EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES = """
+        UPDATE book_images
+        SET
+            image_url = %s,
+            order_num = %s
+        WHERE book_id = %s AND image_url = %s;
+    """

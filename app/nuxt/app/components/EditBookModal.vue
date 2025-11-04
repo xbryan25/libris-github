@@ -2,11 +2,11 @@
 import { validateAddEditBook } from '#imports';
 
 import draggable from 'vuedraggable';
-import BookList from './BookList.vue';
+import { useUpdateBook } from '~/composables/useUpdateBook';
 
 const props = defineProps<{
   isOpenEditBookModal: boolean;
-  bookId?: string;
+  bookId: string;
 }>();
 
 const emit = defineEmits<{
@@ -17,6 +17,9 @@ const state = reactive({
   title: '',
   author: '',
   genres: [] as string[],
+  originalGenres: [] as string[],
+  genresToDelete: [] as string[],
+  genresToAdd: [] as string[],
   condition: '',
   bookImages: [] as File[],
   existingBookImageUrls: [] as string[],
@@ -39,6 +42,9 @@ const maxGenres = 5;
 
 const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
+
+// To prevent NuxtImg from caching images
+const cacheVersion = ref(Date.now());
 
 const { book: bookDetails, fetchBookDetails, loading } = useBookDetails();
 
@@ -99,6 +105,9 @@ const resetState = () => {
     title: '',
     author: '',
     genres: [],
+    originalGenres: [],
+    genresToDelete: [],
+    genresToAdd: [],
     condition: '',
     bookImages: [],
     existingBookImageUrls: [],
@@ -128,7 +137,6 @@ const deleteExistingBookImageUrl = (existingBookImageUrl: string) => {
 
 const fetchCurrentBookDetails = async () => {
   try {
-    console.log(`bookId: ${props.bookId}`);
 
     if (props.bookId) {
       await fetchBookDetails(props.bookId);
@@ -141,6 +149,7 @@ const fetchCurrentBookDetails = async () => {
     state.title = bookDetails.value?.title as string;
     state.author = bookDetails.value?.author as string;
     state.genres = bookDetails.value?.genres as string[];
+    state.originalGenres = bookDetails.value?.genres as string[];
     state.condition = bookDetails.value?.condition
       ? bookDetails.value.condition.charAt(0).toUpperCase() + bookDetails.value.condition.slice(1)
       : '';
@@ -160,7 +169,9 @@ const fetchCurrentBookDetails = async () => {
       state.availability = 'Both';
     }
 
-    console.log(state);
+    cacheVersion.value = Date.now();
+
+    console.log(state.existingBookImageUrls);
   } catch (error) {
     let errorMessage;
 
@@ -171,34 +182,57 @@ const fetchCurrentBookDetails = async () => {
     if (typeof error === 'object' && error !== null && 'data' in error) {
       errorMessage = (error as any).data.error;
     }
+
+    toast.add({
+      title: 'Error',
+      description: errorMessage,
+      color: 'error',
+    });
   }
 };
 
 const onSubmit = async () => {
   try {
+
+    // Update genresToAdd and genresToDelete
+
     const bookFormData = new FormData();
+
+    state.genresToAdd = state.genres.filter((g) => !state.originalGenres.includes(g));
+    state.genresToDelete = state.originalGenres.filter((g) => !state.genres.includes(g));
     bookFormData.append('title', state.title);
     bookFormData.append('author', state.author);
     bookFormData.append('condition', state.condition);
     bookFormData.append('description', state.description);
     bookFormData.append('availability', state.availability);
-    bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
-    bookFormData.append('securityDeposit', state.securityDeposit.toString());
-    bookFormData.append('purchasePrice', state.purchasePrice.toString());
 
-    for (const genre of state.genres) {
-      bookFormData.append('genres', genre);
+
+    if (state.availability === 'For Rent' || state.availability === 'Both') {
+      bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
+      bookFormData.append('securityDeposit', state.securityDeposit.toString());
+      bookFormData.append('purchasePrice', (0).toString());
+    } else {
+      bookFormData.append('dailyRentPrice', (0).toString());
+      bookFormData.append('securityDeposit', (0).toString());
+      bookFormData.append('purchasePrice', state.purchasePrice.toString());
     }
 
-    for (const bookImage of state.bookImages) {
-      bookFormData.append('bookImages', bookImage);
-    }
+    const appendList = (key: string, values: any[]) =>
+      values.forEach((v) => bookFormData.append(key, v));
 
-    const data = await useCreateBook(bookFormData);
+    appendList('genresToAdd', state.genresToAdd);
+    appendList('genresToDelete', state.genresToDelete);
+
+    appendList('bookImages', state.bookImages);
+    appendList('existingBookImageUrls', state.existingBookImageUrls);
+    appendList('existingBookImageUrlsToDelete', state.existingBookImageUrlsToDelete);
+    appendList('allBookOrder', state.allBookOrder);
+
+    const data = await useUpdateBook(props.bookId, bookFormData);
 
     toast.add({
       title: 'Success',
-      description: `'${data.message}' has been added to your library.`,
+      description: `${data.message}`,
       color: 'success',
     });
 
@@ -329,7 +363,7 @@ onMounted(async () => {
     <template #body>
       <UForm
         class="flex flex-col space-y-4"
-        :validate="(state) => validateAddEditBook(state)"
+        :validate="(state) => validateAddEditBook(state, 'edit')"
         :state="state"
         @submit="() => onSubmit()"
         @error="() => onSubmitError()"
@@ -398,7 +432,10 @@ onMounted(async () => {
               :key="index"
               class="relative"
             >
-              <img :src="image" class="rounded-md w-full h-45 object-cover" />
+              <NuxtImg
+                :src="`${image}?v=${cacheVersion}`"
+                class="rounded-md w-full h-45 object-cover"
+              />
 
               <button
                 class="bg-inverted absolute -top-1.5 -right-1.5 rounded-full text-xs cursor-pointer w-5 h-5 border-2 border-bg inline-flex items-center"

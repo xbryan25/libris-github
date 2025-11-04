@@ -77,16 +77,23 @@ const onSubmit = async () => {
     bookFormData.append('condition', state.condition);
     bookFormData.append('description', state.description);
     bookFormData.append('availability', state.availability);
-    bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
-    bookFormData.append('securityDeposit', state.securityDeposit.toString());
-    bookFormData.append('purchasePrice', state.purchasePrice.toString());
 
-    for (const genre of state.genres) {
-      bookFormData.append('genres', genre);
+    if (state.availability === 'For Rent' || state.availability === 'Both') {
+      bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
+      bookFormData.append('securityDeposit', state.securityDeposit.toString());
+      bookFormData.append('purchasePrice', (0).toString());
+    } else {
+      bookFormData.append('dailyRentPrice', (0).toString());
+      bookFormData.append('securityDeposit', (0).toString());
+      bookFormData.append('purchasePrice', state.purchasePrice.toString());
     }
 
-    for (const bookImage of state.bookImages) {
-      bookFormData.append('bookImages', bookImage);
+    const appendList = (key: string, values: any[]) =>
+      values.forEach((v) => bookFormData.append(key, v));
+
+    appendList('genres', state.genres);
+
+    appendList('bookImages', state.bookImages);
     }
 
     const data = await useCreateBook(bookFormData);
@@ -221,7 +228,7 @@ onMounted(async () => {
     <template #body>
       <UForm
         class="flex flex-col space-y-4"
-        :validate="(state) => validateAddEditBook(state)"
+        :validate="(state) => validateAddEditBook(state, 'add')"
         :state="state"
         @submit="() => onSubmit()"
         @error="() => onSubmitError()"

@@ -422,6 +422,39 @@ class BookRepository:
         return db.execute_query_returning(BookQueries.ADD_NEW_BOOK, params)
 
     @staticmethod
+    def edit_a_book(book_id, book_data) -> dict[str, str]:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        params = (
+            book_data["title"],
+            book_data["author"],
+            book_data["condition"],
+            book_data["description"],
+            book_data["availability"],
+            book_data["daily_rent_price"],
+            book_data["security_deposit"],
+            book_data["purchase_price"],
+            book_id,
+        )
+
+        return db.execute_query(BookQueries.EDIT_A_BOOK, params)
+
+    @staticmethod
+    def get_genre_ids_from_genre_names(genres) -> list[dict[str, str]]:
+        db = current_app.extensions["db"]
+
+        return db.fetch_all(
+            CommonQueries.GET_IDS_BY_VALUES.format(
+                table="book_genres", column="book_genre_id", field="book_genre_name"
+            ),
+            (genres,),
+        )
+
+    @staticmethod
     def connect_book_to_genres(book_id, genres) -> None:
         """
         to be written
@@ -429,16 +462,27 @@ class BookRepository:
 
         db = current_app.extensions["db"]
 
-        genre_ids = db.fetch_all(
-            CommonQueries.GET_IDS_BY_VALUES.format(
-                table="book_genres", column="book_genre_id", field="book_genre_name"
-            ),
-            (genres,),
-        )
+        genre_ids = BookRepository.get_genre_ids_from_genre_names(genres)
 
         for genre_id in genre_ids:
             db.execute_query(
                 BookQueries.INSERT_TO_BOOK_GENRE_LINKS,
+                (book_id, genre_id["book_genre_id"]),
+            )
+
+    @staticmethod
+    def remove_connection_of_book_to_genres(book_id, genres) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        genre_ids = BookRepository.get_genre_ids_from_genre_names(genres)
+
+        for genre_id in genre_ids:
+            db.execute_query(
+                BookQueries.DELETE_FROM_BOOK_GENRE_LINKS,
                 (book_id, genre_id["book_genre_id"]),
             )
 
@@ -460,3 +504,34 @@ class BookRepository:
                     book_id,
                 ),
             )
+
+    @staticmethod
+    def remove_book_images_from_database(
+        book_id, existing_book_image_urls_to_delete
+    ) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        for existing_book_image_url_to_delete in existing_book_image_urls_to_delete:
+            db.execute_query(
+                BookQueries.REMOVE_FROM_BOOK_IMAGES,
+                (book_id, existing_book_image_url_to_delete),
+            )
+
+    @staticmethod
+    def edit_book_image_url_in_database(
+        book_id, old_image_url, new_image_url, order_num
+    ) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES,
+            (new_image_url, order_num, book_id, old_image_url),
+        )

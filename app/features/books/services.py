@@ -6,17 +6,11 @@ from app.utils.converters import convert_book_dict, convert_my_library_book_dict
 
 from typing import Any, Optional
 
-from app.utils.date_utils import DateUtils
+from app.utils import DateUtils, upload_images_to_bucket
 
 from supabase import create_client, Client
 
 from flask import current_app
-
-import tempfile
-
-import os
-
-from datetime import datetime
 
 
 class BookServices:
@@ -314,37 +308,142 @@ class BookServices:
             current_app.config.get("SUPABASE_SERVICE_KEY"),
         )
 
-        uploaded_urls = []
         bucket_name = "book_images"
 
-        for index, book_image in enumerate(parsed_book_images):
-            # Create a path inside the bucket
-
-            file_path = f"{book_id}-{index + 1}"
-
-            with tempfile.NamedTemporaryFile(delete=False) as tmp:
-                tmp.write(book_image.read())
-                tmp_path = tmp.name
-
-            # Upload directly from memory (no need to save locally)
-            supabase.storage.from_(bucket_name).upload(
-                file=tmp_path,
-                path=file_path,
-                file_options={
-                    "cache-control": "3600",
-                    "upsert": "false",
-                    "content-type": book_image.content_type,
-                },
-            )
-
-            os.remove(tmp_path)
-
-            # Get public URL
-            public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
-            uploaded_urls.append(
-                {"image_url": public_url, "uploaded_at": datetime.now()}
-            )
-
-        # Link to book_images table
+        uploaded_urls = upload_images_to_bucket(
+            supabase, parsed_book_images, book_id, bucket_name
+        )
 
         BookRepository.add_book_images_to_database(book_id, uploaded_urls)
+
+    @staticmethod
+    def edit_a_book_service(book_id, book_data, book_images) -> None:
+        """Add a new book (improve later)"""
+
+        # Update details of the book
+        book_data["condition"] = book_data["condition"].lower()
+
+        if book_data["availability"] == "For Rent":
+            book_data["availability"] = "rent"
+        elif book_data["availability"] == "For Sale":
+            book_data["availability"] = "purchase"
+        else:
+            book_data["availability"] = book_data["availability"].lower()
+
+        BookRepository.edit_a_book(book_id, book_data)
+
+        # Delete old genres, if there are
+
+        if len(book_data["genres_to_delete"]) > 0:
+            BookRepository.remove_connection_of_book_to_genres(
+                book_id, book_data["genres_to_delete"]
+            )
+
+        # Link new genres to book_genre_links table, if there are
+
+        if len(book_data["genres_to_add"]) > 0:
+            BookRepository.connect_book_to_genres(book_id, book_data["genres_to_add"])
+
+        # Remove old images from Supabase book_images bucket
+
+        supabase: Client = create_client(
+            current_app.config.get("SUPABASE_URL"),
+            current_app.config.get("SUPABASE_SERVICE_KEY"),
+        )
+
+        bucket_name = "book_images"
+
+        has_deleted_an_image = False
+
+        if len(book_data["existing_book_image_urls_to_delete"]) > 0:
+
+            supabase.storage.from_(bucket_name).remove(
+                [
+                    existing_book_image_url_to_delete.split("/").pop()
+                    for existing_book_image_url_to_delete in book_data[
+                        "existing_book_image_urls_to_delete"
+                    ]
+                ]
+            )
+
+            # Remove rows of old images in book_images table
+
+            BookRepository.remove_book_images_from_database(
+                book_id, book_data["existing_book_image_urls_to_delete"]
+            )
+
+            has_deleted_an_image = True
+
+        # Rename already uploaded images based on all_book_order
+
+        if len(book_data["all_book_order"]) > 0 or has_deleted_an_image:
+            SUPABASE_BUCKET_URL = f"{current_app.config.get("SUPABASE_URL")}/storage/v1/object/public/book_images/"
+
+            renamed_mappings = []
+
+            # Move files to a temporary file name first, to avoid conflicts
+            temp_paths = []
+            for index, file_or_url in enumerate(book_data["all_book_order"], start=1):
+                if not file_or_url.startswith(SUPABASE_BUCKET_URL):
+                    continue
+
+                src_path = file_or_url.replace(SUPABASE_BUCKET_URL, "")
+                final_path = f"{book_id}-{index}"
+
+                if src_path == final_path:
+                    continue
+
+                temp_path = f"temp-{final_path}"
+
+                supabase.storage.from_(bucket_name).move(src_path, temp_path)
+
+                temp_paths.append((file_or_url, temp_path))
+
+            # Move to final path
+            for index, (old_url, temp_path) in enumerate(temp_paths, start=1):
+                final_path = temp_path.replace("temp-", "")
+
+                supabase.storage.from_(bucket_name).move(temp_path, final_path)
+
+                new_url = supabase.storage.from_(bucket_name).get_public_url(final_path)
+                renamed_mappings.append((old_url, new_url))
+
+            # Update image_urls in db
+
+            # Add a temporary value first to avoid conflicts
+            temp_mappings = []
+            for old_url, new_url in renamed_mappings:
+                temp_url = new_url + "?temp"
+
+                order_num = int(new_url.split(f"{book_id}-")[-1])
+                temp_order_num = order_num + 1000
+
+                BookRepository.edit_book_image_url_in_database(
+                    book_id, old_url, temp_url, temp_order_num
+                )
+                temp_mappings.append((temp_url, new_url))
+
+            # Change to final value afterwards
+            for temp_url, final_url in temp_mappings:
+                order_num = int(final_url.split(f"{book_id}-")[-1])
+
+                BookRepository.edit_book_image_url_in_database(
+                    book_id, temp_url, final_url, order_num
+                )
+
+        parsed_book_images = book_images.getlist("bookImages")
+
+        uploaded_urls = upload_images_to_bucket(
+            supabase,
+            parsed_book_images,
+            book_id,
+            bucket_name,
+            "edit",
+            book_data["all_book_order"],
+            book_data["existing_book_image_urls"],
+        )
+
+        # Link to new images to book_images table
+
+        if len(uploaded_urls) > 0:
+            BookRepository.add_book_images_to_database(book_id, uploaded_urls)
