@@ -6,6 +6,12 @@ const props = defineProps<{
   bookDetails?: MyLibraryBook | null;
 }>();
 
+const isOpenEditBookModal = ref(false);
+
+const openEditBookModal = () => {
+  isOpenEditBookModal.value = true;
+};
+
 
 </script>
 
@@ -125,7 +131,7 @@ const props = defineProps<{
           />
 
           <div class="flex gap-2 pt-2">
-            <UButton class="flex-1 justify-center cursor-pointer" @click="openEditModal = true">
+            <UButton class="flex-1 justify-center cursor-pointer" @click="openEditBookModal">
               <Icon name="material-symbols:edit" class="w-5 h-5 text-bg" />
               <p>Edit</p>
             </UButton>
@@ -166,6 +172,14 @@ const props = defineProps<{
           </div>
         </div>
       </div>
+
+      <EditBookModal
+        :is-open-edit-book-modal="isOpenEditBookModal"
+        :book-id="bookDetails?.bookId"
+        @update:open-edit-book-modal="
+          (newIsOpenEditBookModal: boolean) => (isOpenEditBookModal = newIsOpenEditBookModal)
+        "
+      />
     </div>
   </div>
 

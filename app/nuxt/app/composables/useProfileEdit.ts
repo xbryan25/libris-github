@@ -10,6 +10,8 @@ export const useProfileEdit = () => {
   const success = ref<string | null>(null)
   const toast = useToast()
 
+  const { $apiFetch } = useNuxtApp()
+
   const editForm = reactive({
     first_name: '',
     middle_name: '',
@@ -72,7 +74,7 @@ export const useProfileEdit = () => {
         return value
       }))
 
-      const response = await fetch(`${API_URL}/api/users/profile/me`, {
+      const response = await $apiFetch(`${API_URL}/api/users/profile/me`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -109,7 +111,7 @@ export const useProfileEdit = () => {
   const updateProfileImage = async (imageUrl: string) => {
     try {
       saving.value = true
-      const response = await fetch(`${API_URL}/api/users/profile/me`, {
+      const response = await $apiFetch(`${API_URL}/api/users/profile/me`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

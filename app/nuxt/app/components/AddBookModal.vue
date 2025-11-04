@@ -5,11 +5,12 @@ import { validateAddEditBook } from '#imports';
 import draggable from 'vuedraggable';
 
 const props = defineProps<{
-  isOpenAddEditBookModal: boolean;
+  isOpenAddBookModal: boolean;
+  bookId?: string;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:openAddEditBookModal', value: boolean): void;
+  (e: 'update:openAddBookModal', value: boolean): void;
 }>();
 
 
@@ -39,7 +40,7 @@ const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
 
 
-function resetState() {
+const resetState = () => {
   Object.assign(state, {
     title: '',
     author: '',
@@ -52,7 +53,7 @@ function resetState() {
     securityDeposit: 0,
     purchasePrice: 0,
   });
-}
+};
 
 
 const loadBookGenreItems = async () => {
@@ -61,10 +62,10 @@ const loadBookGenreItems = async () => {
   bookGenreItems.value = [...bookGenres];
 };
 
-const isOpenAddEditBookModal = computed({
-  get: () => props.isOpenAddEditBookModal,
+const isOpenAddBookModal = computed({
+  get: () => props.isOpenAddBookModal,
   set: (val: boolean) => {
-    emit('update:openAddEditBookModal', val);
+    emit('update:openAddBookModal', val);
   },
 });
 
@@ -96,7 +97,7 @@ const onSubmit = async () => {
       color: 'success',
     });
 
-    isOpenAddEditBookModal.value = false;
+    isOpenAddBookModal.value = false;
   } catch (error) {
     let errorMessage;
 
@@ -194,8 +195,8 @@ watch(
 );
 
 watch(
-  () => props.isOpenAddEditBookModal,
-  (newValue) => {
+  () => props.isOpenAddBookModal,
+    async (newValue) => {
     if (!newValue) {
       // e.g. delay reset after modal closes
       setTimeout(() => {
@@ -212,7 +213,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpenAddEditBookModal" :ui="{ content: 'max-w-2xl' }">
+  <UModal v-model:open="isOpenAddBookModal" :ui="{ content: 'max-w-2xl' }">
     <template #header>
       <h2 class="text-3xl font-semibold">Add New Book</h2>
     </template>
@@ -362,7 +363,7 @@ onMounted(async () => {
             color="error"
             variant="solid"
             class="cursor-pointer"
-            @click="isOpenAddEditBookModal = false"
+            @click="isOpenAddBookModal = false"
             >Cancel</UButton
           >
           <UButton size="md" color="primary" variant="solid" type="submit" class="cursor-pointer"

@@ -34,6 +34,8 @@ export const useProfile = (userId?: string) => {
       error.value === 'Invalid user ID format.'
   )
 
+  const { $apiFetch } = useNuxtApp();
+
   const fetchProfile = async () => {
     loading.value = true
     error.value = null
@@ -46,7 +48,7 @@ export const useProfile = (userId?: string) => {
         credentials: 'include'
       }
 
-      const res = await $fetch<Profile>(url, options)
+      const res = await $apiFetch<Profile>(url, options)
       if (!res.address) {
         res.address = {
           street: '-',

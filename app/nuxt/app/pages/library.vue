@@ -12,10 +12,10 @@ const headerState = reactive({
 });
 
 
-const isOpenAddEditBookModal = ref(false);
+const isOpenAddBookModal = ref(false);
 
-const openAddEditBookModal = () => {
-  isOpenAddEditBookModal.value = true;
+const openAddBookModal = () => {
+  isOpenAddBookModal.value = true;
 };
 
 </script>
@@ -33,7 +33,7 @@ const openAddEditBookModal = () => {
       </div>
 
       <div class="flex-1 flex justify-end pt-5">
-        <UButton class="w-40 justify-center cursor-pointer" @click="openAddEditBookModal">
+        <UButton class="w-40 justify-center cursor-pointer" @click="openAddBookModal">
           <Icon name="material-symbols:add" class="w-8 h-8 text-bg" />
           <p class="font-bold text-xl">Add Book</p>
         </UButton>
@@ -55,10 +55,10 @@ const openAddEditBookModal = () => {
 
     <MyLibraryBookList :header-state="headerState" />
 
-    <AddEditBookModal
-      :is-open-add-edit-book-modal="isOpenAddEditBookModal"
-      @update:open-add-edit-book-modal="
-        (newIsOpenAddEditBookModal) => (isOpenAddEditBookModal = newIsOpenAddEditBookModal)
+    <AddBookModal
+      :is-open-add-book-modal="isOpenAddBookModal"
+      @update:open-add-book-modal="
+        (newIsOpenAddBookModal) => (isOpenAddBookModal = newIsOpenAddBookModal)
       "
     />
   </div>

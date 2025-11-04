@@ -36,11 +36,13 @@ export const useBookDetails = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  const { $apiFetch } = useNuxtApp();
+
   const fetchBookDetails = async (bookId: string) => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<BookDetails>(`${API_URL}/api/books/${bookId}`, {
+      const res = await $apiFetch<BookDetails>(`${API_URL}/api/books/${bookId}`, {
         credentials: 'include'
       })
       book.value = res
