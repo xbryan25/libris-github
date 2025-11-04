@@ -45,6 +45,43 @@ def user_login() -> tuple[Response, int]:
     return UserControllers.user_login_controller()
 
 
+@users_bp.route("/signup", methods=["POST"])
+def user_signup() -> tuple[Response, int]:
+    """
+    Register a new user account.
+
+    This endpoint expects a JSON body containing 'username', 'emailAddress', and 'password'.
+    If registration is successful, the server creates a new user account and initializes
+    a readit wallet with a balance of 0.
+
+    Request body:
+
+        username: The desired username for the new account.
+
+        emailAddress: The email address of the user.
+
+        password: The password for the new account.
+
+    Response JSON:
+
+        messageTitle: A short success message.
+
+        message: A friendly message for the user.
+
+    Possible errors:
+
+        400 if the email already exists or validation fails.
+
+        500 if an unexpected error occurs during processing.
+
+    Additional notes:
+
+        User wallet is initialized with balance 0.
+    """
+
+    return UserControllers.user_signup_controller()
+
+
 @users_bp.route("/logout", methods=["POST"])
 def user_logout() -> tuple[Response, int]:
     """
