@@ -361,7 +361,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpenEditBookModal" :ui="{ content: 'max-w-2xl' }">
+  <UModal v-model:open="isOpenEditBookModal" :ui="{ content: 'max-w-5xl' }">
     <template #header>
       <h2 class="text-3xl font-semibold">Edit Book</h2>
     </template>
@@ -396,7 +396,7 @@ onMounted(async () => {
               :items="bookGenreItems"
               multiple
               placeholder="Select book genres"
-              class="w-full max-w-78 overflow-hidden text-ellipsis whitespace-nowrap"
+              class="w-full overflow-hidden text-ellipsis whitespace-nowrap"
               :ui="{
                 trailingIcon:
                   'group-data-[state=open]:rotate-180 transition-transform duration-200',
@@ -432,7 +432,7 @@ onMounted(async () => {
           <USkeleton v-if="loading" class="w-full h-80" />
           <div
             v-else
-            class="grid grid-cols-3 gap-4 p-4 min-h-80 bg-default border border-default border-dashed rounded-lg content-center"
+            class="grid grid-cols-5 gap-4 p-4 min-h-53 bg-default border border-default border-dashed rounded-lg content-center"
           >
             <div
               v-for="(image, index) in state.existingBookImageUrls"
@@ -465,7 +465,7 @@ onMounted(async () => {
             accept="image/png, image/jpeg, image/webp"
             label="Drop your images here"
             description="SVG, PNG, JPG or GIF (max. 2MB). Up to 5 images."
-            class="w-full min-h-80"
+            class="w-full min-h-53"
           />
         </UFormField>
 
