@@ -39,6 +39,7 @@ const maxGenres = 5;
 const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
 
+const isSubmitting = ref(false);
 
 const resetState = () => {
   Object.assign(state, {
@@ -71,6 +72,8 @@ const isOpenAddBookModal = computed({
 
 const onSubmit = async () => {
   try {
+    isSubmitting.value = true;
+
     const bookFormData = new FormData();
     bookFormData.append('title', state.title);
     bookFormData.append('author', state.author);
@@ -208,6 +211,7 @@ watch(
       // e.g. delay reset after modal closes
       setTimeout(() => {
         resetState();
+        isSubmitting.value = false;
       }, 300); // delay in ms
     }
   },
@@ -227,6 +231,7 @@ onMounted(async () => {
 
     <template #body>
       <UForm
+        v-if="!isSubmitting"
         class="flex flex-col space-y-4"
         :validate="(state) => validateAddEditBook(state, 'add')"
         :state="state"
@@ -378,6 +383,11 @@ onMounted(async () => {
           >
         </div>
       </UForm>
+
+      <div v-else class="flex justify-center items-center min-h-[calc(50vh)]">
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-accent" />
+        <span class="ml-2 text-muted">Adding book...</span>
+      </div>
     </template>
   </UModal>
 </template>

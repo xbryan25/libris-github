@@ -43,6 +43,8 @@ const maxGenres = 5;
 const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
 
+const isSubmitting = ref(false);
+
 // To prevent NuxtImg from caching images
 const cacheVersion = ref(Date.now());
 
@@ -194,7 +196,7 @@ const fetchCurrentBookDetails = async () => {
 const onSubmit = async () => {
   try {
 
-    // Update genresToAdd and genresToDelete
+    isSubmitting.value = true;
 
     const bookFormData = new FormData();
 
@@ -340,6 +342,7 @@ watch(
       // e.g. delay reset after modal closes
       setTimeout(() => {
         resetState();
+        isSubmitting.value = false;
       }, 300); // delay in ms
     } else {
       loading.value = true;
@@ -362,6 +365,7 @@ onMounted(async () => {
 
     <template #body>
       <UForm
+        v-if="!isSubmitting"
         class="flex flex-col space-y-4"
         :validate="(state) => validateAddEditBook(state, 'edit')"
         :state="state"
@@ -565,6 +569,11 @@ onMounted(async () => {
           >
         </div>
       </UForm>
+
+      <div v-else class="flex justify-center items-center min-h-[calc(50vh)]">
+        <UIcon name="i-heroicons-arrow-path" class="w-8 h-8 animate-spin text-accent" />
+        <span class="ml-2 text-muted">Editing book...</span>
+      </div>
     </template>
   </UModal>
 </template>
