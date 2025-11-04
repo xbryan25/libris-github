@@ -307,7 +307,7 @@ class BookServices:
 
         # Upload images to Supabase
 
-        parsed_book_images = []
+        parsed_book_images = book_images.getlist("bookImages")
 
         for value in book_images.values():
             parsed_book_images.append(value)
