@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:openAddBookModal', value: boolean): void;
+  (e: 'addBookSuccess'): void;
 }>();
 
 
@@ -106,6 +107,9 @@ const onSubmit = async () => {
       description: `${data.message}`,
       color: 'success',
     });
+
+
+    emit('addBookSuccess');
 
     isOpenAddBookModal.value = false;
   } catch (error) {

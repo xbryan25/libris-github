@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:openEditBookModal', value: boolean): void;
+  (e: 'editBookSuccess'): void;
 }>();
 
 const state = reactive({
@@ -237,6 +238,8 @@ const onSubmit = async () => {
       description: `${data.message}`,
       color: 'success',
     });
+
+    emit('editBookSuccess');
 
     isOpenEditBookModal.value = false;
   } catch (error) {

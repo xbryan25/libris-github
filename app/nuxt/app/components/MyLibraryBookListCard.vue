@@ -6,6 +6,12 @@ const props = defineProps<{
   bookDetails?: MyLibraryBook | null;
 }>();
 
+
+const emit = defineEmits<{
+  (e: 'editBookSuccess'): void;
+}>();
+
+
 const isOpenEditBookModal = ref(false);
 
 const openEditBookModal = () => {
@@ -175,10 +181,13 @@ const openEditBookModal = () => {
 
       <EditBookModal
         :is-open-edit-book-modal="isOpenEditBookModal"
-        :book-id="bookDetails?.bookId"
+        :book-id="bookDetails?.bookId as string"
+        
         @update:open-edit-book-modal="
           (newIsOpenEditBookModal: boolean) => (isOpenEditBookModal = newIsOpenEditBookModal)
         "
+
+      @edit-book-success="emit('editBookSuccess')" 
       />
     </div>
   </div>

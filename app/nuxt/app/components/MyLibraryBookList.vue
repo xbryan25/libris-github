@@ -8,6 +8,7 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
   };
+  addBookRefreshTrigger: number;
   userId?: string;
 }>();
 
@@ -20,6 +21,10 @@ const cardWidth = 225;
 const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
+
+const editBookRefreshTrigger = ref(0);
+
+const isFetching = ref(false);
 
 const getGridCapacity = () => {
   const el = gridContainer.value;
@@ -36,7 +41,7 @@ const getGridCapacity = () => {
   return total;
 };
 
-const isFetching = ref(false);
+
 
 const loadBooks = async () => {
   const capacity = getGridCapacity();
@@ -146,6 +151,8 @@ watch(
     () => props.headerState.searchValue,
     () => props.headerState.selectedBookAvailability,
     () => props.headerState.selectedBookGenre,
+    () => props.addBookRefreshTrigger,
+    () => editBookRefreshTrigger,
   ],
   async () => {
     isFetching.value = true;
@@ -158,7 +165,7 @@ watch(
       isFetching.value = false;
     }
   },
-  () => debouncedHandler()
+  () => debouncedHandler(),
   { deep: true },
 );
 
@@ -212,6 +219,7 @@ onBeforeUnmount(() => {
           :key="book.bookId"
           card-type="hasContent"
           :book-details="book"
+          @edit-book-success="editBookRefreshTrigger++
         />
 
         <MyLibraryBookListCard

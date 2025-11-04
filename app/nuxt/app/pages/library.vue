@@ -11,6 +11,7 @@ const headerState = reactive({
   selectedBookAvailability: 'All',
 });
 
+const refreshTrigger = ref(0);
 
 const isOpenAddBookModal = ref(false);
 
@@ -18,6 +19,9 @@ const openAddBookModal = () => {
   isOpenAddBookModal.value = true;
 };
 
+const onRefreshSignal = () => {
+  refreshTrigger.value++; // this will change value each time
+};
 </script>
 
 <template>
@@ -53,13 +57,15 @@ const openAddBookModal = () => {
       "
     />
 
-    <MyLibraryBookList :header-state="headerState" />
+    <MyLibraryBookList :header-state="headerState" :add-book-refresh-trigger="refreshTrigger" />
 
     <AddBookModal
       :is-open-add-book-modal="isOpenAddBookModal"
       @update:open-add-book-modal="
         (newIsOpenAddBookModal) => (isOpenAddBookModal = newIsOpenAddBookModal)
       "
+
+      @add-book-success="onRefreshSignal"
     />
   </div>
 </template>
