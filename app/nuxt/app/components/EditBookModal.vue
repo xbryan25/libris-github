@@ -2,6 +2,7 @@
 import { validateAddEditBook } from '#imports';
 
 import draggable from 'vuedraggable';
+import BookList from './BookList.vue';
 
 const props = defineProps<{
   isOpenEditBookModal: boolean;
@@ -18,6 +19,9 @@ const state = reactive({
   genres: [] as string[],
   condition: '',
   bookImages: [] as File[],
+  existingBookImageUrls: [] as string[],
+  existingBookImageUrlsToDelete: [] as string[],
+  allBookOrder: [] as string[],
   description: '',
   availability: '',
   dailyRentPrice: 0,
@@ -28,7 +32,7 @@ const state = reactive({
 const toast = useToast();
 
 const maxFileSize = 2 * 1024 * 1024; // 2MB
-const maxFiles = 5;
+const maxFilesWithExisting = computed(() => 5 - state.existingBookImageUrls.length);
 
 const bookGenreItems = ref<string[]>([]);
 const maxGenres = 5;
@@ -36,7 +40,59 @@ const maxGenres = 5;
 const conditionItems = ['New', 'Good', 'Used', 'Worn'];
 const availabilityItems = ['For Rent', 'For Sale', 'Both'];
 
-const { book: bookDetails, fetchBookDetails } = useBookDetails();
+const { book: bookDetails, fetchBookDetails, loading } = useBookDetails();
+
+const isOpenEditBookModal = computed({
+  get: () => props.isOpenEditBookModal,
+  set: (val: boolean) => {
+    emit('update:openEditBookModal', val);
+  },
+});
+
+const mergedBookImages = computed({
+  get: () => {
+    // Build all possible items
+    const allItems = [
+      ...state.existingBookImageUrls.map((url) => ({
+        id: url,
+        type: 'existing',
+        value: url,
+      })),
+      ...state.bookImages.map((file) => ({
+        id: file.name,
+        type: 'new',
+        value: file,
+      })),
+    ];
+
+    // If we already have an order, follow it
+    if (state.allBookOrder.length > 0) {
+      const ordered = state.allBookOrder
+        .map((id) => allItems.find((item) => item.id === id))
+        .filter(Boolean) as typeof allItems;
+
+      // Add any new items not yet in order (like newly uploaded ones)
+      const missing = allItems.filter((item) => !state.allBookOrder.includes(item.id));
+      return [...ordered, ...missing];
+    }
+
+    // Otherwise, default to normal order
+    return allItems;
+  },
+
+  set: (newList) => {
+    state.existingBookImageUrls = newList
+      .filter((item) => item.type === 'existing')
+      .map((item) => item.value as string);
+
+    state.bookImages = newList
+      .filter((item) => item.type === 'new')
+      .map((item) => item.value as File);
+
+    // Update order
+    state.allBookOrder = newList.map((item) => item.id);
+  },
+});
 
 const resetState = () => {
   Object.assign(state, {
@@ -45,6 +101,9 @@ const resetState = () => {
     genres: [],
     condition: '',
     bookImages: [],
+    existingBookImageUrls: [],
+    existingBookImageUrlsToDelete: [],
+    allBookOrder: [],
     description: '',
     availability: '',
     dailyRentPrice: 0,
@@ -59,12 +118,13 @@ const loadBookGenreItems = async () => {
   bookGenreItems.value = [...bookGenres];
 };
 
-const isOpenEditBookModal = computed({
-  get: () => props.isOpenEditBookModal,
-  set: (val: boolean) => {
-    emit('update:openEditBookModal', val);
-  },
-});
+const deleteExistingBookImageUrl = (existingBookImageUrl: string) => {
+  state.existingBookImageUrlsToDelete.push(existingBookImageUrl);
+
+  state.existingBookImageUrls = state.existingBookImageUrls.filter(
+    (bookImageUrl) => bookImageUrl !== existingBookImageUrl,
+  );
+};
 
 const fetchCurrentBookDetails = async () => {
   try {
@@ -76,7 +136,31 @@ const fetchCurrentBookDetails = async () => {
       throw new Error('bookId is required but was not provided.');
     }
 
-    console.log(bookDetails.value);
+    // Assign bookDetails.value to state
+
+    state.title = bookDetails.value?.title as string;
+    state.author = bookDetails.value?.author as string;
+    state.genres = bookDetails.value?.genres as string[];
+    state.condition = bookDetails.value?.condition
+      ? bookDetails.value.condition.charAt(0).toUpperCase() + bookDetails.value.condition.slice(1)
+      : '';
+    state.existingBookImageUrls = bookDetails.value?.images as string[];
+    state.description = bookDetails.value?.description as string;
+    state.dailyRentPrice = bookDetails.value?.daily_rent_price as number;
+    state.securityDeposit = bookDetails.value?.security_deposit as number;
+    state.purchasePrice = bookDetails.value?.purchase_price as number;
+
+    const bookDetailsAvailability = bookDetails.value?.availability as string;
+
+    if (bookDetailsAvailability === 'rent') {
+      state.availability = 'For Rent';
+    } else if (bookDetailsAvailability === 'purchase') {
+      state.availability = 'For Sale';
+    } else {
+      state.availability = 'Both';
+    }
+
+    console.log(state);
   } catch (error) {
     let errorMessage;
 
@@ -141,7 +225,7 @@ const onSubmit = async () => {
 const onSubmitError = () => {
   toast.add({
     title: 'Error with inputs',
-    description: `Resolve issues to add a book.`,
+    description: `Resolve issues to edit the book.`,
     color: 'error',
   });
 };
@@ -155,14 +239,15 @@ watch(
     let changed = false;
 
     // Limit file count
-    if (adjusted.length > maxFiles) {
-      const numOfOverflow = adjusted.length - maxFiles;
 
-      adjusted = adjusted.slice(0, maxFiles);
+    if (adjusted.length > maxFilesWithExisting.value) {
+      const numOfOverflow = adjusted.length - maxFilesWithExisting.value;
+
+      adjusted = adjusted.slice(0, maxFilesWithExisting.value);
 
       toast.add({
         title: 'Too Many Images Selected',
-        description: `You can only upload up to ${maxFiles} images. ${numOfOverflow} ${numOfOverflow > 1 ? 'extra files were' : 'extra file was'} ignored.`,
+        description: `You can only upload up to ${maxFilesWithExisting.value} ${maxFilesWithExisting.value > 1 ? 'images' : 'image'} as there are already ${state.existingBookImageUrls.length} uploaded images. ${numOfOverflow} ${numOfOverflow > 1 ? 'extra images were' : 'extra image was'} ignored.`,
         color: 'error',
       });
 
@@ -223,13 +308,14 @@ watch(
         resetState();
       }, 300); // delay in ms
     } else {
+      loading.value = true;
+      await loadBookGenreItems();
       await fetchCurrentBookDetails();
     }
   },
 );
 
 onMounted(async () => {
-  await loadBookGenreItems();
   resetState();
 });
 </script>
@@ -250,17 +336,21 @@ onMounted(async () => {
       >
         <div class="flex flex-col gap-4 w-full">
           <UFormField label="Title" name="title" class="flex-1">
-            <UInput v-model="state.title" placeholder="Enter book title" class="w-full" />
+            <USkeleton v-if="loading" class="w-full h-8" />
+            <UInput v-else v-model="state.title" placeholder="Enter book title" class="w-full" />
           </UFormField>
 
           <UFormField label="Author" name="author" class="flex-1">
-            <UInput v-model="state.author" placeholder="Enter book author" class="w-full" />
+            <USkeleton v-if="loading" class="w-full h-8" />
+            <UInput v-else v-model="state.author" placeholder="Enter book author" class="w-full" />
           </UFormField>
         </div>
 
         <div class="flex gap-4">
           <UFormField label="Genres (up to 5)" name="genres" class="flex-1">
+            <USkeleton v-if="loading" class="w-full h-8" />
             <USelectMenu
+              v-else
               v-model="state.genres"
               :items="bookGenreItems"
               multiple
@@ -275,7 +365,9 @@ onMounted(async () => {
           </UFormField>
 
           <UFormField label="Condition" name="condition" class="flex-1">
+            <USkeleton v-if="loading" class="w-full h-8" />
             <USelect
+              v-else
               v-model="state.condition"
               :items="conditionItems"
               placeholder="Select book condition"
@@ -289,8 +381,41 @@ onMounted(async () => {
           </UFormField>
         </div>
 
+
+        <UFormField
+          v-if="state.existingBookImageUrls.length > 0 || loading"
+          label="Existing Images"
+          name="existingImages"
+          class="flex-1"
+        >
+          <USkeleton v-if="loading" class="w-full h-80" />
+          <div
+            v-else
+            class="grid grid-cols-3 gap-4 p-4 min-h-80 bg-default border border-default border-dashed rounded-lg content-center"
+          >
+            <div
+              v-for="(image, index) in state.existingBookImageUrls"
+              :key="index"
+              class="relative"
+            >
+              <img :src="image" class="rounded-md w-full h-45 object-cover" />
+
+              <button
+                class="bg-inverted absolute -top-1.5 -right-1.5 rounded-full text-xs cursor-pointer w-5 h-5 border-2 border-bg inline-flex items-center"
+                type="button"
+                @click="deleteExistingBookImageUrl(image)"
+              >
+                <Icon name="i-lucide:x" class="size-4 bg-default shrink-0" />
+              </button>
+            </div>
+          </div>
+        </UFormField>
+
+
         <UFormField label="Upload Images" name="bookImages" class="flex-1">
+          <USkeleton v-if="loading" class="w-full h-80" />
           <UFileUpload
+            v-else 
             v-model="state.bookImages"
             multiple
             accept="image/png, image/jpeg, image/webp"
@@ -301,22 +426,29 @@ onMounted(async () => {
         </UFormField>
 
         <UFormField
-          v-if="state.bookImages.length > 1"
+          v-if="mergedBookImages.length > 1"
           label="Reorder images (drag the image names)"
           name="reorderImages"
           class="flex-1"
         >
-          <draggable v-model="state.bookImages" item-key="id" tag="ul" :animation="300">
-            <template #item="{ element: bookImage }">
+          <draggable v-model="mergedBookImages" item-key="id" tag="ul" :animation="300">
+            <template #item="{ element }">
               <li class="list-disc list-inside cursor-move px-2 py-1 rounded mb-1 bg-surface-hover">
-                {{ bookImage.name }}
+                <span v-if="element.type === 'existing'">
+                  Uploaded image {{ element.value.split('/').pop().at(-1) }}
+                </span>
+                <span v-else>
+                  {{ element.value.name }}
+                </span>
               </li>
             </template>
           </draggable>
         </UFormField>
 
         <UFormField label="Description" name="description" class="flex-1">
+          <USkeleton v-if="loading" class="w-full h-20" />
           <UTextarea
+            v-else
             v-model="state.description"
             placeholder="Add book description"
             class="w-full min-h-20"
@@ -325,7 +457,9 @@ onMounted(async () => {
         </UFormField>
 
         <UFormField label="Availability" name="availability" class="flex-1">
+          <USkeleton v-if="loading" class="w-full h-8" />
           <USelect
+            v-else
             v-model="state.availability"
             :items="availabilityItems"
             placeholder="Select book availability"
@@ -383,8 +517,14 @@ onMounted(async () => {
             @click="isOpenEditBookModal = false"
             >Cancel</UButton
           >
-          <UButton size="md" color="primary" variant="solid" type="submit" class="cursor-pointer"
-            >Add Book</UButton
+          <UButton
+            size="md"
+            color="primary"
+            variant="solid"
+            type="submit"
+            class="cursor-pointer"
+            :disabled="loading"
+            >Edit Book</UButton
           >
         </div>
       </UForm>

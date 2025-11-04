@@ -93,7 +93,7 @@ const onSubmit = async () => {
 
     toast.add({
       title: 'Success',
-      description: `'${data.message}' has been added to your library.`,
+      description: `${data.message}`,
       color: 'success',
     });
 
