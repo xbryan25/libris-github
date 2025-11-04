@@ -309,9 +309,6 @@ class BookServices:
 
         parsed_book_images = book_images.getlist("bookImages")
 
-        for value in book_images.values():
-            parsed_book_images.append(value)
-
         supabase: Client = create_client(
             current_app.config.get("SUPABASE_URL"),
             current_app.config.get("SUPABASE_SERVICE_KEY"),
