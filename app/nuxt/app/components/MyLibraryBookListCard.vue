@@ -8,17 +8,21 @@ const props = defineProps<{
 
 
 const emit = defineEmits<{
-  (e: 'editBookSuccess'): void;
+  (e: 'editBookSuccess' | 'deleteBookSuccess'): void;
 }>();
 
 
 const isOpenEditBookModal = ref(false);
 
+const isOpenDeleteBookModal = ref(false);
+
 const openEditBookModal = () => {
   isOpenEditBookModal.value = true;
 };
 
-
+const openDeleteBookModal = () => {
+isOpenDeleteBookModal.value = true;
+};
 </script>
 
 <template>
@@ -141,7 +145,11 @@ const openEditBookModal = () => {
               <Icon name="material-symbols:edit" class="w-5 h-5 text-bg" />
               <p>Edit</p>
             </UButton>
-            <UButton color="error" class="flex-1 justify-center cursor-pointer">
+            <UButton
+              color="error"
+              class="flex-1 justify-center cursor-pointer"
+              @click="openDeleteBookModal"
+            >
               <Icon name="material-symbols:delete-sharp" class="w-5 h-5 text-bg" />
               <p>Delete</p>
             </UButton>
@@ -182,12 +190,25 @@ const openEditBookModal = () => {
       <EditBookModal
         :is-open-edit-book-modal="isOpenEditBookModal"
         :book-id="bookDetails?.bookId as string"
-        
+
         @update:open-edit-book-modal="
           (newIsOpenEditBookModal: boolean) => (isOpenEditBookModal = newIsOpenEditBookModal)
         "
 
       @edit-book-success="emit('editBookSuccess')" 
+      />
+
+
+
+      <DeleteBookModal
+        :is-open-delete-book-modal="isOpenDeleteBookModal"
+        :book-id="bookDetails?.bookId as string"
+        :book-title="bookDetails?.title as string"
+        @update:open-delete-book-modal="
+          (newIsOpenDeleteBookModal: boolean) => (isOpenDeleteBookModal = newIsOpenDeleteBookModal)
+        "
+        @delete-book-success="emit('deleteBookSuccess')"
+        
       />
     </div>
   </div>

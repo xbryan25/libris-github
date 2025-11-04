@@ -22,7 +22,7 @@ const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
 
-const editBookRefreshTrigger = ref(0);
+const editDeleteBookRefreshTrigger = ref(0);
 
 const isFetching = ref(false);
 
@@ -152,7 +152,7 @@ watch(
     () => props.headerState.selectedBookAvailability,
     () => props.headerState.selectedBookGenre,
     () => props.addBookRefreshTrigger,
-    () => editBookRefreshTrigger,
+    () => editDeleteBookRefreshTrigger,
   ],
   async () => {
     isFetching.value = true;
@@ -219,7 +219,8 @@ onBeforeUnmount(() => {
           :key="book.bookId"
           card-type="hasContent"
           :book-details="book"
-          @edit-book-success="editBookRefreshTrigger++
+          @edit-book-success="editDeleteBookRefreshTrigger++"
+          @delete-book-success="editDeleteBookRefreshTrigger++"
         />
 
         <MyLibraryBookListCard
