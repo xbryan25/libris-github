@@ -27,7 +27,7 @@ const getGridCapacity = () => {
 
   const width = el.clientWidth;
   const gridGap = 12;
-  const cols = Math.max(1, Math.round((width + gridGap) / (cardWidth + gridGap)));
+  const cols = Math.max(1, Math.floor((width + gridGap) / (cardWidth + gridGap)));
 
   const rows = 2;
 
