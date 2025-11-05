@@ -448,3 +448,22 @@ class BookControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def delete_a_book_controller(book_id: str) -> tuple[Response, int]:
+        """(add later)"""
+
+        try:
+            book_details = request.get_json()
+
+            title = book_details.get("title")
+
+            BookServices.delete_a_book_service(book_id)
+
+            return (
+                jsonify({"message": f"{title} was edited successfully."}),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

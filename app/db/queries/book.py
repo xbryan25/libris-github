@@ -12,6 +12,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
         "AND ("
@@ -40,6 +41,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
         "AND ("
@@ -67,6 +69,7 @@ class BookQueries:
         "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
     )
@@ -83,6 +86,7 @@ class BookQueries:
         "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status IS NULL) "
     )
@@ -102,6 +106,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND ("
         "    %s = '%%' "
@@ -127,6 +132,7 @@ class BookQueries:
         "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
     )
 
@@ -156,6 +162,7 @@ class BookQueries:
         LEFT JOIN book_genres bg ON bgl.book_genre_id = bg.book_genre_id
         LEFT JOIN rented_books rb ON b.book_id = rb.book_id
         WHERE b.book_id = %s
+        AND b.is_soft_deleted != TRUE
         GROUP BY
             b.book_id,
             b.title,
@@ -302,3 +309,18 @@ class BookQueries:
             order_num = %s
         WHERE book_id = %s AND image_url = %s;
     """
+
+    CHECK_IF_BOOK_HAS_RENT_OR_PURCHASE_HISTORY = """
+        SELECT 1 FROM purchased_books WHERE book_id = %s
+        UNION
+        SELECT 1 FROM rented_books WHERE book_id = %s;
+    """
+
+    SOFT_DELETE_A_BOOK = """
+        UPDATE BOOKS
+        SET
+            is_soft_deleted = %s,
+        WHERE book_id = %s;
+    """
+
+    DELETE_A_BOOK = "DELETE FROM books WHERE book_id = %s"

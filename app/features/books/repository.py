@@ -535,3 +535,60 @@ class BookRepository:
             BookQueries.EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES,
             (new_image_url, order_num, book_id, old_image_url),
         )
+
+    @staticmethod
+    def delete_all_book_genre_links_from_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.DELETE_BY_ID.format(table="book_genre_links", pk="book_id"),
+            (book_id,),
+        )
+
+    @staticmethod
+    def check_if_book_has_rent_or_purchase_history(book_id) -> bool:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        row = db.fetch_one(
+            BookQueries.CHECK_IF_BOOK_HAS_RENT_OR_PURCHASE_HISTORY,
+            (book_id, book_id),
+        )
+
+        if row:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def soft_delete_a_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.SOFT_DELETE_A_BOOK,
+            (True, book_id),
+        )
+
+    @staticmethod
+    def delete_a_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.DELETE_A_BOOK,
+            (book_id,),
+        )

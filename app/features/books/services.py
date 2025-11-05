@@ -447,3 +447,42 @@ class BookServices:
 
         if len(uploaded_urls) > 0:
             BookRepository.add_book_images_to_database(book_id, uploaded_urls)
+
+    @staticmethod
+    def delete_a_book_service(book_id) -> None:
+        """Add a new book (improve later)"""
+
+        BookRepository.delete_all_book_genre_links_from_book(book_id)
+
+        image_urls_dict = BookRepository.get_book_images(book_id)
+
+        image_urls_to_delete = [
+            image_url_dict["image_url"] for image_url_dict in image_urls_dict
+        ]
+
+        supabase: Client = create_client(
+            current_app.config.get("SUPABASE_URL"),
+            current_app.config.get("SUPABASE_SERVICE_KEY"),
+        )
+
+        bucket_name = "book_images"
+
+        supabase.storage.from_(bucket_name).remove(
+            [
+                image_url_to_delete.split("/").pop()
+                for image_url_to_delete in image_urls_to_delete
+            ]
+        )
+
+        BookRepository.remove_book_images_from_database(book_id, image_urls_to_delete)
+
+        has_rent_and_purchase_history = (
+            BookRepository.check_if_book_has_rent_or_purchase_history(book_id)
+        )
+
+        print(f"has_rent_and_purchase_history: {has_rent_and_purchase_history}")
+
+        if has_rent_and_purchase_history:
+            BookRepository.soft_delete_a_book(book_id)
+        else:
+            BookRepository.delete_a_book(book_id)

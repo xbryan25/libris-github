@@ -25,17 +25,12 @@ const onSubmit = async () => {
   try {
     isSubmitting.value = true;
 
-    // const data = await useCreateBook();
+const data = await useDeleteBook(props.bookId, props.bookTitle);
 
-    // toast.add({
-    //   title: 'Success',
-    //   description: `${data.message}`,
-    //   color: 'success',
-    // });
 
     toast.add({
-      title: 'Success',
-      description: `Book has been successfully deleted.`,
+      title: 'Success',s
+      description: `${data.message}`,
       color: 'success',
     });
 

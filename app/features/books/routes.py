@@ -388,3 +388,12 @@ def edit_a_book(book_id) -> tuple[Response, int]:
     (add later)
     """
     return BookControllers.edit_a_book_controller(book_id)
+
+
+@books_bp.route("/<string:book_id>", methods=["DELETE"])
+@jwt_required()
+def delete_a_book(book_id) -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.delete_a_book_controller(book_id)
