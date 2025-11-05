@@ -28,6 +28,14 @@ export const useProfile = (userId?: string) => {
   const loading = ref(true)
   const error = ref<string | null>(null)
 
+  const isUserNotFound = computed(
+    () =>
+      error.value === 'User not found.' ||
+      error.value === 'Invalid user ID format.'
+  )
+
+  const { $apiFetch } = useNuxtApp();
+
   const fetchProfile = async () => {
     loading.value = true
     error.value = null
@@ -40,7 +48,7 @@ export const useProfile = (userId?: string) => {
         credentials: 'include'
       }
 
-      const res = await $fetch<Profile>(url, options)
+      const res = await $apiFetch<Profile>(url, options)
       if (!res.address) {
         res.address = {
           street: '-',
@@ -67,11 +75,17 @@ export const useProfile = (userId?: string) => {
 
       profile.value = res
     } catch (e: any) {
-      error.value = e?.message || 'Failed to fetch profile info'
+      if (e?.response?.status === 404) {
+        error.value = 'User not found.'
+      } else if (e?.response?.status === 400) {
+        error.value = 'Invalid user ID format.'
+      } else {
+        error.value = e?.message || 'Failed to fetch profile info'
+      } 
     } finally {
       loading.value = false
     }
   }
 
-  return { profile, loading, error, fetchProfile }
+  return { profile, loading, error, isUserNotFound, fetchProfile }
 }

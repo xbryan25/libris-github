@@ -16,6 +16,8 @@ type BookDetails = {
   owner_profile_picture: string
   owner_trust_score: number
   times_rented: number
+  is_rented: boolean
+  is_purchased: boolean
   images: string[]
 }
 
@@ -33,14 +35,16 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const useBookDetails = () => {
   const book = ref<BookDetails | null>(null)
-  const loading = ref(false)
+  const loading = ref(true)
   const error = ref<string | null>(null)
+
+  const { $apiFetch } = useNuxtApp();
 
   const fetchBookDetails = async (bookId: string) => {
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<BookDetails>(`${API_URL}/api/books/${bookId}`, {
+      const res = await $apiFetch<BookDetails>(`${API_URL}/api/books/${bookId}`, {
         credentials: 'include'
       })
       book.value = res

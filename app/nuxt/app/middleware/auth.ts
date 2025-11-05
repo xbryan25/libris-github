@@ -12,6 +12,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         // await useRefreshAccessToken()
         const response = await useCurrentUser()
         auth.username = response.username
+        auth.user_id = response.user_id
         auth.isAuthenticated = true
 
         // --- Debug logging ---

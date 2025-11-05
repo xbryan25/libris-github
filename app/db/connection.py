@@ -80,6 +80,25 @@ class Database:
                 else:
                     raise
 
+    def execute_query_returning(self, query: Query, params: Any = None):
+        """For INSERT queries with RETURNING clauses."""
+        for attempt in range(self._max_retries + 1):
+            try:
+                with self.get_conn() as conn:
+
+                    with conn.cursor() as cur:
+                        cur.execute(query, params)
+                        result = cur.fetchone()
+                    return result
+            except OperationalError:
+                if attempt < self._max_retries:
+                    logger.warning(
+                        f"OperationalError on attempt {attempt+1}, reconnecting..."
+                    )
+                    self.reconnect()
+                else:
+                    raise
+
     def fetch_all(self, query: Query, params: Any = None) -> list[TupleRow] | None:
         """For SELECT queries returning multiple rows."""
         for attempt in range(self._max_retries + 1):

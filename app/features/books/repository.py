@@ -136,6 +136,100 @@ class BookRepository:
             )
 
     @staticmethod
+    def get_my_library_books(user_id, params) -> list[dict[str, str]]:
+        """
+        Retrieve a paginated list of books based on search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary containing the pagination details, optional search, genre, and availability filters.
+                Expected keys include:
+                    - "books_per_page" (str): The number of book details to retrieve.
+                    - "page_number" (str): This number will be multiplied by books_per_page then serve as the
+                                            offset for pagination.
+                    - "search_value" (str): The value to search for.
+                    - "genre" (str): The genre or category of books to filter by.
+                    - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
+                                        other user, get all books that that user owns
+            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
+                                                        or only from a specific user
+
+        Returns:
+            list[dict]: A list of book records matching the given filters, where each record is represented as a dictionary.
+        """
+
+        db = current_app.extensions["db"]
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["books_per_page"]
+        )
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        # Randomized
+        return db.fetch_all(
+            BookQueries.GET_MY_LIBRARY_BOOKS.format(
+                search_by="title", sort_field="RANDOM()", sort_order="ASC"
+            ),
+            (
+                search_pattern,
+                availability,
+                user_id,
+                genre,
+                genre,
+                params["books_per_page"],
+                offset,
+            ),
+        )
+
+    @staticmethod
+    def get_total_my_library_book_count(user_id, params) -> dict[str, int]:
+        """
+        Retrieve the total number of books based on search, genre, and availability filters.
+
+        Args:
+            params (dict): A dictionary of query parameters. Expected keys include:
+                - "search_value" (str): The value to search for.
+                - "genre" (str): The genre or category of books to filter by.
+                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
+                - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from other
+                                    user, count all books that that user owns
+            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be from
+                                                        everyone or only from a specific user
+
+        Returns:
+             dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
+        """
+
+        db = current_app.extensions["db"]
+
+        # Search is 'Contains'
+        search_pattern = f"%{params['search_value']}%"
+
+        genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
+        availability = (
+            "%%" if params["availability"] == "all" else f"{params['availability']}"
+        )
+
+        return db.fetch_one(
+            BookQueries.GET_MY_LIBRARY_BOOK_COUNT.format(search_by="title"),
+            (
+                search_pattern,
+                genre,
+                availability,
+                user_id,
+            ),
+        )
+
+    @staticmethod
     def get_book_genres() -> list[dict[str, str]]:
         """
         Retrieve a list of available genres.
@@ -304,3 +398,197 @@ class BookRepository:
         params = (user_id,)
 
         return db.fetch_all(BookQueries.GET_SOLD_BOOKS, params)
+
+    @staticmethod
+    def add_new_book(user_id, book_data) -> dict[str, str]:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        params = (
+            book_data["title"],
+            book_data["author"],
+            book_data["condition"],
+            book_data["description"],
+            book_data["availability"],
+            book_data["daily_rent_price"],
+            book_data["security_deposit"],
+            book_data["purchase_price"],
+            user_id,
+        )
+
+        return db.execute_query_returning(BookQueries.ADD_NEW_BOOK, params)
+
+    @staticmethod
+    def edit_a_book(book_id, book_data) -> dict[str, str]:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        params = (
+            book_data["title"],
+            book_data["author"],
+            book_data["condition"],
+            book_data["description"],
+            book_data["availability"],
+            book_data["daily_rent_price"],
+            book_data["security_deposit"],
+            book_data["purchase_price"],
+            book_id,
+        )
+
+        return db.execute_query(BookQueries.EDIT_A_BOOK, params)
+
+    @staticmethod
+    def get_genre_ids_from_genre_names(genres) -> list[dict[str, str]]:
+        db = current_app.extensions["db"]
+
+        return db.fetch_all(
+            CommonQueries.GET_IDS_BY_VALUES.format(
+                table="book_genres", column="book_genre_id", field="book_genre_name"
+            ),
+            (genres,),
+        )
+
+    @staticmethod
+    def connect_book_to_genres(book_id, genres) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        genre_ids = BookRepository.get_genre_ids_from_genre_names(genres)
+
+        for genre_id in genre_ids:
+            db.execute_query(
+                BookQueries.INSERT_TO_BOOK_GENRE_LINKS,
+                (book_id, genre_id["book_genre_id"]),
+            )
+
+    @staticmethod
+    def remove_connection_of_book_to_genres(book_id, genres) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        genre_ids = BookRepository.get_genre_ids_from_genre_names(genres)
+
+        for genre_id in genre_ids:
+            db.execute_query(
+                BookQueries.DELETE_FROM_BOOK_GENRE_LINKS,
+                (book_id, genre_id["book_genre_id"]),
+            )
+
+    @staticmethod
+    def add_book_images_to_database(book_id, uploaded_urls) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        for index, uploaded_url in enumerate(uploaded_urls):
+            db.execute_query(
+                BookQueries.INSERT_TO_BOOK_IMAGES,
+                (
+                    uploaded_url["image_url"],
+                    uploaded_url["uploaded_at"],
+                    index + 1,
+                    book_id,
+                ),
+            )
+
+    @staticmethod
+    def remove_book_images_from_database(
+        book_id, existing_book_image_urls_to_delete
+    ) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        for existing_book_image_url_to_delete in existing_book_image_urls_to_delete:
+            db.execute_query(
+                BookQueries.REMOVE_FROM_BOOK_IMAGES,
+                (book_id, existing_book_image_url_to_delete),
+            )
+
+    @staticmethod
+    def edit_book_image_url_in_database(
+        book_id, old_image_url, new_image_url, order_num
+    ) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES,
+            (new_image_url, order_num, book_id, old_image_url),
+        )
+
+    @staticmethod
+    def delete_all_book_genre_links_from_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.DELETE_BY_ID.format(table="book_genre_links", pk="book_id"),
+            (book_id,),
+        )
+
+    @staticmethod
+    def check_if_book_has_rent_or_purchase_history(book_id) -> bool:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        row = db.fetch_one(
+            BookQueries.CHECK_IF_BOOK_HAS_RENT_OR_PURCHASE_HISTORY,
+            (book_id, book_id),
+        )
+
+        if row:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def soft_delete_a_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.SOFT_DELETE_A_BOOK,
+            (True, book_id),
+        )
+
+    @staticmethod
+    def delete_a_book(book_id) -> None:
+        """
+        to be written
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            BookQueries.DELETE_A_BOOK,
+            (book_id,),
+        )

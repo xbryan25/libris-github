@@ -12,6 +12,9 @@ class Config:
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL environment variable is not set")
 
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_ACCESS_COOKIE_NAME = "access_token_cookie"
