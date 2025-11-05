@@ -4,28 +4,21 @@ import tempfile
 from typing import Any
 from datetime import datetime
 
+from uuid import uuid4
+
 
 def upload_images_to_bucket(
     supabase_client,
-    images,
+    book_images,
     book_id,
     bucket_name,
-    upload_type="add",
-    all_book_order=[],
-    existing_book_image_urls=[],
 ) -> list[dict[str, Any]]:
     uploaded_urls = []
 
-    for index, book_image in enumerate(images, start=1):
+    for book_image in book_images:
         # Create a path inside the bucket
 
-        file_path = (
-            create_file_path_for_edit(
-                index, book_image, book_id, existing_book_image_urls, all_book_order
-            )
-            if upload_type == "edit"
-            else f"{book_id}-{index}"
-        )
+        file_path = f"{book_id}/{uuid4()}"
 
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(book_image.read())
@@ -51,14 +44,3 @@ def upload_images_to_bucket(
         uploaded_urls.append({"image_url": public_url, "uploaded_at": datetime.now()})
 
     return uploaded_urls
-
-
-def create_file_path_for_edit(
-    index, book_image, book_id, existing_book_image_urls=[], all_book_order=[]
-):
-    if len(all_book_order) == 0:
-        file_path = f"{book_id}-{len(existing_book_image_urls) + index}"
-    else:
-        file_path = f"{book_id}-{all_book_order.index(book_image.filename) + 1}"
-
-    return file_path

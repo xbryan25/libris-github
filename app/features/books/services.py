@@ -306,8 +306,8 @@ class BookServices:
         parsed_book_images = book_images.getlist("bookImages")
 
         supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
         )
 
         bucket_name = "book_images"
@@ -349,8 +349,8 @@ class BookServices:
         # Remove old images from Supabase book_images bucket
 
         supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
         )
 
         bucket_name = "book_images"
@@ -436,13 +436,7 @@ class BookServices:
         parsed_book_images = book_images.getlist("bookImages")
 
         uploaded_urls = upload_images_to_bucket(
-            supabase,
-            parsed_book_images,
-            book_id,
-            bucket_name,
-            "edit",
-            book_data["all_book_order"],
-            book_data["existing_book_image_urls"],
+            supabase, parsed_book_images, book_id, bucket_name
         )
 
         # Link to new images to book_images table
@@ -463,8 +457,8 @@ class BookServices:
         ]
 
         supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
         )
 
         bucket_name = "book_images"
