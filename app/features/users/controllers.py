@@ -10,7 +10,6 @@ from flask_jwt_extended import (
 )
 
 import traceback
-
 import uuid
 
 from .services import UserServices
@@ -19,6 +18,7 @@ from app.utils.camel_case_converter import dict_keys_to_camel
 
 
 class UserControllers:
+
     @staticmethod
     def user_login_controller() -> tuple[Response, int]:
         """Generate JWT access and refresh tokens, and set them as HTTP-only cookies after validating user credentials."""
@@ -64,6 +64,49 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def user_signup_controller() -> tuple[Response, int]:
+        """Create a new user account and initialize their wallet."""
+
+        user_signup_details = request.get_json()
+
+        if user_signup_details is None:
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+        try:
+            username = user_signup_details.get("username")
+            email_address = user_signup_details.get("emailAddress")
+            password = user_signup_details.get("password")
+
+            if not username or not email_address or not password:
+                return (
+                    jsonify(
+                        {"error": "Username, email address, and password are required."}
+                    ),
+                    400,
+                )
+
+            result = UserServices.user_signup_service(username, email_address, password)
+
+            if result is None:
+                return jsonify({"error": "Signup failed."}), 400
+
+            if "error" in result:
+                return jsonify({"error": result["error"]}), 400
+
+            resp = make_response(
+                {
+                    "messageTitle": "Account created successfully!",
+                    "message": "Welcome to Libris! Please log in to continue.",
+                }
+            )
+
+            return resp, 201
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def user_logout_controller() -> tuple[Response, int]:
         """Unsets both access and refresh tokens."""
 
@@ -75,7 +118,6 @@ class UserControllers:
                 }
             )
 
-            # Clears both access and refresh cookies
             unset_jwt_cookies(resp)
 
             return resp, 200
@@ -96,7 +138,7 @@ class UserControllers:
 
             username = UserServices.get_username_service(user_id)
 
-            return jsonify({"username": username, "user_id": user_id}), 200
+            return jsonify({"username": username}), 200
 
         except Exception as e:
             traceback.print_exc()
@@ -120,7 +162,6 @@ class UserControllers:
         "Generate a new access token using a valid refresh token."
 
         try:
-            # Get user ID from the refresh token
             identity = get_jwt_identity()
 
             new_access_token = create_access_token(identity=identity)
@@ -143,6 +184,7 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
@@ -200,6 +242,7 @@ class UserControllers:
 
         try:
             user_id = str(get_jwt_identity())
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
@@ -223,20 +266,21 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
+
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_data = request.get_json()
+
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400
 
-            # Update profile information
             profile_success = UserServices.update_user_profile_service(
                 user_id, profile_data
             )
 
-            # Update address if provided
             address_success = True
+
             if "address" in profile_data:
                 address_success = UserServices.update_user_address_service(
                     user_id, profile_data["address"]
@@ -287,7 +331,6 @@ class UserControllers:
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400
 
-            # Update only provided fields
             profile_success = True
             address_success = True
 

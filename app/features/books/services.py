@@ -273,6 +273,8 @@ class BookServices:
             "owner_profile_picture": book["owner_profile_picture"],
             "owner_trust_score": book["owner_trust_score"],
             "times_rented": int(book["times_rented"]),
+            "is_rented": book["is_rented"],
+            "is_purchased": book["is_purchased"],
             "images": [img["image_url"] for img in images],
         }
 

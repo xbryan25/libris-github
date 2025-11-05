@@ -16,9 +16,15 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
+  const signup = async (username: string, email: string, password: string): Promise<{messageTitle: string, message: string}> => {
+    const response = await useUserSignup(username, email, password)
+
+    return {messageTitle: response.messageTitle, message: response.message}
+  }
+
   const logout = async () => {
     const response = await useUserLogout()
-    
+   
     user_id.value = null
     username.value = null
     isAuthenticated.value = false
@@ -26,5 +32,5 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { user_id, username, isAuthenticated, login, logout }
+  return { user_id, username, isAuthenticated, login, signup, logout }
 })
