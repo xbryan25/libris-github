@@ -320,15 +320,13 @@ class UserControllers:
 
         try:
             user_id = get_jwt_identity()
-
-            print("JWT user_id:", user_id)
+            # print("JWT user_id:", user_id)  # <-- add this
 
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_data = request.get_json()
-
-            print("PATCH request body:", profile_data)
+            # print("PATCH request body:", profile_data)  # <-- add this
 
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400

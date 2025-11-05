@@ -7,6 +7,8 @@ export const useProfilePictureUpload = (editForm: any) => {
     const progress = ref(0)
     const toast = useToast()
 
+    const { $apiFetch } = useNuxtApp();
+
     const uploadProfilePicture = async (file: File, userId: string): Promise<string | null> => {
         uploading.value = true
         error.value = null
@@ -56,7 +58,7 @@ export const useProfilePictureUpload = (editForm: any) => {
         try {
             const API_URL = import.meta.env.VITE_API_URL
 
-            await $fetch(`${API_URL}/api/users/profile/me`, {
+            await $apiFetch(`${API_URL}/api/users/profile/me`, {
                 method: 'PATCH',
                 credentials: 'include',
                 body: {

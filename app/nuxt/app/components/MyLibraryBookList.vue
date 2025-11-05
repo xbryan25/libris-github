@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Book } from '~/types';
+import type { MyLibraryBook } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
 const props = defineProps<{
@@ -8,10 +8,11 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
   };
+  addBookRefreshTrigger: number;
   userId?: string;
 }>();
 
-const booksData = ref<Book[]>([]);
+const booksData = ref<MyLibraryBook[]>([]);
 
 const gridContainer = ref<HTMLElement | null>(null);
 
@@ -20,6 +21,10 @@ const cardWidth = 225;
 const booksPerPage = ref(1);
 const pageNumber = ref(1);
 const totalBookCount = ref(0);
+
+const editDeleteBookRefreshTrigger = ref(0);
+
+const isFetching = ref(false);
 
 const getGridCapacity = () => {
   const el = gridContainer.value;
@@ -36,7 +41,7 @@ const getGridCapacity = () => {
   return total;
 };
 
-const isFetching = ref(false);
+
 
 const loadBooks = async () => {
   const capacity = getGridCapacity();
@@ -53,7 +58,7 @@ const loadBooks = async () => {
     userId: props.userId,
   };
 
-  const data = await useBooksForBookList(options);
+  const data = await useBooksForMyLibrary(options);
   booksData.value = data;
 };
 
@@ -65,7 +70,7 @@ const getTotalBookCount = async () => {
     userId: props.userId,
   };
 
-  const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
+  const { totalCount }: { totalCount: number } = await useTotalCountForMyLibrary(options);
 
   totalBookCount.value = totalCount;
 };
@@ -116,6 +121,18 @@ const handleResize = useDebounceFn(async () => {
   }
 }, 400);
 
+const debouncedHandler = useDebounceFn(async () => {
+  isFetching.value = true;
+  try {
+    await debouncedLoadBooks();
+    await debouncedLoadBookCount();
+  } catch (err) {
+    console.error('Error loading books:', err);
+  } finally {
+    isFetching.value = false;
+  }
+}, 500);
+
 watch(
   () => pageNumber.value,
   async () => {
@@ -134,6 +151,8 @@ watch(
     () => props.headerState.searchValue,
     () => props.headerState.selectedBookAvailability,
     () => props.headerState.selectedBookGenre,
+    () => props.addBookRefreshTrigger,
+    () => editDeleteBookRefreshTrigger,
   ],
   async () => {
     isFetching.value = true;
@@ -146,6 +165,7 @@ watch(
       isFetching.value = false;
     }
   },
+  () => debouncedHandler(),
   { deep: true },
 );
 
@@ -188,20 +208,22 @@ onBeforeUnmount(() => {
         ref="gridContainer"
         class="grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-3"
         style="
-          grid-auto-rows: 400px;
-          max-height: calc(400px * 2 + 12px);
-          min-height: calc(400px * 2 + 12px);
+          grid-auto-rows: 440px;
+          max-height: calc(440px * 2 + 12px);
+          min-height: calc(440px * 2 + 12px);
           overflow: hidden;
         "
       >
-        <BookListCard
+        <MyLibraryBookListCard
           v-for="book in booksData"
           :key="book.bookId"
           card-type="hasContent"
           :book-details="book"
+          @edit-book-success="editDeleteBookRefreshTrigger++"
+          @delete-book-success="editDeleteBookRefreshTrigger++"
         />
 
-        <BookListCard
+        <MyLibraryBookListCard
           v-for="_ in Math.max(0, booksPerPage - booksData.length)"
           :key="_"
           card-type="empty"

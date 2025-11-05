@@ -9,6 +9,7 @@ python-dotenv = "*"
 flask-cors = "*"
 psycopg = {extras = ["pool", "binary"], version = "*"}
 flask-jwt-extended = "*"
+supabase = "*"
 
 [dev-packages]
 pre-commit = "*"

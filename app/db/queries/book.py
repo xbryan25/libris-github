@@ -12,6 +12,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
         "AND ("
@@ -40,6 +41,7 @@ class BookQueries:
         "WHERE b.{search_by} ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
         "AND ("
@@ -67,6 +69,7 @@ class BookQueries:
         "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
     )
@@ -83,8 +86,54 @@ class BookQueries:
         "AND bg.book_genre_name ILIKE %s "
         "AND b.availability::text ILIKE %s "
         "AND b.owner_id != %s "
+        "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
+    )
+
+    GET_MY_LIBRARY_BOOKS = (
+        "SELECT DISTINCT ON (b.book_id) "
+        "b.*, rb.rent_status AS rent_status, rb.user_id AS renter_id, "
+        "   ru.username AS renter_username, ru.profile_image_url AS renter_profile_image_url, "
+        "   bi.image_url AS first_image_url "
+        "FROM books AS b "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "LEFT JOIN users AS ru ON rb.user_id = ru.user_id "
+        "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
+        "AND ("
+        "    %s = '%%' "
+        "    OR EXISTS ("
+        "        SELECT 1 FROM book_genre_links bgl2 "
+        "        JOIN book_genres bg2 ON bgl2.book_genre_id = bg2.book_genre_id "
+        "        WHERE bgl2.book_id = b.book_id "
+        "        AND bg2.book_genre_name ILIKE %s"
+        "    )"
+        ") "
+        "ORDER BY b.book_id, {sort_field} {sort_order} "
+        "LIMIT %s OFFSET %s"
+    )
+
+    GET_MY_LIBRARY_BOOK_COUNT = (
+        "SELECT COUNT(DISTINCT b.book_id) "
+        "FROM books AS b "
+        "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
+        "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
+        "WHERE b.{search_by} ILIKE %s "
+        "AND bg.book_genre_name ILIKE %s "
+        "AND b.availability::text ILIKE %s "
+        "AND b.owner_id = %s "
+        "AND b.is_soft_deleted != TRUE "
+        "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
     )
 
     GET_BOOK_DETAILS = """
@@ -125,6 +174,7 @@ class BookQueries:
         LEFT JOIN book_genres bg ON bgl.book_genre_id = bg.book_genre_id
         LEFT JOIN rented_books rb ON b.book_id = rb.book_id
         WHERE b.book_id = %s
+        AND b.is_soft_deleted != TRUE
         GROUP BY
             b.book_id,
             b.title,
@@ -210,3 +260,79 @@ class BookQueries:
             LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
             WHERE b.owner_id = %s AND pb.purchase_status = 'completed'
         """
+
+    ADD_NEW_BOOK = """
+        INSERT INTO books (
+            title,
+            author,
+            condition,
+            description,
+            availability,
+            daily_rent_price,
+            security_deposit,
+            purchase_price,
+            owner_id
+        )
+        VALUES (
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s,
+            %s
+        ) RETURNING book_id
+    """
+
+    EDIT_A_BOOK = """
+        UPDATE books
+        SET
+            title = %s,
+            author = %s,
+            condition = %s,
+            description = %s,
+            availability = %s,
+            daily_rent_price = %s,
+            security_deposit = %s,
+            purchase_price = %s
+        WHERE book_id = %s;
+    """
+
+    INSERT_TO_BOOK_GENRE_LINKS = (
+        "INSERT INTO book_genre_links (book_id, book_genre_id) VALUES (%s, %s)"
+    )
+
+    DELETE_FROM_BOOK_GENRE_LINKS = (
+        "DELETE FROM book_genre_links WHERE book_id = %s AND book_genre_id = %s"
+    )
+
+    INSERT_TO_BOOK_IMAGES = "INSERT INTO book_images (image_url, uploaded_at, order_num, book_id) VALUES (%s, %s, %s, %s)"
+
+    REMOVE_FROM_BOOK_IMAGES = (
+        "DELETE FROM book_images WHERE book_id = %s AND image_url = %s"
+    )
+
+    EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES = """
+        UPDATE book_images
+        SET
+            image_url = %s,
+            order_num = %s
+        WHERE book_id = %s AND image_url = %s;
+    """
+
+    CHECK_IF_BOOK_HAS_RENT_OR_PURCHASE_HISTORY = """
+        SELECT 1 FROM purchased_books WHERE book_id = %s
+        UNION
+        SELECT 1 FROM rented_books WHERE book_id = %s;
+    """
+
+    SOFT_DELETE_A_BOOK = """
+        UPDATE BOOKS
+        SET
+            is_soft_deleted = %s,
+        WHERE book_id = %s;
+    """
+
+    DELETE_A_BOOK = "DELETE FROM books WHERE book_id = %s"

@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from app.common.constants import GenderEnum, BookConditionEnum, BookAvailabilityEnum
-from app.common.dataclasses import User, Book
+from app.common.dataclasses import User, Book, MyLibraryBook
 
 
 def convert_user_dict(user: dict) -> User:
@@ -76,4 +76,62 @@ def convert_book_dict(book: dict) -> Book:
         owner_id=book["owner_id"],
         owner_username=book["owner_username"],
         first_image_url=book["first_image_url"],
+    )
+
+
+def convert_my_library_book_dict(my_library_book: dict) -> MyLibraryBook:
+    """Converts dict from db to a Book class instance"""
+
+    return MyLibraryBook(
+        book_id=my_library_book["book_id"],
+        title=(
+            my_library_book["title"]
+            if my_library_book.get("title") is not None
+            else "-"
+        ),
+        author=(
+            my_library_book["author"]
+            if my_library_book.get("author") is not None
+            else "-"
+        ),
+        genre=(
+            my_library_book["genre"]
+            if my_library_book.get("genre") is not None
+            else "-"
+        ),
+        condition=(
+            BookConditionEnum(my_library_book["condition"])
+            if my_library_book.get("condition") is not None
+            else BookConditionEnum("new")
+        ),
+        description=(
+            my_library_book["description"]
+            if my_library_book.get("description") is not None
+            else "-"
+        ),
+        availability=(
+            BookAvailabilityEnum(my_library_book["availability"])
+            if my_library_book.get("availability") is not None
+            else BookAvailabilityEnum("rent")
+        ),
+        daily_rent_price=(
+            int(my_library_book["daily_rent_price"])
+            if my_library_book.get("daily_rent_price") is not None
+            else 0
+        ),
+        security_deposit=(
+            int(my_library_book["security_deposit"])
+            if my_library_book.get("security_deposit") is not None
+            else 0
+        ),
+        purchase_price=(
+            int(my_library_book["purchase_price"])
+            if my_library_book.get("purchase_price") is not None
+            else 0
+        ),
+        rent_status=my_library_book["rent_status"],
+        renter_id=my_library_book["renter_id"],
+        renter_username=my_library_book["renter_username"],
+        renter_profile_image_url=my_library_book["renter_profile_image_url"],
+        first_image_url=my_library_book["first_image_url"],
     )

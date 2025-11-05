@@ -58,6 +58,91 @@ def get_books_for_book_list() -> tuple[Response, int]:
     return BookControllers.get_books_for_book_list_controller()
 
 
+@books_bp.route("/my-library-books", methods=["GET"])
+@jwt_required()
+def get_my_library_books() -> tuple[Response, int]:
+    """
+    Retrieve details of different books based on pagination, optional search, genre, and availability filters.
+
+    This endpoint requires authentication via a valid access token (HTTP-only cookie).
+    It returns the details of different books, filtered by pagination and optionally by search, genre,
+    and availability.
+
+    Query parameters:
+
+        booksPerPage: The number of book details to retrieve.
+
+        pageNumber: This number will be multiplied by booksPerPage then serve as the offset for pagination.
+
+        searchValue: The value to search for (optional).
+
+        genre: The genre or category of books to filter by.
+
+        availability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        bookDetails: An array of book details objects with the following fields:
+
+            title: The title of the book.
+
+            author: The author of the book.
+
+            bookGenre: The genre of the book.
+
+            bookAvailability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+            daily_rent_price: The daily rent price of the book.
+
+            purchase_price: The purchase price of the book.
+
+
+    Possible errors:
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return BookControllers.get_my_library_books_controller()
+
+
+@books_bp.route("/my-library-books-count", methods=["GET"])
+@jwt_required()
+def get_total_my_library_book_count() -> tuple[Response, int]:
+    """
+    Retrieve the total number of books based on pagination, optional search, genre, and availability filters.
+
+    This endpoint requires authentication via a valid access token (HTTP-only cookie).
+    It returns the total count books, filtered by pagination and optionally by search, genre,
+    and availability.
+
+    Query parameters:
+
+        searchValue: The value to search for (optional).
+
+        bookGenre: The genre or category of books to filter by.
+
+        bookAvailability: The availability status of the book — can be "For Rent", "For Sale", or "Both".
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        totalCount: The total number of students matching the provided filters.
+
+    Possible errors:
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return BookControllers.get_total_my_library_book_count_controller()
+
+
 @books_bp.route("/book-list-books-count", methods=["GET"])
 @jwt_required()
 def get_total_book_count() -> tuple[Response, int]:
@@ -285,3 +370,30 @@ def get_book_details(book_id: str) -> tuple[Response, int]:
         500 if an unexpected error occurs
     """
     return BookControllers.get_book_details_controller(book_id)
+
+
+@books_bp.route("/", methods=["POST"])
+@jwt_required()
+def add_new_book() -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.add_new_book_controller()
+
+
+@books_bp.route("/<string:book_id>", methods=["PATCH"])
+@jwt_required()
+def edit_a_book(book_id) -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.edit_a_book_controller(book_id)
+
+
+@books_bp.route("/<string:book_id>", methods=["DELETE"])
+@jwt_required()
+def delete_a_book(book_id) -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return BookControllers.delete_a_book_controller(book_id)

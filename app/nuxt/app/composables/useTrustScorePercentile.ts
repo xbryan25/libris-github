@@ -13,6 +13,8 @@ export const useTrustScorePercentile = (userId?: string) => {
     const loading = ref(false)
     const error = ref<string | null>(null)
 
+    const { $apiFetch } = useNuxtApp();
+
     const fetchPercentile = async () => {
         loading.value = true
         error.value = null
@@ -22,7 +24,7 @@ export const useTrustScorePercentile = (userId?: string) => {
                 : `${API_URL}/api/users/trust-score-percentile`
 
             console.log('Making API call to:', endpoint)
-            const response = await fetch(endpoint, {
+            const response = await $apiFetch(endpoint, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {

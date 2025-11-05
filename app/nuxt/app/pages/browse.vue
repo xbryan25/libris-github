@@ -61,6 +61,6 @@ onMounted(async () => {
       "
     />
 
-    <BookList :header-state="headerState" />
+    <BookList book-list-variant="default" :header-state="headerState" />
   </div>
 </template>
