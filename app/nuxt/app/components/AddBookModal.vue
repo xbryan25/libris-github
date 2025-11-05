@@ -78,13 +78,17 @@ const onSubmit = async () => {
     bookFormData.append('description', state.description);
     bookFormData.append('availability', state.availability);
 
-    if (state.availability === 'For Rent' || state.availability === 'Both') {
+    if (state.availability === 'For Rent') {
       bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
       bookFormData.append('securityDeposit', state.securityDeposit.toString());
       bookFormData.append('purchasePrice', (0).toString());
-    } else {
+    } else if (state.availability === 'For Sale') {
       bookFormData.append('dailyRentPrice', (0).toString());
       bookFormData.append('securityDeposit', (0).toString());
+      bookFormData.append('purchasePrice', state.purchasePrice.toString());
+    } else {
+      bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
+      bookFormData.append('securityDeposit', state.securityDeposit.toString());
       bookFormData.append('purchasePrice', state.purchasePrice.toString());
     }
 
