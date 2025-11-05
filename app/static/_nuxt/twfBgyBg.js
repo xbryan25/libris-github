@@ -1,1 +1,0 @@
-import{e as t,c as r,o as s,a}from"#entry";const o={class:"flex items-center justify-center w-full"},i=t({__name:"library",setup(n){return(l,e)=>(s(),r("div",o,[...e[0]||(e[0]=[a("h1",{class:"text-5xl font-bold text-primary"},"My Library Page",-1)])]))}});export{i as default};

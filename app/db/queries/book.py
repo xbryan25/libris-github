@@ -314,10 +314,9 @@ class BookQueries:
         "DELETE FROM book_images WHERE book_id = %s AND image_url = %s"
     )
 
-    EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES = """
+    EDIT_BOOK_ORDER_IN_BOOK_IMAGES = """
         UPDATE book_images
         SET
-            image_url = %s,
             order_num = %s
         WHERE book_id = %s AND image_url = %s;
     """

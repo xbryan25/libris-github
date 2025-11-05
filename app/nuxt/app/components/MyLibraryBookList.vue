@@ -41,8 +41,6 @@ const getGridCapacity = () => {
   return total;
 };
 
-
-
 const loadBooks = async () => {
   const capacity = getGridCapacity();
   if (capacity <= 0) return;
@@ -154,17 +152,6 @@ watch(
     () => props.addBookRefreshTrigger,
     () => editDeleteBookRefreshTrigger,
   ],
-  async () => {
-    isFetching.value = true;
-    try {
-      await debouncedLoadBooks();
-      await debouncedLoadBookCount();
-    } catch (err) {
-      console.error('Error loading books:', err);
-    } finally {
-      isFetching.value = false;
-    }
-  },
   () => debouncedHandler(),
   { deep: true },
 );
