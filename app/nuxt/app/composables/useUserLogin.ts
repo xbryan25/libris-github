@@ -7,9 +7,9 @@ type UserLoginResponse = {
 }
 
 export function useUserLogin(emailAddress: string, password: string){
-  const { $apiFetch } = useNuxtApp();   
+  const baseURL = import.meta.env.VITE_API_URL;
 
-  return $apiFetch<UserLoginResponse>(`/api/users/login`, {
+  return $fetch<UserLoginResponse>(`${baseURL}/api/users/login`, {
     method: 'POST',
     credentials: 'include',
     body: {

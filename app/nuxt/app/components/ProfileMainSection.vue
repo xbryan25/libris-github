@@ -54,9 +54,7 @@ const trustScoreBadge = computed(() => {
 watch(
   () => props.profile,
   (newProfile) => {
-    console.log('Profile changed:', newProfile);
     if (newProfile?.trust_score) {
-      console.log('Fetching trust score percentile...');
       fetchPercentile();
     }
   },
@@ -99,9 +97,7 @@ const formattedFullName = computed(() => {
 });
 
 onMounted(() => {
-  console.log('ProfileMainSection mounted, profile:', props.profile);
   if (props.profile?.trust_score) {
-    console.log('Fetching trust score percentile...');
     fetchPercentile();
   }
 });
@@ -196,7 +192,7 @@ onMounted(() => {
             :class="[
               trustScoreBadge.color,
               'text-white text-center px-3 py-1',
-              trustScoreBadge.text === 'Poor' ? 'border border-white' : ''
+              trustScoreBadge.text === 'Poor' ? 'border border-white' : '',
             ]"
             variant="solid"
           >

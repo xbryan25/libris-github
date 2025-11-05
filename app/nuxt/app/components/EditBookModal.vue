@@ -175,8 +175,6 @@ const fetchCurrentBookDetails = async () => {
     }
 
     cacheVersion.value = Date.now();
-
-    console.log(state.existingBookImageUrls);
   } catch (error) {
     let errorMessage;
 
