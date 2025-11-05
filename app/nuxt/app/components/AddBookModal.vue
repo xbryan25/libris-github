@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { validateAddEditBook } from '#imports';
 
 import draggable from 'vuedraggable';
@@ -13,8 +12,6 @@ const emit = defineEmits<{
   (e: 'update:openAddBookModal', value: boolean): void;
   (e: 'addBookSuccess'): void;
 }>();
-
-
 
 const state = reactive({
   title: '',
@@ -57,7 +54,6 @@ const resetState = () => {
   });
 };
 
-
 const loadBookGenreItems = async () => {
   const bookGenres = await useBookGenres();
 
@@ -98,7 +94,6 @@ const onSubmit = async () => {
     appendList('genres', state.genres);
 
     appendList('bookImages', state.bookImages);
-    }
 
     const data = await useCreateBook(bookFormData);
 
@@ -107,7 +102,6 @@ const onSubmit = async () => {
       description: `${data.message}`,
       color: 'success',
     });
-
 
     emit('addBookSuccess');
 
@@ -176,7 +170,6 @@ watch(
       changed = true;
     }
 
-
     // Only update if something changed to avoid infinite recursion
     if (changed) {
       state.bookImages = filtered;
@@ -210,7 +203,7 @@ watch(
 
 watch(
   () => props.isOpenAddBookModal,
-    async (newValue) => {
+  async (newValue) => {
     if (!newValue) {
       // e.g. delay reset after modal closes
       setTimeout(() => {
@@ -294,7 +287,7 @@ onMounted(async () => {
           />
         </UFormField>
 
-         <UFormField
+        <UFormField
           v-if="state.bookImages.length > 1"
           label="Reorder images (drag the image names)"
           name="reorderImages"
@@ -309,9 +302,8 @@ onMounted(async () => {
           </draggable>
         </UFormField>
 
-
         <UFormField label="Description" name="description" class="flex-1">
-        <UTextarea
+          <UTextarea
             v-model="state.description"
             placeholder="Add book description"
             class="w-full min-h-20"
@@ -333,7 +325,6 @@ onMounted(async () => {
         </UFormField>
 
         <div class="flex gap-4 w-full">
-
           <UFormField
             v-if="state.availability === 'For Sale' || state.availability === 'Both'"
             label="Purchase Price"
@@ -343,22 +334,19 @@ onMounted(async () => {
             <UInput v-model="state.purchasePrice" placeholder="Add purchase price" class="w-full" />
           </UFormField>
 
-
           <UFormField
             v-if="state.availability === 'For Rent' || state.availability === 'Both'"
             label="Daily Rent Price"
             name="dailyRentPrice"
             class="flex-1"
           >
-
             <UInput
               v-model="state.dailyRentPrice"
               placeholder="Add daily rent price"
               class="w-full"
             />
           </UFormField>
-          
-        
+
           <UFormField
             v-if="state.availability === 'For Rent' || state.availability === 'Both'"
             label="Security Deposit"

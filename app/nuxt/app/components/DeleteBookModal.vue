@@ -25,11 +25,10 @@ const onSubmit = async () => {
   try {
     isSubmitting.value = true;
 
-const data = await useDeleteBook(props.bookId, props.bookTitle);
-
+    const data = await useDeleteBook(props.bookId, props.bookTitle);
 
     toast.add({
-      title: 'Success',s
+      title: 'Success',
       description: `${data.message}`,
       color: 'success',
     });
