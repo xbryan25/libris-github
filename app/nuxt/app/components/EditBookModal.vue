@@ -244,20 +244,10 @@ const onSubmit = async () => {
     emit('editBookSuccess');
 
     isOpenEditBookModal.value = false;
-  } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) {
-      errorMessage = error.message; // fetch error reason
-    }
-
-    if (typeof error === 'object' && error !== null && 'data' in error) {
-      errorMessage = (error as any).data.error;
-    }
-
+  } catch {
     toast.add({
       title: 'Error',
-      description: errorMessage,
+      description: `There was an error in editing '${state.title}'. Try again.`,
       color: 'error',
     });
   }
