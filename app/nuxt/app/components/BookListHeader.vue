@@ -24,8 +24,12 @@ const bookGenreValue = ref(props.headerState.selectedBookGenre);
 const bookAvailabilityItems = ref(['All', 'For Rent', 'For Sale', 'Both']);
 const bookAvailabilityValue = ref(props.headerState.selectedBookAvailability);
 
+const isFetching = ref(true);
+
 const loadBookGenreItems = async () => {
   const bookGenres = await useBookGenres();
+
+  isFetching.value = false;
 
   bookGenreItems.value = ['All Genres', ...bookGenres];
 };
@@ -51,7 +55,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mt-5 p-5 bg-surface-hover rounded-lg w-full">
+  <div v-if="isFetching" class="mt-5 p-5 bg-surface-hover rounded-lg w-full h-20">
+    <div class="flex gap-5">
+      <USkeleton class="flex-[4] bg-surface-hover" />
+      <USkeleton class="flex-1" />
+      <USkeleton class="flex-1" />
+    </div>
+  </div>
+
+  <div v-else class="mt-5 p-5 bg-surface-hover rounded-lg w-full">
     <div class="flex gap-5">
       <UInput
         v-model="searchValue"

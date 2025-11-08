@@ -26,7 +26,19 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col items-center w-full min-h-screen pt-4 px-4 md:px-8 lg:px-15">
-    <div class="flex w-full px-10 py-5">
+    <div v-if="isFetching" class="flex w-full px-10 py-5">
+      <div class="flex-1 flex flex-col gap-2">
+        <USkeleton class="h-9 w-60" />
+        <USkeleton class="h-5 w-90" />
+      </div>
+
+      <div class="flex-1 flex flex-col items-end gap-1">
+        <USkeleton class="h-5 w-25" />
+        <USkeleton class="h-9 w-20" />
+      </div>
+    </div>
+
+    <div v-else class="flex w-full px-10 py-5">
       <div class="flex-1 flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <Icon name="material-symbols:search" class="w-8 h-8 text-base" />

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   middleware: auth,
@@ -11,17 +12,51 @@ const headerState = reactive({
   selectedBookAvailability: 'All',
 });
 
+const authStore = useAuthStore();
+
 const refreshTrigger = ref(0);
 
 const isOpenAddBookModal = ref(false);
+
+const totalBookCount = ref(0);
+const isFetchingTotalBookCount = ref(true);
 
 const openAddBookModal = () => {
   isOpenAddBookModal.value = true;
 };
 
-const onRefreshSignal = () => {
-  refreshTrigger.value++; // this will change value each time
+const onRefreshSignal = async () => {
+  if (totalBookCount.value == 0) {
+    isFetchingTotalBookCount.value = true;
+
+    await getTotalBookCount();
+  }
+
+  refreshTrigger.value++;
 };
+
+const onRefreshSignalWhenDeleting = async () => {
+  await getTotalBookCount();
+};
+
+const getTotalBookCount = async () => {
+  const options = {
+    searchValue: '',
+    bookGenre: 'All Genres',
+    bookAvailability: 'All',
+    userId: authStore.user_id,
+  };
+
+  const { totalCount }: { totalCount: number } = await useTotalCountForMyLibrary(options);
+
+  totalBookCount.value = totalCount;
+
+  isFetchingTotalBookCount.value = false;
+};
+
+onMounted(async () => {
+  await getTotalBookCount();
+});
 </script>
 
 <template>
@@ -44,27 +79,55 @@ const onRefreshSignal = () => {
       </div>
     </div>
 
-    <BookListHeader
-      :header-state="headerState"
-      @update:search-value="(newSearchValue: string) => (headerState.searchValue = newSearchValue)"
-      @update:selected-book-genre="
-        (newSelectedBookAvailability: string) =>
-          (headerState.selectedBookGenre = newSelectedBookAvailability)
-      "
-      @update:selected-book-availability="
-        (newSelectedBookAvailability: string) =>
-          (headerState.selectedBookAvailability = newSelectedBookAvailability)
-      "
-    />
+    <div v-if="totalBookCount > 0" class="w-full">
+      <BookListHeader
+        :header-state="headerState"
+        @update:search-value="
+          (newSearchValue: string) => (headerState.searchValue = newSearchValue)
+        "
+        @update:selected-book-genre="
+          (newSelectedBookAvailability: string) =>
+            (headerState.selectedBookGenre = newSelectedBookAvailability)
+        "
+        @update:selected-book-availability="
+          (newSelectedBookAvailability: string) =>
+            (headerState.selectedBookAvailability = newSelectedBookAvailability)
+        "
+      />
 
-    <MyLibraryBookList :header-state="headerState" :add-book-refresh-trigger="refreshTrigger" />
+      <MyLibraryBookList
+        :header-state="headerState"
+        :add-book-refresh-trigger="refreshTrigger"
+        @delete-book-success="onRefreshSignalWhenDeleting"
+      />
+    </div>
+
+    <div v-else-if="isFetchingTotalBookCount" class="h-80" />
+
+    <div
+      v-else
+      class="w-full bg-surface-hover h-80 rounded-xl border border-zinc-400 dark:border-zinc-700 mt-5 flex items-center justify-center"
+    >
+      <div class="flex flex-col items-center gap-3">
+        <Icon name="material-symbols:book-2" class="w-20 h-20 text-bg" />
+
+        <div class="flex flex-col items-center">
+          <h2 class="text-2xl font-bold">No books yet</h2>
+          <p class="text-muted">Start building your library by adding your first book.</p>
+        </div>
+
+        <UButton class="justify-center cursor-pointer" @click="openAddBookModal">
+          <Icon name="material-symbols:add" class="w-8 h-8 text-bg" />
+          <p class="font-bold text-xl">Add Your First Book</p>
+        </UButton>
+      </div>
+    </div>
 
     <AddBookModal
       :is-open-add-book-modal="isOpenAddBookModal"
       @update:open-add-book-modal="
         (newIsOpenAddBookModal) => (isOpenAddBookModal = newIsOpenAddBookModal)
       "
-
       @add-book-success="onRefreshSignal"
     />
   </div>

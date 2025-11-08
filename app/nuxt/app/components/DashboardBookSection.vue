@@ -41,18 +41,25 @@ onMounted(() => {
   <div class="w-full bg-background">
     <!-- Navigation Tabs -->
     <div class="mx-auto">
-      <div class="grid grid-cols-4 gap-3">
+      <div v-if="loading" class="grid grid-cols-4 gap-3">
+        <USkeleton class="h-10 w-full" />
+        <USkeleton class="h-10 w-full" />
+        <USkeleton class="h-10 w-full" />
+        <USkeleton class="h-10 w-full" />
+      </div>
+
+      <div v-else class="grid grid-cols-4 gap-3">
         <button
           v-for="tab in tabs"
           :key="tab.id"
-          @click="activeTab = tab.id"
+          :disabled="loading"
           :class="[
             'px-4 py-3 rounded-lg font-medium transition-all text-center cursor-pointer',
             activeTab === tab.id
               ? 'bg-accent text-white'
               : 'bg-surface text-foreground hover:bg-surface-hover',
           ]"
-          :disabled="loading"
+          @click="activeTab = tab.id"
         >
           <div class="flex items-center gap-1">
             <Icon :name="tab.icon" />

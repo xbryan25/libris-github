@@ -12,6 +12,10 @@ const props = defineProps<{
   userId?: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'deleteBookSuccess'): void;
+}>();
+
 const booksData = ref<MyLibraryBook[]>([]);
 
 const gridContainer = ref<HTMLElement | null>(null);
@@ -207,7 +211,10 @@ onBeforeUnmount(() => {
           card-type="hasContent"
           :book-details="book"
           @edit-book-success="editDeleteBookRefreshTrigger++"
-          @delete-book-success="editDeleteBookRefreshTrigger++"
+          @delete-book-success="
+            editDeleteBookRefreshTrigger++;
+            emit('deleteBookSuccess');
+          "
         />
 
         <MyLibraryBookListCard
