@@ -123,7 +123,7 @@ const onSubmit = async () => {
 
     toast.add({
       title: 'Error',
-      description: errorMessage,
+      description: `There was an error in adding '${state.title}'. Try again.`,
       color: 'error',
     });
   }

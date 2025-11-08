@@ -32,7 +32,7 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
 </script>
 
 <template>
-  <div class="max-h-screen w-full flex overflow-hidden bg-background text-base">
+  <div class="h-screen w-full flex overflow-hidden bg-background text-base">
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="login"

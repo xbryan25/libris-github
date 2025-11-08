@@ -13,15 +13,48 @@ const { summary, username, fetchAll, loading, error } = useDashboard();
 onMounted(() => {
   fetchAll();
 });
+
+const delayedLoading = ref(true);
+
+watch(
+  () => loading.value,
+  async (newValue) => {
+    if (!newValue) {
+      await nextTick();
+      delayedLoading.value = false;
+    }
+  },
+);
 </script>
 
 <template>
   <div class="flex flex-col min-h-screen w-full pt-4 px-4 md:px-8 lg:px-15">
-    <div class="text-[42px] font-bold text-base">Welcome back, {{ username }}!</div>
-    <div class="text-sm text-muted ml-1">Here’s your activity overview.</div>
+    <div v-if="delayedLoading" class="flex flex-col gap-2 pt-1">
+      <USkeleton class="h-13 w-150" />
+      <USkeleton class="h-5 w-50" />
+    </div>
+
+    <div v-else>
+      <div class="text-[42px] font-bold text-base">Welcome back, {{ username }}!</div>
+      <div class="text-sm text-muted ml-1">Here’s your activity overview.</div>
+    </div>
 
     <div class="w-full mt-4">
-      <div class="flex flex-wrap justify-center gap-6">
+      <div v-if="delayedLoading" class="flex flex-wrap justify-center gap-6">
+        <USkeleton class="flex-1 h-[170px]" />
+
+        <USkeleton class="flex-1 h-[170px]" />
+
+        <USkeleton class="flex-1 h-[170px]" />
+
+        <USkeleton class="flex-1 h-[170px]" />
+
+        <USkeleton class="flex-1 h-[170px]" />
+
+        <USkeleton class="flex-1 h-[170px]" />
+      </div>
+
+      <div v-else class="flex flex-wrap justify-center gap-6">
         <UCard
           class="flex-1 h-[170px] text-center flex flex-col items-center justify-center bg-surface border-base"
         >
