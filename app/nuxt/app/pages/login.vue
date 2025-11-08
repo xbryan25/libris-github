@@ -9,8 +9,13 @@ definePageMeta({
 
 const toast = useToast();
 const auth = useAuthStore();
+const isLoading = ref(false);
 
 const onSubmitLogin = async (emailAddress: string, password: string) => {
+  if (isLoading.value) return;
+
+  isLoading.value = true;
+
   try {
     const { messageTitle, message } = await auth.login(emailAddress, password);
 
@@ -27,6 +32,8 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
       description: error.data.error,
       color: 'error',
     });
+
+    isLoading.value = false;
   }
 };
 </script>
@@ -36,6 +43,7 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="login"
+        :is-loading="isLoading"
         @on-submit-login="(email, password) => onSubmitLogin(email, password)"
       />
     </div>
