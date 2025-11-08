@@ -101,24 +101,28 @@ onMounted(() => {
     fetchPercentile();
   }
 });
+
+const test = ref(false);
 </script>
 
 <template>
   <UCard
     v-if="loading"
-    class="w-full max-w-[1500px] h-auto bg-surface border-base flex flex-col md:flex-row items-stretch px-6 py-6"
+    class="w-full max-w-[1500px] h-[250px] bg-surface border-base flex flex-col md:flex-row items-stretch"
   >
     <div class="flex items-center justify-start space-x-6 flex-grow">
-      <USkeleton class="w-35 h-35 rounded-full" />
+      <div class="flex gap-4">
+        <USkeleton class="w-35 h-35 rounded-full" />
 
-      <div class="flex flex-col justify-center space-y-3">
-        <USkeleton class="h-12 w-64" />
-        <USkeleton class="h-10 w-80" />
-        <USkeleton class="h-8 w-48" />
+        <div class="flex flex-col justify-center space-y-3">
+          <USkeleton class="h-12 w-64" />
+          <USkeleton class="h-10 w-80" />
+          <USkeleton class="h-8 w-48" />
+        </div>
       </div>
 
       <div class="flex items-center h-full">
-        <USeparator orientation="vertical" class="h-[200px] border-base ml-130" type="solid" />
+        <USeparator orientation="vertical" class="h-[200px] border-base ml-[686px]" type="solid" />
       </div>
 
       <div class="flex flex-col space-y-3">
