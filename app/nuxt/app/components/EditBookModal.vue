@@ -23,6 +23,7 @@ const state = reactive({
   genresToAdd: [] as string[],
   condition: '',
   bookImages: [] as File[],
+  originalExistingBookImageUrls: [] as string[],
   existingBookImageUrls: [] as string[],
   existingBookImageUrlsToDelete: [] as string[],
   allBookOrder: [] as string[],
@@ -113,6 +114,7 @@ const resetState = () => {
     genresToAdd: [],
     condition: '',
     bookImages: [],
+    originalExistingBookImageUrls: [],
     existingBookImageUrls: [],
     existingBookImageUrlsToDelete: [],
     allBookOrder: [],
@@ -140,7 +142,6 @@ const deleteExistingBookImageUrl = (existingBookImageUrl: string) => {
 
 const fetchCurrentBookDetails = async () => {
   try {
-
     if (props.bookId) {
       await fetchBookDetails(props.bookId);
     } else {
@@ -156,6 +157,7 @@ const fetchCurrentBookDetails = async () => {
     state.condition = bookDetails.value?.condition
       ? bookDetails.value.condition.charAt(0).toUpperCase() + bookDetails.value.condition.slice(1)
       : '';
+    state.originalExistingBookImageUrls = bookDetails.value?.images as string[];
     state.existingBookImageUrls = bookDetails.value?.images as string[];
     state.description = bookDetails.value?.description as string;
     state.dailyRentPrice = bookDetails.value?.daily_rent_price as number;
@@ -173,8 +175,6 @@ const fetchCurrentBookDetails = async () => {
     }
 
     cacheVersion.value = Date.now();
-
-    console.log(state.existingBookImageUrls);
   } catch (error) {
     let errorMessage;
 
@@ -196,7 +196,6 @@ const fetchCurrentBookDetails = async () => {
 
 const onSubmit = async () => {
   try {
-
     isSubmitting.value = true;
 
     const bookFormData = new FormData();
@@ -209,14 +208,17 @@ const onSubmit = async () => {
     bookFormData.append('description', state.description);
     bookFormData.append('availability', state.availability);
 
-
-    if (state.availability === 'For Rent' || state.availability === 'Both') {
+    if (state.availability === 'For Rent') {
       bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
       bookFormData.append('securityDeposit', state.securityDeposit.toString());
       bookFormData.append('purchasePrice', (0).toString());
-    } else {
+    } else if (state.availability === 'For Sale') {
       bookFormData.append('dailyRentPrice', (0).toString());
       bookFormData.append('securityDeposit', (0).toString());
+      bookFormData.append('purchasePrice', state.purchasePrice.toString());
+    } else {
+      bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
+      bookFormData.append('securityDeposit', state.securityDeposit.toString());
       bookFormData.append('purchasePrice', state.purchasePrice.toString());
     }
 
@@ -242,20 +244,10 @@ const onSubmit = async () => {
     emit('editBookSuccess');
 
     isOpenEditBookModal.value = false;
-  } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) {
-      errorMessage = error.message; // fetch error reason
-    }
-
-    if (typeof error === 'object' && error !== null && 'data' in error) {
-      errorMessage = (error as any).data.error;
-    }
-
+  } catch {
     toast.add({
       title: 'Error',
-      description: errorMessage,
+      description: `There was an error in editing '${state.title}'. Try again.`,
       color: 'error',
     });
   }
@@ -422,7 +414,6 @@ onMounted(async () => {
           </UFormField>
         </div>
 
-
         <UFormField
           v-if="state.existingBookImageUrls.length > 0 || loading"
           label="Existing Images"
@@ -455,11 +446,10 @@ onMounted(async () => {
           </div>
         </UFormField>
 
-
         <UFormField label="Upload Images" name="bookImages" class="flex-1">
           <USkeleton v-if="loading" class="w-full h-80" />
           <UFileUpload
-            v-else 
+            v-else
             v-model="state.bookImages"
             multiple
             accept="image/png, image/jpeg, image/webp"
@@ -479,7 +469,8 @@ onMounted(async () => {
             <template #item="{ element }">
               <li class="list-disc list-inside cursor-move px-2 py-1 rounded mb-1 bg-surface-hover">
                 <span v-if="element.type === 'existing'">
-                  Uploaded image {{ element.value.split('/').pop().at(-1) }}
+                  Uploaded image
+                  {{ state.originalExistingBookImageUrls.indexOf(element.value) + 1 }}
                 </span>
                 <span v-else>
                   {{ element.value.name }}

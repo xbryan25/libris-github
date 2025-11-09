@@ -22,6 +22,15 @@ class UserQueries:
         "UPDATE users SET first_name = %s, middle_name = %s, last_name = %s, "
         "date_of_birth = %s, phone_number = %s, profile_image_url = %s WHERE user_id = %s"
     )
+    INSERT_USER_ADDRESS = """INSERT INTO user_address (
+            country,
+            city,
+            barangay,
+            street,
+            postal_code,
+            user_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
     UPDATE_USER_ADDRESS = (
         "UPDATE user_address SET country = %s, city = %s, barangay = %s, "
         "street = %s, postal_code = %s WHERE user_id = %s"

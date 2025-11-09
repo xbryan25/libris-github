@@ -206,17 +206,32 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         try:
-            db.execute_query(
-                UserQueries.UPDATE_USER_ADDRESS,
-                (
-                    address_data.get("country"),
-                    address_data.get("city"),
-                    address_data.get("barangay"),
-                    address_data.get("street"),
-                    address_data.get("postal_code"),
-                    user_id,
-                ),
-            )
+            current_user_address = UserRepository.get_user_address(user_id)
+
+            if not current_user_address:
+                db.execute_query(
+                    UserQueries.INSERT_USER_ADDRESS,
+                    (
+                        address_data.get("country"),
+                        address_data.get("city"),
+                        address_data.get("barangay"),
+                        address_data.get("street"),
+                        address_data.get("postal_code"),
+                        user_id,
+                    ),
+                )
+            else:
+                db.execute_query(
+                    UserQueries.UPDATE_USER_ADDRESS,
+                    (
+                        address_data.get("country"),
+                        address_data.get("city"),
+                        address_data.get("barangay"),
+                        address_data.get("street"),
+                        address_data.get("postal_code"),
+                        user_id,
+                    ),
+                )
 
             return True
 

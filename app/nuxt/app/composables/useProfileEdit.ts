@@ -81,18 +81,14 @@ export const useProfileEdit = () => {
         body: JSON.stringify(filteredData)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to update profile')
-      }
+      success.value = response.message || 'Profile updated successfully'
 
-      const result = await response.json()
-      success.value = result.message || 'Profile updated successfully'
       toast.add({
         title: 'Success',
         description: success.value ?? '',
         color: 'success',
       })
+      
       isEditing.value = false
 
       return editForm

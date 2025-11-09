@@ -6,7 +6,11 @@ from app.utils.converters import convert_book_dict, convert_my_library_book_dict
 
 from typing import Any, Optional
 
-from app.utils import DateUtils, upload_images_to_bucket
+from app.utils import (
+    DateUtils,
+    upload_images_to_bucket_from_add_book_service,
+    upload_images_to_bucket_from_edit_book_service,
+)
 
 from supabase import create_client, Client
 
@@ -306,13 +310,13 @@ class BookServices:
         parsed_book_images = book_images.getlist("bookImages")
 
         supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
         )
 
         bucket_name = "book_images"
 
-        uploaded_urls = upload_images_to_bucket(
+        uploaded_urls = upload_images_to_bucket_from_add_book_service(
             supabase, parsed_book_images, book_id, bucket_name
         )
 
@@ -348,12 +352,13 @@ class BookServices:
 
         # Remove old images from Supabase book_images bucket
 
-        supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
-        )
-
+        SUPABASE_BUCKET_URL = f"{current_app.config.get("SUPABASE_URL")}/storage/v1/object/public/book_images/"
         bucket_name = "book_images"
+
+        supabase: Client = create_client(
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
+        )
 
         has_deleted_an_image = False
 
@@ -376,79 +381,42 @@ class BookServices:
 
             has_deleted_an_image = True
 
-        # Rename already uploaded images based on all_book_order
+        if len(book_data["all_book_order"]) > 0:
+            # If there's a new book order (by dragging image names)
 
-        if len(book_data["all_book_order"]) > 0 or has_deleted_an_image:
-            SUPABASE_BUCKET_URL = f"{current_app.config.get("SUPABASE_URL")}/storage/v1/object/public/book_images/"
-
-            renamed_mappings = []
-
-            # Move files to a temporary file name first, to avoid conflicts
-            temp_paths = []
             for index, file_or_url in enumerate(book_data["all_book_order"], start=1):
                 if not file_or_url.startswith(SUPABASE_BUCKET_URL):
                     continue
 
-                src_path = file_or_url.replace(SUPABASE_BUCKET_URL, "")
-                final_path = f"{book_id}-{index}"
+                BookRepository.edit_book_order_in_database(book_id, index, file_or_url)
 
-                if src_path == final_path:
+        elif len(book_data["all_book_order"]) == 0 and has_deleted_an_image:
+            # If an uploaded book has been deleted (no dragging of image names)
+            for index, file_or_url in enumerate(
+                book_data["existing_book_image_urls"], start=1
+            ):
+                if not file_or_url.startswith(SUPABASE_BUCKET_URL):
                     continue
 
-                temp_path = f"temp-{final_path}"
-
-                supabase.storage.from_(bucket_name).move(src_path, temp_path)
-
-                temp_paths.append((file_or_url, temp_path))
-
-            # Move to final path
-            for index, (old_url, temp_path) in enumerate(temp_paths, start=1):
-                final_path = temp_path.replace("temp-", "")
-
-                supabase.storage.from_(bucket_name).move(temp_path, final_path)
-
-                new_url = supabase.storage.from_(bucket_name).get_public_url(final_path)
-                renamed_mappings.append((old_url, new_url))
-
-            # Update image_urls in db
-
-            # Add a temporary value first to avoid conflicts
-            temp_mappings = []
-            for old_url, new_url in renamed_mappings:
-                temp_url = new_url + "?temp"
-
-                order_num = int(new_url.split(f"{book_id}-")[-1])
-                temp_order_num = order_num + 1000
-
-                BookRepository.edit_book_image_url_in_database(
-                    book_id, old_url, temp_url, temp_order_num
-                )
-                temp_mappings.append((temp_url, new_url))
-
-            # Change to final value afterwards
-            for temp_url, final_url in temp_mappings:
-                order_num = int(final_url.split(f"{book_id}-")[-1])
-
-                BookRepository.edit_book_image_url_in_database(
-                    book_id, temp_url, final_url, order_num
-                )
+                BookRepository.edit_book_order_in_database(book_id, index, file_or_url)
 
         parsed_book_images = book_images.getlist("bookImages")
 
-        uploaded_urls = upload_images_to_bucket(
+        uploaded_urls_with_order_num = upload_images_to_bucket_from_edit_book_service(
             supabase,
             parsed_book_images,
             book_id,
             bucket_name,
-            "edit",
-            book_data["all_book_order"],
             book_data["existing_book_image_urls"],
+            book_data["all_book_order"],
         )
 
         # Link to new images to book_images table
 
-        if len(uploaded_urls) > 0:
-            BookRepository.add_book_images_to_database(book_id, uploaded_urls)
+        if len(uploaded_urls_with_order_num) > 0:
+            BookRepository.add_book_images_to_database(
+                book_id, uploaded_urls_with_order_num, add_type="edit_book"
+            )
 
     @staticmethod
     def delete_a_book_service(book_id) -> None:
@@ -463,8 +431,8 @@ class BookServices:
         ]
 
         supabase: Client = create_client(
-            current_app.config.get("SUPABASE_URL"),
-            current_app.config.get("SUPABASE_SERVICE_KEY"),
+            current_app.config.get("SUPABASE_URL", ""),
+            current_app.config.get("SUPABASE_SERVICE_KEY", ""),
         )
 
         bucket_name = "book_images"

@@ -13,9 +13,9 @@ const isLoading = ref(false);
 
 const onSubmitSignup = async (username: string, emailAddress: string, password: string) => {
   if (isLoading.value) return;
-  
+
   isLoading.value = true;
-  
+
   try {
     const { messageTitle, message } = await auth.signup(username, emailAddress, password);
     toast.add({
@@ -26,13 +26,13 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     navigateTo('/login');
   } catch (error: any) {
     let errorMessage = 'An unexpected error occurred.';
-    
+
     if (error.data?.error) {
       errorMessage = error.data.error;
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     toast.add({
       title: 'Signup failed.',
       description: errorMessage,
@@ -45,7 +45,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 </script>
 
 <template>
-  <div class="max-h-screen w-full flex overflow-hidden bg-background text-base">
+  <div class="h-screen w-full flex overflow-hidden bg-background text-base">
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="signup"

@@ -6,44 +6,27 @@ import { useAuthStore } from '~/stores/useAuthStore'
 export default defineNuxtRouteMiddleware(async (to) => {
     const auth = useAuthStore()
 
-    // Determine context, if on server or client
-    const isServer = import.meta.server
-
-    if (isServer) {
-        const event = useRequestEvent();
-        const cookie = event?.node?.req?.headers.cookie;
-
-        // If no cookies at all → definitely unauthenticated
-        if (!cookie) {
-            return navigateTo('/login', { redirectCode: 302 });
-        }
-
-        // ✅ stop here, don’t continue to client-specific logic
-        return;
-    }
-
     try {
-        // // Wait 10 seconds to refresh token again, if access token is removed while still in cooldown, redirect to login
-        await safeRefresh('client')
-        // await useRefreshAccessToken('client')
-        const response = await useCurrentUser('client')
+        // Wait 10 seconds to refresh token again, if access token is removed while still in cooldown, redirect to login
+        await safeRefresh()
+        // await useRefreshAccessToken()
+        const response = await useCurrentUser()
         auth.username = response.username
         auth.user_id = response.user_id
         auth.isAuthenticated = true
 
-         // --- Debug logging ---
-        const logPrefix = isServer ? '[SSR]' : '[Client]'
-        console.log(logPrefix, 'Route path:', to.path)
-        console.log(logPrefix, 'Route params:', to.params)
-        console.log(logPrefix, 'Logged-in user_id:', auth.user_id)
+        // --- Debug logging ---
+        console.log('Route path:', to.path)
+        console.log('Route params:', to.params)
+        console.log('Logged-in user_id:', auth.user_id)
 
         // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {
             if (to.params.id === auth.user_id) {
-                console.log(logPrefix, 'Redirecting to /users/me')
+                console.log('Redirecting to /users/me')
                 return navigateTo('/users/me')
             } else {
-                console.log(logPrefix, 'Viewing another user profile:', to.params.id)
+                console.log('Viewing another user profile:', to.params.id)
             }
         }
 

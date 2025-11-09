@@ -12,6 +12,10 @@ const props = defineProps<{
   userId?: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'deleteBookSuccess'): void;
+}>();
+
 const booksData = ref<MyLibraryBook[]>([]);
 
 const gridContainer = ref<HTMLElement | null>(null);
@@ -40,8 +44,6 @@ const getGridCapacity = () => {
 
   return total;
 };
-
-
 
 const loadBooks = async () => {
   const capacity = getGridCapacity();
@@ -154,17 +156,6 @@ watch(
     () => props.addBookRefreshTrigger,
     () => editDeleteBookRefreshTrigger,
   ],
-  async () => {
-    isFetching.value = true;
-    try {
-      await debouncedLoadBooks();
-      await debouncedLoadBookCount();
-    } catch (err) {
-      console.error('Error loading books:', err);
-    } finally {
-      isFetching.value = false;
-    }
-  },
   () => debouncedHandler(),
   { deep: true },
 );
@@ -220,7 +211,10 @@ onBeforeUnmount(() => {
           card-type="hasContent"
           :book-details="book"
           @edit-book-success="editDeleteBookRefreshTrigger++"
-          @delete-book-success="editDeleteBookRefreshTrigger++"
+          @delete-book-success="
+            editDeleteBookRefreshTrigger++;
+            emit('deleteBookSuccess');
+          "
         />
 
         <MyLibraryBookListCard

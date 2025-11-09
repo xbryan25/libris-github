@@ -9,8 +9,10 @@ definePageMeta({
 
 <template>
   <UApp>
-    <div class="bg-gradient-to-b from-[#d7fff0] to-white min-h-screen w-full">
-      <div class="absolute top-5 left-0 w-full flex justify-between items-center px-5">
+    <div
+      class="bg-gradient-to-b from-[#d7fff0] to-white h-screen w-full flex flex-col items-center"
+    >
+      <div class="top-5 left-0 w-full flex justify-between items-center px-5 pt-5">
         <div class="flex items-center space-x-3">
           <Icon name="icons:logo" class="w-12 h-12" />
           <h1 class="text-4xl font-bold text-[#000000]">Libris</h1>
@@ -23,21 +25,21 @@ definePageMeta({
           >
             Sign-in
           </NuxtLink>
-          <h1 class="text-xl font-semibold">Contact us</h1>
+          <h1 class="text-xl font-semibold text-default">Contact us</h1>
         </div>
       </div>
 
-      <div class="absolute top-[22%] left-1/2 -translate-x-1/2 text-center">
+      <div class="flex-1 flex flex-col justify-center text-center">
         <h1 class="text-8xl font-extrabold text-[#111] tracking-tight">Create Your Own Library</h1>
         <h3 class="mt-4 text-2xl text-[#333] font-medium">
           Discover, rent, or share books near you
         </h3>
         <NuxtLink to="/signup">
-          <UButton size="xl" class="mt-7 px-6 py-3 text-lg">Get Started</UButton>
+          <UButton size="xl" class="mt-7 px-6 py-3 text-lg cursor-pointer">Get Started</UButton>
         </NuxtLink>
       </div>
 
-      <section class="absolute top-[58%] left-1/2 -translate-x-1/2 w-full max-w-6xl px-8">
+      <section class="flex-1 flex justify-center w-full px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-14 text-center">
           <div>
             <Icon name="icons:profilecard" class="w-44 h-44 mx-auto mb-6" />

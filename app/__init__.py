@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -17,7 +17,10 @@ db = None  # global reference
 
 def create_app():
 
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static", template_folder="templates")
+
+    NUXT_DIST_DIR = os.path.join(os.path.dirname(__file__), "static")
+    NUXT_ASSETS_DIR = os.path.join(os.path.dirname(__file__), "static", "_nuxt")
 
     app.config.from_object(Config)
 
@@ -43,5 +46,31 @@ def create_app():
 
     # Close pool gracefully only when the app exits
     atexit.register(lambda: app.extensions.get("db") and app.extensions["db"].close())
+
+    @app.route("/_nuxt/<path:filename>")
+    def nuxt_static(filename):
+        return send_from_directory(NUXT_ASSETS_DIR, filename)
+
+    @app.route("/images/<path:filename>")
+    def nuxt_images(filename):
+        return send_from_directory(os.path.join(NUXT_DIST_DIR, "images"), filename)
+
+    @app.route("/_ipx/_/images/<path:filename>")
+    def ipx_fallback(filename):
+        # Serve images that Nuxt Image tries to optimize via IPX
+        return send_from_directory(os.path.join(NUXT_DIST_DIR, "images"), filename)
+
+    @app.route("/favicon.svg")
+    def favicon_svg():
+        return send_from_directory(NUXT_DIST_DIR, "favicon.svg")
+
+    # Serve index.html for any non-API route
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def catch_all(path):
+        # Prevent catching API routes
+        if path.startswith("api/"):
+            return jsonify({"error": "Not Found"}), 404
+        return render_template("index.html")
 
     return app

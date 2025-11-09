@@ -3,21 +3,11 @@ type CurrentUserResponse = {
 	user_id: string
 }
 
-export function useCurrentUser(loadType: string, cookie?) {
+export function useCurrentUser() {
   const { $apiFetch } = useNuxtApp();   
 
-  // If loadType === 'server', it is run during SSR
-  // else, run during client
-
-  if (loadType == 'client'){
-		return $apiFetch<CurrentUserResponse>(`/api/users/me`, {
+  return $apiFetch<CurrentUserResponse>(`/api/users/me`, {
 			method: 'GET',
 			credentials: 'include',
-		});
-	} else{
-		return $apiFetch<CurrentUserResponse>(`/api/users/me`, {
-			method: 'GET',
-			headers: { cookie },
-		})
-	}
+	});
 }

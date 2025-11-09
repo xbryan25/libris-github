@@ -25,11 +25,10 @@ const onSubmit = async () => {
   try {
     isSubmitting.value = true;
 
-const data = await useDeleteBook(props.bookId, props.bookTitle);
-
+    const data = await useDeleteBook(props.bookId, props.bookTitle);
 
     toast.add({
-      title: 'Success',s
+      title: 'Success',
       description: `${data.message}`,
       color: 'success',
     });
@@ -37,20 +36,10 @@ const data = await useDeleteBook(props.bookId, props.bookTitle);
     emit('deleteBookSuccess');
 
     isOpenDeleteBookModal.value = false;
-  } catch (error) {
-    let errorMessage;
-
-    if (error instanceof Error) {
-      errorMessage = error.message; // fetch error reason
-    }
-
-    if (typeof error === 'object' && error !== null && 'data' in error) {
-      errorMessage = (error as any).data.error;
-    }
-
+  } catch {
     toast.add({
       title: 'Error',
-      description: errorMessage,
+      description: `There was an error in deleting '${state.title}'. Try again.`,
       color: 'error',
     });
   }

@@ -22,8 +22,6 @@ const bookLink = computed(() => {
 
   return `/books/${props.bookDetails?.bookId}?${query}`;
 });
-
-console.log(props.bookDetails);
 </script>
 
 <template>

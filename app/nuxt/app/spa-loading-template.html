@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Libris</title>
+  <style>
+    /* Background overlay that fades */
+    #loading-bg {
+      position: fixed;
+      inset: 0;
+      background: #00a349;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Spinner */
+    .loader {
+      width: 45px;
+      height: 45px;
+      border: 5px solid transparent;
+      border-top-color: white;
+      border-left-color: white;
+      border-radius: 50%;
+      animation: spin 800ms linear infinite;
+
+      position: fixed;       /* independent of layout */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1001;         /* above background */
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Loading text */
+    #loading-text {
+      position: fixed;
+      top: calc(50% + 50px);
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-family: sans-serif;
+      font-size: 1.2rem;
+      z-index: 1001;        /* above background */
+    }
+  </style>
+</head>
+  <body>
+    <!-- Background overlay -->
+    <div id="loading-bg"></div>
+
+    <!-- Loader and text -->
+    <div class="loader"></div>
+    <div id="loading-text">Loading LIBRIS...</div>
+
+    <!-- Nuxt mounts here -->
+    {{ APP }}
+
+    <script>
+      // Remove overlay when Nuxt is ready
+      window.addEventListener('nuxt-ready', () => {
+        const bg = document.getElementById('loading-bg');
+        if (bg) {
+          bg.style.opacity = '0';
+          setTimeout(() => bg.remove(), 500); // match CSS transition
+        }
+      });
+    </script>
+  </body>
+</html>

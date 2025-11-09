@@ -487,23 +487,38 @@ class BookRepository:
             )
 
     @staticmethod
-    def add_book_images_to_database(book_id, uploaded_urls) -> None:
+    def add_book_images_to_database(
+        book_id, uploaded_urls, add_type="add_book"
+    ) -> None:
         """
         to be written
         """
 
         db = current_app.extensions["db"]
 
-        for index, uploaded_url in enumerate(uploaded_urls):
-            db.execute_query(
-                BookQueries.INSERT_TO_BOOK_IMAGES,
-                (
-                    uploaded_url["image_url"],
-                    uploaded_url["uploaded_at"],
-                    index + 1,
-                    book_id,
-                ),
-            )
+        if add_type == "add_book":
+            for index, uploaded_url in enumerate(uploaded_urls):
+                db.execute_query(
+                    BookQueries.INSERT_TO_BOOK_IMAGES,
+                    (
+                        uploaded_url["image_url"],
+                        uploaded_url["uploaded_at"],
+                        index + 1,
+                        book_id,
+                    ),
+                )
+
+        else:
+            for uploaded_url_with_order_num in uploaded_urls:
+                db.execute_query(
+                    BookQueries.INSERT_TO_BOOK_IMAGES,
+                    (
+                        uploaded_url_with_order_num[1]["image_url"],
+                        uploaded_url_with_order_num[1]["uploaded_at"],
+                        uploaded_url_with_order_num[0],
+                        book_id,
+                    ),
+                )
 
     @staticmethod
     def remove_book_images_from_database(
@@ -522,9 +537,7 @@ class BookRepository:
             )
 
     @staticmethod
-    def edit_book_image_url_in_database(
-        book_id, old_image_url, new_image_url, order_num
-    ) -> None:
+    def edit_book_order_in_database(book_id, order_num, image_url) -> None:
         """
         to be written
         """
@@ -532,8 +545,8 @@ class BookRepository:
         db = current_app.extensions["db"]
 
         db.execute_query(
-            BookQueries.EDIT_BOOK_IMAGE_URL_IN_BOOK_IMAGES,
-            (new_image_url, order_num, book_id, old_image_url),
+            BookQueries.EDIT_BOOK_ORDER_IN_BOOK_IMAGES,
+            (order_num, book_id, image_url),
         )
 
     @staticmethod

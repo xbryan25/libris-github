@@ -27,56 +27,30 @@ export default defineNuxtPlugin((nuxtApp) => {
         // Prevent multiple simultaneous refresh calls
         if (!refreshPromise) {
           refreshPromise = (async () => {
-            if (import.meta.server) {
-              // SSR: forward current cookies
-              const event = nuxtApp.ssrContext?.event;
-              const oldCookie = event?.node?.req?.headers.cookie;
-
-              const refreshResponse = await $fetch.raw(`${baseURL}/api/users/refresh`, {
-                method: 'POST',
-                headers: oldCookie ? { cookie: oldCookie } : undefined,
-                credentials: 'omit',
-              });
-
-              let newCookie: string | null = null;
-              if (refreshResponse.headers) {
-                const setCookies = refreshResponse.headers.getSetCookie?.();
-                if (setCookies?.length) {
-                  // Forward Set-Cookie to client
-                  event?.node?.res.setHeader('set-cookie', setCookies);
-                  // Update in-memory cookie for retry
-                  newCookie = setCookies.map(c => c.split(';')[0]).join('; ');
-                }
-              }
-
-              return newCookie;
-            } else {
-              // SPA: browser handles HttpOnly cookies automatically
-              await $fetch(`${baseURL}/api/users/refresh`, {
-                method: 'POST',
-                credentials: 'include',
-              });
-              return null;
-            }
+            // SPA: browser handles HttpOnly cookies automatically
+            await $fetch(`${baseURL}/api/users/refresh`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            return null;
           })().finally(() => (refreshPromise = null));
         }
 
-        const newCookieHeader = await refreshPromise;
+        await refreshPromise;
 
         // Retry the original request
         const requestUrl = typeof request === 'string' ? request : request.url;
         const retryUrl = requestUrl.startsWith('http') ? requestUrl : `${baseURL}${requestUrl}`;
 
         await $fetch.raw(retryUrl, {
-			method: options.method as FetchMethod,
-			body: options.body,
-			headers: {
-				...options.headers,
-				...(import.meta.server && newCookieHeader ? { cookie: newCookieHeader } : {}),
-			},
-			params: options.params,
-			credentials: 'include',
-		});
+          method: options.method as FetchMethod,
+          body: options.body,
+          headers: {
+            ...options.headers,
+          },
+          params: options.params,
+          credentials: 'include',
+        });
 
       } catch (err) {
         console.error('[apiFetch] Session expired, redirecting to login...', err);
