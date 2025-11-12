@@ -14,6 +14,7 @@ definePageMeta({
     >
       <div class="top-5 left-0 w-full flex justify-between items-center px-5 pt-5">
         <div class="flex items-center space-x-3">
+
           <Icon name="icons:logo" class="w-12 h-12 text-primary" />
           <h1 class="text-4xl font-bold text-[#000000]">Libris</h1>
         </div>
@@ -43,18 +44,21 @@ definePageMeta({
         <div class="grid grid-cols-1 md:grid-cols-3 gap-14 text-center">
           
           <NuxtLink to="#build" class="block p-6 rounded-xl hover:bg-white/60 transition-all transform hover:-translate-y-1">
+
             <Icon name="icons:profilecard" class="w-32 h-32 sm:w-44 sm:h-44 mx-auto mb-6 text-primary" />
             <h3 class="text-3xl font-semibold text-[#111]">Build Your Profile</h3>
             <p class="mt-3 text-[#555] text-lg">Create a profile and organize your own library</p>
           </NuxtLink>
 
           <NuxtLink to="#explore" class="block p-6 rounded-xl hover:bg-white/60 transition-all transform hover:-translate-y-1">
+
             <Icon name="icons:books" class="w-32 h-32 sm:w-44 sm:h-44 mx-auto mb-6 text-primary" />
             <h3 class="text-3xl font-semibold text-[#111]">Explore Libraries</h3>
             <p class="mt-3 text-[#555] text-lg">Browse books from other users</p>
           </NuxtLink>
 
           <NuxtLink to="#share" class="block p-6 rounded-xl hover:bg-white/60 transition-all transform hover:-translate-y-1">
+
             <Icon name="icons:exchange" class="w-32 h-32 sm:w-44 sm:h-44 mx-auto mb-6 text-primary" />
             <h3 class="text-3xl font-semibold text-[#111]">Share and Exchange</h3>
             <p class="mt-3 text-[#555] text-lg">Rent, lend, or sell books to fellow readers</p>
@@ -63,60 +67,92 @@ definePageMeta({
         </div>
       </section>
 
-
-      <div id="build" class="py-16 sm:py-24 scroll-mt-16">
+      <div id="build" class="py-24 sm:py-32 scroll-mt-16">
         <UContainer>
-          <h2 class="text-3xl font-bold tracking-tight text-center sm:text-4xl text-[#111]">
-            Build Your Profile in Minutes
-          </h2>
-          <p class="mt-4 text-lg text-gray-600 text-center">
-            Your personal library, beautifully organized and ready to share.
-          </p>
-          
-          <UCard class="mt-12">
-            <template #header>
-              <h3 class="text-xl font-semibold">Your Profile Details</h3>
-            </template>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
 
-          </UCard>
+            <div class="lg:order-1 text-center lg:text-left">
+              <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
+                Build Your Profile and Create Your Library
+              </h2>
+              <p class="mt-6 text-xl text-gray-600">
+                Create your personal library. Effortlessly catalog your collection and let others discover your books.
+              </p>
+            </div>
+            
+
+            <div class="lg:order-2 flex justify-center items-center">
+              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
+                [Your Profile Image Here]
+              </div>
+            </div>
+          </div>
         </UContainer>
       </div>
 
-      <div id="explore" class="py-16 sm:py-24 bg-gray-50 dark:bg-gray-900/50 scroll-mt-16">
+      <div id="explore" class="py-24 sm:py-32 bg-gray-50 dark:bg-gray-900/50 scroll-mt-16">
         <UContainer>
-          <h2 class="text-3xl font-bold tracking-tight text-center sm:text-4xl text-[#111]">
-            Discover a World of Books Nearby
-          </h2>
-          <p class="mt-4 text-lg text-gray-600 text-center">
-            Find exactly what you're looking for, right in your neighborhood.
-          </p>
-          
-          <UCard class="mt-12">
-            <template #header>
-              <h3 class="text-xl font-semibold">Explore Feature Details</h3>
-            </template>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
 
-          </UCard>
+            <div class="lg:order-1 flex justify-center items-center">
+              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
+                [Your Explore Image Here]
+              </div>
+            </div>
+
+
+            <div class="lg:order-2 text-center lg:text-left">
+              <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
+                Browse Books Near You
+              </h2>
+              <p class="mt-6 text-xl text-gray-600">
+                Find exactly what you're looking for, right in your neighborhood. Browse books from other useres or search by genre, author, or title to find your next great read.
+              </p>
+            </div>
+          </div>
         </UContainer>
       </div>
 
-      <div id="share" class="py-16 sm:py-24 scroll-mt-16">
+      <div id="share" class="py-24 sm:py-32 scroll-mt-16">
         <UContainer>
-          <h2 class="text-3xl font-bold tracking-tight text-center sm:text-4xl text-[#111]">
-            Connect, Share, and Read More
-          </h2>
-          <p class="mt-4 text-lg text-gray-600 text-center">
-            A safe and easy way to lend, rent, or sell your books.
-          </p>
-          
-          <UCard class="mt-12">
-            <template #header>
-              <h3 class="text-xl font-semibold">Sharing & Exchange Details</h3>
-            </template>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
 
-          </UCard>
+            <div class="lg:order-1 text-center lg:text-left">
+              <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
+                Connect, Share, and Read More
+              </h2>
+              <p class="mt-6 text-xl text-gray-600">
+                A safe and easy way to lend, rent, or sell your books. Communicate with user, arrange a public meetup, and grow your reading community.
+              </p>
+              <ul class="mt-8 space-y-4 text-xl text-gray-700 text-center lg:text-left">
+                <li class="flex items-center justify-center lg:justify-start">
+                  <Icon name="i-heroicons-check-circle-solid" class="w-7 h-7 text-green-500 mr-3 flex-shrink-0" />
+                  <span>Lend/Sell your books</span>
+                </li>
+                <li class="flex items-center justify-center lg:justify-start">
+                  <Icon name="i-heroicons-check-circle-solid" class="w-7 h-7 text-green-500 mr-3 flex-shrink-0" />
+                  <span>Borrow/Purchase books from others</span>
+                </li>
+                <li class="flex items-center justify-center lg:justify-start">
+                  <Icon name="i-heroicons-check-circle-solid" class="w-7 h-7 text-green-500 mr-3 flex-shrink-0" />
+                  <span>Rate other users after each transaction</span>
+                </li>
+              </ul>
+            </div>
+            
+
+            <div class="lg:order-2 flex justify-center items-center">
+              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
+                [Your Share/Exchange Image Here]
+              </div>
+            </div>
+          </div>
         </UContainer>
       </div>
+
 
       <footer id="contact" class="py-8 border-t border-gray-200 dark:border-gray-800 mt-16">
         <UContainer>
