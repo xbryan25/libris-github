@@ -13,3 +13,9 @@ const toaster = { position: 'top-right' } as const;
     <NuxtLayout />
   </UApp>
 </template>
+
+<style global>
+html {
+  scroll-behavior: smooth;
+}
+</style>
