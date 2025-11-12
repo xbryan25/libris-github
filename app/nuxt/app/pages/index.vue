@@ -10,7 +10,7 @@ definePageMeta({
 <template>
   <UApp>
     <div
-      class="bg-gradient-to-b from-[#d7fff0] to-white min-h-screen w-full flex flex-col"
+      class="bg-gradient-to-b from-[#e2fbce] via-[#e3ef26] to-[#07653] min-h-screen w-full flex flex-col"
     >
       <div class="top-5 left-0 w-full flex justify-between items-center px-5 pt-5">
         <div class="flex items-center space-x-3">
@@ -83,23 +83,23 @@ definePageMeta({
             
 
             <div class="lg:order-2 flex justify-center items-center">
-              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
-                [Your Profile Image Here]
-              </div>
+                <NuxtImg src="/images/BuildImage.png" class="w-full h-full object-cover" alt="Build image" />
             </div>
           </div>
         </UContainer>
       </div>
 
-      <div id="explore" class="py-24 sm:py-32 bg-gray-50 dark:bg-gray-900/50 scroll-mt-16">
+      <div id="explore" class="py-24 sm:py-32  scroll-mt-16">
         <UContainer>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             
 
             <div class="lg:order-1 flex justify-center items-center">
-              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
-                [Your Explore Image Here]
-              </div>
+              <NuxtImg
+                src="/images/BrowseImage.png"
+                class="w-full h-full object-cover -translate-x-4 lg:-translate-x-20"
+                alt="Browse image"
+              />
             </div>
 
 
@@ -108,7 +108,7 @@ definePageMeta({
                 Browse Books Near You
               </h2>
               <p class="mt-6 text-xl text-gray-600">
-                Find exactly what you're looking for, right in your neighborhood. Browse books from other useres or search by genre, author, or title to find your next great read.
+                Find exactly what you're looking for, right in your neighborhood. Browse books from other users, filter by genre, author, title, price, distance to find your next great read.
               </p>
             </div>
           </div>
@@ -125,7 +125,7 @@ definePageMeta({
                 Connect, Share, and Read More
               </h2>
               <p class="mt-6 text-xl text-gray-600">
-                A safe and easy way to lend, rent, or sell your books. Communicate with user, arrange a public meetup, and grow your reading community.
+                A safe and easy way to lend, rent, or sell your books. Communicate with user, arrange a public meetup, and rate other users.
               </p>
               <ul class="mt-8 space-y-4 text-xl text-gray-700 text-center lg:text-left">
                 <li class="flex items-center justify-center lg:justify-start">
@@ -145,9 +145,7 @@ definePageMeta({
             
 
             <div class="lg:order-2 flex justify-center items-center">
-              <div class="w-full max-w-lg aspect-video bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg shadow-xl">
-                [Your Share/Exchange Image Here]
-              </div>
+                <NuxtImg src="/images/ShareImage.png" class="w-full h-full object-cover" alt="Build image" />
             </div>
           </div>
         </UContainer>
