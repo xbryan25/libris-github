@@ -4,11 +4,43 @@ import auth from '~/middleware/auth';
 definePageMeta({
   middleware: auth,
 });
+
+const currentWalletBalance = ref(0);
+const isFetching = ref(true);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 </script>
 
 <template>
-  <div class="h-screen w-full overflow-hidden bg-background text-base">
-    <div class="w-full flex flex-col items-center gap-10 mt-10">
+  <div class="h-auto w-full overflow-hidden bg-background text-base">
+    <div v-if="isFetching" class="w-full flex flex-col items-center gap-10 mt-10">
+      <div class="w-full max-w-[1364px]">
+        <USkeleton class="w-37 h-6" />
+      </div>
+
+      <USkeleton class="h-39 max-w-[1364px] w-full" />
+
+      <div class="flex-1 flex flex-col items-center justify-center gap-5">
+        <div class="flex gap-5">
+          <USkeleton class="w-2xl h-60" />
+          <USkeleton class="w-2xl h-60" />
+        </div>
+
+        <div class="flex gap-5">
+          <USkeleton class="w-2xl h-60" />
+          <USkeleton class="w-2xl h-60" />
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="w-full flex flex-col items-center gap-10 mt-10">
       <div class="flex w-full max-w-[1364px]">
         <NuxtLink :to="`/browse`" class="flex gap-2 cursor-pointer">
           <Icon name="material-symbols:arrow-back-rounded" class="w-5 h-5" />
@@ -21,7 +53,7 @@ definePageMeta({
           <div class="flex items-center">
             <div class="flex-1 flex flex-col gap-2">
               <h2 class="font-semibold text-lg">Current Balance</h2>
-              <h1 class="font-bold text-4xl">1000 Readits</h1>
+              <h1 class="font-bold text-4xl">{{ currentWalletBalance }} Readits</h1>
               <p>Each book requires Readits to rent/buy.</p>
             </div>
 
