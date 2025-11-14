@@ -124,12 +124,15 @@ const isActive = (path: string) => {
           </NuxtLink>
 
           <!-- Readits Display -->
-          <div class="flex items-center rounded-md px-3 py-2 gap-1.5">
+          <NuxtLink
+            class="flex items-center rounded-md px-3 py-2 gap-1.5 hover:bg-surface-hover hover:text-accent text-base"
+            to="/buy-readits"
+          >
             <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
 
             <span v-if="isFetching" class="text-xl font-semibold text-accent">-</span>
             <span v-else class="text-xl font-semibold text-accent">{{ currentWalletBalance }}</span>
-          </div>
+          </NuxtLink>
 
           <!-- Notifications -->
           <button
