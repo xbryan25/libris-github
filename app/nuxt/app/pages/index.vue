@@ -10,8 +10,8 @@ definePageMeta({
 <template>
   <UApp>
     <div
-      class="bg-gradient-to-b from-[#e2fbce] via-[#e3ef26] to-[#07653] min-h-screen w-full flex flex-col"
-    >
+    class="bg-[linear-gradient(to_bottom,_#f1ffe5,_#f7fbb5,_#b4e3d4)] min-h-screen w-full flex flex-col"
+  >
       <div class="top-5 left-0 w-full flex justify-between items-center px-5 pt-5">
         <div class="flex items-center space-x-3">
 
@@ -76,7 +76,7 @@ definePageMeta({
               <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
                 Build Your Profile and Create Your Library
               </h2>
-              <p class="mt-6 text-xl text-gray-600">
+              <p class="mt-6 text-xl text-gray-600 text-justify">
                 Create your personal library. Effortlessly catalog your collection and let others discover your books.
               </p>
             </div>
@@ -107,7 +107,7 @@ definePageMeta({
               <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
                 Browse Books Near You
               </h2>
-              <p class="mt-6 text-xl text-gray-600">
+              <p class="mt-6 text-xl text-gray-600 text-justify">
                 Find exactly what you're looking for, right in your neighborhood. Browse books from other users, filter by genre, author, title, price, distance to find your next great read.
               </p>
             </div>
@@ -124,7 +124,7 @@ definePageMeta({
               <h2 class="text-4xl font-bold tracking-tight sm:text-5xl text-[#111]">
                 Connect, Share, and Read More
               </h2>
-              <p class="mt-6 text-xl text-gray-600">
+              <p class="mt-6 text-xl text-gray-600 text-justify">
                 A safe and easy way to lend, rent, or sell your books. Communicate with user, arrange a public meetup, and rate other users.
               </p>
               <ul class="mt-8 space-y-4 text-xl text-gray-700 text-center lg:text-left">
