@@ -13,11 +13,13 @@ const emit = defineEmits<{
   purchase: []
 }>()
 
-const handleRent = () => {
-  emit('rent')
-}
 
-const handlePurchase = () => {
+const openRentBookModal = () => {
+  emit('rent')
+};
+
+
+const openPurchaseBookModal = () => {
   emit('purchase')
 }
 </script>
@@ -113,7 +115,7 @@ const handlePurchase = () => {
     >
       <button 
         v-if="availability === 'rent' || availability === 'both'"
-        @click="handleRent"
+        @click="openRentBookModal"
         class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
       >
         <UIcon name="i-heroicons-book-open" class="text-xl" />
@@ -122,7 +124,7 @@ const handlePurchase = () => {
       
       <button 
         v-if="availability === 'purchase' || availability === 'both'"
-        @click="handlePurchase"
+        @click="openPurchaseBookModal"
         class="bg-green-700 hover:bg-green-800 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
       >
         <UIcon name="i-heroicons-shopping-cart" class="text-xl" />

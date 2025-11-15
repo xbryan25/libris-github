@@ -11,6 +11,18 @@ const route = useRoute();
 const router = useRouter();
 const bookId = route.params.bookId as string;
 
+const isOpenRentBookModal = ref(false);
+
+const isOpenPurchaseBookModal = ref(false);
+
+const openRentBookModal = () => {
+  isOpenRentBookModal.value = true;
+};
+
+const openPurchaseBookModal = () => {
+  isOpenPurchaseBookModal.value = true;
+};
+
 const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBadge } =
   useBookDetails();
 
@@ -279,13 +291,21 @@ const getBadgeColorClasses = (color: string) => {
                 :daily-rent-price="book.daily_rent_price"
                 :security-deposit="book.security_deposit"
                 :purchase-price="book.purchase_price"
-                @rent="handleRent"
-                @purchase="handlePurchase"
+                @rent="openRentBookModal"
+                @purchase="openPurchaseBookModal"
               />
             </div>
           </div>
         </div>
       </UCard>
     </div>
+    <RentBookModal
+      :is-open-rent-book-modal="isOpenRentBookModal"
+      @update:openRentBookModal="isOpenRentBookModal = $event"
+    />
+    <PurchaseBookModal
+      :is-open-purchase-book-modal="isOpenPurchaseBookModal"
+      @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
+    />
   </div>
 </template>
