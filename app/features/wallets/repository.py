@@ -34,3 +34,15 @@ class WalletRepository:
             WalletQueries.INCREMENT_WALLET_BALANCE,
             (readits_to_add, last_updated, user_id),
         )
+
+    @staticmethod
+    def add_transaction(
+        readits_transaction_amount, transaction_date, transaction_type, user_id
+    ):
+
+        db = current_app.extensions["db"]
+
+        return db.execute_query(
+            WalletQueries.INSERT_TRANSACTION_USING_USER_ID,
+            (readits_transaction_amount, transaction_date, transaction_type, user_id),
+        )

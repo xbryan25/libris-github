@@ -8,7 +8,7 @@ from xendit.apis import InvoiceApi
 
 from xendit.invoice.model.create_invoice_request import CreateInvoiceRequest
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 class WalletServices:
@@ -50,25 +50,29 @@ class WalletServices:
         return invoice["invoice_url"]
 
     @staticmethod
-    def add_readits_to_wallet_from_paid_invoice_service(user_id, amount):
+    def add_readits_to_wallet_from_paid_invoice_service(user_id, amount, last_updated):
 
         amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
 
-        readits_to_add = amount_to_readits_dict[amount]
-
-        last_updated = datetime.now(timezone.utc)
+        if amount not in amount_to_readits_dict:
+            readits_to_add = 0
+        else:
+            readits_to_add = amount_to_readits_dict[amount]
 
         WalletRepository.add_readits_to_wallet_from_paid_invoice(
             user_id, readits_to_add, last_updated
         )
 
-    # @staticmethod
-    # def add_transaction_service(user_id, amount):
+    @staticmethod
+    def add_transaction_service(user_id, amount, transaction_date):
 
-    #     amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
+        amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
 
-    #     readits_to_add = amount_to_readits_dict[amount]
+        if amount not in amount_to_readits_dict:
+            readits_transaction_amount = 0
+        else:
+            readits_transaction_amount = amount_to_readits_dict[amount]
 
-    #     WalletRepository.add_readits_to_wallet_from_paid_invoice(user_id, readits_to_add)
-
-    #     print('reach here')
+        WalletRepository.add_transaction(
+            readits_transaction_amount, transaction_date, "topup", user_id
+        )

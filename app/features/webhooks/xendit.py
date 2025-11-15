@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 
+from datetime import datetime, timezone
+
 from app.features.wallets.services import WalletServices
 
 webhooks_bp = Blueprint("webhooks", __name__)
@@ -36,10 +38,14 @@ def handle_invoice_paid(payload):
 
     parsed_external_id = payload.get("external_id").split("_")
     amount = payload.get("amount")
+    transaction_date = datetime.now(timezone.utc)
 
     WalletServices.add_readits_to_wallet_from_paid_invoice_service(
-        user_id=parsed_external_id[1],
-        amount=amount,
+        user_id=parsed_external_id[1], amount=amount, last_updated=transaction_date
+    )
+
+    WalletServices.add_transaction_service(
+        user_id=parsed_external_id[1], amount=amount, transaction_date=transaction_date
     )
 
     return jsonify({"status": "Successful purchase."}), 200
