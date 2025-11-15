@@ -8,6 +8,14 @@ definePageMeta({
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
 
+const isOpenConfirmPurchaseModal = ref(false);
+const selectedPack = ref('');
+
+const setOpenConfirmPurchaseModal = (packName: string) => {
+  selectedPack.value = packName;
+  isOpenConfirmPurchaseModal.value = true;
+};
+
 onMounted(async () => {
   isFetching.value = true;
 
@@ -19,7 +27,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-auto w-full overflow-hidden bg-background text-base">
+  <div class="h-auto w-full overflow-hidden bg-background text-base mb-15">
     <div v-if="isFetching" class="w-full flex flex-col items-center gap-10 mt-10">
       <div class="w-full max-w-[1364px]">
         <USkeleton class="w-37 h-6" />
@@ -72,6 +80,7 @@ onMounted(async () => {
             billing-cycle="/one-time"
             :button="{
               label: 'Buy now',
+              onClick: () => setOpenConfirmPurchaseModal('starter'),
             }"
             orientation="horizontal"
             variant="outline"
@@ -106,6 +115,7 @@ onMounted(async () => {
             billing-cycle="/one-time"
             :button="{
               label: 'Buy now',
+              onClick: () => setOpenConfirmPurchaseModal('popular'),
             }"
             orientation="horizontal"
             variant="outline"
@@ -138,6 +148,7 @@ onMounted(async () => {
             billing-cycle="/one-time"
             :button="{
               label: 'Buy now',
+              onClick: () => setOpenConfirmPurchaseModal('pro'),
             }"
             orientation="horizontal"
             variant="outline"
@@ -173,6 +184,7 @@ onMounted(async () => {
             billing-cycle="/one-time"
             :button="{
               label: 'Buy now',
+              onClick: () => setOpenConfirmPurchaseModal('ultra'),
             }"
             orientation="horizontal"
             variant="outline"
@@ -198,6 +210,14 @@ onMounted(async () => {
           </UPricingPlan>
         </div>
       </div>
+
+      <ConfirmReaditsPurchaseModal
+        :is-open-confirm-purchase-modal="isOpenConfirmPurchaseModal"
+        :selected-pack="selectedPack"
+        @update:open-confirm-purchase-modal="
+          (newVal: boolean) => (isOpenConfirmPurchaseModal = newVal)
+        "
+      />
     </div>
   </div>
 </template>
