@@ -5,6 +5,7 @@ from .purchases import purchases_bp
 from .rentals import rentals_bp
 from .users import users_bp
 from .wallets import wallets_bp
+from .webhooks import webhooks_bp
 
 blueprints = {
     "dashboard": dashboard_bp,
@@ -14,4 +15,5 @@ blueprints = {
     "rentals": rentals_bp,
     "users": users_bp,
     "wallets": wallets_bp,
+    "webhooks": webhooks_bp,
 }

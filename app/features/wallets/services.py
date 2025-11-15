@@ -8,7 +8,7 @@ from xendit.apis import InvoiceApi
 
 from xendit.invoice.model.create_invoice_request import CreateInvoiceRequest
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class WalletServices:
@@ -48,3 +48,27 @@ class WalletServices:
         invoice = api_instance.create_invoice(create_invoice_request)  # type: ignore[arg-type]
 
         return invoice["invoice_url"]
+
+    @staticmethod
+    def add_readits_to_wallet_from_paid_invoice_service(user_id, amount):
+
+        amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
+
+        readits_to_add = amount_to_readits_dict[amount]
+
+        last_updated = datetime.now(timezone.utc)
+
+        WalletRepository.add_readits_to_wallet_from_paid_invoice(
+            user_id, readits_to_add, last_updated
+        )
+
+    # @staticmethod
+    # def add_transaction_service(user_id, amount):
+
+    #     amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
+
+    #     readits_to_add = amount_to_readits_dict[amount]
+
+    #     WalletRepository.add_readits_to_wallet_from_paid_invoice(user_id, readits_to_add)
+
+    #     print('reach here')
