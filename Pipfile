@@ -10,6 +10,8 @@ flask-cors = "*"
 psycopg = {extras = ["pool", "binary"], version = "*"}
 flask-jwt-extended = "*"
 supabase = "*"
+xendit-python = "*"
+python-dateutil = "*"
 
 [dev-packages]
 pre-commit = "*"

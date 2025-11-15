@@ -31,3 +31,12 @@ def get_current_wallet_balance() -> tuple[Response, int]:
     """
 
     return WalletControllers.get_current_wallet_balance_controller()
+
+
+@wallets_bp.route("/buy-readits", methods=["POST"])
+@jwt_required()
+def buy_readits() -> tuple[Response, int]:
+    """
+    (add later)
+    """
+    return WalletControllers.buy_readits_controller()
