@@ -1,17 +1,14 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/useAuthStore';
+
 const route = useRoute();
+
+const auth = useAuthStore();
+
+const { paymentSuccess } = useSocket(auth.userId as string);
 
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
-
-onMounted(async () => {
-  isFetching.value = true;
-
-  const data = await useCurrentWalletBalance();
-  currentWalletBalance.value = data.currentWalletBalance ?? 0;
-
-  isFetching.value = false;
-});
 
 const isActive = (path: string) => {
   if (route.path === path) return true;
@@ -22,6 +19,24 @@ const isActive = (path: string) => {
 
   return false;
 };
+
+watch(
+  () => paymentSuccess.value,
+  (amount) => {
+    if (amount) {
+      currentWalletBalance.value = currentWalletBalance.value + amount;
+    }
+  },
+);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 </script>
 
 <template>

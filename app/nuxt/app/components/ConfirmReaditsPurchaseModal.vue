@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { capitalizeWords } from '#imports';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 const props = defineProps<{
   isOpenConfirmPurchaseModal: boolean;
@@ -27,13 +28,31 @@ const packToReaditsMap: Record<string, [number, number]> = {
 const isModalConfirmClicked = ref(false);
 
 const toast = useToast();
+const auth = useAuthStore();
+
+const { paymentSuccess } = useSocket(auth.userId as string);
+
+watch(
+  () => paymentSuccess.value,
+  (amount) => {
+    if (amount) {
+      toast.add({
+        title: 'Payment Successful',
+        description: `You received ${amount} readits!`,
+        color: 'success',
+      });
+    }
+
+    paymentSuccess.value = null;
+  },
+);
 
 const onSubmit = async () => {
   isModalConfirmClicked.value = true;
 
   const { invoiceUrl }: { invoiceUrl: string } = await useBuyReadits(props.selectedPack);
 
-  console.log(invoiceUrl);
+  // console.log(invoiceUrl);
 
   window.open(invoiceUrl, '_blank');
 
@@ -46,6 +65,10 @@ const onSubmit = async () => {
   isOpenConfirmPurchaseModal.value = false;
   isModalConfirmClicked.value = false;
 };
+
+// onMounted(() => {
+//   useSocket(auth.userId as string); // initialize on mount
+// });
 </script>
 
 <template>

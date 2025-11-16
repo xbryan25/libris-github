@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   middleware: auth,
 });
+
+const authStore = useAuthStore();
+
+const { paymentSuccess } = useSocket(authStore.userId as string);
 
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
@@ -15,6 +20,15 @@ const setOpenConfirmPurchaseModal = (packName: string) => {
   selectedPack.value = packName;
   isOpenConfirmPurchaseModal.value = true;
 };
+
+watch(
+  () => paymentSuccess.value,
+  (amount) => {
+    if (amount) {
+      currentWalletBalance.value = currentWalletBalance.value + amount;
+    }
+  },
+);
 
 onMounted(async () => {
   isFetching.value = true;

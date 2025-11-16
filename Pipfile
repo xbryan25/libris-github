@@ -12,6 +12,8 @@ flask-jwt-extended = "*"
 supabase = "*"
 xendit-python = "*"
 python-dateutil = "*"
+flask-socketio = "*"
+eventlet = "*"
 
 [dev-packages]
 pre-commit = "*"

@@ -1,4 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
+from app import socketio
+
+from flask_socketio import join_room
 
 from datetime import datetime, timezone
 
@@ -48,4 +51,24 @@ def handle_invoice_paid(payload):
         user_id=parsed_external_id[1], amount=amount, transaction_date=transaction_date
     )
 
+    amount_to_readits_dict = {100: 200, 150: 600, 350: 1000, 750: 5000}
+
+    socketio.emit(
+        "payment_success",
+        {"readits_amount": amount_to_readits_dict[amount]},
+        room=parsed_external_id[1],
+    )
+
     return jsonify({"status": "Successful purchase."}), 200
+
+
+@socketio.on("join")
+def handle_join(data):
+    user_id = data["user_id"]
+    join_room(user_id)
+    print(f"----------------------------------User {user_id} joined room")
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("----------------------------------Client disconnected")

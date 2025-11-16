@@ -12,17 +12,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
         // await useRefreshAccessToken()
         const response = await useCurrentUser()
         auth.username = response.username
-        auth.user_id = response.user_id
+        auth.userId = response.userId
         auth.isAuthenticated = true
 
         // --- Debug logging ---
-        console.log('Route path:', to.path)
-        console.log('Route params:', to.params)
-        console.log('Logged-in user_id:', auth.user_id)
+        // console.log('Route path:', to.path)
+        // console.log('Route params:', to.params)
+        // console.log('Logged-in user_id:', auth.userId)
 
         // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {
-            if (to.params.id === auth.user_id) {
+            if (to.params.id === auth.userId) {
                 console.log('Redirecting to /users/me')
                 return navigateTo('/users/me')
             } else {
@@ -32,6 +32,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     } catch {
         auth.username = null
+        auth.userId = null
         auth.isAuthenticated = false
 
         if (to.path !== '/login') return navigateTo('/login')
