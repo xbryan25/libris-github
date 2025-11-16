@@ -1,95 +1,148 @@
 <script setup lang="ts">
 import { computed, ref, watch, toRef } from 'vue';
 import type { Profile } from '~/composables/UseProfile';
-import { useProfileEdit } from '~/composables/useProfileEdit';
-import { validateProfileForm } from '@/utils/validateProfileEdit';
+import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
 
-const errorMap = ref<Record<string, string>>({});
+const errorMapPersonal = ref<Record<string, string>>({});
+const errorMapAddress = ref<Record<string, string>>({});
 
 interface Props {
   profile: Profile | null;
   loading: boolean;
   error: string | null;
   isCurrentUser?: boolean; // Whether this is the current user's profile
-  isEditing?: boolean; // Whether we're in edit mode
+  isEditingPersonal?: boolean; // Whether personal info is in edit mode
+  isEditingAddress?: boolean; // Whether address is in edit mode
   editForm?: any; // The edit form data
+  savingPersonal?: boolean; // Loading state for personal info save
+  savingAddress?: boolean; // Loading state for address save
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  startEdit: [];
-  save: [];
-  cancel: [];
+  startEditPersonal: [];
+  startEditAddress: [];
+  savePersonal: [];
+  saveAddress: [];
+  cancelPersonal: [];
+  cancelAddress: [];
 }>();
 
 const editForm = computed(() => props.editForm || {});
 
-const isEditingRef = toRef(props, 'isEditing');
+const isEditingPersonalRef = toRef(props, 'isEditingPersonal');
+const isEditingAddressRef = toRef(props, 'isEditingAddress');
 
-const hasClickedEditButton = ref(false);
+const hasClickedSavePersonal = ref(false);
+const hasClickedSaveAddress = ref(false);
 
 // Clear errors when editing is cancelled or when editing starts
-watch(isEditingRef, (isEditing) => {
+watch(isEditingPersonalRef, (isEditing) => {
   if (!isEditing) {
-    errorMap.value = {};
+    errorMapPersonal.value = {};
   } else {
-    hasClickedEditButton.value = false;
-
-    errorMap.value = {};
+    hasClickedSavePersonal.value = false;
+    errorMapPersonal.value = {};
   }
 });
 
-// Real-time validation for fields
+watch(isEditingAddressRef, (isEditing) => {
+  if (!isEditing) {
+    errorMapAddress.value = {};
+  } else {
+    hasClickedSaveAddress.value = false;
+    errorMapAddress.value = {};
+  }
+});
+
+// Real-time validation for personal info fields
 watch(
   () => editForm.value.first_name,
   () => {
-    validateField('first_name');
+    if (props.isEditingPersonal) {
+      validatePersonalField('first_name');
+    }
   },
 );
 
 watch(
   () => editForm.value.middle_name,
   () => {
-    validateField('middle_name');
+    if (props.isEditingPersonal) {
+      validatePersonalField('middle_name');
+    }
   },
 );
 
 watch(
   () => editForm.value.last_name,
   () => {
-    validateField('last_name');
+    if (props.isEditingPersonal) {
+      validatePersonalField('last_name');
+    }
   },
 );
 
 watch(
   () => editForm.value.phone_number,
   () => {
-    validateField('phone_number');
+    if (props.isEditingPersonal) {
+      validatePersonalField('phone_number');
+    }
   },
 );
 
+// Real-time validation for address fields
 watch(
   () => editForm.value.address?.country,
   () => {
-    validateField('address.country');
+    if (props.isEditingAddress) {
+      validateAddressField('address.country');
+    }
   },
 );
 
-function validateField(field: string) {
-  const tempState = { ...editForm.value };
-  const allErrors = validateProfileForm(tempState);
+function validatePersonalField(field: string) {
+  const tempState = {
+    first_name: editForm.value.first_name,
+    middle_name: editForm.value.middle_name,
+    last_name: editForm.value.last_name,
+    phone_number: editForm.value.phone_number,
+  };
+  const allErrors = validatePersonalInfo(tempState);
   const fieldError = allErrors.find((e) => e.name === field);
-  if (fieldError) errorMap.value[field] = fieldError.message;
-  else delete errorMap.value[field];
+  if (fieldError) errorMapPersonal.value[field] = fieldError.message;
+  else delete errorMapPersonal.value[field];
 }
 
-function onSave() {
-  hasClickedEditButton.value = true;
+function validateAddressField(field: string) {
+  const tempState = editForm.value.address || {};
+  const allErrors = validateAddress(tempState);
+  const fieldError = allErrors.find((e) => e.name === field);
+  if (fieldError) errorMapAddress.value[field] = fieldError.message;
+  else delete errorMapAddress.value[field];
+}
 
-  const errors = validateProfileForm(editForm.value);
-  errorMap.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
-  if (errors.length === 0) emit('save');
+function onSavePersonal() {
+  hasClickedSavePersonal.value = true;
+
+  const errors = validatePersonalInfo({
+    first_name: editForm.value.first_name,
+    middle_name: editForm.value.middle_name,
+    last_name: editForm.value.last_name,
+    phone_number: editForm.value.phone_number,
+  });
+  errorMapPersonal.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+  if (errors.length === 0) emit('savePersonal');
+}
+
+function onSaveAddress() {
+  hasClickedSaveAddress.value = true;
+
+  const errors = validateAddress(editForm.value.address || {});
+  errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+  if (errors.length === 0) emit('saveAddress');
 }
 </script>
 
@@ -168,12 +221,44 @@ function onSave() {
   >
     <div class="flex flex-col md:flex-row w-full items-start justify-between gap-10">
       <div class="flex flex-col w-full md:w-1/2 space-y-8">
-        <div class="text-[32px] font-bold text-base">Personal Information</div>
+        <div class="flex justify-between items-center">
+          <div class="text-[32px] font-bold text-base">Personal Information</div>
+          <div class="flex items-center space-x-2">
+            <UButton
+              v-if="isCurrentUser && !isEditingPersonal"
+              icon="i-heroicons-pencil"
+              color="primary"
+              variant="solid"
+              size="sm"
+              @click="$emit('startEditPersonal')"
+            />
+            <div v-if="isCurrentUser && isEditingPersonal" class="flex space-x-2">
+              <UButton
+                color="primary"
+                size="sm"
+                :disabled="hasClickedSavePersonal"
+                :loading="savingPersonal || hasClickedSavePersonal"
+                @click="onSavePersonal"
+              >
+                Save
+              </UButton>
+              <UButton
+                color="neutral"
+                variant="outline"
+                size="sm"
+                :disabled="hasClickedSavePersonal"
+                @click="$emit('cancelPersonal')"
+              >
+                Cancel
+              </UButton>
+            </div>
+          </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8 w-full">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">First Name</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingPersonal"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.first_name"
             >
@@ -182,18 +267,19 @@ function onSave() {
             <UInput
               v-else
               v-model="editForm.first_name"
-              @input="validateField('first_name')"
+              @input="validatePersonalField('first_name')"
               placeholder="First Name"
-              :color="errorMap.first_name ? 'error' : 'primary'"
+              :color="errorMapPersonal.first_name ? 'error' : 'primary'"
+              :disabled="hasClickedSavePersonal"
             />
-            <span v-if="errorMap.first_name" class="text-red-500 text-sm">{{
-              errorMap.first_name
+            <span v-if="errorMapPersonal.first_name" class="text-red-500 text-sm">{{
+              errorMapPersonal.first_name
             }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Middle Name</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingPersonal"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.middle_name"
             >
@@ -203,18 +289,18 @@ function onSave() {
               v-else
               v-model="editForm.middle_name"
               placeholder="Middle Name"
-              :color="errorMap.middle_name ? 'error' : 'primary'"
-              :disabled="hasClickedEditButton"
-              @input="validateField('middle_name')"
+              :color="errorMapPersonal.middle_name ? 'error' : 'primary'"
+              :disabled="hasClickedSavePersonal"
+              @input="validatePersonalField('middle_name')"
             />
-            <span v-if="errorMap.middle_name" class="text-red-500 text-sm">{{
-              errorMap.middle_name
+            <span v-if="errorMapPersonal.middle_name" class="text-red-500 text-sm">{{
+              errorMapPersonal.middle_name
             }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Last Name</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingPersonal"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.last_name"
             >
@@ -224,18 +310,18 @@ function onSave() {
               v-else
               v-model="editForm.last_name"
               placeholder="Last Name"
-              :color="errorMap.last_name ? 'error' : 'primary'"
-              :disabled="hasClickedEditButton"
-              @input="validateField('last_name')"
+              :color="errorMapPersonal.last_name ? 'error' : 'primary'"
+              :disabled="hasClickedSavePersonal"
+              @input="validatePersonalField('last_name')"
             />
-            <span v-if="errorMap.last_name" class="text-red-500 text-sm">{{
-              errorMap.last_name
+            <span v-if="errorMapPersonal.last_name" class="text-red-500 text-sm">{{
+              errorMapPersonal.last_name
             }}</span>
           </div>
           <div class="flex flex-col min-w-0">
             <div class="text-[25px] font-semibold text-base">Date of Birth</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingPersonal"
               class="text-[20px] text-muted overflow-hidden text-ellipsis whitespace-nowrap"
               :title="profile?.date_of_birth"
             >
@@ -245,13 +331,13 @@ function onSave() {
               v-else
               v-model="editForm.date_of_birth"
               type="date"
-              :disabled="hasClickedEditButton"
+              :disabled="hasClickedSavePersonal"
             />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base whitespace-nowrap">Phone Number</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingPersonal"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.phone_number"
             >
@@ -261,12 +347,12 @@ function onSave() {
               v-else
               v-model="editForm.phone_number"
               placeholder="Phone Number"
-              :color="errorMap.phone_number ? 'error' : 'primary'"
-              :disabled="hasClickedEditButton"
-              @input="validateField('phone_number')"
+              :color="errorMapPersonal.phone_number ? 'error' : 'primary'"
+              :disabled="hasClickedSavePersonal"
+              @input="validatePersonalField('phone_number')"
             />
-            <span v-if="errorMap.phone_number" class="text-red-500 text-sm">{{
-              errorMap.phone_number
+            <span v-if="errorMapPersonal.phone_number" class="text-red-500 text-sm">{{
+              errorMapPersonal.phone_number
             }}</span>
           </div>
         </div>
@@ -279,20 +365,20 @@ function onSave() {
           <div class="text-[32px] font-bold text-base">Address</div>
           <div class="flex items-center space-x-2">
             <UButton
-              v-if="isCurrentUser && !isEditing"
+              v-if="isCurrentUser && !isEditingAddress"
               icon="i-heroicons-pencil"
               color="primary"
               variant="solid"
               size="sm"
-              @click="$emit('startEdit')"
+              @click="$emit('startEditAddress')"
             />
-            <div v-if="isCurrentUser && isEditing" class="flex space-x-2">
+            <div v-if="isCurrentUser && isEditingAddress" class="flex space-x-2">
               <UButton
                 color="primary"
                 size="sm"
-                :disabled="hasClickedEditButton"
-                :loading="hasClickedEditButton"
-                @click="onSave"
+                :disabled="hasClickedSaveAddress"
+                :loading="savingAddress || hasClickedSaveAddress"
+                @click="onSaveAddress"
               >
                 Save
               </UButton>
@@ -300,8 +386,8 @@ function onSave() {
                 color="neutral"
                 variant="outline"
                 size="sm"
-                :disabled="hasClickedEditButton"
-                @click="$emit('cancel')"
+                :disabled="hasClickedSaveAddress"
+                @click="$emit('cancelAddress')"
               >
                 Cancel
               </UButton>
@@ -312,7 +398,7 @@ function onSave() {
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingAddress"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.address?.country"
             >
@@ -322,18 +408,18 @@ function onSave() {
               v-else
               v-model="editForm.address.country"
               placeholder="Country"
-              :color="errorMap['address.country'] ? 'error' : 'primary'"
-              :disabled="hasClickedEditButton"
-              @input="validateField('address.country')"
+              :color="errorMapAddress['address.country'] ? 'error' : 'primary'"
+              :disabled="hasClickedSaveAddress"
+              @input="validateAddressField('address.country')"
             />
-            <span v-if="errorMap['address.country']" class="text-red-500 text-sm">{{
-              errorMap['address.country']
+            <span v-if="errorMapAddress['address.country']" class="text-red-500 text-sm">{{
+              errorMapAddress['address.country']
             }}</span>
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">City</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingAddress"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.address?.city"
             >
@@ -342,14 +428,14 @@ function onSave() {
             <UInput
               v-else
               v-model="editForm.address.city"
-              :disabled="hasClickedEditButton"
+              :disabled="hasClickedSaveAddress"
               placeholder="City"
             />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Barangay</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingAddress"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.address?.barangay"
             >
@@ -358,14 +444,14 @@ function onSave() {
             <UInput
               v-else
               v-model="editForm.address.barangay"
-              :disabled="hasClickedEditButton"
+              :disabled="hasClickedSaveAddress"
               placeholder="Barangay"
             />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Street</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingAddress"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.address?.street"
             >
@@ -374,14 +460,14 @@ function onSave() {
             <UInput
               v-else
               v-model="editForm.address.street"
-              :disabled="hasClickedEditButton"
+              :disabled="hasClickedSaveAddress"
               placeholder="Street"
             />
           </div>
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Postal Code</div>
             <div
-              v-if="!isEditing"
+              v-if="!isEditingAddress"
               class="text-[20px] text-muted truncate max-w-full"
               :title="profile?.address?.postal_code"
             >
@@ -390,7 +476,7 @@ function onSave() {
             <UInput
               v-else
               v-model="editForm.address.postal_code"
-              :disabled="hasClickedEditButton"
+              :disabled="hasClickedSaveAddress"
               placeholder="Postal Code"
             />
           </div>
