@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/useAuthStore';
+import type { TabsItem } from '@nuxt/ui';
 
+const tabItems = [
+  {
+    label: 'Unread',
+    icon: 'i-lucide-user',
+    slot: 'unread',
+  },
+  {
+    label: 'Read',
+    icon: 'i-lucide-lock',
+    slot: 'read',
+  },
+];
 const route = useRoute();
 
 const auth = useAuthStore();
@@ -9,6 +22,8 @@ const { paymentSuccess } = useSocket(auth.userId as string);
 
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
+
+const isOpenNotificationPopover = ref(false);
 
 const isActive = (path: string) => {
   if (route.path === path) return true;
@@ -150,11 +165,94 @@ onMounted(async () => {
           </NuxtLink>
 
           <!-- Notifications -->
-          <button
+
+          <UPopover v-model:open="isOpenNotificationPopover" arrow>
+            <UChip text="9" size="3xl">
+              <UButton
+                icon="mdi:bell-outline"
+                class="flex items-center rounded-md p-2 bg-surface hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
+              />
+            </UChip>
+
+            <template #content>
+              <div class="w-75 h-80 p-2 flex flex-col gap-1">
+                <h1 class="font-bold text-xl">Notifications</h1>
+
+                <UTabs
+                  color="neutral"
+                  :items="tabItems"
+                  class="w-full"
+                  :ui="{
+                    trigger: 'cursor-pointer',
+                  }"
+                >
+                  <template #unread>
+                    <div class="flex flex-col gap-2">
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <UButton color="neutral" class="justify-center cursor-pointer"
+                        >See more (99)</UButton
+                      >
+                    </div>
+                  </template>
+
+                  <template #read>
+                    <div class="flex flex-col gap-2">
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                        <h2 class="font-semibold text-sm">Request Approved!</h2>
+                        <p class="text-xs w-full truncate">
+                          The request to rent 'The Passion Within' has been approved.
+                        </p>
+                      </div>
+
+                      <UButton color="neutral" class="justify-center cursor-pointer"
+                        >See more</UButton
+                      >
+                    </div>
+                  </template>
+                </UTabs>
+              </div>
+            </template>
+          </UPopover>
+
+          <!-- <button
             class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
           >
             <Icon name="mdi:bell-outline" class="w-5 h-5" />
-          </button>
+          </button> -->
 
           <!-- Color Mode Toggle -->
           <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors" />
