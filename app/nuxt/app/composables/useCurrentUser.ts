@@ -1,6 +1,6 @@
 type CurrentUserResponse = {
     username: string
-	user_id: string
+	userId: string
 }
 
 export function useCurrentUser() {
