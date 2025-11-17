@@ -71,7 +71,7 @@ onMounted(async () => {
       </div>
 
       <div class="flex justify-center max-w-[1364px] w-full">
-        <UCard class="w-full">
+        <UCard class="w-full bg-surface">
           <div class="flex items-center">
             <div class="flex-1 flex flex-col gap-2">
               <h2 class="font-semibold text-lg">Current Balance</h2>
@@ -98,7 +98,7 @@ onMounted(async () => {
             }"
             orientation="horizontal"
             variant="outline"
-            class="max-w-2xl max-h-60"
+            class="max-w-2xl max-h-60 bg-surface"
             :ui="{
               features: '!flex !mt-6 w-full',
               button:
@@ -133,7 +133,7 @@ onMounted(async () => {
             }"
             orientation="horizontal"
             variant="outline"
-            class="max-w-2xl max-h-60 border-3 border-blue-500"
+            class="max-w-2xl max-h-60 bg-surface border-3 border-blue-500"
             :ui="{
               features: '!flex !mt-6 w-full',
               button: 'cursor-pointer bg-blue-500 hover:bg-blue-400 active:bg-blue-400',
@@ -166,7 +166,7 @@ onMounted(async () => {
             }"
             orientation="horizontal"
             variant="outline"
-            class="max-w-2xl max-h-60"
+            class="max-w-2xl max-h-60 bg-surface"
             :ui="{
               features: '!flex !mt-6 w-full',
               button:
@@ -202,7 +202,7 @@ onMounted(async () => {
             }"
             orientation="horizontal"
             variant="outline"
-            class="max-w-2xl max-h-60 border-3 border-orange-500"
+            class="max-w-2xl max-h-60 bg-surface border-3 border-orange-500"
             :ui="{
               features: '!flex !mt-6 w-full',
               button: 'cursor-pointer bg-orange-500 hover:bg-orange-400 active:bg-orange-400',
