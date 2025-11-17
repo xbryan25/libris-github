@@ -6,8 +6,7 @@
 
   const LOCATIONIQ_API_KEY = import.meta.env.LOCATIONIQ_API_KEY;
 
-  const { query, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
-
+  const { addressQuery, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
 
   function handleSelectSuggestion(item: any) {
     selectSuggestion(item, editForm.value.address);
@@ -113,10 +112,18 @@
       }
     },
   );
+  watch(
+    () => editForm.value.address?.street,
+    (street) => {
+      if (props.isEditingAddress) {
+        addressQuery.value = street || '';
+      }
+    }
+  );
 
-  query.value = editForm.value.address?.street || '';
-
-  watch(query, () => fetchSuggestions());
+  watch(addressQuery, (val) => {
+    if (props.isEditingAddress && val) fetchSuggestions(val);
+  });
 
   function validatePersonalField(field: string) {
     const tempState = {
@@ -415,9 +422,9 @@
           <div class="text-[25px] font-semibold text-base">Search Address</div>
           <div class="relative">
             <UInput
-              v-model="query"
+              v-model="addressQuery"
               :disabled="hasClickedSaveAddress"
-              placeholder="Search street..."
+              placeholder="Search Address..."
             />
             <ul
               v-if="suggestions.length"

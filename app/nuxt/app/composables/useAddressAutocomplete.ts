@@ -1,18 +1,19 @@
 import { ref } from 'vue';
 
 export function useAddressAutocomplete(apiKey: string) {
-  const query = ref('');
+  const addressQuery = ref('');
   const suggestions = ref<any[]>([]);
 
-  async function fetchSuggestions() {
-    if (!query.value) {
+  async function fetchSuggestions(queryValue?: string) {
+    const q = queryValue ?? addressQuery.value;
+    if (!q) {
       suggestions.value = [];
       return;
     }
     try {
       const res = await fetch(
         `https://us1.locationiq.com/v1/search.php?key=${apiKey}&q=${encodeURIComponent(
-          query.value
+          q
         )}&format=json&limit=5`
       );
       if (!res.ok) throw new Error('Network response was not ok');
@@ -26,15 +27,15 @@ export function useAddressAutocomplete(apiKey: string) {
 
   function selectSuggestion(item: any, address: any) {
     if (!address) return;
-    address.street = item.address?.road || item.display_name.split(',')[1]?.trim() || '';
+    address.street = item.address?.road || item.display_name.split(',')[0]?.trim() || '';
     address.city = item.address?.city || item.address?.town || item.address?.village || '';
     address.postal_code = item.address?.postcode || '';
     address.country = item.address?.country || '';
     address.latitude = parseFloat(item.lat);
     address.longitude = parseFloat(item.lon);
-    query.value = item.display_name;
+    addressQuery.value = item.display_name;
     suggestions.value = [];
   }
 
-  return { query, suggestions, fetchSuggestions, selectSuggestion };
+  return { addressQuery, suggestions, fetchSuggestions, selectSuggestion };
 }

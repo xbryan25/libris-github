@@ -42,7 +42,9 @@ export const useProfileEdit = () => {
       city: '',
       barangay: '',
       street: '',
-      postal_code: ''
+      postal_code: '',
+      latitude: null as number | null,
+      longitude: null as number | null
     }
   })
 
@@ -62,6 +64,8 @@ export const useProfileEdit = () => {
       editForm.address.barangay = profile.address.barangay || ''
       editForm.address.street = profile.address.street || ''
       editForm.address.postal_code = profile.address.postal_code || ''
+      editForm.address.latitude = profile.address.latitude || null
+      editForm.address.longitude = profile.address.longitude || null
     }
   }
 
@@ -152,7 +156,7 @@ export const useProfileEdit = () => {
 
       const filteredData = JSON.parse(JSON.stringify(dataToSave, (key, value) => {
         if (typeof value === 'string') return value.trim()
-        if (value === undefined || value === null) return undefined
+        if (value === undefined) return undefined;
         return value
       }))
 
