@@ -1,5 +1,5 @@
   <script setup lang="ts">
-  import { computed, ref, watch, toRef } from 'vue';
+  import { computed, ref, watch, toRef, onMounted } from 'vue';
   import type { Profile } from '~/composables/UseProfile';
   import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
   import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
@@ -159,6 +159,12 @@
     errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
     if (errors.length === 0) emit('saveAddress');
   }
+
+  onMounted(() => {
+  if (editForm.value.address?.display_name) {
+    addressQuery.value = editForm.value.address.display_name;
+  }
+  });
   </script>
 
 <template>
@@ -413,12 +419,15 @@
         <!-- Autocomplete street input -->
         <div v-if="isEditingAddress" class="flex flex-col mb-2">
           <div class="text-[25px] font-semibold text-base">Search Address</div>
-          <div class="relative">
+          <div class="relative flex items-center w-full">
             <UInput
               v-model="addressQuery"
               :disabled="hasClickedSaveAddress"
               placeholder="Search Address..."
             />
+            <UTooltip text="Parsed address may not be accurate. Please edit manually if incorrect.">
+              <UButton variant="ghost" size="sm" icon="i-heroicons-information-circle" />
+            </UTooltip>
             <ul
               v-if="suggestions.length"
               class="absolute z-50 mt-1 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded w-full max-h-40 overflow-auto"
@@ -434,7 +443,6 @@
             </ul>
           </div>
         </div>
-
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>

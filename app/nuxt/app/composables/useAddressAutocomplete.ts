@@ -74,5 +74,5 @@ export function useAddressAutocomplete(apiKey: string) {
     suggestions.value = [];
   }
   
-  return { addressQuery, suggestions, selectSuggestion };
+  return { addressQuery, suggestions, fetchSuggestions, selectSuggestion };
 }
