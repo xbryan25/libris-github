@@ -34,15 +34,45 @@ export function useAddressAutocomplete(apiKey: string) {
 
   function selectSuggestion(item: any, address: any) {
     if (!address) return;
-    address.street = item.address?.road || item.display_name.split(',')[0]?.trim() || '';
-    address.city = item.address?.city || item.address?.town || item.address?.village || '';
-    address.postal_code = item.address?.postcode || '';
-    address.country = item.address?.country || '';
+  
+    const addr = item.address || {};
+    const parts: string[] = item.display_name.split(',').map(p => p.trim());
+  
     address.latitude = parseFloat(item.lat);
     address.longitude = parseFloat(item.lon);
+  
+    // Street / road
+    address.street = addr.road || addr.pedestrian || addr.footway || parts[0] || '';
+  
+    // Barangay (suburb/neighbourhood or 2nd part of display_name)
+    address.barangay =
+      addr.suburb ||
+      addr.neighbourhood ||
+      addr.quarter ||
+      addr.hamlet ||
+      parts[1] || '';
+  
+    // City / municipality
+    address.city =
+      addr.city ||
+      addr.town ||
+      addr.village ||
+      addr.municipality ||
+      parts[2] || '';
+  
+    // Province / state
+    address.province = addr.state || parts[3] || '';
+  
+    // Postal code
+    address.postal_code =
+      addr.postcode || parts.find(p => /\d{4,6}/.test(p)) || '';
+  
+    // Country
+    address.country = addr.country || parts[parts.length - 1] || '';
+  
     addressQuery.value = item.display_name;
     suggestions.value = [];
   }
-
+  
   return { addressQuery, suggestions, selectSuggestion };
 }
