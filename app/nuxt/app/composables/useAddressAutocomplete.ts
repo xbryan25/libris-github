@@ -1,29 +1,36 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { debounce } from 'lodash';
 
 export function useAddressAutocomplete(apiKey: string) {
   const addressQuery = ref('');
   const suggestions = ref<any[]>([]);
 
-  async function fetchSuggestions(queryValue?: string) {
-    const q = queryValue ?? addressQuery.value;
-    if (!q) {
+  const fetchSuggestions = async () => {
+    if (!addressQuery.value) {
       suggestions.value = [];
       return;
     }
     try {
       const res = await fetch(
-        `https://us1.locationiq.com/v1/search.php?key=${apiKey}&q=${encodeURIComponent(
-          q
-        )}&format=json&limit=5`
+        `https://api.locationiq.com/v1/autocomplete.php?key=${apiKey}&q=${encodeURIComponent(addressQuery.value)}&limit=5&dedupe=1`
       );
       if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
-      suggestions.value = data;
+      suggestions.value = await res.json();
     } catch (err) {
       console.error('Fetch error:', err);
       suggestions.value = [];
     }
-  }
+  };
+
+  const debouncedFetch = debounce(fetchSuggestions, 500); 
+
+  watch(addressQuery, (val) => {
+    if (!val) {
+      suggestions.value = [];
+      return;
+    }
+    debouncedFetch();
+  });
 
   function selectSuggestion(item: any, address: any) {
     if (!address) return;
@@ -37,5 +44,5 @@ export function useAddressAutocomplete(apiKey: string) {
     suggestions.value = [];
   }
 
-  return { addressQuery, suggestions, fetchSuggestions, selectSuggestion };
+  return { addressQuery, suggestions, selectSuggestion };
 }

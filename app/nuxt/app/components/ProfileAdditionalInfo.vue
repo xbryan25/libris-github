@@ -4,14 +4,9 @@
   import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
   import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 
-  const LOCATIONIQ_API_KEY = import.meta.env.LOCATIONIQ_API_KEY;
-
+  const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
+  console.log('LocationIQ API key:', LOCATIONIQ_API_KEY);
   const { addressQuery, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
-
-  function handleSelectSuggestion(item: any) {
-    selectSuggestion(item, editForm.value.address);
-  }
-
 
   const errorMapPersonal = ref<Record<string, string>>({});
   const errorMapAddress = ref<Record<string, string>>({});
@@ -112,18 +107,16 @@
       }
     },
   );
-  watch(
-    () => editForm.value.address?.street,
-    (street) => {
-      if (props.isEditingAddress) {
-        addressQuery.value = street || '';
-      }
-    }
-  );
-
+  
   watch(addressQuery, (val) => {
-    if (props.isEditingAddress && val) fetchSuggestions(val);
+  if (props.isEditingAddress && val) fetchSuggestions();
   });
+
+  function handleSelectSuggestion(item: any) {
+  selectSuggestion(item, editForm.value.address); 
+  addressQuery.value = item.display_name; 
+  suggestions.value = [];
+}
 
   function validatePersonalField(field: string) {
     const tempState = {
