@@ -1,150 +1,165 @@
-<script setup lang="ts">
-import { computed, ref, watch, toRef } from 'vue';
-import type { Profile } from '~/composables/UseProfile';
-import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
+  <script setup lang="ts">
+  import { computed, ref, watch, toRef } from 'vue';
+  import type { Profile } from '~/composables/UseProfile';
+  import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
+  import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 
-const errorMapPersonal = ref<Record<string, string>>({});
-const errorMapAddress = ref<Record<string, string>>({});
+  const LOCATIONIQ_API_KEY = import.meta.env.LOCATIONIQ_API_KEY;
 
-interface Props {
-  profile: Profile | null;
-  loading: boolean;
-  error: string | null;
-  isCurrentUser?: boolean; // Whether this is the current user's profile
-  isEditingPersonal?: boolean; // Whether personal info is in edit mode
-  isEditingAddress?: boolean; // Whether address is in edit mode
-  editForm?: any; // The edit form data
-  savingPersonal?: boolean; // Loading state for personal info save
-  savingAddress?: boolean; // Loading state for address save
-}
+  const { query, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
 
-const props = defineProps<Props>();
 
-const emit = defineEmits<{
-  startEditPersonal: [];
-  startEditAddress: [];
-  savePersonal: [];
-  saveAddress: [];
-  cancelPersonal: [];
-  cancelAddress: [];
-}>();
-
-const editForm = computed(() => props.editForm || {});
-
-const isEditingPersonalRef = toRef(props, 'isEditingPersonal');
-const isEditingAddressRef = toRef(props, 'isEditingAddress');
-
-const hasClickedSavePersonal = ref(false);
-const hasClickedSaveAddress = ref(false);
-
-// Clear errors when editing is cancelled or when editing starts
-watch(isEditingPersonalRef, (isEditing) => {
-  if (!isEditing) {
-    errorMapPersonal.value = {};
-  } else {
-    hasClickedSavePersonal.value = false;
-    errorMapPersonal.value = {};
+  function handleSelectSuggestion(item: any) {
+    selectSuggestion(item, editForm.value.address);
   }
-});
 
-watch(isEditingAddressRef, (isEditing) => {
-  if (!isEditing) {
-    errorMapAddress.value = {};
-  } else {
-    hasClickedSaveAddress.value = false;
-    errorMapAddress.value = {};
+
+  const errorMapPersonal = ref<Record<string, string>>({});
+  const errorMapAddress = ref<Record<string, string>>({});
+
+  interface Props {
+    profile: Profile | null;
+    loading: boolean;
+    error: string | null;
+    isCurrentUser?: boolean; // Whether this is the current user's profile
+    isEditingPersonal?: boolean; // Whether personal info is in edit mode
+    isEditingAddress?: boolean; // Whether address is in edit mode
+    editForm?: any; // The edit form data
+    savingPersonal?: boolean; // Loading state for personal info save
+    savingAddress?: boolean; // Loading state for address save
   }
-});
 
-// Real-time validation for personal info fields
-watch(
-  () => editForm.value.first_name,
-  () => {
-    if (props.isEditingPersonal) {
-      validatePersonalField('first_name');
+  const props = defineProps<Props>();
+
+  const emit = defineEmits<{
+    startEditPersonal: [];
+    startEditAddress: [];
+    savePersonal: [];
+    saveAddress: [];
+    cancelPersonal: [];
+    cancelAddress: [];
+  }>();
+
+  const editForm = computed(() => props.editForm || {});
+
+  const isEditingPersonalRef = toRef(props, 'isEditingPersonal');
+  const isEditingAddressRef = toRef(props, 'isEditingAddress');
+
+  const hasClickedSavePersonal = ref(false);
+  const hasClickedSaveAddress = ref(false);
+
+  // Clear errors when editing is cancelled or when editing starts
+  watch(isEditingPersonalRef, (isEditing) => {
+    if (!isEditing) {
+      errorMapPersonal.value = {};
+    } else {
+      hasClickedSavePersonal.value = false;
+      errorMapPersonal.value = {};
     }
-  },
-);
-
-watch(
-  () => editForm.value.middle_name,
-  () => {
-    if (props.isEditingPersonal) {
-      validatePersonalField('middle_name');
-    }
-  },
-);
-
-watch(
-  () => editForm.value.last_name,
-  () => {
-    if (props.isEditingPersonal) {
-      validatePersonalField('last_name');
-    }
-  },
-);
-
-watch(
-  () => editForm.value.phone_number,
-  () => {
-    if (props.isEditingPersonal) {
-      validatePersonalField('phone_number');
-    }
-  },
-);
-
-// Real-time validation for address fields
-watch(
-  () => editForm.value.address?.country,
-  () => {
-    if (props.isEditingAddress) {
-      validateAddressField('address.country');
-    }
-  },
-);
-
-function validatePersonalField(field: string) {
-  const tempState = {
-    first_name: editForm.value.first_name,
-    middle_name: editForm.value.middle_name,
-    last_name: editForm.value.last_name,
-    phone_number: editForm.value.phone_number,
-  };
-  const allErrors = validatePersonalInfo(tempState);
-  const fieldError = allErrors.find((e) => e.name === field);
-  if (fieldError) errorMapPersonal.value[field] = fieldError.message;
-  else delete errorMapPersonal.value[field];
-}
-
-function validateAddressField(field: string) {
-  const tempState = editForm.value.address || {};
-  const allErrors = validateAddress(tempState);
-  const fieldError = allErrors.find((e) => e.name === field);
-  if (fieldError) errorMapAddress.value[field] = fieldError.message;
-  else delete errorMapAddress.value[field];
-}
-
-function onSavePersonal() {
-  hasClickedSavePersonal.value = true;
-
-  const errors = validatePersonalInfo({
-    first_name: editForm.value.first_name,
-    middle_name: editForm.value.middle_name,
-    last_name: editForm.value.last_name,
-    phone_number: editForm.value.phone_number,
   });
-  errorMapPersonal.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
-  if (errors.length === 0) emit('savePersonal');
-}
 
-function onSaveAddress() {
-  hasClickedSaveAddress.value = true;
+  watch(isEditingAddressRef, (isEditing) => {
+    if (!isEditing) {
+      errorMapAddress.value = {};
+    } else {
+      hasClickedSaveAddress.value = false;
+      errorMapAddress.value = {};
+    }
+  });
 
-  const errors = validateAddress(editForm.value.address || {});
-  errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
-  if (errors.length === 0) emit('saveAddress');
-}
-</script>
+  // Real-time validation for personal info fields
+  watch(
+    () => editForm.value.first_name,
+    () => {
+      if (props.isEditingPersonal) {
+        validatePersonalField('first_name');
+      }
+    },
+  );
+
+  watch(
+    () => editForm.value.middle_name,
+    () => {
+      if (props.isEditingPersonal) {
+        validatePersonalField('middle_name');
+      }
+    },
+  );
+
+  watch(
+    () => editForm.value.last_name,
+    () => {
+      if (props.isEditingPersonal) {
+        validatePersonalField('last_name');
+      }
+    },
+  );
+
+  watch(
+    () => editForm.value.phone_number,
+    () => {
+      if (props.isEditingPersonal) {
+        validatePersonalField('phone_number');
+      }
+    },
+  );
+
+  // Real-time validation for address fields
+  watch(
+    () => editForm.value.address?.country,
+    () => {
+      if (props.isEditingAddress) {
+        validateAddressField('address.country');
+      }
+    },
+  );
+
+  query.value = editForm.value.address?.street || '';
+
+  watch(query, () => fetchSuggestions());
+
+  function validatePersonalField(field: string) {
+    const tempState = {
+      first_name: editForm.value.first_name,
+      middle_name: editForm.value.middle_name,
+      last_name: editForm.value.last_name,
+      phone_number: editForm.value.phone_number,
+    };
+    const allErrors = validatePersonalInfo(tempState);
+    const fieldError = allErrors.find((e) => e.name === field);
+    if (fieldError) errorMapPersonal.value[field] = fieldError.message;
+    else delete errorMapPersonal.value[field];
+  }
+
+  function validateAddressField(field: string) {
+    const tempState = editForm.value.address || {};
+    const allErrors = validateAddress(tempState);
+    const fieldError = allErrors.find((e) => e.name === field);
+    if (fieldError) errorMapAddress.value[field] = fieldError.message;
+    else delete errorMapAddress.value[field];
+  }
+
+  function onSavePersonal() {
+    hasClickedSavePersonal.value = true;
+
+    const errors = validatePersonalInfo({
+      first_name: editForm.value.first_name,
+      middle_name: editForm.value.middle_name,
+      last_name: editForm.value.last_name,
+      phone_number: editForm.value.phone_number,
+    });
+    errorMapPersonal.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+    if (errors.length === 0) emit('savePersonal');
+  }
+
+  function onSaveAddress() {
+    hasClickedSaveAddress.value = true;
+
+    const errors = validateAddress(editForm.value.address || {});
+    errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+    if (errors.length === 0) emit('saveAddress');
+  }
+  </script>
 
 <template>
   <UCard
@@ -394,6 +409,32 @@ function onSaveAddress() {
             </div>
           </div>
         </div>
+
+        <!-- Autocomplete street input -->
+        <div v-if="isEditingAddress" class="flex flex-col mb-2">
+          <div class="text-[25px] font-semibold text-base">Search Address</div>
+          <div class="relative">
+            <UInput
+              v-model="query"
+              :disabled="hasClickedSaveAddress"
+              placeholder="Search street..."
+            />
+            <ul
+              v-if="suggestions.length"
+              class="absolute z-50 mt-1 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded w-full max-h-40 overflow-auto"
+            >
+              <li
+                v-for="(item, i) in suggestions"
+                :key="i"
+                @click="handleSelectSuggestion(item)"
+                class="p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700"
+              >
+                {{ item.display_name }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div class="grid grid-cols-3 gap-x-20 gap-y-8">
           <div class="flex flex-col">
             <div class="text-[25px] font-semibold text-base">Country</div>
