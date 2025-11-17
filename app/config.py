@@ -15,6 +15,9 @@ class Config:
     SUPABASE_URL = os.getenv("SUPABASE_URL")
     SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
+    XENDIT_SECRET_KEY = os.getenv("XENDIT_SECRET_KEY")
+    XENDIT_WEBHOOK_SECRET_KEY = os.getenv("XENDIT_WEBHOOK_SECRET_KEY")
+
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_ACCESS_COOKIE_NAME = "access_token_cookie"
