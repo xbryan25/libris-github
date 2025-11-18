@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/useAuthStore';
-import type { TabsItem } from '@nuxt/ui';
 
 const tabItems = [
   {
     label: 'Unread',
-    icon: 'i-lucide-user',
     slot: 'unread',
   },
   {
     label: 'Read',
-    icon: 'i-lucide-lock',
     slot: 'read',
   },
 ];
@@ -188,21 +185,27 @@ onMounted(async () => {
                 >
                   <template #unread>
                     <div class="flex flex-col gap-2">
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
                         </p>
                       </div>
 
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
                         </p>
                       </div>
 
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
@@ -217,21 +220,27 @@ onMounted(async () => {
 
                   <template #read>
                     <div class="flex flex-col gap-2">
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
                         </p>
                       </div>
 
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
                         </p>
                       </div>
 
-                      <div class="cursor-pointer border-2 border-surface p-2 rounded-md">
+                      <div
+                        class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
+                      >
                         <h2 class="font-semibold text-sm">Request Approved!</h2>
                         <p class="text-xs w-full truncate">
                           The request to rent 'The Passion Within' has been approved.
