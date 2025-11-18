@@ -6,72 +6,96 @@ const UCheckbox = resolveComponent('UCheckbox');
 
 const data = ref([
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings' xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: true,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
     hasRead: false,
   },
   {
+    notificationID: '123',
+    notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
       "xbryan25 has successfully requested to return the book which is titled 'The Way Of Kings'",
@@ -96,13 +120,18 @@ const columns: TableColumn[] = [
       },
     },
   },
+
   {
     id: 'notification',
     cell: ({ row }) => {
-      return h('div', { class: 'flex gap-10' }, [
-        h('p', { class: 'font-bold' }, row.original.notificationHeader),
-        h('p', { class: 'text-sm text-gray-500 truncate' }, row.original.notificationBody),
-      ]);
+      return h(
+        resolveComponent('NuxtLink'),
+        { to: `/notifications/${row.original.notificationID}`, class: 'flex gap-10 no-underline' },
+        () => [
+          h('p', { class: 'font-bold' }, row.original.notificationHeader),
+          h('p', { class: 'text-sm text-gray-500 truncate' }, row.original.notificationBody),
+        ],
+      );
     },
     meta: {
       class: {
@@ -113,7 +142,13 @@ const columns: TableColumn[] = [
   },
   {
     id: 'date',
-    cell: 'Mar 11',
+    cell: ({ row }) => {
+      return h(
+        resolveComponent('NuxtLink'),
+        { to: `/notifications/${row.original.notificationID}`, class: 'flex gap-10 no-underline' },
+        () => [h('p', { class: 'font-bold' }, row.original.notificationDate)],
+      );
+    },
     meta: {
       class: {
         th: 'w-20',
@@ -125,8 +160,13 @@ const columns: TableColumn[] = [
 
 const table = useTemplateRef('table');
 
-const items = ref(['All', 'Read', 'Unread']);
-const value = ref('All');
+const sortItems = ref(['Show Newest First', 'Show Oldest First']);
+const sortValue = ref('Show Newest First');
+
+const showItems = ref(['Show All', 'Show Only Read', 'Show Only Unread']);
+const showValue = ref('Show All');
+
+const selectAllNotifsInPageValue = ref(false);
 </script>
 
 <template>
@@ -141,15 +181,28 @@ const value = ref('All');
     </div>
 
     <div class="flex-1 flex flex-col items-center px-20">
-      <!-- <div class="flex w-full">
-        <div class="flex items-center justify-center gap-2">
-          <UCheckbox size="xl" />
-          <USelect v-model="value" :items="items" />
+      <div class="flex w-full">
+        <div class="flex-1 flex gap-3 items-center pl-3">
+          <UCheckbox
+            v-model="selectAllNotifsInPageValue"
+            size="xl"
+            :ui="{ base: 'cursor-pointer' }"
+          />
+
+          <UTooltip v-if="selectAllNotifsInPageValue" text="Delete">
+            <UButton icon="material-symbols:delete-outline" class="cursor-pointer" />
+          </UTooltip>
+
+          <UTooltip v-if="selectAllNotifsInPageValue" text="Mark as read">
+            <UButton icon="material-symbols:mark-email-read" class="cursor-pointer" />
+          </UTooltip>
         </div>
 
-        <UButton>Delete</UButton>
-        <UButton>Mark as Read</UButton>
-      </div> -->
+        <div class="flex-1 flex justify-end gap-3">
+          <USelect v-model="showValue" :items="showItems" class="min-w-45" />
+          <USelect v-model="sortValue" :items="sortItems" class="min-w-45" />
+        </div>
+      </div>
 
       <UTable
         ref="table"
@@ -166,7 +219,7 @@ const value = ref('All');
         }"
       />
 
-      <UPagination show-edges :sibling-count="0" :total="10" class="pt-5" />
+      <UPagination show-edges :sibling-count="2" :total="10" class="pt-5" />
     </div>
   </div>
 </template>
