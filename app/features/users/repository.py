@@ -217,6 +217,8 @@ class UserRepository:
                         address_data.get("barangay"),
                         address_data.get("street"),
                         address_data.get("postal_code"),
+                        address_data.get("latitude"),
+                        address_data.get("longitude"),
                         user_id,
                     ),
                 )
@@ -229,6 +231,8 @@ class UserRepository:
                         address_data.get("barangay"),
                         address_data.get("street"),
                         address_data.get("postal_code"),
+                        address_data.get("latitude"),
+                        address_data.get("longitude"),
                         user_id,
                     ),
                 )

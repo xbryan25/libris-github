@@ -11,21 +11,53 @@ definePageMeta({
 });
 
 const { profile, fetchProfile, loading, error } = useProfile()
-const { isEditing, startEditing, saveProfile, cancelEditing, editForm } = useProfileEdit()
+const { 
+  isEditingPersonal, 
+  isEditingAddress,
+  savingPersonal,
+  savingAddress,
+  startEditingPersonal, 
+  startEditingAddress,
+  savePersonalInfo, 
+  saveAddress,
+  cancelEditingPersonal, 
+  cancelEditingAddress, 
+  editForm,
+  isEditing // Legacy prop for ProfileMainSection
+} = useProfileEdit()
 
-const handleStartEdit = () => {
-  startEditing(profile.value)
+const handleStartEditPersonal = () => {
+  startEditingPersonal(profile.value)
 }
 
-const handleSave = async (formData: any) => {
-  const updatedProfile = await saveProfile(formData)
-  if (updatedProfile) {
+const handleStartEditAddress = () => {
+  startEditingAddress(profile.value)
+}
+
+const handleSavePersonal = async () => {
+  try {
+    await savePersonalInfo()
     await fetchProfile()
+  } catch (e) {
+    // Error is already handled in the composable
   }
 }
 
-const handleCancel = () => {
-  cancelEditing()
+const handleSaveAddress = async () => {
+  try {
+    await saveAddress()
+    await fetchProfile()
+  } catch (e) {
+    // Error is already handled in the composable
+  }
+}
+
+const handleCancelPersonal = () => {
+  cancelEditingPersonal()
+}
+
+const handleCancelAddress = () => {
+  cancelEditingAddress()
 }
 
 const handleProfileUpdate = async (updatedData: any) => {
@@ -59,12 +91,19 @@ onMounted(() => {
         :loading="loading" 
         :error="error" 
         :is-current-user="true"
-        :is-editing="isEditing"
+        :is-editing-personal="isEditingPersonal"
+        :is-editing-address="isEditingAddress"
         :edit-form="editForm"
-        @start-edit="handleStartEdit"
-        @save="handleSave"
-        @cancel="handleCancel"
+        :saving-personal="savingPersonal"
+        :saving-address="savingAddress"
+        @start-edit-personal="handleStartEditPersonal"
+        @start-edit-address="handleStartEditAddress"
+        @save-personal="handleSavePersonal"
+        @save-address="handleSaveAddress"
+        @cancel-personal="handleCancelPersonal"
+        @cancel-address="handleCancelAddress"
       />
     </div>
   </div>
 </template>
+
