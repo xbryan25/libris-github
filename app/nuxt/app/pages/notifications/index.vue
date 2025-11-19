@@ -2,6 +2,12 @@
 import { h, resolveComponent } from 'vue';
 import type { TableColumn } from '@nuxt/ui';
 
+import auth from '~/middleware/auth';
+
+definePageMeta({
+  middleware: auth,
+});
+
 const UCheckbox = resolveComponent('UCheckbox');
 
 type Notification = {
@@ -118,6 +124,9 @@ const columns: TableColumn<Notification>[] = [
     id: 'select',
     cell: ({ row }) =>
       h(UCheckbox, {
+        ui: {
+          base: 'cursor-pointer',
+        },
         modelValue: computed(() => selectedRows.value.has(row.original.notificationId)).value,
         'onUpdate:modelValue': (value: boolean) => {
           console.log(value);
@@ -210,8 +219,12 @@ const showValue = ref('Show All');
 
     <div class="flex-1 flex flex-col items-center px-20">
       <div class="flex w-full">
-        <div class="flex-1 flex gap-3 items-center pl-3">
-          <UCheckbox :model-value="externalCheckboxValue" @update:model-value="toggleAll" />
+        <div class="flex-1 flex gap-3 items-center pl-[15px]">
+          <UCheckbox
+            :model-value="externalCheckboxValue"
+            :ui="{ base: 'cursor-pointer' }"
+            @update:model-value="toggleAll"
+          />
 
           <UTooltip v-if="externalCheckboxValue" text="Delete">
             <UButton icon="material-symbols:delete-outline" class="cursor-pointer" />
@@ -232,11 +245,14 @@ const showValue = ref('Show All');
         ref="table"
         :data="data"
         :columns="columns"
-        class="table-auto !w-full !min-w-0 cursor-pointer"
+        class="table-auto !w-full !min-w-0"
         :ui="{ root: 'table-auto !w-full !min-w-0' }"
         :meta="{
           class: {
-            tr: (row) => (row.original.hasRead ? '' : 'bg-surface'),
+            tr: (row) =>
+              row.original.hasRead
+                ? 'cursor-pointer hover:outline hover:outline-1 hover:outline-surface'
+                : 'cursor-pointer hover:outline hover:outline-1 hover:outline-surface bg-surface ',
           },
         }"
       />
