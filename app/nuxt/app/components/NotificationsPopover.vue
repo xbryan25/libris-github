@@ -44,7 +44,7 @@ onMounted(async () => {
       <div class="w-75 h-85 p-2 flex flex-col gap-2">
         <h1 class="font-bold text-xl">Unread Notifications</h1>
 
-        <div class="flex-1 flex flex-col gap-2">
+        <div v-if="recentNotifications.length > 0" class="flex-1 flex flex-col gap-2">
           <RecentNotificationCard
             v-for="notification in recentNotifications"
             :key="notification.notificationId"
@@ -52,8 +52,14 @@ onMounted(async () => {
           />
         </div>
 
+        <div v-else class="flex-1 flex justify-center items-center">
+          <p class="text-sm">Notifications will show up here...</p>
+        </div>
+
         <NuxtLink to="/notifications" class="w-full">
-          <UButton color="neutral" class="justify-center cursor-pointer w-full">See more</UButton>
+          <UButton color="neutral" class="justify-center cursor-pointer w-full"
+            >See more...</UButton
+          >
         </NuxtLink>
       </div>
     </template>
