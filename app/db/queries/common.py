@@ -7,7 +7,7 @@ class CommonQueries:
     GET_ALL = "SELECT * FROM {table}"
     GET_MANY = (
         "SELECT * FROM {table} "
-        "WHERE {search_by} ILIKE %s "
+        "WHERE {conditions} "
         "ORDER BY {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )

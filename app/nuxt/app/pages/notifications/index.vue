@@ -227,11 +227,19 @@ const showValue = ref('Show All');
           />
 
           <UTooltip v-if="externalCheckboxValue" text="Delete">
-            <UButton icon="material-symbols:delete-outline" class="cursor-pointer" />
+            <UButton
+              icon="material-symbols:delete-outline"
+              color="neutral"
+              class="cursor-pointer"
+            />
           </UTooltip>
 
           <UTooltip v-if="externalCheckboxValue" text="Mark as read">
-            <UButton icon="material-symbols:mark-email-read" class="cursor-pointer" />
+            <UButton
+              icon="material-symbols:mark-email-read"
+              color="neutral"
+              class="cursor-pointer"
+            />
           </UTooltip>
         </div>
 

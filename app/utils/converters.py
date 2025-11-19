@@ -1,6 +1,11 @@
 from datetime import datetime, date
-from app.common.constants import GenderEnum, BookConditionEnum, BookAvailabilityEnum
-from app.common.dataclasses import User, Book, MyLibraryBook
+from app.common.constants import (
+    GenderEnum,
+    BookConditionEnum,
+    BookAvailabilityEnum,
+    NotificationTypeEnum,
+)
+from app.common.dataclasses import User, Book, MyLibraryBook, Notification
 
 
 def convert_user_dict(user: dict) -> User:
@@ -134,4 +139,36 @@ def convert_my_library_book_dict(my_library_book: dict) -> MyLibraryBook:
         renter_username=my_library_book["renter_username"],
         renter_profile_image_url=my_library_book["renter_profile_image_url"],
         first_image_url=my_library_book["first_image_url"],
+    )
+
+
+def convert_notification_dict(notification: dict) -> Notification:
+    """Converts dict from db to a Book class instance"""
+
+    return Notification(
+        notification_id=notification["notification_id"],
+        header=(
+            notification["header"] if notification.get("header") is not None else "-"
+        ),
+        message=(
+            notification["message"] if notification.get("message") is not None else "-"
+        ),
+        created_at=(
+            notification["created_at"]
+            if isinstance(notification.get("created_at"), datetime)
+            or notification.get("created_at") is None
+            else datetime.fromisoformat(notification["created_at"])
+        ),
+        is_read=(
+            notification["is_read"]
+            if notification.get("is_read") is not None
+            else False
+        ),
+        notification_type=(
+            NotificationTypeEnum(notification["notification_type"])
+            if notification.get("notification_type") is not None
+            else NotificationTypeEnum("rent")
+        ),
+        sender_id=notification["sender_id"],
+        receiver_id=notification["receiver_id"],
     )

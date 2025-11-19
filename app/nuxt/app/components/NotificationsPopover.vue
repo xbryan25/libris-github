@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Notification } from '~/types';
+
 const props = defineProps<{
   isOpen: boolean;
 }>();
@@ -7,22 +9,25 @@ const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
 }>();
 
-const tabItems = [
-  {
-    label: 'Unread',
-    slot: 'unread',
-  },
-  {
-    label: 'Read',
-    slot: 'read',
-  },
-];
+const recentNotifications = ref<Notification[]>([]);
+const isFetching = ref(false);
+const maxNumOfRecentNotfications: number = 4;
 
 const isOpen = computed({
   get: () => props.isOpen,
   set: (val: boolean) => {
     emit('update:isOpen', val);
   },
+});
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  recentNotifications.value = await useRecentNotifications(maxNumOfRecentNotfications);
+
+  console.log(recentNotifications.value);
+
+  isFetching.value = false;
 });
 </script>
 
@@ -37,43 +42,19 @@ const isOpen = computed({
 
     <template #content>
       <div class="w-75 h-85 p-2 flex flex-col gap-2">
-        <h1 class="font-bold text-xl">Latest Notifications</h1>
+        <h1 class="font-bold text-xl">Unread Notifications</h1>
 
-        <div class="flex flex-col gap-2">
-          <div class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover">
-            <h2 class="font-semibold text-sm">Request Approved!</h2>
-            <p class="text-xs w-full truncate">
-              The request to rent 'The Passion Within' has been approved.
-            </p>
-          </div>
-
-          <div class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover">
-            <h2 class="font-semibold text-sm">Request Approved!</h2>
-            <p class="text-xs w-full truncate">
-              The request to rent 'The Passion Within' has been approved.
-            </p>
-          </div>
-
-          <div class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover">
-            <h2 class="font-semibold text-sm">Request Approved!</h2>
-            <p class="text-xs w-full truncate">
-              The request to rent 'The Passion Within' has been approved.
-            </p>
-          </div>
-
-          <div class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover">
-            <h2 class="font-semibold text-sm">Request Approved!</h2>
-            <p class="text-xs w-full truncate">
-              The request to rent 'The Passion Within' has been approved.
-            </p>
-          </div>
-
-          <NuxtLink to="/notifications" class="w-full">
-            <UButton color="neutral" class="justify-center cursor-pointer w-full"
-              >See more (99)</UButton
-            >
-          </NuxtLink>
+        <div class="flex-1 flex flex-col gap-2">
+          <RecentNotificationCard
+            v-for="notification in recentNotifications"
+            :key="notification.notificationId"
+            :notification-details="notification"
+          />
         </div>
+
+        <NuxtLink to="/notifications" class="w-full">
+          <UButton color="neutral" class="justify-center cursor-pointer w-full">See more</UButton>
+        </NuxtLink>
       </div>
     </template>
   </UPopover>

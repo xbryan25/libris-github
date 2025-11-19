@@ -19,3 +19,9 @@ class BookAvailabilityEnum(enum.Enum):
     rent = "rent"
     purchase = "purchase"
     both = "both"
+
+
+class NotificationTypeEnum(enum.Enum):
+    rent = "rent"
+    purchase = "purchase"
+    system = "system"
