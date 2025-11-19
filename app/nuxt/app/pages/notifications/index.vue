@@ -4,9 +4,17 @@ import type { TableColumn } from '@nuxt/ui';
 
 const UCheckbox = resolveComponent('UCheckbox');
 
-const data = ref([
+type Notification = {
+  notificationId: string;
+  notificationDate: string;
+  notificationHeader: string;
+  notificationBody: string;
+  hasRead: boolean;
+};
+
+const data = ref<Notification[]>([
   {
-    notificationID: '123',
+    notificationId: '123',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -14,7 +22,7 @@ const data = ref([
     hasRead: true,
   },
   {
-    notificationID: '123',
+    notificationId: '1234',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -22,7 +30,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '1235',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -30,7 +38,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '1236',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -38,7 +46,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '1237',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -46,7 +54,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '1238',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -54,7 +62,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '1239',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -62,7 +70,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '12324',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -70,7 +78,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '12344',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -78,7 +86,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '12355',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -86,7 +94,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '12366',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -94,7 +102,7 @@ const data = ref([
     hasRead: false,
   },
   {
-    notificationID: '123',
+    notificationId: '12377',
     notificationDate: 'Mar 11',
     notificationHeader: 'Return Request Approved',
     notificationBody:
@@ -103,15 +111,19 @@ const data = ref([
   },
 ]);
 
-const columns: TableColumn[] = [
+const selectedRows = ref<Set<string>>(new Set());
+
+const columns: TableColumn<Notification>[] = [
   {
     id: 'select',
-    cell: () =>
+    cell: ({ row }) =>
       h(UCheckbox, {
-        icon: 'tabler:check',
-        ui: {
-          base: 'cursor-pointer',
+        modelValue: computed(() => selectedRows.value.has(row.original.notificationId)).value,
+        'onUpdate:modelValue': (value: boolean) => {
+          console.log(value);
+          toggleRow(row.original.notificationId, value);
         },
+        'aria-label': 'Select row',
       }),
     meta: {
       class: {
@@ -120,13 +132,12 @@ const columns: TableColumn[] = [
       },
     },
   },
-
   {
     id: 'notification',
     cell: ({ row }) => {
       return h(
         resolveComponent('NuxtLink'),
-        { to: `/notifications/${row.original.notificationID}`, class: 'flex gap-10 no-underline' },
+        { to: `/notifications/${row.original.notificationId}`, class: 'flex gap-10 no-underline' },
         () => [
           h('p', { class: 'font-bold' }, row.original.notificationHeader),
           h('p', { class: 'text-sm text-gray-500 truncate' }, row.original.notificationBody),
@@ -145,7 +156,7 @@ const columns: TableColumn[] = [
     cell: ({ row }) => {
       return h(
         resolveComponent('NuxtLink'),
-        { to: `/notifications/${row.original.notificationID}`, class: 'flex gap-10 no-underline' },
+        { to: `/notifications/${row.original.notificationId}`, class: 'flex gap-10 no-underline' },
         () => [h('p', { class: 'font-bold' }, row.original.notificationDate)],
       );
     },
@@ -158,15 +169,32 @@ const columns: TableColumn[] = [
   },
 ];
 
-const table = useTemplateRef('table');
+const externalCheckboxValue = computed<boolean | 'indeterminate'>(() => {
+  if (selectedRows.value.size === 0) return false;
+  if (selectedRows.value.size === data.value.length) return true;
+  return 'indeterminate';
+});
+
+// Handler for external checkbox
+function toggleAll(value: boolean | 'indeterminate') {
+  const val = value === 'indeterminate' ? true : value;
+  if (val) selectedRows.value = new Set(data.value.map((r) => r.notificationId));
+  else selectedRows.value = new Set();
+}
+
+// Row checkbox toggle
+function toggleRow(id: string, value: boolean) {
+  const newSet = new Set(selectedRows.value);
+  if (value) newSet.add(id);
+  else newSet.delete(id);
+  selectedRows.value = newSet;
+}
 
 const sortItems = ref(['Show Newest First', 'Show Oldest First']);
 const sortValue = ref('Show Newest First');
 
 const showItems = ref(['Show All', 'Show Only Read', 'Show Only Unread']);
 const showValue = ref('Show All');
-
-const selectAllNotifsInPageValue = ref(false);
 </script>
 
 <template>
@@ -183,17 +211,13 @@ const selectAllNotifsInPageValue = ref(false);
     <div class="flex-1 flex flex-col items-center px-20">
       <div class="flex w-full">
         <div class="flex-1 flex gap-3 items-center pl-3">
-          <UCheckbox
-            v-model="selectAllNotifsInPageValue"
-            size="xl"
-            :ui="{ base: 'cursor-pointer' }"
-          />
+          <UCheckbox :model-value="externalCheckboxValue" @update:model-value="toggleAll" />
 
-          <UTooltip v-if="selectAllNotifsInPageValue" text="Delete">
+          <UTooltip v-if="externalCheckboxValue" text="Delete">
             <UButton icon="material-symbols:delete-outline" class="cursor-pointer" />
           </UTooltip>
 
-          <UTooltip v-if="selectAllNotifsInPageValue" text="Mark as read">
+          <UTooltip v-if="externalCheckboxValue" text="Mark as read">
             <UButton icon="material-symbols:mark-email-read" class="cursor-pointer" />
           </UTooltip>
         </div>
@@ -206,14 +230,12 @@ const selectAllNotifsInPageValue = ref(false);
 
       <UTable
         ref="table"
-        loading
         :data="data"
         :columns="columns"
         class="table-auto !w-full !min-w-0 cursor-pointer"
         :ui="{ root: 'table-auto !w-full !min-w-0' }"
         :meta="{
           class: {
-            // The conditional function must be nested here
             tr: (row) => (row.original.hasRead ? '' : 'bg-surface'),
           },
         }"
