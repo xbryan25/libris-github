@@ -3,6 +3,9 @@ class CommonQueries:
 
     INSERT = "INSERT INTO {table} ({columns}) VALUES ({placeholders})"
     GET_TOTAL_COUNT = "SELECT COUNT(*) FROM {table}"
+    GET_TOTAL_COUNT_WITH_CONDITIONS = (
+        "SELECT COUNT(*) AS count FROM {table} WHERE {conditions}"
+    )
     GET_BY_ID = "SELECT * FROM {table} WHERE {pk} = %s LIMIT 1"
     GET_ALL = "SELECT * FROM {table}"
     GET_MANY = (

@@ -44,3 +44,33 @@ class NotificationRepository:
                 ),
                 (user_id, read_status_bool, params["rows_per_page"], offset),
             )
+
+    @staticmethod
+    def get_notifications_total_count(user_id, params) -> dict[str, int]:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        if params["read_status"] == "show all":
+            return db.fetch_one(
+                CommonQueries.GET_TOTAL_COUNT_WITH_CONDITIONS.format(
+                    table="notifications", conditions="receiver_id = %s"
+                ),
+                (user_id,),
+            )
+
+        else:
+            if params["read_status"] == "show only read":
+                read_status_bool = True
+            else:
+                read_status_bool = False
+
+            return db.fetch_one(
+                CommonQueries.GET_TOTAL_COUNT_WITH_CONDITIONS.format(
+                    table="notifications",
+                    conditions="receiver_id = %s AND is_read = %s",
+                ),
+                (user_id, read_status_bool),
+            )

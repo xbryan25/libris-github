@@ -29,3 +29,13 @@ class NotificationServices:
             notification_dataclasses.append(convert_notification_dict(notification))
 
         return notification_dataclasses
+
+    @staticmethod
+    def get_notifications_total_count_service(user_id, params) -> int:
+        """
+        add later
+        """
+
+        return NotificationRepository.get_notifications_total_count(user_id, params)[
+            "count"
+        ]

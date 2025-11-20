@@ -101,16 +101,19 @@ const readStatus = ref('Show All');
 
 const rowsPerPageItems = ref([10, 25, 50]);
 const rowsPerPage = ref(10);
+const delayedRowsPerPage = ref(10);
 
 // Table functions
 
 const isLoading = ref(true);
 
 const totalNotificationCount = ref(0);
+
 const pageNumber = ref(1);
+const delayedPageNumber = ref(1);
 
 const loadEntities = async () => {
-  // isLoading.value = true;
+  isLoading.value = true;
 
   const options = {
     rowsPerPage: rowsPerPage.value,
@@ -137,7 +140,7 @@ const updatePagination = () => {
 };
 
 const getTotalEntityCount = async () => {
-  const { totalCount }: { totalCount: number } = await useNotificationsCount(readStatus.value);
+  const { totalCount }: { totalCount: number } = await useNotificationsTotalCount(readStatus.value);
 
   totalNotificationCount.value = totalCount;
 };
@@ -168,8 +171,16 @@ watch(
     isLoading.value = true;
     debouncedLoadEntities();
     debouncedGetTotalEntityCount();
+    isLoading.value = false;
   },
 );
+
+watch(isLoading, (newVal) => {
+  if (!newVal) {
+    delayedPageNumber.value = pageNumber.value;
+    delayedRowsPerPage.value = rowsPerPage.value;
+  }
+});
 
 onMounted(() => {
   updatePagination();
@@ -213,6 +224,7 @@ onMounted(() => {
 
     <UTable
       ref="table"
+      :loading="isLoading"
       :data="notificationsData"
       :columns="columns"
       :ui="{ root: 'table-auto !w-full !min-w-0' }"
@@ -227,9 +239,25 @@ onMounted(() => {
     />
 
     <div v-if="notificationsData.length > 0" class="grid grid-cols-3 pt-5 w-full items-center">
-      <div v-if="notificationsData.length == 1" class="text-sm text-muted">1 of {{ 100 }}.</div>
-      <div v-else class="text-sm text-muted">1-{{ notificationsData.length }} of {{ 100 }}.</div>
-      <UPagination show-edges :sibling-count="2" :total="10" class="flex justify-center" />
+      <div v-if="notificationsData.length == 1" class="text-sm text-muted">
+        1 of {{ totalNotificationCount }}.
+      </div>
+      <div v-else class="text-sm text-muted">
+        {{ delayedRowsPerPage * (delayedPageNumber - 1) + 1 }}-{{
+          delayedRowsPerPage * delayedPageNumber > totalNotificationCount
+            ? totalNotificationCount
+            : delayedRowsPerPage * delayedPageNumber
+        }}
+        of {{ totalNotificationCount }}.
+      </div>
+      <UPagination
+        v-model:page="pageNumber"
+        show-edges
+        :sibling-count="2"
+        :items-per-page="rowsPerPage"
+        :total="totalNotificationCount"
+        class="flex justify-center"
+      />
     </div>
   </div>
 </template>

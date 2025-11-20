@@ -14,3 +14,13 @@ def get_notifications() -> tuple[Response, int]:
     """
 
     return NotificationControllers.get_notifications_controller()
+
+
+@notifications_bp.route("/total-count", methods=["GET"])
+@jwt_required()
+def get_notifications_total_count() -> tuple[Response, int]:
+    """
+    (add later)
+    """
+
+    return NotificationControllers.get_notifications_total_count_controller()
