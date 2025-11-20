@@ -7,13 +7,10 @@ const props = defineProps<{
 </script>
 
 <template>
-  <NuxtLink
-    :to="`notifications`"
-    class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover"
-  >
+  <div class="cursor-pointer border-2 border-surface p-2 rounded-md hover:bg-surface-hover">
     <h2 class="font-semibold text-sm">{{ props.notificationDetails.header }}</h2>
     <p class="text-xs w-full truncate">
       {{ props.notificationDetails.message }}
     </p>
-  </NuxtLink>
+  </div>
 </template>

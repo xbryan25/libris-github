@@ -9,6 +9,9 @@ const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
 }>();
 
+const clickedRow = ref<Notification | null>(null);
+const isOpenNotificationModal = ref(false);
+
 const recentNotifications = ref<Notification[]>([]);
 const isFetching = ref(false);
 const maxNumOfRecentNotfications: number = 4;
@@ -81,6 +84,10 @@ onMounted(async () => {
             v-for="notification in recentNotifications"
             :key="notification.notificationId"
             :notification-details="notification"
+            @click="
+              clickedRow = notification;
+              isOpenNotificationModal = true;
+            "
           />
         </div>
 
@@ -94,6 +101,17 @@ onMounted(async () => {
           >
         </NuxtLink>
       </div>
+
+      <NotificationDetailsModal
+        :is-open-notification-modal="isOpenNotificationModal"
+        :header="clickedRow?.header"
+        :message="clickedRow?.message"
+        :created-at="clickedRow?.createdAt"
+        @update:open-notification-modal="
+          (newIsOpenNotificationModal: boolean) =>
+            (isOpenNotificationModal = newIsOpenNotificationModal)
+        "
+      />
     </template>
   </UPopover>
 </template>
