@@ -5,7 +5,7 @@
   import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 
   const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
-  console.log('LocationIQ API key:', LOCATIONIQ_API_KEY);
+
   const { addressQuery, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
 
   const errorMapPersonal = ref<Record<string, string>>({});

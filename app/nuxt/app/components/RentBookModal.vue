@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 
+const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
+const meetupAddress = ref('') 
+const { 
+  addressQuery: meetupAddressQuery, 
+  suggestions: meetupSuggestions, 
+  fetchSuggestions: fetchMeetupSuggestions, 
+  selectSuggestion: selectMeetupSuggestion 
+} = useAddressAutocomplete(LOCATIONIQ_API_KEY)
 
 const props = defineProps<{
   isOpenRentBookModal: boolean
@@ -40,6 +50,22 @@ function validateTimeWindow() {
     timeError.value = ''
   }
 }
+function onMeetupInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (!target.value) {
+    meetupSuggestions.value = [] 
+    return
+  }
+  fetchMeetupSuggestions()
+}
+
+function handleSelectMeetupSuggestion(item: any) {
+  selectMeetupSuggestion(item, meetupAddress)
+  meetupAddressQuery.value = item.display_name
+  meetupAddress.value = item.display_name
+  meetupSuggestions.value = [] 
+}
+
 
 watch(meetupTime, validateTimeWindow)
 
@@ -118,6 +144,30 @@ const totalCost = computed(() => {
           />
         </div>
         <div class="mt-4">
+          <p class="font-semibold text-base mt-4">Meetup Location</p>
+          <div class="relative w-full">
+            <UInput
+              v-model="meetupAddressQuery"
+              placeholder="Enter meetup location..."
+              class="mt-1 w-full"
+              @input="onMeetupInput"
+            />
+            <ul
+              v-if="meetupSuggestions.length"
+              class="absolute z-50 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded w-full max-h-60 overflow-auto shadow-lg"
+            >
+              <li
+                v-for="(item, i) in meetupSuggestions"
+                :key="i"
+                @click="handleSelectMeetupSuggestion(item)"
+                class="p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700"
+              >
+                {{ item.display_name }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-4">
           <p class="font-semibold text-base">Meetup Date</p>
           <UInput 
             type="date" 
@@ -139,10 +189,15 @@ const totalCost = computed(() => {
           <UButton @click="isOpenRentBookModal = false" class="bg-slate-300 hover:bg-slate-400 text-black dark:bg-slate-400 dark:hover:bg-slate-500 px-4 py-2 rounded">
           <p>Cancel</p> 
           </UButton>
-          <UButton :disabled="!!timeError || !meetupTime || !finalDays || !meetupDate" class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded">
+          <UButton :disabled="!!timeError || !meetupTime || !finalDays || !meetupDate || !meetupAddressQuery" class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded">
           <p>Send Rental Request</p> 
           </UButton>
         </div>
   </template>
   </UModal>
 </template>
+<style scoped>
+::v-deep(.umodal .content) {
+  overflow: visible !important;
+}
+</style>
