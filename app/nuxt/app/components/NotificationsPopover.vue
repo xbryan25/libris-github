@@ -13,11 +13,18 @@ const recentNotifications = ref<Notification[]>([]);
 const isFetching = ref(false);
 const maxNumOfRecentNotfications: number = 4;
 
+const unreadNotificationsCount: Ref<number> = ref<number>(0);
+
 const isOpen = computed({
   get: () => props.isOpen,
   set: (val: boolean) => {
     emit('update:isOpen', val);
   },
+});
+
+const chipText = computed(() => {
+  const count = unreadNotificationsCount.value;
+  return count > 99 ? '99+' : count.toString();
 });
 
 onMounted(async () => {
@@ -32,6 +39,11 @@ onMounted(async () => {
 
   recentNotifications.value = await useNotifications(options);
 
+  const { totalCount }: { totalCount: number } =
+    await useNotificationsTotalCount('show only unread');
+
+  unreadNotificationsCount.value = totalCount;
+
   console.log(recentNotifications.value);
 
   isFetching.value = false;
@@ -40,7 +52,7 @@ onMounted(async () => {
 
 <template>
   <UPopover v-model:open="isOpen" arrow>
-    <UChip text="9" size="3xl">
+    <UChip :text="chipText" size="3xl" :ui="{ base: 'py-2 px-1' }">
       <UButton
         icon="mdi:bell-outline"
         class="flex items-center rounded-md p-2 bg-surface hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
