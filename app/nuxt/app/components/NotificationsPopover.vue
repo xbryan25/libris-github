@@ -52,12 +52,25 @@ onMounted(async () => {
 
 <template>
   <UPopover v-model:open="isOpen" arrow>
-    <UChip :text="chipText" size="3xl" :ui="{ base: 'py-2 px-1' }">
+    <div>
+      <UChip
+        v-if="unreadNotificationsCount > 0"
+        :text="chipText"
+        size="3xl"
+        :ui="{ base: 'py-2 px-1' }"
+      >
+        <UButton
+          icon="mdi:bell-outline"
+          class="flex items-center rounded-md p-2 bg-surface hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
+        />
+      </UChip>
+
       <UButton
+        v-else
         icon="mdi:bell-outline"
         class="flex items-center rounded-md p-2 bg-surface hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
       />
-    </UChip>
+    </div>
 
     <template #content>
       <div class="w-75 h-85 p-2 flex flex-col gap-2">

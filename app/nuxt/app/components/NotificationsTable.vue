@@ -5,11 +5,15 @@ import { useDebounceFn } from '@vueuse/core';
 
 import type { Notification } from '~/types';
 
+import { dateConverter } from '#imports';
+
 const UCheckbox = resolveComponent('UCheckbox');
 
 const notificationsData = ref<Notification[]>([]);
 
 const selectedRows = ref<Set<string>>(new Set());
+
+const clickedRow = ref<Notification | null>(null);
 
 const columns: TableColumn<Notification>[] = [
   {
@@ -37,10 +41,16 @@ const columns: TableColumn<Notification>[] = [
     id: 'notification',
     cell: ({ row }) => {
       return h(
-        resolveComponent('NuxtLink'),
-        { to: `/notifications/${row.original.notificationId}`, class: 'flex gap-10 no-underline' },
-        () => [
-          h('p', { class: 'font-bold' }, row.original.header),
+        'div',
+        {
+          class: 'flex gap-10 no-underline',
+          onClick: () => {
+            isOpenNotificationModal.value = true;
+            clickedRow.value = row.original;
+          },
+        },
+        [
+          h('p', { class: 'font-bold min-w-40' }, row.original.header),
           h('p', { class: 'text-sm text-gray-500 truncate' }, row.original.message),
         ],
       );
@@ -56,9 +66,15 @@ const columns: TableColumn<Notification>[] = [
     id: 'date',
     cell: ({ row }) => {
       return h(
-        resolveComponent('NuxtLink'),
-        { to: `/notifications/${row.original.notificationId}`, class: 'flex gap-10 no-underline' },
-        () => [h('p', { class: 'font-bold' }, row.original.createdAt)],
+        'div',
+        {
+          class: 'flex gap-10 no-underline',
+          onClick: () => {
+            isOpenNotificationModal.value = true;
+            clickedRow.value = row.original;
+          },
+        },
+        [h('p', { class: 'font-bold' }, dateConverter(row.original.createdAt, 'short'))],
       );
     },
     meta: {
@@ -92,6 +108,8 @@ function toggleRow(id: string, value: boolean) {
 }
 
 const table = useTemplateRef('table');
+
+const isOpenNotificationModal = ref(false);
 
 const orderItems = ref(['Show Newest First', 'Show Oldest First']);
 const order = ref('Show Newest First');
@@ -195,24 +213,36 @@ onMounted(() => {
   <div class="flex-1 flex flex-col items-center px-20 py-5">
     <div class="flex w-full">
       <div class="flex-1 flex gap-3 items-center pl-[15px]">
-        <UCheckbox
-          :model-value="externalCheckboxValue"
-          :ui="{ base: 'cursor-pointer' }"
-          @update:model-value="toggleAll"
-        />
+        <div v-if="notificationsData.length > 0 && !isLoading" class="flex gap-3">
+          <UCheckbox
+            :model-value="externalCheckboxValue"
+            :ui="{ base: 'cursor-pointer' }"
+            @update:model-value="toggleAll"
+          />
 
-        <div class="text-sm text-muted">
-          {{ selectedRows.size }} of
-          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected
+          <div class="text-sm text-muted">
+            {{ selectedRows.size }} of
+            {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected
+          </div>
         </div>
 
-        <UTooltip v-if="externalCheckboxValue" text="Delete">
-          <UButton icon="material-symbols:delete-outline" color="neutral" class="cursor-pointer" />
-        </UTooltip>
+        <div v-if="externalCheckboxValue && !isLoading" class="flex gap-3">
+          <UTooltip text="Delete">
+            <UButton
+              icon="material-symbols:delete-outline"
+              color="neutral"
+              class="cursor-pointer"
+            />
+          </UTooltip>
 
-        <UTooltip v-if="externalCheckboxValue" text="Mark as read">
-          <UButton icon="material-symbols:mark-email-read" color="neutral" class="cursor-pointer" />
-        </UTooltip>
+          <UTooltip text="Mark as read">
+            <UButton
+              icon="material-symbols:mark-email-read"
+              color="neutral"
+              class="cursor-pointer"
+            />
+          </UTooltip>
+        </div>
       </div>
 
       <div class="flex-1 flex justify-end gap-3">
@@ -259,5 +289,16 @@ onMounted(() => {
         class="flex justify-center"
       />
     </div>
+
+    <NotificationDetailsModal
+      :is-open-notification-modal="isOpenNotificationModal"
+      :header="clickedRow?.header"
+      :message="clickedRow?.message"
+      :created-at="clickedRow?.createdAt"
+      @update:open-notification-modal="
+        (newIsOpenNotificationModal: boolean) =>
+          (isOpenNotificationModal = newIsOpenNotificationModal)
+      "
+    />
   </div>
 </template>
