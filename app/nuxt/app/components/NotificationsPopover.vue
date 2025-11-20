@@ -23,7 +23,14 @@ const isOpen = computed({
 onMounted(async () => {
   isFetching.value = true;
 
-  recentNotifications.value = await useRecentNotifications(maxNumOfRecentNotfications);
+  const options = {
+    rowsPerPage: maxNumOfRecentNotfications,
+    pageNumber: 1,
+    readStatus: 'show only unread',
+    order: 'show newest first',
+  };
+
+  recentNotifications.value = await useNotifications(options);
 
   console.log(recentNotifications.value);
 

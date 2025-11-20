@@ -91,11 +91,16 @@ function toggleRow(id: string, value: boolean) {
   selectedRows.value = newSet;
 }
 
+const table = useTemplateRef('table');
+
 const orderItems = ref(['Show Newest First', 'Show Oldest First']);
 const order = ref('Show Newest First');
 
 const readStatusItems = ref(['Show All', 'Show Only Read', 'Show Only Unread']);
 const readStatus = ref('Show All');
+
+const rowsPerPageItems = ref([10, 25, 50]);
+const rowsPerPage = ref(10);
 
 // Table functions
 
@@ -103,8 +108,6 @@ const isLoading = ref(true);
 
 const totalNotificationCount = ref(0);
 const pageNumber = ref(1);
-const reservedHeight = 300;
-const rowsPerPage = ref(0);
 
 const loadEntities = async () => {
   // isLoading.value = true;
@@ -112,13 +115,13 @@ const loadEntities = async () => {
   const options = {
     rowsPerPage: rowsPerPage.value,
     pageNumber: pageNumber.value,
-    hasReadStatus: readStatus.value,
+    readStatus: readStatus.value,
     order: order.value,
   };
 
   const data = await useNotifications(options);
 
-  notificationsData.value = data.entities;
+  notificationsData.value = data;
 
   isLoading.value = false;
 };
@@ -130,19 +133,7 @@ const debouncedLoadEntities = useDebounceFn(async () => {
 }, 700); // 700ms debounce
 
 const updatePagination = () => {
-  calculateRows();
   debouncedGetTotalEntityCount();
-};
-
-const calculateRows = () => {
-  // const row = document.querySelector('table tbody tr');
-  // const rowHeight = row?.clientHeight ? row?.clientHeight - 1 : 63;
-
-  const rowHeight = 64;
-
-  const availableHeight = window.innerHeight - reservedHeight;
-
-  rowsPerPage.value = Math.max(5, Math.floor(availableHeight / rowHeight));
 };
 
 const getTotalEntityCount = async () => {
@@ -190,7 +181,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col items-center px-20">
+  <div class="flex-1 flex flex-col items-center px-20 py-5">
     <div class="flex w-full">
       <div class="flex-1 flex gap-3 items-center pl-[15px]">
         <UCheckbox
@@ -198,6 +189,11 @@ onMounted(() => {
           :ui="{ base: 'cursor-pointer' }"
           @update:model-value="toggleAll"
         />
+
+        <div class="text-sm text-muted">
+          {{ selectedRows.size }} of
+          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected
+        </div>
 
         <UTooltip v-if="externalCheckboxValue" text="Delete">
           <UButton icon="material-symbols:delete-outline" color="neutral" class="cursor-pointer" />
@@ -211,6 +207,7 @@ onMounted(() => {
       <div class="flex-1 flex justify-end gap-3">
         <USelect v-model="readStatus" :items="readStatusItems" class="min-w-45" />
         <USelect v-model="order" :items="orderItems" class="min-w-45" />
+        <USelect v-model="rowsPerPage" :items="rowsPerPageItems" class="w-18" />
       </div>
     </div>
 
@@ -218,7 +215,6 @@ onMounted(() => {
       ref="table"
       :data="notificationsData"
       :columns="columns"
-      class="flex-1"
       :ui="{ root: 'table-auto !w-full !min-w-0' }"
       :meta="{
         class: {
@@ -230,6 +226,10 @@ onMounted(() => {
       }"
     />
 
-    <UPagination show-edges :sibling-count="2" :total="10" class="pt-5" />
+    <div v-if="notificationsData.length > 0" class="grid grid-cols-3 pt-5 w-full items-center">
+      <div v-if="notificationsData.length == 1" class="text-sm text-muted">1 of {{ 100 }}.</div>
+      <div v-else class="text-sm text-muted">1-{{ notificationsData.length }} of {{ 100 }}.</div>
+      <UPagination show-edges :sibling-count="2" :total="10" class="flex justify-center" />
+    </div>
   </div>
 </template>

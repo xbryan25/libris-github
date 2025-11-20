@@ -6,10 +6,11 @@ from flask_jwt_extended import jwt_required
 notifications_bp = Blueprint("notifications_bp", __name__)
 
 
-@notifications_bp.route("/get-recent-notifications", methods=["GET"])
+@notifications_bp.route("/", methods=["GET"])
 @jwt_required()
-def get_recent_notifications() -> tuple[Response, int]:
+def get_notifications() -> tuple[Response, int]:
     """
     (add later)
     """
-    return NotificationControllers.get_recent_notifications_controller()
+
+    return NotificationControllers.get_notifications_controller()

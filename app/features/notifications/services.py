@@ -7,18 +7,20 @@ from app.utils import convert_notification_dict
 
 class NotificationServices:
     @staticmethod
-    def get_recent_notifications_service(
-        user_id, num_of_notifications
-    ) -> list[Notification]:
+    def get_notifications_service(user_id, params) -> list[Notification]:
         """
         add later
         """
 
-        notifications = NotificationRepository.get_recent_notifications(
-            user_id, num_of_notifications
-        )
+        # Clean 'order' values from 'show newest first' to 'DESC' and 'show oldest first' to 'ASC'
+        if params["order"] == "show newest first":
+            params["order"] = "DESC"
+        elif params["order"] == "show oldest first":
+            params["order"] = "ASC"
+        else:
+            params["order"] = "DESC"
 
-        print(notifications)
+        notifications = NotificationRepository.get_notifications(user_id, params)
 
         notification_dataclasses = []
 
