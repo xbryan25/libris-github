@@ -60,7 +60,7 @@ const isOpenPurchaseBookModal = computed({
           </div>
         </div>
         <div class="flex justify-end gap-3 mt-6">
-          <UButton class="bg-slate-300 hover:bg-slate-400 text-black dark:bg-slate-400 dark:hover:bg-slate-500 px-4 py-2 rounded">
+          <UButton @click="isOpenPurchaseBookModal=false" class="bg-slate-300 hover:bg-slate-400 text-black dark:bg-slate-400 dark:hover:bg-slate-500 px-4 py-2 rounded">
           <p>Cancel</p> 
           </UButton>
           <UButton class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded">
