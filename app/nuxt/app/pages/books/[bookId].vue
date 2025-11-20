@@ -3,6 +3,7 @@ import auth from '~/middleware/auth';
 import { useBookDetails } from '~/composables/useBookDetails';
 import BookPricing from '~/components/BookPricing.vue';
 
+
 definePageMeta({
   middleware: auth,
 });
@@ -14,6 +15,18 @@ const bookId = route.params.bookId as string;
 const isOpenRentBookModal = ref(false);
 
 const isOpenPurchaseBookModal = ref(false);
+
+const currentWalletBalance = ref(0);
+const isFetching = ref(true);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 
 const openRentBookModal = () => {
   isOpenRentBookModal.value = true;
@@ -301,11 +314,18 @@ const getBadgeColorClasses = (color: string) => {
     </div>
     <RentBookModal
       :is-open-rent-book-modal="isOpenRentBookModal"
+      :book-title="book?.title"
+      :daily-rent-price="book?.daily_rent_price"
+      :security-deposit="book?.security_deposit"
       @update:openRentBookModal="isOpenRentBookModal = $event"
     />
     <PurchaseBookModal
       :is-open-purchase-book-modal="isOpenPurchaseBookModal"
       @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
+      :book-title="book?.title"
+      :book-author="book?.author"
+      :purchase-price="book?.purchase_price"
+      :current-wallet-balance="currentWalletBalance"
     />
   </div>
 </template>
