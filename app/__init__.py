@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
 
 from .config import Config
 
@@ -11,6 +12,7 @@ import os
 import atexit
 
 jwt = JWTManager()
+socketio = SocketIO(cors_allowed_origins="*")
 
 db = None  # global reference
 
@@ -25,6 +27,8 @@ def create_app():
     app.config.from_object(Config)
 
     jwt.init_app(app)
+    socketio.init_app(app)
+
     CORS(app, origins=["http://127.0.0.1:3000"], supports_credentials=True)
 
     from .features import blueprints
@@ -37,12 +41,6 @@ def create_app():
         db = Database()
         db.init_app(app)
         app.extensions["db"] = db
-
-    # @app.teardown_appcontext
-    # def close_db(exception=None):
-    #     db = app.extensions.get("db")
-    #     if db and db.pool and not db.pool.closed:
-    #         db.close()
 
     # Close pool gracefully only when the app exits
     atexit.register(lambda: app.extensions.get("db") and app.extensions["db"].close())

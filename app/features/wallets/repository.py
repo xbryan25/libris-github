@@ -1,4 +1,4 @@
-from app.db.queries import CommonQueries
+from app.db.queries import CommonQueries, WalletQueries
 
 from flask import current_app
 
@@ -23,4 +23,26 @@ class WalletRepository:
                 column="balance", table="readits_wallets", field="user_id"
             ),
             (user_id,),
+        )
+
+    @staticmethod
+    def add_readits_to_wallet_from_paid_invoice(user_id, readits_to_add, last_updated):
+
+        db = current_app.extensions["db"]
+
+        return db.execute_query(
+            WalletQueries.INCREMENT_WALLET_BALANCE,
+            (readits_to_add, last_updated, user_id),
+        )
+
+    @staticmethod
+    def add_transaction(
+        readits_transaction_amount, transaction_date, transaction_type, user_id
+    ):
+
+        db = current_app.extensions["db"]
+
+        return db.execute_query(
+            WalletQueries.INSERT_TRANSACTION_USING_USER_ID,
+            (readits_transaction_amount, transaction_date, transaction_type, user_id),
         )

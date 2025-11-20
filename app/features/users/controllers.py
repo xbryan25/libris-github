@@ -138,7 +138,7 @@ class UserControllers:
 
             username = UserServices.get_username_service(user_id)
 
-            return jsonify({"username": username}), 200
+            return jsonify({"username": username, "userId": user_id}), 200
 
         except Exception as e:
             traceback.print_exc()
@@ -357,6 +357,68 @@ class UserControllers:
                 return jsonify({"message": "Profile updated successfully"}), 200
             else:
                 return jsonify({"message": "Failed to update profile"}), 500
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def update_personal_info_controller() -> tuple[Response, int]:
+        """Update only the personal information (not address) of the authenticated user."""
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            profile_data = request.get_json()
+
+            if not profile_data:
+                return jsonify({"message": "No data provided"}), 400
+
+            profile_success = UserServices.update_user_profile_service(
+                user_id, profile_data
+            )
+
+            if profile_success:
+                return (
+                    jsonify({"message": "Personal information updated successfully"}),
+                    200,
+                )
+            else:
+                return (
+                    jsonify({"message": "Failed to update personal information"}),
+                    500,
+                )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def update_address_controller() -> tuple[Response, int]:
+        """Update only the address information of the authenticated user."""
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated"}), 401
+
+            address_data = request.get_json()
+
+            if not address_data:
+                return jsonify({"message": "No data provided"}), 400
+
+            address_success = UserServices.update_user_address_service(
+                user_id, address_data
+            )
+
+            if address_success:
+                return jsonify({"message": "Address updated successfully"}), 200
+            else:
+                return jsonify({"message": "Failed to update address"}), 500
 
         except Exception as e:
             traceback.print_exc()

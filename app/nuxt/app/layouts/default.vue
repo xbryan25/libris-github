@@ -1,17 +1,14 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/useAuthStore';
+
 const route = useRoute();
+
+const auth = useAuthStore();
+
+const { paymentSuccess } = useSocket(auth.userId as string);
 
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
-
-onMounted(async () => {
-  isFetching.value = true;
-
-  const data = await useCurrentWalletBalance();
-  currentWalletBalance.value = data.currentWalletBalance ?? 0;
-
-  isFetching.value = false;
-});
 
 const isActive = (path: string) => {
   if (route.path === path) return true;
@@ -22,6 +19,24 @@ const isActive = (path: string) => {
 
   return false;
 };
+
+watch(
+  () => paymentSuccess.value,
+  (amount) => {
+    if (amount) {
+      currentWalletBalance.value = currentWalletBalance.value + amount;
+    }
+  },
+);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
 </script>
 
 <template>
@@ -124,12 +139,15 @@ const isActive = (path: string) => {
           </NuxtLink>
 
           <!-- Readits Display -->
-          <div class="flex items-center rounded-md px-3 py-2 gap-1.5">
+          <NuxtLink
+            class="flex items-center rounded-md px-3 py-2 gap-1.5 hover:bg-surface-hover hover:text-accent text-base"
+            to="/buy-readits"
+          >
             <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
 
             <span v-if="isFetching" class="text-xl font-semibold text-accent">-</span>
             <span v-else class="text-xl font-semibold text-accent">{{ currentWalletBalance }}</span>
-          </div>
+          </NuxtLink>
 
           <!-- Notifications -->
           <button
