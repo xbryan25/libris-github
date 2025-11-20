@@ -6,6 +6,8 @@ type Address = {
   city: string
   country: string
   postal_code: string
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type Profile = {
