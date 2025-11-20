@@ -1,3 +1,51 @@
-from flask import Blueprint
+from flask import Blueprint, Response
+from .controllers import RentalControllers
+from flask_jwt_extended import jwt_required
 
 rentals_bp = Blueprint("rentals_bp", __name__)
+
+
+@rentals_bp.route("/my-rentals", methods=["GET"])
+@jwt_required()
+def get_my_rentals() -> tuple[Response, int]:
+    """
+    Retrieve all active rentals for the authenticated user.
+
+    This endpoint returns rentals with statuses:
+    'pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation'
+
+    Response JSON:
+        [
+            {
+                "rental_id": str,
+                "rent_status": str,
+                "book_id": str,
+                "title": str,
+                "author": str,
+                "image": str,
+                "from": str,
+                "all_fees_captured": bool,
+                "reserved_at": str,
+                "reservation_expires_at": str,
+                "rental_duration_days": int,
+                "meetup_location": str,
+                "meetup_time_window": str,
+                "pickup_confirmation_started_at": str,
+                "user_confirmed_pickup": bool,
+                "owner_confirmed_pickup": bool,
+                "return_confirmation_started_at": str,
+                "user_confirmed_return": bool,
+                "owner_confirmed_return": bool,
+                "cost": int,
+                "meetup_date": str,
+                "meetup_time": str,
+                "rent_start_date": str,
+                "rent_end_date": str
+            }
+        ]
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return RentalControllers.get_user_rentals_controller()
