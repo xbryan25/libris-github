@@ -3,6 +3,7 @@ import auth from '~/middleware/auth';
 import { useBookDetails } from '~/composables/useBookDetails';
 import BookPricing from '~/components/BookPricing.vue';
 import { useCreateRental } from '~/composables/useCreateRental';
+import { useCreatePurchase } from '~/composables/useCreatePurchase';
 
 definePageMeta({
   middleware: auth,
@@ -13,6 +14,8 @@ const router = useRouter();
 const bookId = route.params.bookId as string;
 
 const { rentalExists, checkRentalExists } = useCreateRental()
+
+const { purchaseExists, checkPurchaseExists } = useCreatePurchase()
 
 const isOpenRentBookModal = ref(false);
 
@@ -42,6 +45,12 @@ const handleRentalSuccess = () => {
 const openPurchaseBookModal = () => {
   isOpenPurchaseBookModal.value = true;
 };
+
+const handlePurchaseSuccess = () => {
+  purchaseExists.value = true
+  isOpenRentBookModal.value = false
+}
+
 
 const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBadge } =
   useBookDetails();
@@ -320,6 +329,7 @@ onMounted(async () => {
                 :purchase-price="book.purchase_price"
                 :book-id="bookId ?? ''"
                 :rental-exists="rentalExists"
+                :purchase-exists="purchaseExists"
                 @rent="openRentBookModal"
                 @purchase="openPurchaseBookModal"
               />
@@ -340,11 +350,14 @@ onMounted(async () => {
     />
     <PurchaseBookModal
       :is-open-purchase-book-modal="isOpenPurchaseBookModal"
-      @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
+      :book-id="bookId ?? ''"
       :book-title="book?.title"
       :book-author="book?.author"
       :purchase-price="book?.purchase_price"
       :current-wallet-balance="currentWalletBalance"
+      :purchase-exists="purchaseExists"
+      @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
+      @purchase-success="handlePurchaseSuccess"
     />
   </div>
 </template>
