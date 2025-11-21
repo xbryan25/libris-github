@@ -2,7 +2,7 @@ from flask import request, jsonify, make_response, Response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import traceback
 import datetime
-import uuid
+
 
 from .services import RentalsService
 
@@ -68,20 +68,16 @@ class RentalsController:
                     400,
                 )
 
-            rental_id = str(uuid.uuid4())
-            reserved_at = datetime.datetime.utcnow()
+            reserved_at = datetime.datetime.now(datetime.UTC)
             reservation_expires_at = reserved_at + datetime.timedelta(days=1)
 
             rental_data = {
-                "rental_id": rental_id,
                 "user_id": current_user_id,
                 "book_id": rental_data_json["book_id"],
-                "rent_status": "pending",
                 "reserved_at": reserved_at,
                 "reservation_expires_at": reservation_expires_at,
                 "total_rent_cost": rental_data_json["total_rent_cost"],
                 "rental_duration_days": rental_data_json["rental_duration_days"],
-                "all_fees_captured": False,
                 "meetup_time_window": rental_data_json["meetup_time_window"],
                 "meetup_location": rental_data_json["meetup_location"],
                 "meetup_date": rental_data_json["meetup_date"],
@@ -94,7 +90,7 @@ class RentalsController:
 
             resp = make_response(
                 {
-                    "rental_id": rental_id,
+                    "rental_id": result["rental_id"],
                     "messageTitle": "Rental request created successfully.",
                     "message": "Your rental request has been sent.",
                 }

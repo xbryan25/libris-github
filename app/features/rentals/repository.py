@@ -1,6 +1,5 @@
 from flask import current_app
 from app.db.queries.rental_queries import RentalsQueries
-import uuid
 
 
 class RentalsRepository:
@@ -27,18 +26,13 @@ class RentalsRepository:
         """
         db = current_app.extensions["db"]
 
-        rental_id = str(uuid.uuid4())
-
         params = (
-            rental_id,
             rental_data["user_id"],
             rental_data["book_id"],
-            "pending",
             rental_data["reserved_at"],
             rental_data["reservation_expires_at"],
             rental_data["total_rent_cost"],
             rental_data["rental_duration_days"],
-            False,
             rental_data["meetup_time_window"],
             rental_data["meetup_location"],
             rental_data["meetup_date"],
