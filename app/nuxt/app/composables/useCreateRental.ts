@@ -3,10 +3,23 @@ import { ref } from 'vue'
 const API_URL = import.meta.env.VITE_API_URL
 
 export const useCreateRental = () => {
+  const rentalExists = ref(false)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   const { $apiFetch } = useNuxtApp()
+
+  const checkRentalExists = async (bookId: string) => {
+    try {
+      const res = await $apiFetch<{ exists: boolean }>(
+        `${API_URL}/api/rentals/check/${bookId}`,
+        { method: 'GET', credentials: 'include' }
+      )
+      rentalExists.value = res.exists
+    } catch (e: any) {
+      console.error(e)
+    }
+  }
 
   const createRental = async (payload: {
     book_id: string
@@ -38,6 +51,8 @@ export const useCreateRental = () => {
   return {
     loading,
     error,
-    createRental
+    createRental,
+    checkRentalExists,
+    rentalExists
   }
 }

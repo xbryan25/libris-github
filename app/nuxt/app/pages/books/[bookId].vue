@@ -2,7 +2,7 @@
 import auth from '~/middleware/auth';
 import { useBookDetails } from '~/composables/useBookDetails';
 import BookPricing from '~/components/BookPricing.vue';
-
+import { useCreateRental } from '~/composables/useCreateRental';
 
 definePageMeta({
   middleware: auth,
@@ -11,6 +11,8 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const bookId = route.params.bookId as string;
+
+const { rentalExists, checkRentalExists } = useCreateRental()
 
 const isOpenRentBookModal = ref(false);
 
@@ -31,6 +33,11 @@ onMounted(async () => {
 const openRentBookModal = () => {
   isOpenRentBookModal.value = true;
 };
+
+const handleRentalSuccess = () => {
+  rentalExists.value = true
+  isOpenRentBookModal.value = false
+}
 
 const openPurchaseBookModal = () => {
   isOpenPurchaseBookModal.value = true;
@@ -114,6 +121,13 @@ const getBadgeColorClasses = (color: string) => {
   };
   return colors[color] || colors.gray;
 };
+
+onMounted(async () => {
+  if (bookId) {
+    await checkRentalExists(bookId)
+  }
+})
+
 </script>
 
 <template>
@@ -304,6 +318,8 @@ const getBadgeColorClasses = (color: string) => {
                 :daily-rent-price="book.daily_rent_price"
                 :security-deposit="book.security_deposit"
                 :purchase-price="book.purchase_price"
+                :book-id="bookId ?? ''"
+                :rental-exists="rentalExists"
                 @rent="openRentBookModal"
                 @purchase="openPurchaseBookModal"
               />
@@ -318,7 +334,9 @@ const getBadgeColorClasses = (color: string) => {
       :book-title="book?.title"
       :daily-rent-price="book?.daily_rent_price"
       :security-deposit="book?.security_deposit"
+      :rental-exists="rentalExists"
       @update:openRentBookModal="isOpenRentBookModal = $event"
+      @rental-success="handleRentalSuccess"
     />
     <PurchaseBookModal
       :is-open-purchase-book-modal="isOpenPurchaseBookModal"

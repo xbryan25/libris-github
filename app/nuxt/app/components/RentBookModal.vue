@@ -5,6 +5,7 @@ import { useCreateRental } from '~/composables/useCreateRental';
 
 const { createRental, loading, error } = useCreateRental()
 
+
 const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
 const meetupAddress = ref('') 
 const { 
@@ -20,10 +21,14 @@ const props = defineProps<{
   bookTitle?: string
   dailyRentPrice?: number
   securityDeposit?: number
+  rentalExists: boolean
 }>()
+
 
 const emit = defineEmits<{
   (e: 'update:openRentBookModal', value: boolean): void
+  (e: 'rental-success'): void
+  (e: 'update:rentalExists', value: boolean): void
 }>()
 
 const isOpenRentBookModal = computed({
@@ -102,7 +107,8 @@ async function sendRental() {
       meetup_location: meetupAddressQuery.value,
       meetup_date: meetupDate.value!
     })
-
+    emit('update:rentalExists', true)
+    emit('rental-success')
     isOpenRentBookModal.value = false
   } catch (err) {
     console.error(err)
