@@ -33,3 +33,17 @@ class RentalsService:
         except Exception:
             traceback.print_exc()
             return None
+
+    @staticmethod
+    def check_pending_rental(user_id: str, book_id: str) -> bool:
+        """
+        Check if the user already has a pending rental for the given book.
+
+        Returns:
+            bool: True if a pending rental exists, False otherwise.
+        """
+        try:
+            return RentalsRepository.exists_pending_rental(user_id, book_id)
+        except Exception:
+            traceback.print_exc()
+            return False

@@ -101,3 +101,27 @@ class RentalsController:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    @jwt_required()
+    def check_rental_controller(book_id: str) -> tuple[Response, int]:
+        """
+        Check if the current user already has a pending rental request for a given book.
+
+        Args:
+            book_id (str): The UUID of the book.
+
+        Returns JSON:
+            exists: True if a pending rental exists, False otherwise.
+
+        Errors:
+            401 if user is not authenticated
+            500 if unexpected error occurs
+        """
+        try:
+            current_user_id = get_jwt_identity()
+            exists = RentalsService.check_pending_rental(current_user_id, book_id)
+            return jsonify({"exists": exists}), 200
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

@@ -30,3 +30,9 @@ class RentalsQueries:
         )
         RETURNING rental_id;
     """
+
+    CHECK_PENDING_RENTAL = """
+    SELECT 1 FROM rented_books
+    WHERE user_id = %s AND book_id = %s AND rent_status = 'pending'
+    LIMIT 1;
+    """

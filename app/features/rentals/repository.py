@@ -45,3 +45,16 @@ class RentalsRepository:
             return rental_data
 
         return None
+
+    @staticmethod
+    def exists_pending_rental(user_id: str, book_id: str) -> bool:
+        """
+        Check if a pending rental exists for the given user and book.
+
+        Returns:
+            bool: True if a pending rental exists, False otherwise.
+        """
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(RentalsQueries.CHECK_PENDING_RENTAL, (user_id, book_id))
+        return bool(result)

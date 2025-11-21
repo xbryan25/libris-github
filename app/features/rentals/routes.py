@@ -36,3 +36,22 @@ def create_rental() -> tuple[Response, int]:
         500 if an unexpected error occurs during processing.
     """
     return RentalsController.create_rental_controller()
+
+
+@rentals_bp.route("/check/<book_id>", methods=["GET"])
+@jwt_required()
+def check_rental(book_id: str) -> tuple[Response, int]:
+    """
+    Check if the current user already has a pending rental request for a given book.
+
+    Args:
+        book_id (str): The UUID of the book.
+
+    Returns JSON:
+        exists: True if a pending rental exists, False otherwise.
+
+    Errors:
+        401 if user is not authenticated.
+        500 if an unexpected error occurs.
+    """
+    return RentalsController.check_rental_controller(book_id)
