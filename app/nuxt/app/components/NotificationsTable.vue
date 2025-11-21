@@ -44,9 +44,12 @@ const columns: TableColumn<Notification>[] = [
         'div',
         {
           class: 'flex gap-10 no-underline',
-          onClick: () => {
+          onClick: async () => {
             isOpenNotificationModal.value = true;
+            row.original.isRead = true;
             clickedRow.value = row.original;
+
+            await useMarkNotificationAsRead(row.original.notificationId);
           },
         },
         [
@@ -69,9 +72,12 @@ const columns: TableColumn<Notification>[] = [
         'div',
         {
           class: 'flex gap-10 no-underline',
-          onClick: () => {
+          onClick: async () => {
             isOpenNotificationModal.value = true;
+            row.original.isRead = true;
             clickedRow.value = row.original;
+
+            await useMarkNotificationAsRead(row.original.notificationId);
           },
         },
         [h('p', { class: 'font-bold' }, dateConverter(row.original.createdAt, 'short'))],

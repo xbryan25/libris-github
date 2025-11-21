@@ -74,3 +74,18 @@ class NotificationRepository:
                 ),
                 (user_id, read_status_bool),
             )
+
+    @staticmethod
+    def mark_notification_as_read(notification_id: str) -> None:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.UPDATE_BY_ID.format(
+                table="notifications", set_clause="is_read = %s", pk="notification_id"
+            ),
+            (True, notification_id),
+        )

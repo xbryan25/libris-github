@@ -126,3 +126,22 @@ class NotificationControllers:
         except InvalidParameterError as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 400
+
+    @staticmethod
+    def mark_notification_as_read_controller(
+        notification_id: str,
+    ) -> tuple[Response, int]:
+        """add later"""
+
+        try:
+
+            NotificationServices.mark_notification_as_read_service(notification_id)
+
+            return (
+                jsonify({"message": f"Notification {notification_id} mark as read."}),
+                200,
+            )
+
+        except InvalidParameterError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400

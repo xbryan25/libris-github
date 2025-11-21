@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Notification } from '~/types';
+import { useMarkNotificationAsRead } from '#imports';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -30,9 +31,7 @@ const chipText = computed(() => {
   return count > 99 ? '99+' : count.toString();
 });
 
-onMounted(async () => {
-  isFetching.value = true;
-
+const getRecentNotifications = async () => {
   const options = {
     rowsPerPage: maxNumOfRecentNotfications,
     pageNumber: 1,
@@ -41,11 +40,21 @@ onMounted(async () => {
   };
 
   recentNotifications.value = await useNotifications(options);
+};
 
+const getUnreadNotificationsCount = async () => {
   const { totalCount }: { totalCount: number } =
     await useNotificationsTotalCount('show only unread');
 
   unreadNotificationsCount.value = totalCount;
+};
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  await getRecentNotifications();
+
+  await getUnreadNotificationsCount();
 
   console.log(recentNotifications.value);
 
@@ -85,8 +94,13 @@ onMounted(async () => {
             :key="notification.notificationId"
             :notification-details="notification"
             @click="
-              clickedRow = notification;
-              isOpenNotificationModal = true;
+              async () => {
+                clickedRow = notification;
+                isOpenNotificationModal = true;
+                await useMarkNotificationAsRead(notification.notificationId);
+                await getRecentNotifications();
+                await getUnreadNotificationsCount();
+              }
             "
           />
         </div>

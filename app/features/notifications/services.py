@@ -39,3 +39,11 @@ class NotificationServices:
         return NotificationRepository.get_notifications_total_count(user_id, params)[
             "count"
         ]
+
+    @staticmethod
+    def mark_notification_as_read_service(notification_id: str) -> None:
+        """
+        add later
+        """
+
+        NotificationRepository.mark_notification_as_read(notification_id)

@@ -24,3 +24,13 @@ def get_notifications_total_count() -> tuple[Response, int]:
     """
 
     return NotificationControllers.get_notifications_total_count_controller()
+
+
+@notifications_bp.route("/<string:notification_id>/mark-as-read", methods=["PATCH"])
+@jwt_required()
+def mark_notification_as_read(notification_id: str) -> tuple[Response, int]:
+    """
+    (add later)
+    """
+
+    return NotificationControllers.mark_notification_as_read_controller(notification_id)
