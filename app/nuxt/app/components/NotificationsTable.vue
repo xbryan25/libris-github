@@ -191,10 +191,25 @@ const checkIfBeyondPageLimit = () => {
   }
 };
 
-const markSelectedNotificationsAsRead = async () => {
+const determineIsReadChange = computed(() => {
+  const notificationMap = new Map(notificationsData.value.map((n) => [n.notificationId, n]));
+
+  for (const notificationId of selectedRows.value) {
+    const notification = notificationMap.get(notificationId);
+    if (!notification) return false;
+
+    if (!notification.isRead) {
+      return true;
+    }
+  }
+
+  return false;
+});
+
+const markSelectedNotificationsAsRead = async (): Promise<void> => {
   isLoading.value = true;
 
-  await useMarkMultipleNotificationAsRead(selectedRows.value);
+  await useChangeNotificationsReadStatus(selectedRows.value, determineIsReadChange.value);
 
   await debouncedLoadEntities();
 
@@ -203,7 +218,7 @@ const markSelectedNotificationsAsRead = async () => {
   isLoading.value = false;
 
   toast.add({
-    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as read.`,
+    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as ${determineIsReadChange.value ? 'read' : 'unread'}.`,
     color: 'success',
   });
 };
@@ -274,9 +289,13 @@ onMounted(() => {
             />
           </UTooltip>
 
-          <UTooltip text="Mark as read">
+          <UTooltip :text="`Mark as ${determineIsReadChange ? 'read' : 'unread'}`">
             <UButton
-              icon="material-symbols:mark-email-read"
+              :icon="
+                determineIsReadChange
+                  ? 'material-symbols:mark-email-read'
+                  : 'material-symbols:mark-email-unread'
+              "
               color="neutral"
               class="cursor-pointer"
               @click="markSelectedNotificationsAsRead()"

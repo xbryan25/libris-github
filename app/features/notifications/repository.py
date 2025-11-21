@@ -91,7 +91,9 @@ class NotificationRepository:
         )
 
     @staticmethod
-    def mark_multiple_notifications_as_read(notification_ids: list[str]) -> None:
+    def change_notifications_read_status(
+        notification_ids: list[str], is_read_change: bool
+    ) -> None:
         """
         add later
         """
@@ -102,5 +104,5 @@ class NotificationRepository:
             CommonQueries.UPDATE_MULTIPLE_ROWS_BY_ID.format(
                 table="notifications", set_clause="is_read = %s", pk="notification_id"
             ),
-            (True, notification_ids),
+            (is_read_change, notification_ids),
         )

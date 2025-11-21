@@ -147,15 +147,19 @@ class NotificationControllers:
             return jsonify({"error": str(e)}), 400
 
     @staticmethod
-    def mark_multiple_notifications_as_read_controller() -> tuple[Response, int]:
+    def change_notifications_read_status_controller() -> tuple[Response, int]:
         """add later"""
 
         try:
 
-            notification_ids = request.get_json().get("notificationIds", [])
+            request_json = request.get_json()
 
-            NotificationServices.mark_multiple_notifications_as_read_service(
-                notification_ids
+            notification_ids = request_json.get("notificationIds", [])
+
+            is_read_change = request_json.get("isReadChange", True)
+
+            NotificationServices.change_notifications_read_status_service(
+                notification_ids, is_read_change
             )
 
             return (

@@ -36,11 +36,11 @@ def mark_notification_as_read(notification_id: str) -> tuple[Response, int]:
     return NotificationControllers.mark_notification_as_read_controller(notification_id)
 
 
-@notifications_bp.route("/mark-as-read", methods=["PATCH"])
+@notifications_bp.route("/change-read-status", methods=["PATCH"])
 @jwt_required()
-def mark_multiple_notifications_as_read() -> tuple[Response, int]:
+def change_notifications_read_status() -> tuple[Response, int]:
     """
     (add later)
     """
 
-    return NotificationControllers.mark_multiple_notifications_as_read_controller()
+    return NotificationControllers.change_notifications_read_status_controller()

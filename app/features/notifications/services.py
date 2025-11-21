@@ -49,11 +49,13 @@ class NotificationServices:
         NotificationRepository.mark_notification_as_read(notification_id)
 
     @staticmethod
-    def mark_multiple_notifications_as_read_service(
-        notification_ids: list[str],
+    def change_notifications_read_status_service(
+        notification_ids: list[str], is_read_change: bool
     ) -> None:
         """
         add later
         """
 
-        NotificationRepository.mark_multiple_notifications_as_read(notification_ids)
+        NotificationRepository.change_notifications_read_status(
+            notification_ids, is_read_change
+        )
