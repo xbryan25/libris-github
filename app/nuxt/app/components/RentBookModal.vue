@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
+import { useCreateRental } from '~/composables/useCreateRental';
+
+const { createRental, loading, error } = useCreateRental()
 
 const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
 const meetupAddress = ref('') 
@@ -13,6 +16,7 @@ const {
 
 const props = defineProps<{
   isOpenRentBookModal: boolean
+  bookId: string
   bookTitle?: string
   dailyRentPrice?: number
   securityDeposit?: number
@@ -87,6 +91,23 @@ const totalCost = computed(() => {
   const deposit = props.securityDeposit ?? 0
   return rent * finalDays.value + deposit
 })
+
+async function sendRental() {
+  try {
+    await createRental({
+      book_id: props.bookId, 
+      total_rent_cost: totalCost.value,
+      rental_duration_days: finalDays.value!,
+      meetup_time_window: meetupTime.value,
+      meetup_location: meetupAddressQuery.value,
+      meetup_date: meetupDate.value!
+    })
+
+    isOpenRentBookModal.value = false
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 </script>
 
@@ -189,15 +210,11 @@ const totalCost = computed(() => {
           <UButton @click="isOpenRentBookModal = false" class="bg-slate-300 hover:bg-slate-400 text-black dark:bg-slate-400 dark:hover:bg-slate-500 px-4 py-2 rounded">
           <p>Cancel</p> 
           </UButton>
-          <UButton :disabled="!!timeError || !meetupTime || !finalDays || !meetupDate || !meetupAddressQuery" class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded">
-          <p>Send Rental Request</p> 
+          <UButton @click="sendRental" :disabled="!!timeError || !meetupTime || !finalDays || !meetupDate || !meetupAddressQuery" class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed">
+            <p v-if="!loading">Send Rental Request</p> 
+            <p v-else>Sending...</p>
           </UButton>
         </div>
   </template>
   </UModal>
 </template>
-<style scoped>
-::v-deep(.umodal .content) {
-  overflow: visible !important;
-}
-</style>

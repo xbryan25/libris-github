@@ -314,6 +314,7 @@ const getBadgeColorClasses = (color: string) => {
     </div>
     <RentBookModal
       :is-open-rent-book-modal="isOpenRentBookModal"
+      :book-id="bookId ?? ''"
       :book-title="book?.title"
       :daily-rent-price="book?.daily_rent_price"
       :security-deposit="book?.security_deposit"
