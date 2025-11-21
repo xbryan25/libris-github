@@ -32,7 +32,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:openPurchaseBookModal', value: boolean): void
   (e: 'purchase-success'): void
-  (e: 'update:rentalExists', value: boolean): void
+  (e: 'update:purchaseExists', value: boolean): void
 }>()
 
 const isOpenPurchaseBookModal = computed({
@@ -81,6 +81,7 @@ async function sendPurchase() {
       meetup_date: meetupDate.value,
       meetup_time_window: meetupTimeWindow.value,
     })
+    emit('update:purchaseExists', true)
     emit('purchase-success')
     isOpenPurchaseBookModal.value = false
   } catch (err) {
