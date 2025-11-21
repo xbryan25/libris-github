@@ -138,7 +138,32 @@ class NotificationControllers:
             NotificationServices.mark_notification_as_read_service(notification_id)
 
             return (
-                jsonify({"message": f"Notification {notification_id} mark as read."}),
+                jsonify({"message": f"Notification {notification_id} marked as read."}),
+                200,
+            )
+
+        except InvalidParameterError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400
+
+    @staticmethod
+    def mark_multiple_notifications_as_read_controller() -> tuple[Response, int]:
+        """add later"""
+
+        try:
+
+            notification_ids = request.get_json().get("notificationIds", [])
+
+            NotificationServices.mark_multiple_notifications_as_read_service(
+                notification_ids
+            )
+
+            return (
+                jsonify(
+                    {
+                        "message": f"{len(notification_ids)} notifications marked as read."
+                    }
+                ),
                 200,
             )
 

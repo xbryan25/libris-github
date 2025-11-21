@@ -49,7 +49,7 @@ const columns: TableColumn<Notification>[] = [
             row.original.isRead = true;
             clickedRow.value = row.original;
 
-            await useMarkNotificationAsRead(row.original.notificationId);
+            await markSingleNotificationAsRead(row.original.notificationId);
           },
         },
         [
@@ -136,6 +136,8 @@ const totalNotificationCount = ref(0);
 const pageNumber = ref(1);
 const delayedPageNumber = ref(1);
 
+const toast = useToast();
+
 const loadEntities = async () => {
   isLoading.value = true;
 
@@ -189,12 +191,42 @@ const checkIfBeyondPageLimit = () => {
   }
 };
 
+const markSelectedNotificationsAsRead = async () => {
+  isLoading.value = true;
+
+  await useMarkMultipleNotificationAsRead(selectedRows.value);
+
+  await debouncedLoadEntities();
+
+  await debouncedGetTotalEntityCount();
+
+  isLoading.value = false;
+
+  toast.add({
+    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as read.`,
+    color: 'success',
+  });
+};
+
+const deleteSelectedNotifications = () => {
+  console.log(selectedRows.value);
+};
+
+const markSingleNotificationAsRead = async (notificationId: string) => {
+  await useMarkNotificationAsRead(notificationId);
+};
+
 watch(
   [() => rowsPerPage.value, () => pageNumber.value, () => readStatus.value, () => order.value],
-  () => {
+  async () => {
     isLoading.value = true;
-    debouncedLoadEntities();
-    debouncedGetTotalEntityCount();
+
+    await debouncedLoadEntities();
+
+    // Reset selected rows
+    selectedRows.value = new Set();
+    await debouncedGetTotalEntityCount();
+
     isLoading.value = false;
   },
 );
@@ -238,6 +270,7 @@ onMounted(() => {
               icon="material-symbols:delete-outline"
               color="neutral"
               class="cursor-pointer"
+              @click="deleteSelectedNotifications()"
             />
           </UTooltip>
 
@@ -246,6 +279,7 @@ onMounted(() => {
               icon="material-symbols:mark-email-read"
               color="neutral"
               class="cursor-pointer"
+              @click="markSelectedNotificationsAsRead()"
             />
           </UTooltip>
         </div>

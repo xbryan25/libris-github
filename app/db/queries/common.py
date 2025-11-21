@@ -15,6 +15,7 @@ class CommonQueries:
         "LIMIT %s OFFSET %s"
     )
     UPDATE_BY_ID = "UPDATE {table} SET {set_clause} WHERE {pk} = %s"
+    UPDATE_MULTIPLE_ROWS_BY_ID = "UPDATE {table} SET {set_clause} WHERE {pk} = ANY(%s)"
     DELETE_BY_ID = "DELETE FROM {table} WHERE {pk} = %s"
     GET_COLUMNS_FROM_TABLE = "SELECT {columns} FROM {table} ORDER BY {order_column} ASC"
     GET_BY_SPECIFIC_COLUMN = "SELECT * FROM {table} WHERE {column} = %s"
