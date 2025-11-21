@@ -22,3 +22,21 @@ class RentalControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_lendings_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            lendings = RentalServices.get_user_lendings_with_status(user_id)
+
+            if not lendings:
+                return jsonify({"error": "No lendings found for this user"}), 404
+
+            return jsonify(lendings), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

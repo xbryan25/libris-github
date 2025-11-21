@@ -49,3 +49,45 @@ def get_my_rentals() -> tuple[Response, int]:
         500 if an unexpected error occurs
     """
     return RentalControllers.get_user_rentals_controller()
+
+
+@rentals_bp.route("/my-lendings", methods=["GET"])
+@jwt_required()
+def get_my_lendings() -> tuple[Response, int]:
+    """
+    Retrieve all active lendings for the authenticated user.
+
+    This endpoint returns lendings with statuses:
+    'pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation'
+
+    Response JSON:
+        [
+            {
+                "rental_id": str,
+                "rent_status": str,
+                "book_id": str,
+                "title": str,
+                "author": str,
+                "image": str,
+                "from": str,
+                "all_fees_captured": bool,
+                "reserved_at": str,
+                "reservation_expires_at": str,
+                "rental_duration_days": int,
+                "meetup_location": str,
+                "meetup_time_window": str,
+                "pickup_confirmation_started_at": str,
+                "user_confirmed_pickup": bool,
+                "owner_confirmed_pickup": bool,
+                "return_confirmation_started_at": str,
+                "user_confirmed_return": bool,
+                "owner_confirmed_return": bool,
+                "cost": int,
+                "meetup_date": str,
+                "meetup_time": str,
+                "rent_start_date": str,
+                "rent_end_date": str
+            }
+        ]
+    """
+    return RentalControllers.get_user_lendings_controller()
