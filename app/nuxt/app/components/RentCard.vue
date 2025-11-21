@@ -63,45 +63,53 @@ const getCurrentStep = (status: string) => {
 </script>
 
 <template>
-  <div class="bg-surface rounded-lg border border-base p-6 hover:shadow-md transition-shadow">
-    <!-- Header -->
-    <div class="flex justify-between items-start mb-4">
-      <div class="flex-1">
-        <h3 class="text-xl font-bold text-foreground mb-2">{{ rental.title }}</h3>
-        <div class="flex items-center gap-4 text-sm text-muted">
-          <div class="flex items-center gap-1">
-            <Icon name="lucide:user" class="w-4 h-4" />
-            <span>Renting from {{ rental.from }}</span>
+  <NuxtLink 
+    :to="{
+      path: `/rentals/${rental.rental_id}`,
+      query: { from: 'rental' }
+    }" 
+    class="block"
+  >
+    <div class="bg-surface rounded-lg border border-base p-6 hover:shadow-md transition-shadow">
+      <!-- Header -->
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+          <h3 class="text-xl font-bold text-foreground mb-2">{{ rental.title }}</h3>
+          <div class="flex items-center gap-4 text-sm text-muted">
+            <div class="flex items-center gap-1">
+              <Icon name="lucide:user" class="w-4 h-4" />
+              <span>Renting from {{ rental.from }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <Icon name="lucide:calendar" class="w-4 h-4" />
+              <span>{{ rental.rental_duration_days }} Days</span>
+            </div>
           </div>
+        </div>
+        
+        <!-- Status Badge and Readits -->
+        <div class="flex items-center gap-3">
+          <span 
+            :class="[getStatusBadge(rental.rent_status).color, 'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap']"
+          >
+            {{ getStatusBadge(rental.rent_status).label }}
+          </span>
           <div class="flex items-center gap-1">
-            <Icon name="lucide:calendar" class="w-4 h-4" />
-            <span>{{ rental.rental_duration_days }} Days</span>
+            <span class="text-accent text-xl font-bold">-</span>
+            <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
+            <span class="text-accent text-xl font-bold">{{ rental.cost }}</span>
           </div>
         </div>
       </div>
-      
-      <!-- Status Badge and Readits -->
-      <div class="flex items-center gap-3">
-        <span 
-          :class="[getStatusBadge(rental.rent_status).color, 'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap']"
-        >
-          {{ getStatusBadge(rental.rent_status).label }}
-        </span>
-        <div class="flex items-center gap-1">
-          <span class="text-accent text-xl font-bold">-</span>
-          <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
-          <span class="text-accent text-xl font-bold">{{ rental.cost }}</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Progress Steps using UStepper -->
-    <div class="mt-6">
-      <UStepper 
-        disabled
-        :items="getStepperItems(rental.rent_status)" 
-        :model-value="getCurrentStep(rental.rent_status)"
-      />
+      <!-- Progress Steps using UStepper -->
+      <div class="mt-6">
+        <UStepper 
+          disabled
+          :items="getStepperItems(rental.rent_status)" 
+          :model-value="getCurrentStep(rental.rent_status)"
+        />
+      </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
