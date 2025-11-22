@@ -33,22 +33,29 @@ export const useCreatePurchase = () => {
     error.value = null
 
     try {
+      await $apiFetch(`${API_URL}/api/wallets/update-reserved-amount`, {
+        method: 'PATCH',
+        body: { amount_to_reserve: payload.total_buy_cost },
+        credentials: 'include'
+      })
+
       const res = await $apiFetch(`${API_URL}/api/purchases/create`, {
         method: 'POST',
         body: payload,
         credentials: 'include'
       })
+
       toast.add({
         title: 'Success',
-        description: 'Purchase created successfully',
+        description: 'Purchase request sent successfully',
         color: 'success',
       })
       return res
     } catch (err: any) {
-      error.value = err?.data?.error || err?.message || 'Failed to create purchase'
+      error.value = err?.data?.message || err?.data?.error || err?.message || 'Failed to process purchase'
       toast.add({
         title: 'Error',
-        description: error.value ?? 'Failed to create purchase',
+        description: error.value ?? 'Failed to process purchase',
         color: 'error',
       })
       throw err
