@@ -12,6 +12,8 @@ from app.utils import dict_keys_to_camel, asdict_enum_safe, to_int
 
 from typing import Any, cast
 
+from app import socketio
+
 
 class NotificationControllers:
 
@@ -135,7 +137,24 @@ class NotificationControllers:
 
         try:
 
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
             NotificationServices.mark_notification_as_read_service(notification_id)
+
+            unread_notifications_count = (
+                NotificationServices.get_notifications_total_count_service(
+                    user_id, {"read_status": "show only unread"}
+                )
+            )
+
+            socketio.emit(
+                "update_unread_notifications_count",
+                {"unreadNotificationsCount": unread_notifications_count},
+                room=user_id,
+            )
 
             return (
                 jsonify({"message": f"Notification {notification_id} marked as read."}),
@@ -151,15 +170,31 @@ class NotificationControllers:
         """add later"""
 
         try:
-
             request_json = request.get_json()
 
             notification_ids = request_json.get("notificationIds", [])
 
             is_read_change = request_json.get("isReadChange", True)
 
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
             NotificationServices.change_notifications_read_status_service(
                 notification_ids, is_read_change
+            )
+
+            unread_notifications_count = (
+                NotificationServices.get_notifications_total_count_service(
+                    user_id, {"read_status": "show only unread"}
+                )
+            )
+
+            socketio.emit(
+                "update_unread_notifications_count",
+                {"unreadNotificationsCount": unread_notifications_count},
+                room=user_id,
             )
 
             return (

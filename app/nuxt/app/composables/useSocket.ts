@@ -1,5 +1,7 @@
 
 const paymentSuccess = ref<number | null>(null);
+const updateUnreadNotificationsCount = ref<number | null>(null)
+
 let isInitialized = false;
 let currentUserId: string | null = null
 
@@ -12,7 +14,11 @@ export function useSocket(userId: string | null) {
   if (!isInitialized) {
 
     $socket.on("payment_success", (data) => {
-      paymentSuccess.value = data.readits_amount;
+      paymentSuccess.value = data.readitsAmount;
+    });
+
+    $socket.on("update_unread_notifications_count", (data) => {
+      updateUnreadNotificationsCount.value = data.unreadNotificationsCount;
     });
 
     $socket.on("disconnect", () => {
@@ -42,5 +48,5 @@ export function useSocket(userId: string | null) {
     currentUserId = userId
   }
 
-  return { paymentSuccess };
+  return { paymentSuccess, updateUnreadNotificationsCount };
 }

@@ -7,6 +7,8 @@ import type { Notification } from '~/types';
 
 import { dateConverter } from '#imports';
 
+import { useAuthStore } from '~/stores/useAuthStore';
+
 const UCheckbox = resolveComponent('UCheckbox');
 
 const notificationsData = ref<Notification[]>([]);
@@ -14,6 +16,8 @@ const notificationsData = ref<Notification[]>([]);
 const selectedRows = ref<Set<string>>(new Set());
 
 const clickedRow = ref<Notification | null>(null);
+
+const clickedFromTable = ref<boolean>(false);
 
 const columns: TableColumn<Notification>[] = [
   {
@@ -23,6 +27,7 @@ const columns: TableColumn<Notification>[] = [
         ui: {
           base: 'cursor-pointer',
         },
+        disabled: isLoading.value,
         modelValue: computed(() => selectedRows.value.has(row.original.notificationId)).value,
         'onUpdate:modelValue': (value: boolean) => {
           console.log(value);
@@ -48,6 +53,7 @@ const columns: TableColumn<Notification>[] = [
             isOpenNotificationModal.value = true;
             row.original.isRead = true;
             clickedRow.value = row.original;
+            clickedFromTable.value = true;
 
             await markSingleNotificationAsRead(row.original.notificationId);
           },
@@ -138,6 +144,10 @@ const delayedPageNumber = ref(1);
 
 const toast = useToast();
 
+const authStore = useAuthStore();
+
+const { updateUnreadNotificationsCount } = useSocket(authStore.userId as string);
+
 const loadEntities = async () => {
   isLoading.value = true;
 
@@ -213,7 +223,7 @@ const markSelectedNotificationsAsRead = async (): Promise<void> => {
 
   await debouncedLoadEntities();
 
-  await debouncedGetTotalEntityCount();
+  // await debouncedGetTotalEntityCount();
 
   isLoading.value = false;
 
@@ -252,6 +262,17 @@ watch(isLoading, (newVal) => {
     delayedRowsPerPage.value = rowsPerPage.value;
   }
 });
+
+watch(
+  () => updateUnreadNotificationsCount.value,
+  async () => {
+    if (!clickedFromTable.value) {
+      await debouncedLoadEntities();
+    }
+
+    clickedFromTable.value = false;
+  },
+);
 
 onMounted(() => {
   updatePagination();

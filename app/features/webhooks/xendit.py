@@ -55,7 +55,7 @@ def handle_invoice_paid(payload):
 
     socketio.emit(
         "payment_success",
-        {"readits_amount": amount_to_readits_dict[amount]},
+        {"readitsAmount": amount_to_readits_dict[amount]},
         room=parsed_external_id[1],
     )
 

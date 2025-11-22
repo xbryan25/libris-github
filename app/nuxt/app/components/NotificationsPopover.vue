@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Notification } from '~/types';
 import { useMarkNotificationAsRead } from '#imports';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -18,6 +19,10 @@ const isFetching = ref(false);
 const maxNumOfRecentNotfications: number = 4;
 
 const unreadNotificationsCount: Ref<number> = ref<number>(0);
+
+const authStore = useAuthStore();
+
+const { updateUnreadNotificationsCount } = useSocket(authStore.userId as string);
 
 const isOpen = computed({
   get: () => props.isOpen,
@@ -48,6 +53,16 @@ const getUnreadNotificationsCount = async () => {
 
   unreadNotificationsCount.value = totalCount;
 };
+
+watch(
+  () => updateUnreadNotificationsCount.value,
+  async (newUnreadNotificationsCount) => {
+    if (newUnreadNotificationsCount !== null && newUnreadNotificationsCount !== undefined) {
+      await getRecentNotifications();
+      unreadNotificationsCount.value = newUnreadNotificationsCount;
+    }
+  },
+);
 
 onMounted(async () => {
   isFetching.value = true;
@@ -96,8 +111,6 @@ onMounted(async () => {
                 clickedRow = notification;
                 isOpenNotificationModal = true;
                 await useMarkNotificationAsRead(notification.notificationId);
-                await getRecentNotifications();
-                await getUnreadNotificationsCount();
               }
             "
           />
