@@ -6,6 +6,7 @@ export const useCreatePurchase = () => {
   const purchaseExists = ref(false)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const toast = useToast()
 
   const { $apiFetch } = useNuxtApp()
 
@@ -37,9 +38,19 @@ export const useCreatePurchase = () => {
         body: payload,
         credentials: 'include'
       })
+      toast.add({
+        title: 'Success',
+        description: 'Purchase created successfully',
+        color: 'success',
+      })
       return res
     } catch (err: any) {
       error.value = err?.data?.error || err?.message || 'Failed to create purchase'
+      toast.add({
+        title: 'Error',
+        description: error.value ?? 'Failed to create purchase',
+        color: 'error',
+      })
       throw err
     } finally {
       loading.value = false
