@@ -110,13 +110,20 @@ async function sendPurchase() {
           <span>{{ props.bookAuthor }}</span>
         </div>
         <USeparator orientation="horizontal" class="my-2 bg-slate-400" />
-        <div class="flex items-center justify-between font-semibold text-base">
+        
+          <div class="flex items-center justify-between font-semibold text-base">
           <span>Total Cost:</span>
-          <span>{{ props.purchasePrice }}</span>
+          <div class="flex items-center gap-1">
+            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+            <span>{{ props.purchasePrice }}</span>
+          </div>
         </div>
         <div class="flex items-center justify-between font-semibold text-base">
           <span>Your Balance:</span>
-          <span>{{ props.currentWalletBalance }}</span>
+          <div class="flex items-center gap-1">
+            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+            <span>{{ props.currentWalletBalance }}</span>
+          </div>
         </div>
       </div>
 
