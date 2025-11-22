@@ -44,3 +44,13 @@ def change_notifications_read_status() -> tuple[Response, int]:
     """
 
     return NotificationControllers.change_notifications_read_status_controller()
+
+
+@notifications_bp.route("/delete", methods=["DELETE"])
+@jwt_required()
+def delete_notifications() -> tuple[Response, int]:
+    """
+    (add later)
+    """
+
+    return NotificationControllers.delete_notifications()

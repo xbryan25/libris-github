@@ -379,7 +379,14 @@ onMounted(() => {
         (newIsOpenNotificationActionsModal: boolean) =>
           (isOpenNotificationActionsModal = newIsOpenNotificationActionsModal)
       "
-      @on-successful-action="async () => await debouncedLoadEntities()"
+      @on-successful-update="async () => await debouncedLoadEntities()"
+      @on-successful-delete="
+        async () => {
+          await debouncedLoadEntities();
+          selectedRows = new Set();
+          await debouncedGetTotalEntityCount();
+        }
+      "
     />
   </div>
 </template>

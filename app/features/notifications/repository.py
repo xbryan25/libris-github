@@ -106,3 +106,18 @@ class NotificationRepository:
             ),
             (is_read_change, notification_ids),
         )
+
+    @staticmethod
+    def delete_notifications(notification_ids: list[str]) -> None:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.DELETE_MULTIPLE_ROWS_BY_ID.format(
+                table="notifications", pk="notification_id"
+            ),
+            (notification_ids,),
+        )

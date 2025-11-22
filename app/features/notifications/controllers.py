@@ -209,3 +209,40 @@ class NotificationControllers:
         except InvalidParameterError as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 400
+
+    @staticmethod
+    def delete_notifications() -> tuple[Response, int]:
+        """add later"""
+
+        try:
+            request_json = request.get_json()
+
+            notification_ids = request_json.get("notificationIds", [])
+
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
+            NotificationServices.delete_notifications_service(notification_ids)
+
+            unread_notifications_count = (
+                NotificationServices.get_notifications_total_count_service(
+                    user_id, {"read_status": "show only unread"}
+                )
+            )
+
+            socketio.emit(
+                "update_unread_notifications_count",
+                {"unreadNotificationsCount": unread_notifications_count},
+                room=user_id,
+            )
+
+            return (
+                jsonify({"message": f"{len(notification_ids)} notifications deleted."}),
+                200,
+            )
+
+        except InvalidParameterError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400

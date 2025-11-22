@@ -3,12 +3,12 @@ const props = defineProps<{
   isOpenNotificationActionsModal: boolean;
   selectedNotificationAction: string;
   selectedRows: Set<string>;
-  determineIsReadChange: boolean | null;
+  determineIsReadChange: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:openNotificationActionsModal', value: boolean): void;
-  (e: 'onSuccessfulAction'): void;
+  (e: 'onSuccessfulUpdate' | 'onSuccessfulDelete'): void;
 }>();
 
 const isLoading = ref(false);
@@ -25,29 +25,39 @@ const isOpenNotificationActionsModal = computed({
 const markSelectedNotificationsAsRead = async (): Promise<void> => {
   isLoading.value = true;
 
-  if (props.determineIsReadChange !== null)
-    await useChangeNotificationsReadStatus(props.selectedRows, props.determineIsReadChange);
-
-  isLoading.value = false;
+  await useChangeNotificationsReadStatus(props.selectedRows, props.determineIsReadChange);
 
   toast.add({
     description: `${props.selectedRows.size} notification${props.selectedRows.size > 1 ? 's' : ''} marked as ${props.determineIsReadChange ? 'unread' : 'read'}.`,
     color: 'success',
   });
 
-  emit('onSuccessfulAction');
+  emit('onSuccessfulUpdate');
 };
 
 const deleteSelectedNotifications = async () => {
-  console.log('deleted rows');
+  isLoading.value = true;
+
+  await useDeleteNotifications(props.selectedRows);
 
   toast.add({
     description: `${props.selectedRows.size} notification${props.selectedRows.size > 1 ? 's' : ''} deleted.`,
     color: 'success',
   });
 
-  emit('onSuccessfulAction');
+  emit('onSuccessfulDelete');
 };
+
+watch(
+  () => props.isOpenNotificationActionsModal,
+  async (newValue) => {
+    if (!newValue) {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500);
+    }
+  },
+);
 </script>
 
 <template>
@@ -97,6 +107,8 @@ const deleteSelectedNotifications = async () => {
             color="primary"
             variant="solid"
             class="cursor-pointer"
+            :loading="isLoading"
+            :disabled="isLoading"
             @click="
               async () => {
                 if (props.selectedNotificationAction == 'delete') {

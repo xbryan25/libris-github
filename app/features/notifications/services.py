@@ -59,3 +59,11 @@ class NotificationServices:
         NotificationRepository.change_notifications_read_status(
             notification_ids, is_read_change
         )
+
+    @staticmethod
+    def delete_notifications_service(notification_ids: list[str]) -> None:
+        """
+        add later
+        """
+
+        NotificationRepository.delete_notifications(notification_ids)
