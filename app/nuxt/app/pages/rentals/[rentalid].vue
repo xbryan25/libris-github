@@ -73,6 +73,97 @@ const handleCancelRequest = () => {
   console.log('Cancel request for:', rentalid);
 }
 
+const getStepperItems = (status: string) => {
+  if (from === 'rental') {
+    return [
+      {
+        title: 'Requested',
+        description: 'Rental request sent',
+        icon: 'i-lucide-send'
+      },
+      {
+        title: 'Confirmed',
+        description: 'Owner approved request',
+        icon: 'i-lucide-check-circle'
+      },
+      {
+        title: 'Pickup',
+        description: 'Ready for pickup',
+        icon: 'i-lucide-package'
+      },
+      {
+        title: 'Renting',
+        description: 'Currently renting',
+        icon: 'i-lucide-book-open'
+      },
+      {
+        title: 'Return',
+        description: 'Ready for return',
+        icon: 'i-lucide-package-check'
+      },
+      {
+        title: 'Completed',
+        description: 'Rental finished',
+        icon: 'i-lucide-circle-check'
+      }
+    ]
+  } else {
+    return [
+      {
+        title: 'Pending',
+        description: 'Rental request received',
+        icon: 'i-lucide-send'
+      },
+      {
+        title: 'Confirmed',
+        description: 'Approved request',
+        icon: 'i-lucide-check-circle'
+      },
+      {
+        title: 'Delivered',
+        description: 'Book Delivered',
+        icon: 'i-lucide-package'
+      },
+      {
+        title: 'Active',
+        description: 'Currently renting',
+        icon: 'i-lucide-book-open'
+      },
+      {
+        title: 'Pickup',
+        description: 'Ready for return pickup',
+        icon: 'i-lucide-package-check'
+      },
+      {
+        title: 'Completed',
+        description: 'Rental finished',
+        icon: 'i-lucide-circle-check'
+      }
+    ]
+  }
+}
+
+const getCurrentStep = (status: string) => {
+  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'completed']
+  return statusOrder.indexOf(status)
+}
+
+const isWithinOneHourOfMeetup = computed(() => {
+  if (currentItem.value?.rent_status !== 'approved') {
+    return false;
+  }
+  
+  if (!currentItem.value?.meetup_date || !currentItem.value?.meetup_time) {
+    return false;
+  }
+  
+  const meetupDateTime = new Date(`${currentItem.value.meetup_date} ${currentItem.value.meetup_time}`);
+  const now = new Date();
+  const oneHourBeforeMeetup = new Date(meetupDateTime.getTime() - 60 * 60 * 1000);
+  
+  return now >= oneHourBeforeMeetup && now <= meetupDateTime;
+})
+
 onMounted(() => {
   fetchRentalData();
 });
@@ -158,6 +249,15 @@ onMounted(() => {
         </div>
       </div>
 
+      <!-- Progress Stepper Card - Show only if status is not pending -->
+      <div v-if="currentItem.rent_status !== 'pending'" class="bg-surface rounded-lg border border-base p-6">
+        <UStepper 
+          disabled
+          :items="getStepperItems(currentItem.rent_status)" 
+          :model-value="getCurrentStep(currentItem.rent_status)"
+        />
+      </div>
+
       <!-- Rental Details Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Dates Card -->
@@ -173,7 +273,7 @@ onMounted(() => {
             </div>
             <div v-else>
               <p class="text-sm text-muted">Start Date</p>
-              <p class="font-medium">Pending</p>
+              <p class="font-medium">{{ formatDate(currentItem.rent_start_date) }}</p>
             </div>
             
             <div v-if="currentItem.rent_status === 'pending'">
@@ -253,7 +353,7 @@ onMounted(() => {
           <div>
             <p class="text-xs text-muted mb-1">Total Cost</p>
             <div class="flex items-center gap-1">
-              <span class="text-sm font-bold text-accent">{{ from === 'rental' ? '-' : '+' }}</span>
+              <span class="text-sm font-bold">{{ from === 'rental' ? '-' : '+' }}</span>
               <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
               <span class="font-bold text-lg text-accent">{{ currentItem.cost }}</span>
             </div>
@@ -265,6 +365,42 @@ onMounted(() => {
               {{ currentItem.all_fees_captured ? 'Captured' : 'Pending' }}
             </p>
           </div>
+        </div>
+      </div>
+
+      <!-- Handoff Confirmation Card - Only show if status is approved -->
+      <div v-if="currentItem.rent_status === 'approved'">
+        <!-- Warning Message - Show when NOT within 1 hour -->
+        <div v-if="!isWithinOneHourOfMeetup" class="bg-surface rounded-lg border border-base p-5">
+          <div class="flex items-start gap-3">
+            <Icon name="lucide:clock" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-foreground">
+              A confirmation button will appear 1 hour before the meetup time to confirm the book handoff.
+            </p>
+          </div>
+        </div>
+
+        <!-- Confirmation Button - Show when within 1 hour -->
+        <div v-else class="bg-surface rounded-lg border border-base p-5">
+          <div class="mb-4">
+            <p class="text-sm text-foreground mb-2">
+              Please confirm if you have {{ from === 'rental' ? 'received' : 'delivered' }} the book. Both users must confirm to progress the rental.
+            </p>
+          </div>
+          <button 
+            v-if="from === 'rental'"
+            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Icon name="lucide:check" class="w-5 h-5" />
+            Confirm Received Book
+          </button>
+          <button 
+            v-else-if="from === 'lending'"
+            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Icon name="lucide:check" class="w-5 h-5" />
+            Confirm Delivered Book
+          </button>
         </div>
       </div>
 
