@@ -3,6 +3,8 @@ import { ref, shallowRef, computed, watch } from 'vue'
 import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete'
 import { useCreatePurchase } from '~/composables/useCreatePurchase'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+import VueTimepicker from 'vue3-timepicker'
+import 'vue3-timepicker/dist/VueTimepicker.css'
 
 const { createPurchase, loading, error } = useCreatePurchase()
 
@@ -37,7 +39,8 @@ const {
 } = useAddressAutocomplete(LOCATIONIQ_API_KEY)
 
 const meetupDate = ref<string | null>(null)
-const meetupTimeWindow = ref('')
+const meetupStartTime = ref<{ HH: string, mm: string } | string | null>(null)
+const meetupEndTime = ref<{ HH: string, mm: string } | string | null>(null)
 const timeError = ref('')
 
 const props = defineProps<{
@@ -79,33 +82,83 @@ function handleSelectMeetupSuggestion(item: any) {
   input?.blur()
 }
 
+function getTimeValue(val: any): string {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object' && val.HH && val.mm) return `${val.HH}:${val.mm}`
+  return ''
+}
+
 function validateTimeWindow() {
-  const cleaned = meetupTimeWindow.value.replace(/\s+/g, ' ').trim()
-  const pattern = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)\s*-\s*(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i
-  if (!pattern.test(cleaned)) {
-    timeError.value = 'Invalid format. Example: 10:30 AM - 12:00 PM'
+  const startStr = getTimeValue(meetupStartTime.value)
+  const endStr = getTimeValue(meetupEndTime.value)
+
+  if (!startStr || !endStr) {
+    timeError.value = '' 
+    return
+  }
+
+  const startDate = new Date(`1970-01-01T${startStr}:00`)
+  const endDate = new Date(`1970-01-01T${endStr}:00`)
+
+  if (endDate <= startDate) {
+    timeError.value = 'End time must be later than start time'
   } else {
     timeError.value = ''
   }
 }
 
-watch(meetupTimeWindow, validateTimeWindow)
+function formatTimeObj(time: string | null | undefined) {
+  if (!time) return ''
+  const [hStr, mStr] = time.split(':')
+  if (!hStr || !mStr) return ''
+  
+  let h = parseInt(hStr)
+  const m = parseInt(mStr)
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  
+  if (h === 0) h = 12
+  if (h > 12) h -= 12
+  
+  return `${h}:${m.toString().padStart(2, '0')} ${ampm}`
+}
+
+watch([meetupStartTime, meetupEndTime], validateTimeWindow)
 
 const isSending = ref(false)
 
 async function sendPurchase() {
-  if (isSending.value) return
-  if (!meetupDate.value || !meetupAddressQuery.value || !!timeError.value || !meetupTimeWindow.value) return
+  validateTimeWindow()
+  
+  if (isSending.value || !!timeError.value) return
 
+
+  if (!meetupDate.value || !meetupAddressQuery.value || !meetupStartTime.value || !meetupEndTime.value) {
+    return
+  }
+
+  isSending.value = true
 
   try {
+    const rawStart = getTimeValue(meetupStartTime.value)
+    const rawEnd = getTimeValue(meetupEndTime.value)
+
+    const startStr = formatTimeObj(rawStart)
+    const endStr = formatTimeObj(rawEnd)
+
+    if (!startStr || !endStr) {
+      timeError.value = 'Please select valid start and end times'
+      return 
+    }
+
     await createPurchase({
       book_id: props.bookId, 
       total_buy_cost: props.purchasePrice!,
       meetup_location: meetupAddressQuery.value,
       meetup_date: meetupDate.value,
-      meetup_time_window: meetupTimeWindow.value,
+      meetup_time_window: `${startStr} - ${endStr}`,
     })
+
     emit('update:purchaseExists', true)
     emit('purchase-success')
     isOpenPurchaseBookModal.value = false
@@ -194,12 +247,10 @@ async function sendPurchase() {
 
       <div class="mt-4">
         <p class="font-semibold text-base">Meetup Time Window</p>
-        <UInput
-          v-model="meetupTimeWindow"
-          placeholder="10:30 AM - 12:00 PM"
-          @blur="validateTimeWindow"
-          class="mt-1 w-full"
-        />
+        <div class="flex gap-2 mt-1">
+           <VueTimepicker v-model="meetupStartTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="false" placeholder="Start Time" />
+           <VueTimepicker v-model="meetupEndTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="false" placeholder="End Time" />
+        </div>
         <p v-if="timeError" class="text-red-500 text-sm mt-1">{{ timeError }}</p>
       </div>
 
@@ -213,7 +264,7 @@ async function sendPurchase() {
         <UButton 
           @click="sendPurchase"
           class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
-          :disabled="!!timeError || !meetupTimeWindow || !meetupDate || !meetupAddressQuery || loading"
+          :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading"
         >
           <p v-if="!loading">Confirm Purchase</p>
           <p v-else>Processing...</p>
