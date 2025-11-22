@@ -63,34 +63,38 @@ const selected = ref('')
 const customDays = ref<number | null>(null)
 const finalDays = ref<number | null>(null)
 const meetupDate = ref<string | null>(null)
-const meetupTime = ref('')
-const meetupStartTime = ref<{ hours: number; minutes: number } | null>(null)
-const meetupEndTime = ref<{ hours: number; minutes: number } | null>(null)
+const meetupStartTime = ref<string | { HH: string, mm: string } | null>(null)
+const meetupEndTime = ref<string | { HH: string, mm: string } | null>(null)
 const timeError = ref('')
 
+function getTimeValue(val: any): string {
+  if (!val) return ''
+  if (typeof val === 'string') return val
+  if (typeof val === 'object' && val.HH && val.mm) return `${val.HH}:${val.mm}`
+  return ''
+}
+
 function validateTimeWindow() {
-  if (!meetupStartTime.value || !meetupEndTime.value) {
-    timeError.value = 'Please select both start and end time'
+  const startStr = getTimeValue(meetupStartTime.value)
+  const endStr = getTimeValue(meetupEndTime.value)
+
+  if (!startStr || !endStr) {
     return
   }
 
-  const start = new Date(`1970-01-01T${meetupStartTime.value}`)
-  const end = new Date(`1970-01-01T${meetupEndTime.value}`)
+  const startDate = new Date(`1970-01-01T${startStr}:00`)
+  const endDate = new Date(`1970-01-01T${endStr}:00`)
 
-  if (end <= start) {
-    timeError.value = 'End time must be after start time'
+  if (endDate <= startDate) {
+    timeError.value = 'End time must be later than start time'
   } else {
     timeError.value = ''
   }
 }
-function onMeetupInput(event: Event) {
-  const target = event.target as HTMLInputElement
-  if (!target.value) {
-    meetupSuggestions.value = [] 
-    return
-  }
-  fetchMeetupSuggestions()
-}
+
+watch([meetupStartTime, meetupEndTime], () => {
+  validateTimeWindow()
+})
 
 function handleSelectMeetupSuggestion(item: any) {
   selectMeetupSuggestion(item, meetupAddress)
@@ -98,9 +102,6 @@ function handleSelectMeetupSuggestion(item: any) {
   meetupAddress.value = item.display_name
   meetupSuggestions.value = [] 
 }
-
-
-watch(meetupTime, validateTimeWindow)
 
 watch(selected, (value) => {
   if (value !== 'Custom') {
@@ -122,6 +123,15 @@ watch(meetupDateCalendar, (val) => {
   meetupDate.value = val ? df.format(val.toDate(getLocalTimeZone())) : null
 })
 
+function onMeetupInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (!target.value) {
+    meetupSuggestions.value = [] 
+    return
+  }
+  fetchMeetupSuggestions()
+}
+
 const totalCost = computed(() => {
   if (!finalDays.value) return 0
   const rent = props.dailyRentPrice ?? 0
@@ -129,29 +139,47 @@ const totalCost = computed(() => {
   return rent * finalDays.value + deposit
 })
 
-function formatTimeObj(time: { hours: number; minutes: number } | null | undefined) {
-  if (!time || typeof time.hours !== 'number' || typeof time.minutes !== 'number') return ''
-  let h = time.hours
-  const m = time.minutes
+function formatTimeObj(time: string | null | undefined) {
+  if (!time) return ''
+  const [hStr, mStr] = time.split(':')
+  if (!hStr || !mStr) return ''
+  
+  let h = parseInt(hStr)
+  const m = parseInt(mStr)
   const ampm = h >= 12 ? 'PM' : 'AM'
+  
   if (h === 0) h = 12
   if (h > 12) h -= 12
-  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`
+  
+  return `${h}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
 const isSendingRental = ref(false)
 
 async function sendRental() {
-  if (isSendingRental.value) return
+  validateTimeWindow()
+
+  if (isSendingRental.value || !!timeError.value) return
+
+  isSendingRental.value = true
+
   try {
-    const startStr = formatTimeObj(meetupStartTime.value)
-    const endStr = formatTimeObj(meetupEndTime.value)
+    const rawStart = getTimeValue(meetupStartTime.value)
+    const rawEnd = getTimeValue(meetupEndTime.value)
+
+    const startStr = formatTimeObj(rawStart)
+    const endStr = formatTimeObj(rawEnd)
+
+    if (!startStr || !endStr) {
+      timeError.value = 'Please select valid start and end times'
+      return 
+    }
 
     await createRental({
       book_id: props.bookId,
       total_rent_cost: totalCost.value,
       rental_duration_days: finalDays.value!,
-      meetup_time_window: `${startStr} - ${endStr}`,
+      meetup_time_window: `${startStr} - ${endStr}`, 
       meetup_location: meetupAddressQuery.value,
       meetup_date: meetupDate.value!
     })
@@ -259,8 +287,8 @@ async function sendRental() {
         <div class="mt-4">
           <p class="font-semibold text-base">Meetup Time Window</p>
           <div class="flex gap-2">
-            <VueTimepicker v-model="meetupStartTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="true" placeholder="Start Time" />
-            <VueTimepicker v-model="meetupEndTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="true" placeholder="End Time" />
+            <VueTimepicker v-model="meetupStartTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="false" placeholder="Start Time" />
+            <VueTimepicker v-model="meetupEndTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="false" placeholder="End Time" />
           </div>
           <p v-if="timeError" class="text-red-500 text-sm mt-1">{{ timeError }}</p>
         </div>
