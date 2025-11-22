@@ -2,6 +2,8 @@
 import guest from '~/middleware/guest';
 import { useAuthStore } from '~/stores/useAuthStore';
 
+import { googleAuthCodeLogin } from 'vue3-google-login';
+
 definePageMeta({
   layout: 'unauthenticated',
   middleware: guest,
@@ -36,6 +38,30 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
     isLoading.value = false;
   }
 };
+
+const onSubmitGmailLogin = async () => {
+  try {
+    const googlePopupResponse = await googleAuthCodeLogin(); // may trigger COOP warning
+
+    const code = googlePopupResponse.code;
+
+    const { messageTitle, message } = await useUserGoogleLogin(code);
+
+    toast.add({
+      title: messageTitle,
+      description: message,
+      color: 'success',
+    });
+
+    // send code to backend, etc.
+  } catch (error) {
+    toast.add({
+      title: 'Login failed.',
+      description: error.data.error,
+      color: 'error',
+    });
+  }
+};
 </script>
 
 <template>
@@ -45,6 +71,7 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
         auth-type="login"
         :is-loading="isLoading"
         @on-submit-login="(email, password) => onSubmitLogin(email, password)"
+        @on-submit-gmail-login="async () => await onSubmitGmailLogin()"
       />
     </div>
 

@@ -69,6 +69,25 @@ class UserServices:
         return {"success": True}
 
     @staticmethod
+    def user_google_signup_service(
+        email_address: str,
+        first_name: str,
+        last_name: str,
+        profile_image_url: str | None,
+    ) -> dict | None:
+        """
+        add later
+        """
+
+        user_id = UserRepository.create_user_from_google(
+            email_address, first_name, last_name, profile_image_url
+        )
+
+        # UserRepository.initialize_wallet(user_id)
+
+        return {"user_id": user_id}
+
+    @staticmethod
     def get_username_service(user_id) -> str | None:
         """
         Get the username of a user using the user_id.
@@ -86,6 +105,25 @@ class UserServices:
             return None
 
         return username_dict["username"]
+
+    @staticmethod
+    def get_user_by_email_address_service(email: str) -> dict[str, Any] | None:
+        """
+        Retrieve a user and their details using an email.
+
+        Args:
+            email (str): The email used to retreive a user.
+
+        Returns:
+            str: The username of the user if found, otherwise None.
+        """
+
+        user_dict = UserRepository.get_user_by_email_address(email)
+
+        if user_dict is None:
+            return None
+
+        return user_dict
 
     @staticmethod
     def get_profile_info_service(user_id: str) -> dict[str, Any] | None:

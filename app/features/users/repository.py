@@ -96,6 +96,27 @@ class UserRepository:
         return str(result["user_id"])
 
     @staticmethod
+    def create_user_from_google(
+        email_address: str,
+        first_name: str,
+        last_name: str,
+        profile_image_url: str | None,
+    ) -> str:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(
+            """INSERT INTO users (email_address, first_name, last_name, profile_image_url, auth_provider, trust_score)
+            VALUES (%s, %s, %s, %s, %s, 0) RETURNING user_id""",
+            (email_address, first_name, last_name, profile_image_url, "google"),
+        )
+
+        return str(result["user_id"])
+
+    @staticmethod
     def initialize_wallet(user_id: str) -> None:
         """
         Initialize a wallet for a new user with balance of 0.

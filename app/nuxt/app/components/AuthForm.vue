@@ -9,6 +9,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'onSubmitLogin', email: string, password: string): void;
   (e: 'onSubmitSignup', username: string, email: string, password: string): void;
+  (e: 'onSubmitGmailLogin'): void;
 }>();
 
 const state = reactive({
@@ -49,6 +50,12 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         }}
       </h3>
     </div>
+
+    <UButton
+      v-if="authType === 'login'"
+      label="Login with Google"
+      @click="emit('onSubmitGmailLogin')"
+    />
 
     <UForm
       :validate="(state) => validateAuthForm(state, props.authType)"

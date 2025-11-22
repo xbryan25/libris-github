@@ -45,6 +45,15 @@ def user_login() -> tuple[Response, int]:
     return UserControllers.user_login_controller()
 
 
+@users_bp.route("/google-login", methods=["POST"])
+def user_google_login() -> tuple[Response, int]:
+    """
+    add later
+    """
+
+    return UserControllers.user_google_login_controller()
+
+
 @users_bp.route("/signup", methods=["POST"])
 def user_signup() -> tuple[Response, int]:
     """
