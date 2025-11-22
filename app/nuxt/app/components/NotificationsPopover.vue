@@ -56,8 +56,6 @@ onMounted(async () => {
 
   await getUnreadNotificationsCount();
 
-  console.log(recentNotifications.value);
-
   isFetching.value = false;
 });
 </script>

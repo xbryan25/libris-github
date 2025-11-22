@@ -11,9 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
     password: string
   ): Promise<{ messageTitle: string; message: string }> => {
     try {
-      console.log('before response?')
       const response = await useUserLogin(email, password);
-      console.log(response)
 
       userId.value = response.user_id;
       username.value = response.username;

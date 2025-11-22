@@ -218,7 +218,7 @@ const markSelectedNotificationsAsRead = async (): Promise<void> => {
   isLoading.value = false;
 
   toast.add({
-    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as ${determineIsReadChange.value ? 'read' : 'unread'}.`,
+    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as ${determineIsReadChange.value ? 'unread' : 'read'}.`,
     color: 'success',
   });
 };
