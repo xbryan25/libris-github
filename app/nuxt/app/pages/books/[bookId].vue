@@ -368,6 +368,7 @@ onMounted(async () => {
       :purchase-price="book?.purchase_price"
       :current-wallet-balance="currentWalletBalance"
       :purchase-exists="purchaseExists"
+      :reserved_amount="reservedAmount"
       @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
       @purchase-success="handlePurchaseSuccess"
     />

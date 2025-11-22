@@ -51,6 +51,7 @@ const props = defineProps<{
   purchasePrice?: number
   currentWalletBalance?: number
   purchaseExists: boolean
+  reserved_amount?: number
 }>()
 
 const emit = defineEmits<{
@@ -64,10 +65,15 @@ const isOpenPurchaseBookModal = computed({
   set: (val: boolean) => emit('update:openPurchaseBookModal', val)
 })
 
+const availableBalance = computed(() => {
+  const balance = props.currentWalletBalance ?? 0
+  const reserved = props.reserved_amount ?? 0
+  return balance - reserved
+})
+
 const hasInsufficientFunds = computed(() => {
   const price = props.purchasePrice ?? 0
-  const balance = props.currentWalletBalance ?? 0
-  return price > balance
+  return price > availableBalance.value
 })
 
 function onMeetupInput(event: Event) {
@@ -205,19 +211,25 @@ async function sendPurchase() {
             <span>{{ props.purchasePrice }}</span>
           </div>
         </div>
-        <div class="flex items-center justify-between font-semibold text-base">
-          <span>Your Balance:</span>
-          <div class="flex items-center gap-1">
-            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
-            <span>{{ props.currentWalletBalance }}</span>
+        <div class="flex items-start justify-between font-semibold text-base mt-2">
+          <span class="mt-0.5">Available Balance:</span>
+          <div class="flex flex-col items-end">
+            <div class="flex items-center gap-1">
+              <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+              <span>{{ availableBalance }}</span>
+            </div>
+            <span class="text-xs text-gray-500 font-normal">
+              ({{ props.currentWalletBalance }} total - {{ props.reserved_amount }} reserved)
+            </span>
           </div>
+        </div>
         </div>
         <div v-if="hasInsufficientFunds" class="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
           <Icon name="i-heroicons-exclamation-circle" class="w-5 h-5 shrink-0" />
-          <span>Insufficient wallet balance to complete this purchase.</span>
+          <span>
+            Insufficient available funds.
+          </span>
         </div>
-      </div>
-
       <div class="mt-4">
         <p class="font-semibold text-base">Meetup Location</p>
         <div class="relative w-full">
