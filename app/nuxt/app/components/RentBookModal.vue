@@ -117,9 +117,15 @@ watch(selected, (value) => {
   }
 })
 
+function preventDecimal(event: KeyboardEvent) {
+  if (['.', 'e', '-', '+'].includes(event.key)) {
+    event.preventDefault()
+  }
+}
+
 watch(customDays, (value) => {
   if (selected.value === 'Custom' && value) {
-    finalDays.value = value
+    finalDays.value = Math.floor(value)
   }
 })
 
@@ -259,6 +265,7 @@ async function sendRental() {
             min="1"
             placeholder="e.g., 12"
             class="mt-1 w-full"
+            @keydown="preventDecimal"
           />
         </div>
         <div class="mt-4">
