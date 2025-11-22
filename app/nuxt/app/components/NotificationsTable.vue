@@ -122,6 +122,8 @@ function toggleRow(id: string, value: boolean) {
 const table = useTemplateRef('table');
 
 const isOpenNotificationModal = ref(false);
+const isOpenNotificationActionsModal = ref(false);
+const selectedNotificationAction = ref('');
 
 const orderItems = ref(['Show Newest First', 'Show Oldest First']);
 const order = ref('Show Newest First');
@@ -141,8 +143,6 @@ const totalNotificationCount = ref(0);
 
 const pageNumber = ref(1);
 const delayedPageNumber = ref(1);
-
-const toast = useToast();
 
 const authStore = useAuthStore();
 
@@ -216,27 +216,6 @@ const determineIsReadChange = computed(() => {
   return false;
 });
 
-const markSelectedNotificationsAsRead = async (): Promise<void> => {
-  isLoading.value = true;
-
-  await useChangeNotificationsReadStatus(selectedRows.value, determineIsReadChange.value);
-
-  await debouncedLoadEntities();
-
-  // await debouncedGetTotalEntityCount();
-
-  isLoading.value = false;
-
-  toast.add({
-    description: `${selectedRows.value.size} notification${selectedRows.value.size > 1 ? 's' : ''} marked as ${determineIsReadChange.value ? 'unread' : 'read'}.`,
-    color: 'success',
-  });
-};
-
-const deleteSelectedNotifications = () => {
-  console.log(selectedRows.value);
-};
-
 const markSingleNotificationAsRead = async (notificationId: string) => {
   await useMarkNotificationAsRead(notificationId);
 };
@@ -306,7 +285,12 @@ onMounted(() => {
               icon="material-symbols:delete-outline"
               color="neutral"
               class="cursor-pointer"
-              @click="deleteSelectedNotifications()"
+              @click="
+                () => {
+                  selectedNotificationAction = 'delete';
+                  isOpenNotificationActionsModal = true;
+                }
+              "
             />
           </UTooltip>
 
@@ -319,7 +303,12 @@ onMounted(() => {
               "
               color="neutral"
               class="cursor-pointer"
-              @click="markSelectedNotificationsAsRead()"
+              @click="
+                () => {
+                  selectedNotificationAction = `${determineIsReadChange ? 'markRead' : 'markUnread'}`;
+                  isOpenNotificationActionsModal = true;
+                }
+              "
             />
           </UTooltip>
         </div>
@@ -379,6 +368,18 @@ onMounted(() => {
         (newIsOpenNotificationModal: boolean) =>
           (isOpenNotificationModal = newIsOpenNotificationModal)
       "
+    />
+
+    <NotificationActionsModal
+      :is-open-notification-actions-modal="isOpenNotificationActionsModal"
+      :selected-notification-action="selectedNotificationAction"
+      :selected-rows="selectedRows"
+      :determine-is-read-change="determineIsReadChange"
+      @update:open-notification-actions-modal="
+        (newIsOpenNotificationActionsModal: boolean) =>
+          (isOpenNotificationActionsModal = newIsOpenNotificationActionsModal)
+      "
+      @on-successful-action="async () => await debouncedLoadEntities()"
     />
   </div>
 </template>
