@@ -39,6 +39,7 @@ const props = defineProps<{
   securityDeposit?: number
   rentalExists: boolean
   currentWalletBalance?: number
+  reservedAmount?: number
 }>()
 
 
@@ -52,6 +53,7 @@ const isOpenRentBookModal = computed({
   get: () => props.isOpenRentBookModal,
   set: (val: boolean) => emit('update:openRentBookModal', val)
 })
+
 const rentOptions = [
   '1 day',
   '3 days',
@@ -68,11 +70,6 @@ const meetupStartTime = ref<string | { HH: string, mm: string } | null>(null)
 const meetupEndTime = ref<string | { HH: string, mm: string } | null>(null)
 const timeError = ref('')
 
-const hasInsufficientFunds = computed(() => {
-  const cost = totalCost.value
-  const balance = props.currentWalletBalance ?? 0
-  return cost > balance
-})
 
 function getTimeValue(val: any): string {
   if (!val) return ''
@@ -150,6 +147,16 @@ const totalCost = computed(() => {
   const rent = props.dailyRentPrice ?? 0
   const deposit = props.securityDeposit ?? 0
   return rent * finalDays.value + deposit
+})
+
+const availableBalance = computed(() => {
+  const balance = props.currentWalletBalance ?? 0
+  const reserved = props.reservedAmount ?? 0
+  return balance - reserved
+})
+
+const hasInsufficientFunds = computed(() => {
+  return totalCost.value > availableBalance.value
 })
 
 function formatTimeObj(time: string | null | undefined) {
@@ -248,6 +255,19 @@ async function sendRental() {
             <div class="flex items-center gap-1" :class="{'text-red-500': hasInsufficientFunds}">
               <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent" :class="hasInsufficientFunds ? 'text-red-500' : 'text-accent'"/>
               <span>{{ totalCost }}</span>
+            </div>
+          </div>
+          <div class="flex items-start justify-between font-semibold text-base mt-2">
+            <span class="mt-0.5">Available Balance:</span> 
+
+            <div class="flex flex-col items-end">
+              <div class="flex items-center gap-1">
+                <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+                <span>{{ availableBalance }}</span>
+              </div>
+              <span class="text-xs text-gray-500 font-normal">
+                ({{ props.currentWalletBalance }} current balance - {{ props.reservedAmount }} reserved)
+              </span>
             </div>
           </div>
           <div v-if="hasInsufficientFunds" class="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">

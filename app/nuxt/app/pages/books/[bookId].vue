@@ -22,6 +22,7 @@ const isOpenRentBookModal = ref(false);
 const isOpenPurchaseBookModal = ref(false);
 
 const currentWalletBalance = ref(0);
+const reservedAmount = ref(0);
 const isFetching = ref(true);
 
 onMounted(async () => {
@@ -32,6 +33,15 @@ onMounted(async () => {
 
   isFetching.value = false;
 });
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useReservedAmount();
+  reservedAmount.value = data.reservedAmount ?? 0;
+
+  isFetching.value = false;
+})
 
 const openRentBookModal = () => {
   isOpenRentBookModal.value = true;
@@ -346,6 +356,7 @@ onMounted(async () => {
       :security-deposit="book?.security_deposit"
       :rental-exists="rentalExists"
       :current-wallet-balance="currentWalletBalance"
+      :reserved-amount="reservedAmount"
       @update:openRentBookModal="isOpenRentBookModal = $event"
       @rental-success="handleRentalSuccess"
     />
