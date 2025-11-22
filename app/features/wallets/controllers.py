@@ -38,11 +38,12 @@ class WalletControllers:
             if not user_id:
                 return jsonify({"message": "Not authenticated."}), 401
 
-            reserved_wallet_balance = WalletServices.get_reserved_amount_service(
-                user_id
-            )
+            reserved_wallet_data = WalletServices.get_reserved_amount_service(user_id)
 
-            return jsonify({"reservedamount": reserved_wallet_balance}), 200
+            if not reserved_wallet_data:
+                return jsonify({"reserved_amount": 0}), 200
+
+            return jsonify({"reserved_amount": reserved_wallet_data}), 200
 
         except Exception as e:
             traceback.print_exc()

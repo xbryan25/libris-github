@@ -34,23 +34,30 @@ export const useCreateRental = () => {
     error.value = null
 
     try {
+      await $apiFetch(`${API_URL}/api/wallets/update-reserved-amount`, {
+        method: 'PATCH',
+        body: { amount_to_reserve: payload.total_rent_cost },
+        credentials: 'include'
+      })
+
       const res = await $apiFetch(`${API_URL}/api/rentals/create`, {
         method: 'POST',
         body: payload,
         credentials: 'include'
       })
+
       toast.add({
         title: 'Success',
-        description: 'Rental created successfully',
+        description: 'Rental request sent successfully',
         color: 'success',
       })
 
       return res
     } catch (err: any) {
-      error.value = err?.data?.error || err?.message || 'Failed to create rental'
+      error.value = err?.data?.message || err?.data?.error || err?.message || 'Failed to process rental'
       toast.add({
         title: 'Error',
-        description: error.value ?? 'Failed to create rental',
+        description: error.value ?? 'Failed to process rental',
         color: 'error',
       })
       throw err

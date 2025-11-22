@@ -38,7 +38,7 @@ onMounted(async () => {
   isFetching.value = true;
 
   const data = await useReservedAmount();
-  reservedAmount.value = data.reservedAmount ?? 0;
+  reservedAmount.value = data.reserved_amount ?? 0;
 
   isFetching.value = false;
 })

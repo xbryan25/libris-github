@@ -1,7 +1,7 @@
 export function useReservedAmount(){
     const { $apiFetch } = useNuxtApp();   
   
-    return $apiFetch<{reservedAmount: number}>(`/api/wallets/get-reserved-amount`, {
+    return $apiFetch<{reserved_amount: number}>(`/api/wallets/get-reserved-amount`, {
       method: 'GET',
       credentials: 'include',
     });
