@@ -68,7 +68,7 @@ class RentalsController:
                     400,
                 )
 
-            reserved_at = datetime.datetime.now(datetime.UTC)
+            reserved_at = datetime.datetime.now()
             reservation_expires_at = reserved_at + datetime.timedelta(days=1)
 
             rental_data = {
