@@ -6,6 +6,7 @@ export const useCreateRental = () => {
   const rentalExists = ref(false)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const toast = useToast()
 
   const { $apiFetch } = useNuxtApp()
 
@@ -38,10 +39,20 @@ export const useCreateRental = () => {
         body: payload,
         credentials: 'include'
       })
+      toast.add({
+        title: 'Success',
+        description: 'Rental created successfully',
+        color: 'success',
+      })
 
       return res
     } catch (err: any) {
       error.value = err?.data?.error || err?.message || 'Failed to create rental'
+      toast.add({
+        title: 'Error',
+        description: error.value ?? 'Failed to create rental',
+        color: 'error',
+      })
       throw err
     } finally {
       loading.value = false
