@@ -345,6 +345,7 @@ onMounted(async () => {
       :daily-rent-price="book?.daily_rent_price"
       :security-deposit="book?.security_deposit"
       :rental-exists="rentalExists"
+      :current-wallet-balance="currentWalletBalance"
       @update:openRentBookModal="isOpenRentBookModal = $event"
       @rental-success="handleRentalSuccess"
     />

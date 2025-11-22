@@ -38,6 +38,7 @@ const props = defineProps<{
   dailyRentPrice?: number
   securityDeposit?: number
   rentalExists: boolean
+  currentWalletBalance?: number
 }>()
 
 
@@ -66,6 +67,12 @@ const meetupDate = ref<string | null>(null)
 const meetupStartTime = ref<string | { HH: string, mm: string } | null>(null)
 const meetupEndTime = ref<string | { HH: string, mm: string } | null>(null)
 const timeError = ref('')
+
+const hasInsufficientFunds = computed(() => {
+  const cost = totalCost.value
+  const balance = props.currentWalletBalance ?? 0
+  return cost > balance
+})
 
 function getTimeValue(val: any): string {
   if (!val) return ''
@@ -161,6 +168,8 @@ async function sendRental() {
 
   if (isSendingRental.value || !!timeError.value) return
 
+  if (isSendingRental.value || !!timeError.value || hasInsufficientFunds.value) return
+
   isSendingRental.value = true
 
   try {
@@ -230,10 +239,14 @@ async function sendRental() {
 
           <div class="flex items-center justify-between font-semibold text-base">
             <span>Total Cost:</span>
-            <div class="flex items-center gap-1">
-              <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+            <div class="flex items-center gap-1" :class="{'text-red-500': hasInsufficientFunds}">
+              <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent" :class="hasInsufficientFunds ? 'text-red-500' : 'text-accent'"/>
               <span>{{ totalCost }}</span>
             </div>
+          </div>
+          <div v-if="hasInsufficientFunds" class="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
+            <Icon name="i-heroicons-exclamation-circle" class="w-5 h-5 shrink-0" />
+            <span>Insufficient wallet balance for this rental duration.</span>
           </div>
         </div>
         <p class="font-semibold text-base mt-4">Rental Duration</p>
@@ -298,7 +311,7 @@ async function sendRental() {
           </UButton>
           <UButton
             @click="sendRental"
-            :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !finalDays || !meetupDate || !meetupAddressQuery || loading"
+            :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !finalDays || !meetupDate || !meetupAddressQuery || loading || hasInsufficientFunds"
             class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
           >
             <p v-if="!loading">Send Rental Request</p> 
