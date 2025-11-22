@@ -33,6 +33,33 @@ def get_current_wallet_balance() -> tuple[Response, int]:
     return WalletControllers.get_current_wallet_balance_controller()
 
 
+@wallets_bp.route("/get-reserved-amount", methods=["GET"])
+@jwt_required()
+def get_reserved_amount() -> tuple[Response, int]:
+    """
+    Retrieve the reserved amount amount of the authenticated user.
+
+    This endpoint requires a valid access token (sent via an HTTP-only cookie).
+    It returns the reserved amount amount associated with the authenticated user.
+
+    Request body:
+
+        None. This endpoint does not require any input data.
+
+    Response JSON:
+
+        reservedamounte: The reserved amount of a user.
+
+    Possible errors:
+
+        401 if the user is not authenticated or the token is missing/invalid.
+
+        500 if an unexpected error occurs during processing.
+    """
+
+    return WalletControllers.get_reserved_amount_controller()
+
+
 @wallets_bp.route("/buy-readits", methods=["POST"])
 @jwt_required()
 def buy_readits() -> tuple[Response, int]:

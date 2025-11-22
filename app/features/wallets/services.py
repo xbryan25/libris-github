@@ -27,6 +27,20 @@ class WalletServices:
         return WalletRepository.get_current_wallet_balance(user_id)["balance"]
 
     @staticmethod
+    def get_reserved_amount_service(user_id) -> int:
+        """
+        Retrieve the reserved amount of the authenticated user.
+
+        Args:
+            user_id (str): The user_id of the authenticated user.
+
+        Returns:
+            int: The reserved amount of the authenticated user.
+        """
+
+        return WalletRepository.get_reserved_amount(user_id)["reserved_amount"]
+
+    @staticmethod
     def buy_readits_service(user_id, amount_needed_in_pack, readits_from_pack) -> str:
         xendit.set_api_key(current_app.config.get("XENDIT_SECRET_KEY", ""))
 

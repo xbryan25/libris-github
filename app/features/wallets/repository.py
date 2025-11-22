@@ -26,6 +26,27 @@ class WalletRepository:
         )
 
     @staticmethod
+    def get_reserved_amount(user_id) -> dict[str, int]:
+        """
+        Retrieve the reserved amount of the authenticated user.
+
+        Args:
+            user_id (str): The user_id of the authenticated user.
+
+        Returns:
+             dict: A dictionary containing the reserved amount of the authenticated user.
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.GET_COLUMN_BY_FIELD.format(
+                column="reserved_amount", table="readits_wallets", field="user_id"
+            ),
+            (user_id,),
+        )
+
+    @staticmethod
     def add_readits_to_wallet_from_paid_invoice(user_id, readits_to_add, last_updated):
 
         db = current_app.extensions["db"]
