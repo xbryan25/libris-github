@@ -3,6 +3,8 @@ import { ref, shallowRef, computed, watch } from 'vue'
 import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 import { useCreateRental } from '~/composables/useCreateRental';
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+import VueTimepicker from 'vue3-timepicker'
+import 'vue3-timepicker/dist/VueTimepicker.css'
 
 const { createRental, loading, error } = useCreateRental()
 
@@ -62,13 +64,21 @@ const customDays = ref<number | null>(null)
 const finalDays = ref<number | null>(null)
 const meetupDate = ref<string | null>(null)
 const meetupTime = ref('')
+const meetupStartTime = ref<{ hours: number; minutes: number } | null>(null)
+const meetupEndTime = ref<{ hours: number; minutes: number } | null>(null)
 const timeError = ref('')
 
 function validateTimeWindow() {
-  const cleaned = meetupTime.value.replace(/\s+/g, ' ').trim()
-  const pattern = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)\s*-\s*(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i
-  if (!pattern.test(cleaned)) {
-    timeError.value = 'Invalid format. Example: 10:30 AM - 12:00 PM'
+  if (!meetupStartTime.value || !meetupEndTime.value) {
+    timeError.value = 'Please select both start and end time'
+    return
+  }
+
+  const start = new Date(`1970-01-01T${meetupStartTime.value}`)
+  const end = new Date(`1970-01-01T${meetupEndTime.value}`)
+
+  if (end <= start) {
+    timeError.value = 'End time must be after start time'
   } else {
     timeError.value = ''
   }
@@ -109,7 +119,7 @@ watch(meetupDateCalendar, (val) => {
   if (val && val < minDate) {
     meetupDateCalendar.value = minDate
   }
-  meetupDate.value = val ? val.toString() : null
+  meetupDate.value = val ? df.format(val.toDate(getLocalTimeZone())) : null
 })
 
 const totalCost = computed(() => {
@@ -119,16 +129,31 @@ const totalCost = computed(() => {
   return rent * finalDays.value + deposit
 })
 
+function formatTimeObj(time: { hours: number; minutes: number } | null | undefined) {
+  if (!time || typeof time.hours !== 'number' || typeof time.minutes !== 'number') return ''
+  let h = time.hours
+  const m = time.minutes
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  if (h === 0) h = 12
+  if (h > 12) h -= 12
+  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`
+}
+
+
 async function sendRental() {
   try {
+    const startStr = formatTimeObj(meetupStartTime.value)
+    const endStr = formatTimeObj(meetupEndTime.value)
+
     await createRental({
-      book_id: props.bookId, 
+      book_id: props.bookId,
       total_rent_cost: totalCost.value,
       rental_duration_days: finalDays.value!,
-      meetup_time_window: meetupTime.value,
+      meetup_time_window: `${startStr} - ${endStr}`,
       meetup_location: meetupAddressQuery.value,
       meetup_date: meetupDate.value!
     })
+
     emit('update:rentalExists', true)
     emit('rental-success')
     isOpenRentBookModal.value = false
@@ -136,7 +161,6 @@ async function sendRental() {
     console.error(err)
   }
 }
-
 </script>
 
 <template>
@@ -230,19 +254,21 @@ async function sendRental() {
         </div>
         <div class="mt-4">
           <p class="font-semibold text-base">Meetup Time Window</p>
-          <UInput
-            v-model="meetupTime"
-            placeholder="10:30 AM - 12:00 PM"
-            @blur="validateTimeWindow"
-            class="mt-1 w-full"
-          />
+          <div class="flex gap-2">
+            <VueTimepicker v-model="meetupStartTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="true" placeholder="Start Time" />
+            <VueTimepicker v-model="meetupEndTime" @change="validateTimeWindow" format="HH:mm" :use12-hour="true" placeholder="End Time" />
+          </div>
           <p v-if="timeError" class="text-red-500 text-sm mt-1">{{ timeError }}</p>
         </div>
         <div class="flex justify-end gap-3 mt-6">
           <UButton @click="isOpenRentBookModal = false" class="bg-slate-300 hover:bg-slate-400 text-black dark:bg-slate-400 dark:hover:bg-slate-500 px-4 py-2 rounded">
           <p>Cancel</p> 
           </UButton>
-          <UButton @click="sendRental" :disabled="!!timeError || !meetupTime || !finalDays || !meetupDate || !meetupAddressQuery" class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed">
+          <UButton
+            @click="sendRental"
+            :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !finalDays || !meetupDate || !meetupAddressQuery"
+            class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
+          >
             <p v-if="!loading">Send Rental Request</p> 
             <p v-else>Sending...</p>
           </UButton>
