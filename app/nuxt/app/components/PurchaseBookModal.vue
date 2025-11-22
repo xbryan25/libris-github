@@ -91,8 +91,12 @@ function validateTimeWindow() {
 
 watch(meetupTimeWindow, validateTimeWindow)
 
+const isSending = ref(false)
+
 async function sendPurchase() {
+  if (isSending.value) return
   if (!meetupDate.value || !meetupAddressQuery.value || !!timeError.value || !meetupTimeWindow.value) return
+
 
   try {
     await createPurchase({
@@ -107,6 +111,8 @@ async function sendPurchase() {
     isOpenPurchaseBookModal.value = false
   } catch (err) {
     console.error(err)
+  } finally {
+    isSending.value = false
   }
 }
 
