@@ -1,5 +1,4 @@
 from app.db.queries import CommonQueries, WalletQueries
-
 from flask import current_app
 
 
@@ -45,6 +44,31 @@ class WalletRepository:
             ),
             (user_id,),
         )
+
+    @staticmethod
+    def update_reserved_amount(user_id: str, new_reserved_amount: float) -> bool:
+        """
+        Update the reserved amount of the authenticated user.
+
+        Args:
+            user_id (str): The user_id of the authenticated user.
+            new_reserved_amount (float): The new total reserved amount to set.
+
+        Returns:
+            bool: True if the update was successful, False otherwise.
+        """
+
+        db = current_app.extensions["db"]
+
+        try:
+            db.execute_query(
+                WalletQueries.UPDATE_RESERVED_AMOUNT,
+                (new_reserved_amount, user_id),
+            )
+            return True
+        except Exception as e:
+            print(f"DB Error: {e}")
+            return False
 
     @staticmethod
     def add_readits_to_wallet_from_paid_invoice(user_id, readits_to_add, last_updated):
