@@ -45,7 +45,7 @@ const getStepperItems = (status: string): StepperItem[] => {
     },
     {
       title: 'Return',
-      description: 'Return process',
+      description: 'Ready for return',
       icon: 'i-lucide-package-check'
     },
     {

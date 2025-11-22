@@ -24,28 +24,28 @@ const getStatusBadge = (status: string) => {
 const getStepperItems = (status: string): StepperItem[] => {
   return [
     {
-      title: 'Requested',
-      description: 'Rental request sent',
+      title: 'Pending',
+      description: 'Rental request received',
       icon: 'i-lucide-send'
     },
     {
       title: 'Confirmed',
-      description: 'Owner approved request',
+      description: 'Approved request',
       icon: 'i-lucide-check-circle'
     },
     {
-      title: 'Pickup',
-      description: 'Ready for pickup',
+      title: 'Delivered',
+      description: 'Book Delivered',
       icon: 'i-lucide-package'
     },
     {
-      title: 'Renting',
+      title: 'Active',
       description: 'Currently renting',
       icon: 'i-lucide-book-open'
     },
     {
-      title: 'Return',
-      description: 'Return process',
+      title: 'Pickup',
+      description: 'Ready for return pickup',
       icon: 'i-lucide-package-check'
     },
     {

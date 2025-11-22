@@ -9,8 +9,8 @@ interface Props {
 
 defineProps<Props>();
 
-const { rentals, loading, error, fetchUserRentals } = useUserRentals()
-const { lendings, fetchUserLendings } = useUserLendings()
+const { rentals, loading: rentalsLoading, error: rentalsError, fetchUserRentals } = useUserRentals()
+const { lendings, loading: lendingsLoading, error: lendingsError, fetchUserLendings } = useUserLendings()
 
 onMounted(() => {
   fetchUserRentals()
@@ -22,7 +22,7 @@ onMounted(() => {
   <div class="w-full bg-background">
     <div v-if="activeTab === 'lending'">
       <!-- Lending content -->
-      <div v-if="loading" class="bg-surface rounded-lg p-6 w-full border border-base">
+      <div v-if="lendingsLoading" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:loader-2" class="w-8 h-8 text-muted mx-auto animate-spin" />
@@ -31,11 +31,11 @@ onMounted(() => {
         </div>
       </div>
       
-      <div v-else-if="error" class="bg-surface rounded-lg p-6 w-full border border-base">
+      <div v-else-if="lendingsError" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:alert-circle" class="w-16 h-16 text-red-500 mx-auto" />
-            <p class="text-red-500 mt-4 text-lg">{{ error }}</p>
+            <p class="text-red-500 mt-4 text-lg">{{ lendingsError }}</p>
           </div>
         </div>
       </div>
@@ -60,7 +60,7 @@ onMounted(() => {
 
     <div v-else>
       <!-- Renting content -->
-      <div v-if="loading" class="bg-surface rounded-lg p-6 w-full border border-base">
+      <div v-if="rentalsLoading" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:loader-2" class="w-8 h-8 text-muted mx-auto animate-spin" />
@@ -69,11 +69,11 @@ onMounted(() => {
         </div>
       </div>
       
-      <div v-else-if="error" class="bg-surface rounded-lg p-6 w-full border border-base">
+      <div v-else-if="rentalsError" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:alert-circle" class="w-16 h-16 text-red-500 mx-auto" />
-            <p class="text-red-500 mt-4 text-lg">{{ error }}</p>
+            <p class="text-red-500 mt-4 text-lg">{{ rentalsError }}</p>
           </div>
         </div>
       </div>
