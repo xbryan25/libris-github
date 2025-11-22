@@ -48,6 +48,7 @@ class RentalQueries:
             rb.rent_start_date,
             rb.rent_end_date,
             rb.rental_duration_days,
+            rb.meetup_date,
             rb.meetup_location,
             rb.meetup_time_window,
             rb.meetup_time,
