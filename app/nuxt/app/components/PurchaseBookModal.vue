@@ -64,6 +64,12 @@ const isOpenPurchaseBookModal = computed({
   set: (val: boolean) => emit('update:openPurchaseBookModal', val)
 })
 
+const hasInsufficientFunds = computed(() => {
+  const price = props.purchasePrice ?? 0
+  const balance = props.currentWalletBalance ?? 0
+  return price > balance
+})
+
 function onMeetupInput(event: Event) {
   const target = event.target as HTMLInputElement
   if (!target.value) {
@@ -132,6 +138,7 @@ async function sendPurchase() {
   
   if (isSending.value || !!timeError.value) return
 
+  if (isSending.value || !!timeError.value || hasInsufficientFunds.value) return
 
   if (!meetupDate.value || !meetupAddressQuery.value || !meetupStartTime.value || !meetupEndTime.value) {
     return
@@ -191,10 +198,10 @@ async function sendPurchase() {
         </div>
         <USeparator orientation="horizontal" class="my-2 bg-slate-400" />
         
-          <div class="flex items-center justify-between font-semibold text-base">
+          <div class="flex items-center justify-between font-semibold text-base" :class="{'text-red-500': hasInsufficientFunds}">
           <span>Total Cost:</span>
           <div class="flex items-center gap-1">
-            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
+            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5" :class="hasInsufficientFunds ? 'text-red-500' : 'text-accent'"/>
             <span>{{ props.purchasePrice }}</span>
           </div>
         </div>
@@ -204,6 +211,10 @@ async function sendPurchase() {
             <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-accent"/>
             <span>{{ props.currentWalletBalance }}</span>
           </div>
+        </div>
+        <div v-if="hasInsufficientFunds" class="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
+          <Icon name="i-heroicons-exclamation-circle" class="w-5 h-5 shrink-0" />
+          <span>Insufficient wallet balance to complete this purchase.</span>
         </div>
       </div>
 
@@ -264,7 +275,7 @@ async function sendPurchase() {
         <UButton 
           @click="sendPurchase"
           class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
-          :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading"
+          :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading || hasInsufficientFunds"
         >
           <p v-if="!loading">Confirm Purchase</p>
           <p v-else>Processing...</p>
