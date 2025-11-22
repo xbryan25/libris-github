@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, shallowRef, computed, watch } from 'vue'
 import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 import { useCreateRental } from '~/composables/useCreateRental';
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 
 const { createRental, loading, error } = useCreateRental()
+
+const df = new DateFormatter('en-US', { dateStyle: 'medium' })
+
+const meetupDateCalendar = shallowRef<CalendarDate | null>(null)
+
+const now = new Date()
+const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+const minDate = new CalendarDate(tomorrow.getFullYear(), tomorrow.getMonth() + 1, tomorrow.getDate())
+
+const formattedDate = computed(() => {
+  if (!meetupDateCalendar.value) return ''
+  return df.format(meetupDateCalendar.value.toDate(getLocalTimeZone()))
+})
 
 
 const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
@@ -90,6 +104,14 @@ watch(customDays, (value) => {
     finalDays.value = value
   }
 })
+
+watch(meetupDateCalendar, (val) => {
+  if (val && val < minDate) {
+    meetupDateCalendar.value = minDate
+  }
+  meetupDate.value = val ? val.toString() : null
+})
+
 const totalCost = computed(() => {
   if (!finalDays.value) return 0
   const rent = props.dailyRentPrice ?? 0
@@ -196,11 +218,15 @@ async function sendRental() {
         </div>
         <div class="mt-4">
           <p class="font-semibold text-base">Meetup Date</p>
-          <UInput 
-            type="date" 
-            v-model="meetupDate" 
-            class="mt-1 w-full" 
-          />
+          <UPopover>
+            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+              {{ formattedDate || 'Select a date' }}
+            </UButton>
+
+            <template #content>
+              <UCalendar v-model="meetupDateCalendar" class="p-2" :minValue="minDate" />
+            </template>
+          </UPopover>
         </div>
         <div class="mt-4">
           <p class="font-semibold text-base">Meetup Time Window</p>
