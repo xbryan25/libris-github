@@ -142,9 +142,9 @@ const isSending = ref(false)
 async function sendPurchase() {
   validateTimeWindow()
   
-  if (isSending.value || !!timeError.value) return
-
-  if (isSending.value || !!timeError.value || hasInsufficientFunds.value) return
+  if (isSending.value || !!timeError.value || hasInsufficientFunds.value) {
+    return
+  }
 
   if (!meetupDate.value || !meetupAddressQuery.value || !meetupStartTime.value || !meetupEndTime.value) {
     return
@@ -174,15 +174,15 @@ async function sendPurchase() {
 
     emit('update:purchaseExists', true)
     emit('purchase-success')
+    
     isOpenPurchaseBookModal.value = false
+    
   } catch (err) {
     console.error(err)
   } finally {
     isSending.value = false
   }
 }
-
-
 </script>
 
 <template>
@@ -285,7 +285,7 @@ async function sendPurchase() {
           <p>Cancel</p> 
         </UButton>
         <UButton 
-          @click="sendPurchase"
+          @click.stop.prevent="sendPurchase"
           class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
           :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading || hasInsufficientFunds"
         >
