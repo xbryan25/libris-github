@@ -29,6 +29,58 @@ class WalletControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def get_reserved_amount_controller() -> tuple[Response, int]:
+        """Retrieve the reserved amount balance of the authenticated user."""
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
+            reserved_wallet_data = WalletServices.get_reserved_amount_service(user_id)
+
+            if not reserved_wallet_data:
+                return jsonify({"reserved_amount": 0}), 200
+
+            return jsonify({"reserved_amount": reserved_wallet_data}), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def update_reserved_amount_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"message": "Not authenticated."}), 401
+
+            update_details = request.get_json()
+
+            amount_to_reserve = float(update_details.get("amount_to_reserve", 0))
+
+            success = WalletServices.update_reserved_amount_service(
+                user_id, amount_to_reserve
+            )
+
+            if success:
+                return (
+                    jsonify({"message": "Reserved amount updated successfully."}),
+                    200,
+                )
+            else:
+                return (
+                    jsonify({"message": "Failed to update reserved amount."}),
+                    400,
+                )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def buy_readits_controller() -> tuple[Response, int]:
         """(add later)"""
 

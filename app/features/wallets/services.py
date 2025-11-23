@@ -27,6 +27,47 @@ class WalletServices:
         return WalletRepository.get_current_wallet_balance(user_id)["balance"]
 
     @staticmethod
+    def get_reserved_amount_service(user_id) -> int:
+        """
+        Retrieve the reserved amount of the authenticated user.
+
+        Args:
+            user_id (str): The user_id of the authenticated user.
+
+        Returns:
+            int: The reserved amount of the authenticated user.
+        """
+
+        return WalletRepository.get_reserved_amount(user_id)["reserved_amount"]
+
+    @staticmethod
+    def update_reserved_amount_service(user_id: str, amount_to_reserve: float) -> bool:
+        """
+        Update the reserved amount of the authenticated user.
+
+        Args:
+            user_id (str): The user_id of the authenticated user.
+            amount_to_reserve (float): The amount to add to the reserved balance.
+
+        Returns:
+            bool: True if the update was successful, False otherwise.
+        """
+        try:
+            current_data = WalletRepository.get_reserved_amount(user_id)
+
+            if current_data is None:
+                return False
+
+            current_reserved = current_data.get("reserved_amount") or 0
+            new_reserved_total = current_reserved + amount_to_reserve
+
+            return WalletRepository.update_reserved_amount(user_id, new_reserved_total)
+
+        except Exception as e:
+            print("Error updating reserved amount:", e)
+            return False
+
+    @staticmethod
     def buy_readits_service(user_id, amount_needed_in_pack, readits_from_pack) -> str:
         xendit.set_api_key(current_app.config.get("XENDIT_SECRET_KEY", ""))
 

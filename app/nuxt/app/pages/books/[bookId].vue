@@ -2,6 +2,8 @@
 import auth from '~/middleware/auth';
 import { useBookDetails } from '~/composables/useBookDetails';
 import BookPricing from '~/components/BookPricing.vue';
+import { useCreateRental } from '~/composables/useCreateRental';
+import { useCreatePurchase } from '~/composables/useCreatePurchase';
 
 definePageMeta({
   middleware: auth,
@@ -10,6 +12,55 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const bookId = route.params.bookId as string;
+
+const { rentalExists, checkRentalExists } = useCreateRental()
+
+const { purchaseExists, checkPurchaseExists } = useCreatePurchase()
+
+const isOpenRentBookModal = ref(false);
+
+const isOpenPurchaseBookModal = ref(false);
+
+const currentWalletBalance = ref(0);
+const reservedAmount = ref(0);
+const isFetching = ref(true);
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useCurrentWalletBalance();
+  currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  isFetching.value = false;
+});
+
+onMounted(async () => {
+  isFetching.value = true;
+
+  const data = await useReservedAmount();
+  reservedAmount.value = data.reserved_amount ?? 0;
+
+  isFetching.value = false;
+})
+
+const openRentBookModal = () => {
+  isOpenRentBookModal.value = true;
+};
+
+const handleRentalSuccess = () => {
+  rentalExists.value = true
+  isOpenRentBookModal.value = false
+}
+
+const openPurchaseBookModal = () => {
+  isOpenPurchaseBookModal.value = true;
+};
+
+const handlePurchaseSuccess = () => {
+  purchaseExists.value = true
+  isOpenRentBookModal.value = false
+}
+
 
 const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBadge } =
   useBookDetails();
@@ -89,6 +140,16 @@ const getBadgeColorClasses = (color: string) => {
   };
   return colors[color] || colors.gray;
 };
+
+onMounted(async () => {
+  if (bookId) {
+    await Promise.all([
+      checkRentalExists(bookId),
+      checkPurchaseExists(bookId) 
+    ])
+  }
+})
+
 </script>
 
 <template>
@@ -279,13 +340,40 @@ const getBadgeColorClasses = (color: string) => {
                 :daily-rent-price="book.daily_rent_price"
                 :security-deposit="book.security_deposit"
                 :purchase-price="book.purchase_price"
-                @rent="handleRent"
-                @purchase="handlePurchase"
+                :book-id="bookId ?? ''"
+                :rental-exists="rentalExists"
+                :purchase-exists="purchaseExists"
+                @rent="openRentBookModal"
+                @purchase="openPurchaseBookModal"
               />
             </div>
           </div>
         </div>
       </UCard>
     </div>
+    <RentBookModal
+      :is-open-rent-book-modal="isOpenRentBookModal"
+      :book-id="bookId ?? ''"
+      :book-title="book?.title"
+      :daily-rent-price="book?.daily_rent_price"
+      :security-deposit="book?.security_deposit"
+      :rental-exists="rentalExists"
+      :current-wallet-balance="currentWalletBalance"
+      :reserved-amount="reservedAmount"
+      @update:openRentBookModal="isOpenRentBookModal = $event"
+      @rental-success="handleRentalSuccess"
+    />
+    <PurchaseBookModal
+      :is-open-purchase-book-modal="isOpenPurchaseBookModal"
+      :book-id="bookId ?? ''"
+      :book-title="book?.title"
+      :book-author="book?.author"
+      :purchase-price="book?.purchase_price"
+      :current-wallet-balance="currentWalletBalance"
+      :purchase-exists="purchaseExists"
+      :reserved_amount="reservedAmount"
+      @update:openPurchaseBookModal="isOpenPurchaseBookModal = $event"
+      @purchase-success="handlePurchaseSuccess"
+    />
   </div>
 </template>

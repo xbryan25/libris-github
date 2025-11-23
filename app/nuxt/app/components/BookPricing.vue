@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { onMounted, ref, watch } from 'vue'
+import { useCreateRental } from '~/composables/useCreateRental'
+import { useCreatePurchase } from '~/composables/useCreatePurchase'
+
 interface Props {
   availability: 'rent' | 'purchase' | 'both'
   dailyRentPrice?: number
   securityDeposit?: number
   purchasePrice?: number
+  bookId: string
+  rentalExists: boolean
+  purchaseExists: boolean
 }
 
 const props = defineProps<Props>()
@@ -13,11 +20,24 @@ const emit = defineEmits<{
   purchase: []
 }>()
 
-const handleRent = () => {
-  emit('rent')
-}
+const { checkRentalExists } = useCreateRental()
 
-const handlePurchase = () => {
+const { checkPurchaseExists } = useCreatePurchase()
+
+onMounted(async () => {
+  if (props.bookId) {
+    await checkRentalExists(props.bookId)
+    await checkPurchaseExists(props.bookId)
+  }
+})
+
+
+const openRentBookModal = () => {
+  emit('rent')
+};
+
+
+const openPurchaseBookModal = () => {
   emit('purchase')
 }
 </script>
@@ -113,20 +133,24 @@ const handlePurchase = () => {
     >
       <button 
         v-if="availability === 'rent' || availability === 'both'"
-        @click="handleRent"
-        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
+        @click="openRentBookModal"
+        :disabled="props.rentalExists"
+        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:bg-blue-400 disabled:dark:bg-blue-600 disabled:text-white disabled:cursor-not-allowed"
       >
         <UIcon name="i-heroicons-book-open" class="text-xl" />
-        Rent This Book
+        <span v-if="props.rentalExists">Request Already Sent</span>
+        <span v-else>Rent This Book</span>
       </button>
       
       <button 
         v-if="availability === 'purchase' || availability === 'both'"
-        @click="handlePurchase"
-        class="bg-green-700 hover:bg-green-800 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
+        @click="openPurchaseBookModal"
+        :disabled="props.purchaseExists"
+        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:bg-blue-400 disabled:dark:bg-blue-600 disabled:text-white disabled:cursor-not-allowed"
       >
         <UIcon name="i-heroicons-shopping-cart" class="text-xl" />
-        Buy This Book
+        <span v-if="props.purchaseExists">Request Already Sent</span>
+        <span v-else>Buy This Book</span>
       </button>
     </div>
   </UCard>
