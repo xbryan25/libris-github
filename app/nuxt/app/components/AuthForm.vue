@@ -51,107 +51,114 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
       </h3>
     </div>
 
-    <UButton
-      v-if="authType === 'login'"
-      label="Login with Google"
-      @click="emit('onSubmitGmailLogin')"
-    />
+    <div class="w-100 flex flex-col gap-5">
+      <div v-if="authType === 'login'" class="flex flex-col gap-5">
+        <UButton
+          icon="logos:google-icon"
+          label="Login with Google"
+          class="justify-center bg-default border border-accented text-default cursor-pointer h-9 text-md font-bold hover:bg-muted active:bg-muted gap-3"
+          @click="emit('onSubmitGmailLogin')"
+        />
 
-    <UForm
-      :validate="(state) => validateAuthForm(state, props.authType)"
-      :state="state"
-      class="space-y-4"
-      @submit="(event) => onSubmit(event)"
-    >
-      <UFormField v-if="authType === 'signup'" label="Username" name="username">
-        <UInput v-model="state.username" class="w-100" :disabled="isLoading" />
-      </UFormField>
-
-      <UFormField label="Email Address" name="emailAddress">
-        <UInput v-model="state.emailAddress" class="w-100" :disabled="isLoading" />
-      </UFormField>
-
-      <UFormField label="Password" name="password">
-        <UInput
-          v-model="state.password"
-          :type="showPassword ? 'text' : 'password'"
-          class="w-100"
-          :disabled="isLoading"
-          :ui="{ trailing: 'pe-1' }"
-        >
-          <template #trailing>
-            <UButton
-              color="neutral"
-              variant="link"
-              size="sm"
-              :icon="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
-              :aria-label="showPassword ? 'Hide password' : 'Show password'"
-              :aria-pressed="showPassword"
-              :disabled="isLoading"
-              @click="showPassword = !showPassword"
-            />
-          </template>
-        </UInput>
-      </UFormField>
-
-      <UFormField v-if="authType === 'signup'" label="Confirm Password" name="confirmPassword">
-        <UInput
-          v-model="state.confirmPassword"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          class="w-100"
-          :disabled="isLoading"
-          :ui="{ trailing: 'pe-1' }"
-        >
-          <template #trailing>
-            <UButton
-              color="neutral"
-              variant="link"
-              size="sm"
-              :icon="showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
-              :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
-              :aria-pressed="showConfirmPassword"
-              :disabled="isLoading"
-              @click="showConfirmPassword = !showConfirmPassword"
-            />
-          </template>
-        </UInput>
-      </UFormField>
-
-      <div v-if="authType === 'login'" class="w-full">
-        <p class="text-sm inline-block text-violet-700 dark:text-violet-500 cursor-pointer">
-          Forgot your password?
-        </p>
+        <USeparator color="primary" size="sm" label="or" />
       </div>
 
-      <UButton
-        type="submit"
-        class="w-100 h-9 cursor-pointer justify-center text-lg font-bold"
-        :disabled="isLoading"
-        :loading="isLoading"
+      <UForm
+        :validate="(state) => validateAuthForm(state, props.authType)"
+        :state="state"
+        class="space-y-4"
+        @submit="(event) => onSubmit(event)"
       >
-        {{
-          isLoading
-            ? authType === 'login'
-              ? 'Logging in...'
-              : 'Please wait...'
-            : authType === 'login'
-              ? 'Login'
-              : 'Sign Up'
-        }}
-      </UButton>
+        <UFormField v-if="authType === 'signup'" label="Username" name="username">
+          <UInput v-model="state.username" class="w-100" :disabled="isLoading" />
+        </UFormField>
 
-      <div class="flex gap-1">
-        <p class="text-sm">
-          {{ authType === 'login' ? "Don't have an account?" : 'Already have an account?' }}
-        </p>
-        <NuxtLink
-          :to="authType === 'login' ? '/signup' : '/login'"
-          class="text-sm text-violet-700 dark:text-violet-500 cursor-pointer"
+        <UFormField label="Email Address" name="emailAddress">
+          <UInput v-model="state.emailAddress" class="w-100" :disabled="isLoading" />
+        </UFormField>
+
+        <UFormField label="Password" name="password">
+          <UInput
+            v-model="state.password"
+            :type="showPassword ? 'text' : 'password'"
+            class="w-100"
+            :disabled="isLoading"
+            :ui="{ trailing: 'pe-1' }"
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                :icon="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :aria-pressed="showPassword"
+                :disabled="isLoading"
+                @click="showPassword = !showPassword"
+              />
+            </template>
+          </UInput>
+        </UFormField>
+
+        <UFormField v-if="authType === 'signup'" label="Confirm Password" name="confirmPassword">
+          <UInput
+            v-model="state.confirmPassword"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            class="w-100"
+            :disabled="isLoading"
+            :ui="{ trailing: 'pe-1' }"
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                :icon="showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
+                :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                :aria-pressed="showConfirmPassword"
+                :disabled="isLoading"
+                @click="showConfirmPassword = !showConfirmPassword"
+              />
+            </template>
+          </UInput>
+        </UFormField>
+
+        <div v-if="authType === 'login'" class="w-full">
+          <p class="text-sm inline-block text-violet-700 dark:text-violet-500 cursor-pointer">
+            Forgot your password?
+          </p>
+        </div>
+
+        <UButton
+          type="submit"
+          class="w-100 h-9 cursor-pointer justify-center text-lg font-bold"
+          :disabled="isLoading"
+          :loading="isLoading"
         >
-          {{ authType === 'login' ? 'Sign Up' : 'Login' }}
-        </NuxtLink>
-      </div>
-    </UForm>
+          {{
+            isLoading
+              ? authType === 'login'
+                ? 'Logging in...'
+                : 'Please wait...'
+              : authType === 'login'
+                ? 'Login'
+                : 'Sign Up'
+          }}
+        </UButton>
+
+        <div class="flex gap-1">
+          <p class="text-sm">
+            {{ authType === 'login' ? "Don't have an account?" : 'Already have an account?' }}
+          </p>
+          <NuxtLink
+            :to="authType === 'login' ? '/signup' : '/login'"
+            class="text-sm text-violet-700 dark:text-violet-500 cursor-pointer"
+          >
+            {{ authType === 'login' ? 'Sign Up' : 'Login' }}
+          </NuxtLink>
+        </div>
+      </UForm>
+    </div>
   </div>
 </template>
 
