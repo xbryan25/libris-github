@@ -42,7 +42,8 @@ const getStatusBadge = (status: string) => {
     awaiting_pickup_confirmation: { label: 'Pickup Arranged', color: 'bg-orange-500' },
     ongoing: { label: 'Book Received', color: 'bg-purple-500' },
     awaiting_return_confirmation: { label: 'Return Initiated', color: 'bg-indigo-500' },
-    completed: { label: 'Return Complete', color: 'bg-green-500' }
+    rate_user: { label: 'Rate User', color: 'bg-amber-500' },
+    completed: { label: 'Completed', color: 'bg-green-500' }
   }
   
   return statusConfig[status] || { label: status, color: 'bg-gray-500' }
@@ -102,6 +103,11 @@ const getStepperItems = (status: string) => {
         icon: 'i-lucide-package-check'
       },
       {
+        title: 'Rate',
+        description: 'Rate the experience',
+        icon: 'i-lucide-star'
+      },
+      {
         title: 'Completed',
         description: 'Rental finished',
         icon: 'i-lucide-circle-check'
@@ -126,13 +132,18 @@ const getStepperItems = (status: string) => {
       },
       {
         title: 'Active',
-        description: 'Currently renting',
+        description: 'Currently lending',
         icon: 'i-lucide-book-open'
       },
       {
         title: 'Pickup',
         description: 'Ready for return pickup',
         icon: 'i-lucide-package-check'
+      },
+      {
+        title: 'Rate',
+        description: 'Rate the experience',
+        icon: 'i-lucide-star'
       },
       {
         title: 'Completed',
@@ -144,7 +155,7 @@ const getStepperItems = (status: string) => {
 }
 
 const getCurrentStep = (status: string) => {
-  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'completed']
+  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'rate_user', 'completed']
   return statusOrder.indexOf(status)
 }
 
@@ -165,6 +176,39 @@ const isWithinOneHourOfMeetup = computed(() => {
   
   // Check if current time is within 1 hour before meetup and not past the meetup time
   return now >= oneHourBeforeMeetup && now <= meetupDateTime;
+})
+
+const isWithinOneHourOfReturn = computed(() => {
+  // Only check if status is 'ongoing'
+  if (currentItem.value?.rent_status !== 'ongoing') {
+    return false;
+  }
+  
+  if (!currentItem.value?.rent_end_date) {
+    return false;
+  }
+  
+  // Check if there's a specific return meetup time, otherwise use the original meetup_time
+  const returnTime = currentItem.value?.meetup_time || '18:00'; // Default to 6pm if not set
+  
+  // Combine rent_end_date with the meetup time
+  const returnDateTime = new Date(`${currentItem.value.rent_end_date} ${returnTime}`);
+  const now = new Date();
+  const oneHourBeforeReturn = new Date(returnDateTime.getTime() - 60 * 60 * 1000);
+  
+  // Check if current time is within 1 hour before return meetup time
+  return now >= oneHourBeforeReturn && now <= returnDateTime;
+})
+
+const daysRemaining = computed(() => {
+  if (!currentItem.value?.rent_end_date) return 0;
+  
+  const endDate = new Date(currentItem.value.rent_end_date);
+  const now = new Date();
+  const diffTime = endDate.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays > 0 ? diffDays : 0;
 })
 
 onMounted(() => {
@@ -190,9 +234,6 @@ onMounted(() => {
         />
         {{ from === 'rental' ? 'Rental Details' : 'Lending Details' }}
       </h1>
-      <p class="text-muted">
-        {{ from === 'rental' ? 'Viewing your rental' : 'Viewing your lending' }} - ID: {{ rentalid }}
-      </p>
     </div>
 
     <!-- Loading State -->
@@ -261,8 +302,23 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Rental Details Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Active Rental Alert - Show when status is ongoing -->
+      <div v-if="currentItem.rent_status === 'ongoing'" class="bg-purple-50 border border-purple-200 rounded-lg p-5">
+        <div class="flex items-start gap-3">
+          <Icon name="lucide:book-open" class="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+          <div class="flex-1">
+            <p class="text-purple-900 font-medium mb-2">
+              {{ from === 'rental' ? 'You are currently renting this book.' : 'This book is currently being rented.' }}
+            </p>
+            <p class="text-sm text-purple-800">
+              <strong>{{ daysRemaining }}</strong> day(s) remaining until return date.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rental Details Grid - Hide for rate_user and completed status -->
+      <div v-if="currentItem.rent_status !== 'completed' && currentItem.rent_status !== 'rate_user'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Dates Card -->
         <div class="bg-surface rounded-lg border border-base p-6">
           <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
@@ -307,17 +363,20 @@ onMounted(() => {
             Meetup Information
           </h3>
           <div class="space-y-4">
-            <div v-if="currentItem.meetup_date">
-              <p class="text-sm text-muted">Initial Meetup Date</p>
-              <p class="font-medium">{{ formatDate(currentItem.meetup_date) }}</p>
+            <div class="grid grid-cols-2 gap-4">
+              <div v-if="currentItem.meetup_date">
+                <p class="text-sm text-muted">Initial Meetup Date</p>
+                <p class="font-medium">{{ formatDate(currentItem.meetup_date) }}</p>
+              </div>
+
+              <div v-if="currentItem.rent_status !== 'pending' && currentItem.rent_end_date">
+                <p class="text-sm text-muted">Final Return Date</p>
+                <p class="font-medium text-red-600">{{ formatDate(currentItem.rent_end_date) }}</p>
+              </div>
             </div>
 
-            <div>
-              <p class="text-sm text-muted">Meetup Location</p>
-              <p class="font-medium">{{ currentItem.meetup_location || 'Not set' }}</p>
-            </div>
-
-            <div v-if="currentItem.meetup_time">
+            <div class="grid grid-cols-2 gap-4">
+              <div v-if="currentItem.meetup_time">
               <p class="text-sm text-muted">Meetup Time</p>
               <p class="font-medium">{{ currentItem.meetup_time }}</p>
             </div>
@@ -326,12 +385,18 @@ onMounted(() => {
               <p class="text-sm text-muted">Time Window</p>
               <p class="font-medium">{{ currentItem.meetup_time_window }}</p>
             </div>
+            </div>
+
+            <div>
+              <p class="text-sm text-muted">Meetup Location</p>
+              <p class="font-medium">{{ currentItem.meetup_location || 'Not set' }}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Cost Information Card - Compact Version -->
-      <div class="bg-surface rounded-lg border border-base p-5">
+      <!-- Cost Information Card - Hide for rate_user and completed status -->
+      <div v-if="currentItem.rent_status !== 'completed' && currentItem.rent_status !== 'rate_user'" class="bg-surface rounded-lg border border-base p-5">
         <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
           <Icon name="fluent:book-coins-20-regular" class="w-5 h-5" />
           Cost Details
@@ -368,6 +433,103 @@ onMounted(() => {
               {{ currentItem.all_fees_captured ? 'Captured' : 'Pending' }}
             </p>
           </div>
+        </div>
+      </div>
+
+      <!-- Rate User Status - Deposit and Rating -->
+      <div v-if="currentItem.rent_status === 'rate_user' || currentItem.rent_status === 'completed'" class="space-y-6">
+        <!-- Deposit Return Card -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-5">
+          <div class="flex items-start gap-3">
+            <Icon name="lucide:check-circle" class="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0" />
+            <div class="flex-1">
+              <p class="text-green-900 font-medium text-lg mb-1">
+                Security deposit {{ from === 'rental' ? 'has been returned' : 'returned' }}
+              </p>
+              <div class="flex items-center gap-2 mt-2">
+                <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-green-600" />
+                <span class="text-green-800 font-bold text-xl">15 Readits</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Card - Only show if status is rate_user -->
+        <div v-if="currentItem.rent_status === 'rate_user'" class="bg-surface rounded-lg border border-base p-6">
+          <h2 class="text-2xl font-bold text-center mb-2">
+            Rate {{ from === 'rental' ? (currentItem as Rental).from : (currentItem as Lending).to }} as a {{ from === 'rental' ? 'lender' : 'renter' }}
+          </h2>
+          <p class="text-center text-muted mb-6">How would you rate this user?</p>
+          
+          <!-- Star Rating -->
+          <div class="flex justify-center gap-3 mb-6">
+            <Icon 
+              v-for="star in 5" 
+              :key="star"
+              name="lucide:star" 
+              class="w-12 h-12 cursor-pointer hover:scale-110 transition-transform fill-current text-gray-300 hover:text-yellow-500"
+            />
+          </div>
+
+          <!-- Comment Box -->
+          <div class="mb-4">
+            <textarea 
+              placeholder="Leave a comment"
+              class="w-full p-3 border border-base rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface"
+              rows="4"
+            ></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            Submit Rating
+          </button>
+        </div>
+
+        <!-- Completed Message - Show if status is completed -->
+        <div v-if="currentItem.rent_status === 'completed'" class="bg-surface rounded-lg border border-base p-6">
+          <div class="text-center">
+            <Icon name="lucide:check-circle" class="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 class="text-2xl font-bold mb-2">Rental Completed!</h2>
+            <p class="text-muted">Thank you for using our service. Your rating has been submitted.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Return Confirmation Card - Only show if status is ongoing -->
+      <div v-if="currentItem.rent_status === 'ongoing'">
+        <!-- Warning Message - Show when NOT within 1 hour of return -->
+        <div v-if="!isWithinOneHourOfReturn" class="bg-blue-50 border border-blue-200 rounded-lg p-5">
+          <div class="flex items-start gap-3">
+            <Icon name="lucide:clock" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-blue-900">
+              A confirmation button will appear 1 hour before the return date to confirm the book return.
+            </p>
+          </div>
+        </div>
+
+        <!-- Confirmation Button - Show when within 1 hour of return -->
+        <div v-else class="bg-blue-50 border-2 border-blue-300 rounded-lg p-5">
+          <div class="mb-4 flex items-start gap-3">
+            <Icon name="lucide:alert-circle" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <p class="text-sm text-blue-900 font-medium">
+              Please confirm if you have {{ from === 'rental' ? 'returned' : 'received back' }} the book. Both users must confirm to complete the rental.
+            </p>
+          </div>
+          <button 
+            v-if="from === 'rental'"
+            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Icon name="lucide:check" class="w-5 h-5" />
+            Confirm Returned Book
+          </button>
+          <button 
+            v-else-if="from === 'lending'"
+            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Icon name="lucide:check" class="w-5 h-5" />
+            Confirm Received Back Book
+          </button>
         </div>
       </div>
 

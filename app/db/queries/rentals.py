@@ -30,7 +30,8 @@ class RentalQueries:
         JOIN users u ON b.owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE rb.user_id = %s
-        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation');
+        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
+        'ongoing', 'awaiting_return_confirmation', 'rate_user');
     """
 
     GET_USER_LENDINGS_WITH_STATUS = """
@@ -64,5 +65,6 @@ class RentalQueries:
         JOIN users u ON rb.user_id = u.user_id  -- Changed: join to renter (user_id)
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE b.owner_id = %s
-        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation');
+        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
+        'ongoing', 'awaiting_return_confirmation', 'rate_user');
     """

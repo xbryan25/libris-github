@@ -15,6 +15,7 @@ const getStatusBadge = (status: string) => {
     awaiting_pickup_confirmation: { label: 'Pickup Arranged', color: 'bg-orange-500' },
     ongoing: { label: 'Book Received', color: 'bg-purple-500' },
     awaiting_return_confirmation: { label: 'Return Initiated', color: 'bg-indigo-500' },
+    rate_user: { label: 'Rate User', color: 'bg-amber-500' },
     completed: { label: 'Return Complete', color: 'bg-green-500' }
   }
   
@@ -49,6 +50,11 @@ const getStepperItems = (status: string): StepperItem[] => {
       icon: 'i-lucide-package-check'
     },
     {
+      title: 'Rate',
+      description: 'Rate the experience',
+      icon: 'i-lucide-star'
+    },
+    {
       title: 'Completed',
       description: 'Rental finished',
       icon: 'i-lucide-circle-check'
@@ -57,7 +63,7 @@ const getStepperItems = (status: string): StepperItem[] => {
 }
 
 const getCurrentStep = (status: string) => {
-  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'completed']
+  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'rate_user', 'completed']
   return statusOrder.indexOf(status)
 }
 </script>
