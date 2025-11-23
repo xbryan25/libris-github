@@ -2,8 +2,6 @@
 import guest from '~/middleware/guest';
 import { useAuthStore } from '~/stores/useAuthStore';
 
-import { googleAuthCodeLogin } from 'vue3-google-login';
-
 definePageMeta({
   layout: 'unauthenticated',
   middleware: guest,
@@ -12,6 +10,8 @@ definePageMeta({
 const toast = useToast();
 const auth = useAuthStore();
 const isLoading = ref(false);
+
+const isOpenAddUsernameModal = ref(true);
 
 const onSubmitLogin = async (emailAddress: string, password: string) => {
   if (isLoading.value) return;
@@ -41,19 +41,19 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
 
 const onSubmitGmailLogin = async () => {
   try {
-    const googlePopupResponse = await googleAuthCodeLogin(); // may trigger COOP warning
+    const { messageTitle, message } = await auth.googleLogin();
 
-    const code = googlePopupResponse.code;
+    if (auth.username === null) {
+      isOpenAddUsernameModal.value = true;
+    } else {
+      toast.add({
+        title: messageTitle,
+        description: message,
+        color: 'success',
+      });
 
-    const { messageTitle, message } = await useUserGoogleLogin(code);
-
-    toast.add({
-      title: messageTitle,
-      description: message,
-      color: 'success',
-    });
-
-    // send code to backend, etc.
+      navigateTo('/dashboard');
+    }
   } catch (error) {
     toast.add({
       title: 'Login failed.',
@@ -78,5 +78,13 @@ const onSubmitGmailLogin = async () => {
     <div class="flex-1">
       <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />
     </div>
+
+    <AddUsernameModal
+      :user-id="auth.userId"
+      :is-open-add-username-modal="isOpenAddUsernameModal"
+      @update:open-add-username-modal="
+        (newOpenAddUsernameModal) => (isOpenAddUsernameModal = newOpenAddUsernameModal)
+      "
+    />
   </div>
 </template>
