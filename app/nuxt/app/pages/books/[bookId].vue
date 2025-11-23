@@ -143,7 +143,10 @@ const getBadgeColorClasses = (color: string) => {
 
 onMounted(async () => {
   if (bookId) {
-    await checkRentalExists(bookId)
+    await Promise.all([
+      checkRentalExists(bookId),
+      checkPurchaseExists(bookId) 
+    ])
   }
 })
 
