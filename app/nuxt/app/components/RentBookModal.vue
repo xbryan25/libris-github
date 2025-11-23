@@ -176,6 +176,13 @@ function formatTimeObj(time: string | null | undefined) {
 
 const isSendingRental = ref(false)
 
+watch(() => props.isOpenRentBookModal, (isOpen) => {
+  if (isOpen) {
+    isSendingRental.value = false
+    timeError.value = ''
+  }
+})
+
 async function sendRental() {
   validateTimeWindow()
 
@@ -194,6 +201,7 @@ async function sendRental() {
 
     if (!startStr || !endStr) {
       timeError.value = 'Please select valid start and end times'
+      isSendingRental.value = false
       return 
     }
 
@@ -213,9 +221,8 @@ async function sendRental() {
     
   } catch (err) {
     console.error(err)
-  } finally {
     isSendingRental.value = false
-  }
+  } 
 }
 </script>
 

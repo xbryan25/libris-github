@@ -137,6 +137,13 @@ function formatTimeObj(time: string | null | undefined) {
 
 watch([meetupStartTime, meetupEndTime], validateTimeWindow)
 
+watch(() => props.isOpenPurchaseBookModal, (isOpen) => {
+  if (isOpen) {
+    isSending.value = false
+    timeError.value = ''
+  }
+})
+
 const isSending = ref(false)
 
 async function sendPurchase() {
@@ -161,6 +168,7 @@ async function sendPurchase() {
 
     if (!startStr || !endStr) {
       timeError.value = 'Please select valid start and end times'
+      isSending.value = false
       return 
     }
 
@@ -179,9 +187,8 @@ async function sendPurchase() {
     
   } catch (err) {
     console.error(err)
-  } finally {
     isSending.value = false
-  }
+  } 
 }
 </script>
 
@@ -287,9 +294,9 @@ async function sendPurchase() {
         <UButton 
           @click.stop.prevent="sendPurchase"
           class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
-          :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading || hasInsufficientFunds"
+          :disabled="!!timeError || !meetupStartTime || !meetupEndTime || !meetupDate || !meetupAddressQuery || loading || hasInsufficientFunds || isSending"
         >
-          <p v-if="!loading">Confirm Purchase</p>
+          <p v-if="!loading && !isSending">Confirm Purchase</p>
           <p v-else>Processing...</p>
         </UButton>
       </div>
