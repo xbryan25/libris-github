@@ -14,9 +14,6 @@ class RentalControllers:
 
             rentals = RentalServices.get_user_rentals_with_status(user_id)
 
-            if not rentals:
-                return jsonify({"error": "No rentals found for this user"}), 404
-
             return jsonify(rentals), 200
 
         except Exception as e:
@@ -31,9 +28,6 @@ class RentalControllers:
                 return jsonify({"error": "Unauthorized"}), 401
 
             lendings = RentalServices.get_user_lendings_with_status(user_id)
-
-            if not lendings:
-                return jsonify({"error": "No lendings found for this user"}), 404
 
             return jsonify(lendings), 200
 

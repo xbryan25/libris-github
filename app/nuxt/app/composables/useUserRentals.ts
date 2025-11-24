@@ -64,10 +64,10 @@ export const useUserRentals = () => {
       const res = await $apiFetch<Rental[]>(`${API_URL}/api/rentals/my-rentals`, {
         credentials: 'include'
       })
-      rentals.value = res
+      rentals.value = Array.isArray(res) ? res : []
     } catch (e: any) {
-      error.value = e?.message || 'Failed to fetch user rentals'
-      throw e
+      rentals.value = []
+      console.log('No rentals found or error fetching rentals:', e)
     } finally {
       loading.value = false
     }

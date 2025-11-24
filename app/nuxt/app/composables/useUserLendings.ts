@@ -64,10 +64,10 @@ export const useUserLendings = () => {
       const res = await $apiFetch<Lending[]>(`${API_URL}/api/rentals/my-lendings`, {
         credentials: 'include'
       })
-      lendings.value = res
+      lendings.value = Array.isArray(res) ? res : []
     } catch (e: any) {
-      error.value = e?.message || 'Failed to fetch user lendings'
-      throw e
+      lendings.value = []
+      console.log('No lendings found or error fetching lendings:', e)
     } finally {
       loading.value = false
     }
