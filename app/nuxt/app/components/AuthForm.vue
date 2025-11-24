@@ -154,7 +154,14 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
           <p class="text-sm">
             {{ authType === 'login' ? "Don't have an account?" : 'Already have an account?' }}
           </p>
+          <span
+            v-if="isDisabled"
+            class="text-sm text-violet-700 dark:text-violet-500 opacity-50 cursor-not-allowed"
+          >
+            {{ authType === 'login' ? 'Sign Up' : 'Login' }}
+          </span>
           <NuxtLink
+            v-else
             :to="authType === 'login' ? '/signup' : '/login'"
             class="text-sm text-violet-700 dark:text-violet-500 cursor-pointer"
           >
