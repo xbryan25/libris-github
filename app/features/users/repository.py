@@ -137,9 +137,10 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         result = db.fetch_one(
-            """INSERT INTO users (email_address, first_name, last_name, profile_image_url, auth_provider, trust_score)
-            VALUES (%s, %s, %s, %s, %s, 0) RETURNING user_id""",
-            (email_address, first_name, last_name, profile_image_url, "google"),
+            """INSERT INTO users
+            (email_address, first_name, last_name, profile_image_url, auth_provider, is_email_verified, trust_score)
+            VALUES (%s, %s, %s, %s, %s, %s, 0) RETURNING user_id""",
+            (email_address, first_name, last_name, profile_image_url, "google", True),
         )
 
         return str(result["user_id"])

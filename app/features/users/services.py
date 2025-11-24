@@ -55,7 +55,13 @@ class UserServices:
         existing_user_by_email = UserRepository.get_user_by_email_address(email_address)
 
         if existing_user_by_email:
-            return {"error": "Email address already exists.", "type": "email"}
+            if existing_user_by_email["auth_provider"] == "google":
+                return {
+                    "error": "Email address is already linked to a Google account.",
+                    "type": "email",
+                }
+            else:
+                return {"error": "Email address is already in use.", "type": "email"}
 
         existing_user_by_username = UserRepository.get_user_by_username(username)
 

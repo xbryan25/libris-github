@@ -110,8 +110,12 @@ class UserControllers:
             user = UserServices.get_user_by_email_address_service(email_address)
 
             user_id = user["user_id"] if user else None
+            auth_provider = user["auth_provider"] if user else None
 
-            if not user_id:
+            if user_id and auth_provider and auth_provider == "local":
+                return jsonify({"error": "Email address is already in use."}), 400
+
+            else:
                 user_id = UserServices.user_google_signup_service(
                     email_address, first_name, last_name, profile_image_url
                 )
