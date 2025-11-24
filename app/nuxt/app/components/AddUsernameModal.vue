@@ -68,9 +68,7 @@ const submitNewUsername = async () => {
         </div>
 
         <UForm
-          :validate="
-            (newUsername) => validateNewUsername(newUsername, isOpenAddUsernameModal.value)
-          "
+          :validate="(newUsername) => validateNewUsername(newUsername, isOpenAddUsernameModal)"
           :state="newUsername"
           class="space-y-4"
           @submit="async () => await submitNewUsername()"

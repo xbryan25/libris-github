@@ -80,7 +80,7 @@ export function validateAuthForm (state: any, authType: string): FormError[] {
 }
 
 
-export function validateNewUsername (newUsername: string, isOpenAddUsernameModal: string): FormError[] {
+export function validateNewUsername (newUsername: string, isOpenAddUsernameModal: boolean): FormError[] {
 
     const whitespaceRegex = /^\s*$/;
 
