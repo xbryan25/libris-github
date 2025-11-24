@@ -9,13 +9,15 @@ definePageMeta({
 
 const toast = useToast();
 const auth = useAuthStore();
+
+const isDisabled = ref(false);
 const isLoading = ref(false);
+const isLoadingGoogle = ref(false);
 
 const isOpenAddUsernameModal = ref(false);
 
 const onSubmitLogin = async (emailAddress: string, password: string) => {
-  if (isLoading.value) return;
-
+  isDisabled.value = true;
   isLoading.value = true;
 
   try {
@@ -35,12 +37,16 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
       color: 'error',
     });
 
+    isDisabled.value = false;
     isLoading.value = false;
   }
 };
 
-const onSubmitGmailLogin = async () => {
+const onSubmitGoogleLogin = async () => {
   try {
+    isDisabled.value = true;
+    isLoadingGoogle.value = true;
+
     const { messageTitle, message } = await auth.googleLogin();
 
     if (auth.username === null) {
@@ -55,11 +61,21 @@ const onSubmitGmailLogin = async () => {
       navigateTo('/dashboard');
     }
   } catch (error) {
-    toast.add({
-      title: 'Login via Google failed.',
-      description: error.data.error,
-      color: 'error',
-    });
+    console.log(error);
+    console.log(error.type);
+
+    const isPopupClosed = error?.type === 'popup_closed';
+
+    if (!isPopupClosed) {
+      toast.add({
+        title: 'Login via Google failed.',
+        description: error?.data?.error,
+        color: 'error',
+      });
+    }
+
+    isDisabled.value = false;
+    isLoadingGoogle.value = false;
   }
 };
 
@@ -81,9 +97,11 @@ const onAddUsernameSuccess = async () => {
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="login"
+        :is-disabled="isDisabled"
         :is-loading="isLoading"
+        :is-loading-google="isLoadingGoogle"
         @on-submit-login="(email, password) => onSubmitLogin(email, password)"
-        @on-submit-gmail-login="async () => await onSubmitGmailLogin()"
+        @on-submit-google-login="async () => await onSubmitGoogleLogin()"
       />
     </div>
 
@@ -95,7 +113,11 @@ const onAddUsernameSuccess = async () => {
       :user-id="auth.userId"
       :is-open-add-username-modal="isOpenAddUsernameModal"
       @update:open-add-username-modal="
-        (newOpenAddUsernameModal) => (isOpenAddUsernameModal = newOpenAddUsernameModal)
+        (newOpenAddUsernameModal) => {
+          isOpenAddUsernameModal = newOpenAddUsernameModal;
+          isDisabled = false;
+          isLoadingGoogle = false;
+        }
       "
       @add-username-success="onAddUsernameSuccess"
     />

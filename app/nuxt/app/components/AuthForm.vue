@@ -3,13 +3,15 @@ import type { FormSubmitEvent } from '@nuxt/ui';
 
 const props = defineProps<{
   authType: string;
-  isLoading?: boolean;
+  isDisabled: boolean;
+  isLoading: boolean;
+  isLoadingGoogle?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'onSubmitLogin', email: string, password: string): void;
   (e: 'onSubmitSignup', username: string, email: string, password: string): void;
-  (e: 'onSubmitGmailLogin'): void;
+  (e: 'onSubmitGoogleLogin'): void;
 }>();
 
 const state = reactive({
@@ -56,8 +58,10 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         <UButton
           icon="logos:google-icon"
           label="Login with Google"
-          class="justify-center bg-default border border-accented text-default cursor-pointer h-9 text-md font-bold hover:bg-muted active:bg-muted gap-3"
-          @click="emit('onSubmitGmailLogin')"
+          class="justify-center bg-default border border-accented text-default cursor-pointer h-9 text-md font-bold hover:bg-muted active:bg-muted disabled:bg-elevated gap-3"
+          :disabled="props.isDisabled"
+          :loading="props.isLoadingGoogle"
+          @click="emit('onSubmitGoogleLogin')"
         />
 
         <USeparator color="primary" size="sm" label="or" />
@@ -70,11 +74,11 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         @submit="(event) => onSubmit(event)"
       >
         <UFormField v-if="authType === 'signup'" label="Username" name="username">
-          <UInput v-model="state.username" class="w-100" :disabled="isLoading" />
+          <UInput v-model="state.username" class="w-100" :disabled="props.isLoading" />
         </UFormField>
 
         <UFormField label="Email Address" name="emailAddress">
-          <UInput v-model="state.emailAddress" class="w-100" :disabled="isLoading" />
+          <UInput v-model="state.emailAddress" class="w-100" :disabled="props.isLoading" />
         </UFormField>
 
         <UFormField label="Password" name="password">
@@ -82,7 +86,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
             v-model="state.password"
             :type="showPassword ? 'text' : 'password'"
             class="w-100"
-            :disabled="isLoading"
+            :disabled="props.isLoading"
             :ui="{ trailing: 'pe-1' }"
           >
             <template #trailing>
@@ -93,7 +97,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
                 :icon="showPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
                 :aria-label="showPassword ? 'Hide password' : 'Show password'"
                 :aria-pressed="showPassword"
-                :disabled="isLoading"
+                :disabled="props.isLoading"
                 @click="showPassword = !showPassword"
               />
             </template>
@@ -105,7 +109,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
             v-model="state.confirmPassword"
             :type="showConfirmPassword ? 'text' : 'password'"
             class="w-100"
-            :disabled="isLoading"
+            :disabled="props.isLoading"
             :ui="{ trailing: 'pe-1' }"
           >
             <template #trailing>
@@ -116,7 +120,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
                 :icon="showConfirmPassword ? 'heroicons:eye-slash' : 'heroicons:eye'"
                 :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
                 :aria-pressed="showConfirmPassword"
-                :disabled="isLoading"
+                :disabled="props.isLoading"
                 @click="showConfirmPassword = !showConfirmPassword"
               />
             </template>
@@ -132,11 +136,11 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         <UButton
           type="submit"
           class="w-100 h-9 cursor-pointer justify-center text-lg font-bold"
-          :disabled="isLoading"
-          :loading="isLoading"
+          :disabled="props.isDisabled"
+          :loading="props.isLoading"
         >
           {{
-            isLoading
+            props.isLoading
               ? authType === 'login'
                 ? 'Logging in...'
                 : 'Please wait...'

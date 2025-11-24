@@ -38,6 +38,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const googlePopupResponse = await googleAuthCodeLogin(); // may trigger COOP warning
 
+      console.log(googlePopupResponse)
+
       const code = googlePopupResponse.code;
 
       const response = await useUserGoogleLogin(code);
