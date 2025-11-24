@@ -78,3 +78,31 @@ export function validateAuthForm (state: any, authType: string): FormError[] {
 
     return errors;
 }
+
+
+export function validateNewUsername (newUsername: string, isOpenAddUsernameModal: boolean): FormError[] {
+
+    const whitespaceRegex = /^\s*$/;
+
+    const errors: { name: string, message: string }[] = [];
+
+    if (!isOpenAddUsernameModal){
+        return errors
+    }
+
+    if (!newUsername || whitespaceRegex.test(newUsername)) {
+        errors.push({ name: 'username', message: 'Username is required.' });
+    } else if (newUsername && newUsername.length < 3) {
+        errors.push({
+            name: 'username',
+            message: 'Username must be at least 3 characters long.',
+        });
+    } else if (newUsername && newUsername.length > 64) {
+        errors.push({
+            name: 'username',
+            message: 'Username must not exceed 64 characters.',
+        });
+    }
+
+    return errors;
+}

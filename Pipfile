@@ -14,6 +14,7 @@ xendit-python = "*"
 python-dateutil = "*"
 flask-socketio = "*"
 eventlet = "*"
+types-requests = "*"
 
 [dev-packages]
 pre-commit = "*"

@@ -18,6 +18,9 @@ class Config:
     XENDIT_SECRET_KEY = os.getenv("XENDIT_SECRET_KEY")
     XENDIT_WEBHOOK_SECRET_KEY = os.getenv("XENDIT_WEBHOOK_SECRET_KEY")
 
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_ACCESS_COOKIE_NAME = "access_token_cookie"

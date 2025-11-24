@@ -19,3 +19,8 @@ class BookAvailabilityEnum(enum.Enum):
     rent = "rent"
     purchase = "purchase"
     both = "both"
+
+
+class AuthProviderEnum(enum.Enum):
+    local = "local"
+    google = "google"

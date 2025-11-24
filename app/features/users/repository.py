@@ -49,6 +49,21 @@ class UserRepository:
         )
 
     @staticmethod
+    def update_username_by_user_id(user_id: str, username: str) -> None:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.execute_query(
+            CommonQueries.UPDATE_BY_ID.format(
+                table="users", set_clause="username = %s", pk="user_id"
+            ),
+            (username, user_id),
+        )
+
+    @staticmethod
     def get_username(user_id: str) -> dict[str, str] | None:
         """
         Retrieve the username of a user by their user_id.
@@ -68,6 +83,19 @@ class UserRepository:
                 column="username", table="users", field="user_id"
             ),
             (user_id,),
+        )
+
+    @staticmethod
+    def check_if_username_is_taken(username: str) -> dict[str, bool]:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.CHECK_IF_EXISTS.format(table="users", column="username"),
+            (username,),
         )
 
     @staticmethod
@@ -91,6 +119,28 @@ class UserRepository:
         result = db.fetch_one(
             "INSERT INTO users (username, email_address, password_hash, trust_score) VALUES (%s, %s, %s, 0) RETURNING user_id",
             (username, email_address, hashed_password),
+        )
+
+        return str(result["user_id"])
+
+    @staticmethod
+    def create_user_from_google(
+        email_address: str,
+        first_name: str,
+        last_name: str,
+        profile_image_url: str | None,
+    ) -> str:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(
+            """INSERT INTO users
+            (email_address, first_name, last_name, profile_image_url, auth_provider, is_email_verified, trust_score)
+            VALUES (%s, %s, %s, %s, %s, %s, 0) RETURNING user_id""",
+            (email_address, first_name, last_name, profile_image_url, "google", True),
         )
 
         return str(result["user_id"])
