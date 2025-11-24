@@ -49,6 +49,21 @@ class UserRepository:
         )
 
     @staticmethod
+    def update_username_by_user_id(user_id: str, username: str) -> None:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.execute_query(
+            CommonQueries.UPDATE_BY_ID.format(
+                table="users", set_clause="username = %s", pk="user_id"
+            ),
+            (username, user_id),
+        )
+
+    @staticmethod
     def get_username(user_id: str) -> dict[str, str] | None:
         """
         Retrieve the username of a user by their user_id.
@@ -68,6 +83,19 @@ class UserRepository:
                 column="username", table="users", field="user_id"
             ),
             (user_id,),
+        )
+
+    @staticmethod
+    def check_if_username_is_taken(username: str) -> dict[str, bool]:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.CHECK_IF_EXISTS.format(table="users", column="username"),
+            (username,),
         )
 
     @staticmethod

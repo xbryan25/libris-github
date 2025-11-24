@@ -1,4 +1,3 @@
-import { stringifyQuery } from "vue-router";
 
 export const useSubmitNewUsername = async (userId: string | null, username: string) => {
   const baseURL = import.meta.env.VITE_API_URL;

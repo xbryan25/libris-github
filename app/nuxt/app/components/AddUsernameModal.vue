@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { validateNewUsername } from '#imports';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 const props = defineProps<{
   userId: string | null;
@@ -11,16 +12,10 @@ const emit = defineEmits<{
   (e: 'addUsernameSuccess'): void;
 }>();
 
-// const state = reactive({
-//   newUsername: '',
-//   password: '',
-//   username: '',
-//   confirmPassword: '',
-// });
-
 const newUsername = ref('');
 const isSubmittingNewUsername = ref(false);
 
+const auth = useAuthStore();
 const toast = useToast();
 
 const isOpenAddUsernameModal = computed({
@@ -34,8 +29,6 @@ const submitNewUsername = async () => {
   try {
     isSubmittingNewUsername.value = true;
 
-    console.log(newUsername.value);
-
     const { messageTitle, message } = await useSubmitNewUsername(props.userId, newUsername.value);
 
     toast.add({
@@ -43,12 +36,18 @@ const submitNewUsername = async () => {
       description: message,
       color: 'success',
     });
+
+    auth.username = newUsername.value;
+
+    emit('addUsernameSuccess');
   } catch (error) {
     toast.add({
       title: 'Username update failed.',
       description: error.data.error,
       color: 'error',
     });
+
+    isSubmittingNewUsername.value = false;
   }
 };
 </script>

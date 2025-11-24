@@ -74,7 +74,7 @@ class UserServices:
         first_name: str,
         last_name: str,
         profile_image_url: str | None,
-    ) -> dict | None:
+    ) -> str | None:
         """
         add later
         """
@@ -83,9 +83,17 @@ class UserServices:
             email_address, first_name, last_name, profile_image_url
         )
 
-        # UserRepository.initialize_wallet(user_id)
+        UserRepository.initialize_wallet(user_id)
 
-        return {"user_id": user_id}
+        return user_id
+
+    @staticmethod
+    def update_username_by_user_id_service(user_id: str, username: str) -> None:
+        """
+        add later
+        """
+
+        UserRepository.update_username_by_user_id(user_id, username)
 
     @staticmethod
     def get_username_service(user_id) -> str | None:
@@ -105,6 +113,22 @@ class UserServices:
             return None
 
         return username_dict["username"]
+
+    @staticmethod
+    def check_if_username_is_taken_service(username: str) -> bool:
+        """
+        Get the username of a user using the user_id.
+
+        Args:
+            user_id (str): user_id of the user.
+
+        Returns:
+            str: The username of the user if found, otherwise None.
+        """
+
+        is_username_taken = UserRepository.check_if_username_is_taken(username)
+
+        return is_username_taken["exists"]
 
     @staticmethod
     def get_user_by_email_address_service(email: str) -> dict[str, Any] | None:

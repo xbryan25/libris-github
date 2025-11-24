@@ -11,7 +11,7 @@ const toast = useToast();
 const auth = useAuthStore();
 const isLoading = ref(false);
 
-const isOpenAddUsernameModal = ref(true);
+const isOpenAddUsernameModal = ref(false);
 
 const onSubmitLogin = async (emailAddress: string, password: string) => {
   if (isLoading.value) return;
@@ -56,7 +56,19 @@ const onSubmitGmailLogin = async () => {
     }
   } catch (error) {
     toast.add({
-      title: 'Login failed.',
+      title: 'Login via Google failed.',
+      description: error.data.error,
+      color: 'error',
+    });
+  }
+};
+
+const onAddUsernameSuccess = async () => {
+  try {
+    navigateTo('/dashboard');
+  } catch (error) {
+    toast.add({
+      title: 'Login via Google failed.',
       description: error.data.error,
       color: 'error',
     });
@@ -85,6 +97,7 @@ const onSubmitGmailLogin = async () => {
       @update:open-add-username-modal="
         (newOpenAddUsernameModal) => (isOpenAddUsernameModal = newOpenAddUsernameModal)
       "
+      @add-username-success="onAddUsernameSuccess"
     />
   </div>
 </template>

@@ -43,6 +43,7 @@ class UserControllers:
 
             resp = make_response(
                 {
+                    "user_id": user.user_id,
                     "username": user.username,
                     "messageTitle": "Login successful.",
                     "message": "Enjoy your session!",
@@ -115,6 +116,8 @@ class UserControllers:
                     email_address, first_name, last_name, profile_image_url
                 )
 
+            username = UserServices.get_username_service(user_id)
+
             # Generate your JWT access/refresh tokens
             access_token = create_access_token(identity=user_id)
             refresh_token = create_refresh_token(identity=user_id)
@@ -122,10 +125,70 @@ class UserControllers:
             # Set cookies
             resp = make_response(
                 {
+                    "user_id": user_id,
+                    "username": username,
                     "messageTitle": "Login successful via Google.",
                     "message": "Enjoy your session!",
                 }
             )
+
+            if username:
+                set_access_cookies(
+                    resp, access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
+                )
+                set_refresh_cookies(
+                    resp,
+                    refresh_token,
+                    max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
+                )
+
+            return resp, 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def update_username_by_user_id_controller() -> tuple[Response, int]:
+        """test"""
+
+        new_username_details = request.get_json()
+
+        if new_username_details is None:
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+        try:
+            user_id = new_username_details.get("userId")
+            username = new_username_details.get("username")
+
+            if not user_id or not username:
+                return (
+                    jsonify({"error": "user_id, and username are required."}),
+                    400,
+                )
+
+            is_username_taken = UserServices.check_if_username_is_taken_service(
+                username
+            )
+
+            if is_username_taken:
+                return (
+                    jsonify({"error": f"Username '{username}' is already taken."}),
+                    400,
+                )
+
+            UserServices.update_username_by_user_id_service(user_id, username)
+
+            access_token = create_access_token(identity=user_id)
+            refresh_token = create_refresh_token(identity=user_id)
+
+            resp = make_response(
+                {
+                    "messageTitle": "Username updated!",
+                    "message": "You can now start using Libris. Enjoy your session.",
+                }
+            )
+
             set_access_cookies(
                 resp, access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
             )
@@ -135,7 +198,7 @@ class UserControllers:
                 max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
             )
 
-            return resp, 200
+            return resp, 201
 
         except Exception as e:
             traceback.print_exc()
