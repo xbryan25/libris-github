@@ -17,6 +17,8 @@ from .services import UserServices
 
 from app.utils.camel_case_converter import dict_keys_to_camel
 
+from app.exceptions.custom_exceptions import EmailInUseByGoogleError
+
 
 class UserControllers:
 
@@ -60,6 +62,10 @@ class UserControllers:
             )
 
             return resp, 200
+
+        except EmailInUseByGoogleError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400
 
         except Exception as e:
             traceback.print_exc()

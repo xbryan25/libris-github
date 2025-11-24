@@ -6,6 +6,8 @@ from app.common.dataclasses import User
 
 from app.utils import convert_user_dict
 
+from app.exceptions.custom_exceptions import EmailInUseByGoogleError
+
 
 class UserServices:
 
@@ -26,6 +28,11 @@ class UserServices:
 
         if not user:
             return None
+
+        if user and user["auth_provider"] == "google":
+            raise EmailInUseByGoogleError(
+                "Email address is linked to a Google account. Try logging in using Google."
+            )
 
         user["user_id"] = str(user["user_id"])
 
