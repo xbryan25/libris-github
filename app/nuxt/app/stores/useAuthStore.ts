@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+import { googleAuthCodeLogin } from 'vue3-google-login';
+
 export const useAuthStore = defineStore('auth', () => {
   const userId = ref<string | null>(null)
   const username = ref<string | null>(null)
@@ -12,6 +14,33 @@ export const useAuthStore = defineStore('auth', () => {
   ): Promise<{ messageTitle: string; message: string }> => {
     try {
       const response = await useUserLogin(email, password);
+
+      userId.value = response.user_id;
+      username.value = response.username;
+      isAuthenticated.value = true;
+
+      return {
+        messageTitle: response.messageTitle,
+        message: response.message,
+      };
+    } catch (error: any) {
+      console.error('Login failed in store:', error);
+
+      // rethrow error so the component’s try/catch can handle it
+      throw error;
+    }
+  }
+
+  const googleLogin = async (
+  ): Promise<{ messageTitle: string; message: string }> => {
+    try {
+      const googlePopupResponse = await googleAuthCodeLogin(); // may trigger COOP warning
+
+      console.log(googlePopupResponse)
+
+      const code = googlePopupResponse.code;
+
+      const response = await useUserGoogleLogin(code);
 
       userId.value = response.user_id;
       username.value = response.username;
@@ -45,5 +74,5 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { userId, username, isAuthenticated, login, signup, logout }
+  return { userId, username, isAuthenticated, login, googleLogin, signup, logout }
 })

@@ -25,3 +25,8 @@ class NotificationTypeEnum(enum.Enum):
     rent = "rent"
     purchase = "purchase"
     system = "system"
+
+
+class AuthProviderEnum(enum.Enum):
+    local = "local"
+    google = "google"

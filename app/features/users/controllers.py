@@ -11,10 +11,13 @@ from flask_jwt_extended import (
 
 import traceback
 import uuid
+import requests
 
 from .services import UserServices
 
 from app.utils.camel_case_converter import dict_keys_to_camel
+
+from app.exceptions.custom_exceptions import EmailInUseByGoogleError
 
 
 class UserControllers:
@@ -42,6 +45,7 @@ class UserControllers:
 
             resp = make_response(
                 {
+                    "user_id": user.user_id,
                     "username": user.username,
                     "messageTitle": "Login successful.",
                     "message": "Enjoy your session!",
@@ -58,6 +62,153 @@ class UserControllers:
             )
 
             return resp, 200
+
+        except EmailInUseByGoogleError as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 400
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def user_google_login_controller() -> tuple[Response, int]:
+        """add later"""
+
+        user_google_login_details = request.get_json()
+
+        if user_google_login_details is None:
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+        try:
+            data = request.get_json()
+            code = data.get("code")
+
+            if not code:
+                return jsonify({"error": "Missing Google authorization code"}), 400
+
+            token_resp = requests.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": code,
+                    "client_id": current_app.config.get("GOOGLE_CLIENT_ID", ""),
+                    "client_secret": current_app.config.get("GOOGLE_CLIENT_SECRET", ""),
+                    "redirect_uri": "postmessage",
+                    "grant_type": "authorization_code",
+                },
+            )
+
+            token_resp.raise_for_status()
+            tokens = token_resp.json()
+            id_token = tokens.get("id_token")
+
+            user_info_resp = requests.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+            )
+            user_info_resp.raise_for_status()
+            user_info = user_info_resp.json()
+
+            email_address = user_info["email"]
+            first_name = user_info["given_name"]
+            last_name = user_info["family_name"]
+            profile_image_url = user_info["picture"]
+
+            user = UserServices.get_user_by_email_address_service(email_address)
+
+            user_id = user["user_id"] if user else None
+            auth_provider = user["auth_provider"] if user else None
+
+            if user_id and auth_provider and auth_provider == "local":
+                return jsonify({"error": "Email address is already in use."}), 400
+
+            elif not user_id:
+                user_id = UserServices.user_google_signup_service(
+                    email_address, first_name, last_name, profile_image_url
+                )
+
+            username = UserServices.get_username_service(user_id)
+
+            # Generate your JWT access/refresh tokens
+            access_token = create_access_token(identity=user_id)
+            refresh_token = create_refresh_token(identity=user_id)
+
+            # Set cookies
+            resp = make_response(
+                {
+                    "user_id": user_id,
+                    "username": username,
+                    "messageTitle": "Login successful via Google.",
+                    "message": "Enjoy your session!",
+                }
+            )
+
+            if username:
+                set_access_cookies(
+                    resp, access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
+                )
+                set_refresh_cookies(
+                    resp,
+                    refresh_token,
+                    max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
+                )
+
+            return resp, 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def update_username_by_user_id_controller() -> tuple[Response, int]:
+        """test"""
+
+        new_username_details = request.get_json()
+
+        if new_username_details is None:
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+        try:
+            user_id = new_username_details.get("userId")
+            username = new_username_details.get("username")
+
+            if not user_id or not username:
+                return (
+                    jsonify({"error": "user_id, and username are required."}),
+                    400,
+                )
+
+            is_username_taken = UserServices.check_if_username_is_taken_service(
+                username
+            )
+
+            if is_username_taken:
+                return (
+                    jsonify({"error": f"Username '{username}' is already taken."}),
+                    400,
+                )
+
+            UserServices.update_username_by_user_id_service(user_id, username)
+
+            access_token = create_access_token(identity=user_id)
+            refresh_token = create_refresh_token(identity=user_id)
+
+            resp = make_response(
+                {
+                    "messageTitle": "Username updated!",
+                    "message": "You can now start using Libris. Enjoy your session.",
+                }
+            )
+
+            set_access_cookies(
+                resp, access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
+            )
+            set_refresh_cookies(
+                resp,
+                refresh_token,
+                max_age=current_app.config["REFRESH_COOKIE_MAX_AGE"],
+            )
+
+            return resp, 201
 
         except Exception as e:
             traceback.print_exc()

@@ -3,4 +3,5 @@ from .enums import (  # noqa: F401
     BookAvailabilityEnum,
     BookConditionEnum,
     NotificationTypeEnum,
+    AuthProviderEnum,
 )

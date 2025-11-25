@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from werkzeug.security import check_password_hash
 
-from app.common.constants import GenderEnum
+from app.common.constants import GenderEnum, AuthProviderEnum
 
 
 @dataclass
@@ -21,6 +21,8 @@ class User:
     trust_score: int
     profile_completed: datetime | None
     profile_image_url: str | None
+    auth_provider: AuthProviderEnum
+    is_email_verified: bool
 
     def check_password(self, password: str) -> bool:
         """Validate plaintext password against the hashed one."""

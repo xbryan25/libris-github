@@ -17,3 +17,8 @@ class WalletQueries:
         INNER JOIN users u ON rw.user_id = u.user_id
         WHERE u.user_id = %s;
     """
+    UPDATE_RESERVED_AMOUNT = """
+    UPDATE readits_wallets
+    SET reserved_amount = %s
+    WHERE user_id = %s
+    """

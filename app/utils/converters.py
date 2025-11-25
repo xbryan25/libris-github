@@ -4,7 +4,9 @@ from app.common.constants import (
     BookConditionEnum,
     BookAvailabilityEnum,
     NotificationTypeEnum,
+    AuthProviderEnum,
 )
+
 from app.common.dataclasses import User, Book, MyLibraryBook, Notification
 
 
@@ -43,6 +45,8 @@ def convert_user_dict(user: dict) -> User:
             else datetime.fromisoformat(user["profile_completed"])
         ),
         profile_image_url=user.get("profile_image_url"),
+        auth_provider=AuthProviderEnum(user["auth_provider"]),
+        is_email_verified=user["is_email_verified"],
     )
 
 
