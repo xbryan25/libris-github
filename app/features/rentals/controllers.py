@@ -39,6 +39,7 @@ class RentalControllers:
     def approve_rental_controller(rental_id: str) -> tuple[Response, int]:
         """
         Controller to approve a rental request.
+        This will capture fees, deduct from wallet, and log transaction.
         """
         try:
             user_id = get_jwt_identity()
@@ -64,9 +65,15 @@ class RentalControllers:
                 return jsonify({"error": error}), 400
 
             return (
-                jsonify({"message": "Rental approved successfully", "rental": result}),
+                jsonify(
+                    {
+                        "message": "Rental approved successfully. Fees captured and transaction logged.",
+                        "rental": result,
+                    }
+                ),
                 200,
             )
 
         except Exception as e:
+            traceback.print_exc()
             return jsonify({"error": str(e)}), 500

@@ -1,4 +1,5 @@
 from .repository import RentalRepository
+from app.features.wallets.repository import WalletRepository
 from typing import Any
 from app.utils import DateUtils
 from datetime import datetime
@@ -160,6 +161,10 @@ class RentalServices:
     ) -> tuple[dict[str, Any] | None, str | None]:
         """
         Approve a rental request with meetup time.
+        This will:
+        1. Set all_fees_captured to TRUE
+        2. Deduct amount from reserved_amount and balance
+        3. Create transaction log
         """
         try:
             if not meetup_time:
@@ -177,6 +182,8 @@ class RentalServices:
             owner_id = rental.get("owner_id")
             rent_status = rental.get("rent_status")
             time_window = rental.get("meetup_time_window", "")
+            renter_user_id = rental.get("user_id")
+            total_cost = int(rental.get("total_rent_cost", 0))
 
             # Verify the approver is the owner
             if str(owner_id) != str(approver_user_id):
@@ -194,11 +201,48 @@ class RentalServices:
             if not is_valid:
                 return None, error_msg
 
+            # Ensure renter_user_id is a string
+            if not renter_user_id:
+                return None, "Renter user ID not found"
+            renter_user_id_str = str(renter_user_id)
+
+            # Deduct from reserved_amount and balance
+            wallet_result = WalletRepository.deduct_from_reserved_and_balance(
+                renter_user_id_str, total_cost
+            )
+
+            if not wallet_result:
+                return None, "Insufficient funds or wallet not found"
+
+            wallet_id = wallet_result.get("wallet_id")
+
+            # Ensure wallet_id is a string
+            if not wallet_id:
+                return None, "Wallet ID not found after deduction"
+            wallet_id_str = str(wallet_id)
+
+            # Create transaction log
+            transaction_result = WalletRepository.insert_transaction(
+                wallet_id=wallet_id_str,
+                amount=-total_cost,  # Negative because it's a deduction
+                transaction_type="rent",
+            )
+
+            if not transaction_result:
+                logger.error(f"Failed to create transaction log for rental {rental_id}")
+                # Note: The wallet deduction already happened, so we log but don't fail
+
             # Approve the rental with 12-hour format time
             result = RentalRepository.approve_rental(rental_id, meetup_time_12hour)
 
             if not result:
                 return None, "Failed to update rental status"
+
+            logger.info(
+                f"Rental {rental_id} approved. "
+                f"Deducted {total_cost} from user {renter_user_id_str}. "
+                f"Transaction ID: {transaction_result.get('transaction_id') if transaction_result else 'N/A'}"
+            )
 
             return result, None
 

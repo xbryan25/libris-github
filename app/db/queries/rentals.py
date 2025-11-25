@@ -73,10 +73,11 @@ class RentalQueries:
         UPDATE rented_books
         SET
             rent_status = 'approved',
-            meetup_time = %s
+            meetup_time = %s,
+            all_fees_captured = TRUE
         WHERE rental_id = %s
         AND rent_status = 'pending'
-        RETURNING rental_id, rent_status, meetup_time;
+        RETURNING rental_id, rent_status, meetup_time, all_fees_captured;
     """
 
     GET_RENTAL_BY_ID = """
@@ -85,6 +86,7 @@ class RentalQueries:
             rb.rent_status,
             rb.user_id,
             rb.meetup_time_window,
+            rb.total_rent_cost,
             b.owner_id,
             b.title
         FROM rented_books rb

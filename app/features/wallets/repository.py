@@ -1,5 +1,5 @@
 from app.db.queries import CommonQueries, WalletQueries
-
+from datetime import datetime
 from flask import current_app
 
 
@@ -46,3 +46,59 @@ class WalletRepository:
             WalletQueries.INSERT_TRANSACTION_USING_USER_ID,
             (readits_transaction_amount, transaction_date, transaction_type, user_id),
         )
+
+    @staticmethod
+    def deduct_from_reserved_and_balance(user_id: str, amount: int) -> dict | None:
+        """
+        Deduct amount from both reserved_amount and balance.
+
+        Args:
+            user_id: The user's ID
+            amount: Amount to deduct from both reserved and balance
+
+        Returns:
+            dict with wallet_id, balance, reserved_amount or None if insufficient funds
+        """
+        db = current_app.extensions["db"]
+        last_updated = datetime.now()
+
+        result = db.fetch_one(
+            WalletQueries.DEDUCT_FROM_RESERVED_AND_BALANCE,
+            (amount, amount, last_updated, user_id, amount, amount),
+        )
+
+        return result
+
+    @staticmethod
+    def get_wallet_id_by_user_id(user_id: str) -> str | None:
+        """Get wallet_id for a given user_id."""
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(WalletQueries.GET_WALLET_ID_BY_USER_ID, (user_id,))
+
+        return result.get("wallet_id") if result else None
+
+    @staticmethod
+    def insert_transaction(
+        wallet_id: str, amount: int, transaction_type: str
+    ) -> dict | None:
+        """
+        Insert a transaction record.
+
+        Args:
+            wallet_id: The wallet ID
+            amount: Transaction amount (positive for credit, negative for debit)
+            transaction_type: Type of transaction (rent, purchase, topup, etc.)
+
+        Returns:
+            dict with transaction_id or None if failed
+        """
+        db = current_app.extensions["db"]
+        transaction_date = datetime.now()
+
+        result = db.fetch_one(
+            WalletQueries.INSERT_TRANSACTION_USING_WALLET_ID,
+            (wallet_id, amount, transaction_date, transaction_type),
+        )
+
+        return result
