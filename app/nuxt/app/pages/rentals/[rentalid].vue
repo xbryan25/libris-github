@@ -35,6 +35,12 @@ const fetchRentalData = async () => {
   }
 }
 
+// Handle approval success - reload the data
+const handleApprovalSuccess = async () => {
+  console.log('Approval successful, reloading data...');
+  await fetchRentalData();
+}
+
 onMounted(() => {
   fetchRentalData();
 });
@@ -138,6 +144,7 @@ onMounted(() => {
         v-if="currentItem.rent_status === 'pending'"
         :from="from"
         :rental-id="rentalid"
+        @approval-success="handleApprovalSuccess"
       />
     </div>
   </div>

@@ -2,20 +2,38 @@
 interface Props {
   from: string;
   rentalId: string;
+  timeWindow?: string;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const emit = defineEmits(['approval-success']);
+
+const isApprovalModalOpen = ref(false);
+const toast = useToast(); // Assuming you're using Nuxt UI toast
 
 const handleCancelRequest = () => {
   console.log('Cancel request');
+  // Add your cancel logic here
 }
 
-const handleApproveRental = () => {
-  console.log('Approve rental');
+const handleApproveClick = () => {
+  isApprovalModalOpen.value = true;
 }
 
 const handleRejectRental = () => {
   console.log('Reject rental');
+  // Add your reject logic here
+}
+
+const handleApprovalSuccess = () => {
+  // Show success message
+  toast.add({
+    title: 'Success',
+    description: 'Rental approved successfully!',
+    icon: 'i-lucide-check-circle',
+  });
+  
+  emit('approval-success');
 }
 </script>
 
@@ -46,19 +64,26 @@ const handleRejectRental = () => {
     </div>
     <div class="flex gap-3 mt-4">
       <button 
-        @click="handleApproveRental"
-        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+        @click="handleApproveClick"
+        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
       >
         <Icon name="lucide:check" class="w-4 h-4" />
         Approve Rental
       </button>
       <button 
         @click="handleRejectRental"
-        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
       >
         <Icon name="lucide:x" class="w-4 h-4" />
         Reject Rental
       </button>
     </div>
+
+    <!-- Approval Modal Component -->
+    <RentalApprovalModal
+      v-model="isApprovalModalOpen"
+      :rental-id="rentalId"
+      @success="handleApprovalSuccess"
+    />
   </div>
 </template>
