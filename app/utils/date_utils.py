@@ -46,3 +46,17 @@ class DateUtils:
             return str(date_input)
         except Exception:
             return str(date_input)
+
+    @staticmethod
+    def convert_to_12_hour_format(time_24: str) -> str:
+        """
+        Convert 24-hour time format (HH:MM) to 12-hour format (hh:MM AM/PM)
+        """
+        if not time_24:
+            return ""
+
+        try:
+            time_obj = datetime.strptime(time_24, "%H:%M")
+            return time_obj.strftime("%I:%M %p").lstrip("0")
+        except Exception:
+            return time_24

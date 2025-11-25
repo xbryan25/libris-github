@@ -1,4 +1,4 @@
-from flask import jsonify, Response
+from flask import jsonify, Response, request
 import traceback
 from flask_jwt_extended import get_jwt_identity
 from .services import RentalServices
@@ -33,4 +33,40 @@ class RentalControllers:
 
         except Exception as e:
             traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def approve_rental_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to approve a rental request.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            # Get request data
+            data = request.get_json()
+
+            if not data:
+                return jsonify({"error": "Invalid request body"}), 400
+
+            meetup_time = data.get("meetupTime")
+
+            if not meetup_time:
+                return jsonify({"error": "Meetup time is required"}), 400
+
+            result, error = RentalServices.approve_rental_request(
+                rental_id, meetup_time, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify({"message": "Rental approved successfully", "rental": result}),
+                200,
+            )
+
+        except Exception as e:
             return jsonify({"error": str(e)}), 500

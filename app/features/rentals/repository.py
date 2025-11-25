@@ -1,6 +1,9 @@
 from app.db.queries.rentals import RentalQueries
 from flask import current_app
 from typing import Any
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RentalRepository:
@@ -39,3 +42,32 @@ class RentalRepository:
 
         result = db.fetch_all(RentalQueries.GET_USER_LENDINGS_WITH_STATUS, params)
         return result if result else []
+
+    @staticmethod
+    def get_rental_by_id(rental_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve rental details by rental ID.
+        """
+        db = current_app.extensions["db"]
+        params = (rental_id,)
+        result = db.fetch_one(RentalQueries.GET_RENTAL_BY_ID, params)
+        return result
+
+    @staticmethod
+    def approve_rental(rental_id: str, meetup_time: str) -> dict[str, Any] | None:
+        """
+        Approve a rental and set meetup time.
+
+        Args:
+            rental_id (str): The rental ID to approve.
+            meetup_time (str): The meetup time (HH:MM format).
+
+        Returns:
+            dict[str, Any] | None: Updated rental details or None if update failed.
+        """
+        db = current_app.extensions["db"]
+        params = (meetup_time, rental_id)
+
+        result = db.fetch_one(RentalQueries.APPROVE_RENTAL, params)
+
+        return result

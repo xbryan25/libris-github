@@ -1,6 +1,10 @@
 from .repository import RentalRepository
 from typing import Any
 from app.utils import DateUtils
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RentalServices:
@@ -24,6 +28,7 @@ class RentalServices:
                 "rental_duration_days": rental.get("rental_duration_days", 0),
                 "meetup_location": rental.get("meetup_location", ""),
                 "meetup_time_window": rental.get("meetup_time_window", ""),
+                "meetup_time": rental.get("meetup_time"),
                 "pickup_confirmation_started_at": rental.get(
                     "pickup_confirmation_started_at"
                 ),
@@ -39,15 +44,9 @@ class RentalServices:
                     if rental.get("cost") not in (None, "")
                     else 0
                 ),
-                # Date and time separated
                 "meetup_date": (
                     DateUtils.extract_date(rental.get("meetup_date"))
                     if rental.get("meetup_date")
-                    else None
-                ),
-                "meetup_time": (
-                    DateUtils.extract_time(rental.get("meetup_time"))
-                    if rental.get("meetup_time")
                     else None
                 ),
                 "rent_start_date": (
@@ -85,6 +84,7 @@ class RentalServices:
                 "rental_duration_days": lending.get("rental_duration_days", 0),
                 "meetup_location": lending.get("meetup_location", ""),
                 "meetup_time_window": lending.get("meetup_time_window", ""),
+                "meetup_time": lending.get("meetup_time"),
                 "pickup_confirmation_started_at": lending.get(
                     "pickup_confirmation_started_at"
                 ),
@@ -100,15 +100,9 @@ class RentalServices:
                     if lending.get("cost") not in (None, "")
                     else 0
                 ),
-                # Date and time separated
                 "meetup_date": (
                     DateUtils.extract_date(lending.get("meetup_date"))
                     if lending.get("meetup_date")
-                    else None
-                ),
-                "meetup_time": (
-                    DateUtils.extract_time(lending.get("meetup_time"))
-                    if lending.get("meetup_time")
                     else None
                 ),
                 "rent_start_date": (
@@ -124,3 +118,90 @@ class RentalServices:
             }
             formatted_lendings.append(formatted_lending)
         return formatted_lendings
+
+    @staticmethod
+    def validate_meetup_time(meetup_time: str, time_window: str) -> tuple[bool, str]:
+        """
+        Validate if meetup time falls within the requested time window.
+
+        Args:
+            meetup_time (str): Time in 12-hour format (HH:MM AM/PM).
+            time_window (str): Time window like "10:00 AM - 1:00 PM".
+
+        Returns:
+            tuple[bool, str]: (is_valid, error_message)
+        """
+        if not time_window:
+            return True, ""
+
+        try:
+            parts = time_window.split("-")
+            if len(parts) != 2:
+                return True, ""
+
+            start_str = parts[0].strip()
+            end_str = parts[1].strip()
+
+            start_time = datetime.strptime(start_str, "%I:%M %p").time()
+            end_time = datetime.strptime(end_str, "%I:%M %p").time()
+            meetup = datetime.strptime(meetup_time, "%I:%M %p").time()
+
+            if meetup < start_time or meetup > end_time:
+                return False, f"Meetup time must be between {time_window}"
+
+            return True, ""
+        except Exception as e:
+            logger.error(f"Error validating time: {e}")
+            return True, ""
+
+    @staticmethod
+    def approve_rental_request(
+        rental_id: str, meetup_time: str, approver_user_id: str
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        """
+        Approve a rental request with meetup time.
+        """
+        try:
+            if not meetup_time:
+                return None, "Meetup time is required"
+
+            # Convert 24-hour format to 12-hour format
+            meetup_time_12hour = DateUtils.convert_to_12_hour_format(meetup_time)
+
+            # Get rental details
+            rental = RentalRepository.get_rental_by_id(rental_id)
+
+            if not rental:
+                return None, "Rental not found"
+
+            owner_id = rental.get("owner_id")
+            rent_status = rental.get("rent_status")
+            time_window = rental.get("meetup_time_window", "")
+
+            # Verify the approver is the owner
+            if str(owner_id) != str(approver_user_id):
+                return None, "Unauthorized: Only the book owner can approve this rental"
+
+            # Check if rental is in pending status
+            if rent_status != "pending":
+                return None, f"Rental cannot be approved. Current status: {rent_status}"
+
+            # Validate meetup time against time window
+            is_valid, error_msg = RentalServices.validate_meetup_time(
+                meetup_time_12hour, time_window
+            )
+
+            if not is_valid:
+                return None, error_msg
+
+            # Approve the rental with 12-hour format time
+            result = RentalRepository.approve_rental(rental_id, meetup_time_12hour)
+
+            if not result:
+                return None, "Failed to update rental status"
+
+            return result, None
+
+        except Exception as e:
+            logger.error(f"Error in approve_rental_request: {str(e)}")
+            return None, f"Error: {str(e)}"

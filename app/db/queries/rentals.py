@@ -68,3 +68,26 @@ class RentalQueries:
         AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
         'ongoing', 'awaiting_return_confirmation', 'rate_user');
     """
+
+    APPROVE_RENTAL = """
+        UPDATE rented_books
+        SET
+            rent_status = 'approved',
+            meetup_time = %s
+        WHERE rental_id = %s
+        AND rent_status = 'pending'
+        RETURNING rental_id, rent_status, meetup_time;
+    """
+
+    GET_RENTAL_BY_ID = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            rb.user_id,
+            rb.meetup_time_window,
+            b.owner_id,
+            b.title
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        WHERE rb.rental_id = %s;
+    """

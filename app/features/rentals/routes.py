@@ -91,3 +91,12 @@ def get_my_lendings() -> tuple[Response, int]:
         ]
     """
     return RentalControllers.get_user_lendings_controller()
+
+
+@rentals_bp.route("/<rental_id>/approve", methods=["POST"])
+@jwt_required()
+def approve_rental(rental_id: str) -> tuple[Response, int]:
+    """
+    Approve a rental request and set meetup time.
+    """
+    return RentalControllers.approve_rental_controller(rental_id)
