@@ -236,20 +236,21 @@ watch(isOpen, async (newValue) => {
     </template>
 
     <template #footer>
-      <div class="flex justify-end gap-3">
+      <div class="w-full flex justify-end gap-3">
         <UButton
-          color="gray"
           variant="ghost"
           @click="isOpen = false"
+          color="error"
           :disabled="submitting"
+          class="color-red-500 hover:bg-red-100 hover:text-red-600 cursor-pointer"
         >
           Cancel
         </UButton>
         <UButton
-          color="green"
           @click="handleSubmit"
           :disabled="!!validationError || submitting"
           :loading="submitting"
+          class="text-white bg-green-600 hover:bg-green-700 focus:ring-green-500 cursor-pointer"
         >
           <Icon v-if="!submitting" name="lucide:check" class="w-4 h-4 mr-2" />
           {{ submitting ? 'Approving...' : 'Confirm Approval' }}

@@ -50,7 +50,7 @@ const formatDateTime = (dateString: string) => {
         
         <div v-if="item.rent_status === 'pending'">
           <p class="text-sm text-muted">End Date</p>
-          <p class="font-medium">in {{ item.rental_duration_days }} days</p>
+          <p class="font-medium">Pending</p>
         </div>
         <div v-else>
           <p class="text-sm text-muted">End Date</p>

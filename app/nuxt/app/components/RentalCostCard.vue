@@ -34,7 +34,7 @@ defineProps<Props>();
       <div>
         <p class="text-xs text-muted mb-1">Total Cost</p>
         <div class="flex items-center gap-1">
-          <span class="text-sm font-bold">{{ from === 'rental' ? '-' : '+' }}</span>
+          <span class="text-sm font-bold text-accent">{{ from === 'rental' ? '-' : '+' }}</span>
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
           <span class="font-bold text-lg text-accent">{{ cost }}</span>
         </div>
