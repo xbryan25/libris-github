@@ -137,4 +137,46 @@ class RentalsQueries:
     WHERE rental_id = %s
     AND rent_status = 'pending'
     RETURNING rental_id;
-"""
+    """
+
+    UPDATE_APPROVED_TO_PICKUP_CONFIRMATION = """
+        UPDATE rented_books
+        SET
+            rent_status = 'awaiting_pickup_confirmation',
+            pickup_confirmation_started_at = NOW()
+        WHERE rent_status = 'approved'
+        AND meetup_date IS NOT NULL
+        AND meetup_time IS NOT NULL
+        AND (
+            -- Use same timezone as cleanup query
+            (meetup_date + meetup_time::time) - INTERVAL '1 hour'
+            <= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        AND (
+            -- Make sure we haven't passed the meetup time yet
+            (meetup_date + meetup_time::time)
+            >= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        RETURNING rental_id, user_id, book_id;
+    """
+
+    UPDATE_ONGOING_TO_RETURN_CONFIRMATION = """
+        UPDATE rented_books
+        SET
+            rent_status = 'awaiting_return_confirmation',
+            return_confirmation_started_at = NOW()
+        WHERE rent_status = 'ongoing'
+        AND rent_end_date IS NOT NULL
+        AND meetup_time IS NOT NULL
+        AND (
+            -- Use same timezone as cleanup query
+            (rent_end_date + meetup_time::time) - INTERVAL '1 hour'
+            <= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        AND (
+            -- Make sure we haven't passed the return time yet
+            (rent_end_date + meetup_time::time)
+            >= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        RETURNING rental_id, user_id, book_id;
+    """

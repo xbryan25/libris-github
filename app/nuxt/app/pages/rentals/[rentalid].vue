@@ -131,7 +131,7 @@ onMounted(() => {
 
       <!-- Confirmation Cards (for approved and ongoing) -->
       <RentalConfirmationCard
-        v-if="currentItem.rent_status === 'approved' || currentItem.rent_status === 'ongoing'"
+        v-if="currentItem.rent_status === 'approved' || currentItem.rent_status === 'ongoing' || currentItem.rent_status === 'awaiting_pickup_confirmation' || currentItem.rent_status === 'awaiting_return_confirmation'"
         :status="currentItem.rent_status"
         :from="from"
         :meetup-date="currentItem.meetup_date"

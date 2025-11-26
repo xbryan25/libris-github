@@ -228,3 +228,30 @@ def cleanup_expired_rentals_manual() -> tuple[Response, int]:
     except Exception as e:
         print(f"Error in cleanup: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@rentals_bp.route("/status-update", methods=["POST"])
+def update_rental_statuses_manual() -> tuple[Response, int]:
+    """
+    Manual endpoint to trigger rental status updates.
+    """
+    try:
+        from app.scheduler import run_status_update_now
+        from flask import current_app
+
+        result = run_status_update_now(current_app._get_current_object())
+
+        return (
+            jsonify(
+                {
+                    "message": "Status update completed",
+                    "pickup_updates": result["pickup_updates"]["updated"],
+                    "return_updates": result["return_updates"]["updated"],
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print(f"Error in status update: {str(e)}")
+        return jsonify({"error": str(e)}), 500
