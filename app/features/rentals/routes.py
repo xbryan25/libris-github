@@ -1,4 +1,5 @@
 from flask import Blueprint, Response
+from flask import jsonify
 from flask_jwt_extended import jwt_required
 from .controllers import RentalsController
 
@@ -194,3 +195,36 @@ def check_rental(book_id: str) -> tuple[Response, int]:
         500 if an unexpected error occurs.
     """
     return RentalsController.check_rental_controller(book_id)
+
+
+@rentals_bp.route("/test", methods=["GET"])
+@jwt_required()
+def test_route():
+    return jsonify({"message": "Rentals routes working!"}), 200
+
+
+@rentals_bp.route("/cleanup", methods=["POST"])
+def cleanup_expired_rentals_manual() -> tuple[Response, int]:
+    """
+    Manual endpoint to trigger cleanup of expired rentals.
+    """
+    try:
+        from app.scheduler import run_cleanup_now
+        from flask import current_app
+
+        result = run_cleanup_now(current_app._get_current_object())
+
+        return (
+            jsonify(
+                {
+                    "message": "Cleanup completed",
+                    "cleaned": result["cleaned"],
+                    "errors": result["errors"],
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        print(f"Error in cleanup: {str(e)}")
+        return jsonify({"error": str(e)}), 500
