@@ -25,19 +25,23 @@ class RentalsServices:
                 "image": rental.get("image"),
                 "from": rental.get("from", ""),
                 "all_fees_captured": rental.get("all_fees_captured", False),
-                "reserved_at": rental.get("reserved_at"),
-                "reservation_expires_at": rental.get("reservation_expires_at"),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    rental.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    rental.get("reservation_expires_at")
+                ),
                 "rental_duration_days": rental.get("rental_duration_days", 0),
                 "meetup_location": rental.get("meetup_location", ""),
                 "meetup_time_window": rental.get("meetup_time_window", ""),
                 "meetup_time": rental.get("meetup_time"),
-                "pickup_confirmation_started_at": rental.get(
-                    "pickup_confirmation_started_at"
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    rental.get("pickup_confirmation_started_at")
                 ),
                 "user_confirmed_pickup": rental.get("user_confirmed_pickup", False),
                 "owner_confirmed_pickup": rental.get("owner_confirmed_pickup", False),
-                "return_confirmation_started_at": rental.get(
-                    "return_confirmation_started_at"
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    rental.get("return_confirmation_started_at")
                 ),
                 "user_confirmed_return": rental.get("user_confirmed_return", False),
                 "owner_confirmed_return": rental.get("owner_confirmed_return", False),
@@ -81,19 +85,23 @@ class RentalsServices:
                 "image": lending.get("image"),
                 "to": lending.get("to", ""),
                 "all_fees_captured": lending.get("all_fees_captured", False),
-                "reserved_at": lending.get("reserved_at"),
-                "reservation_expires_at": lending.get("reservation_expires_at"),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    lending.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    lending.get("reservation_expires_at")
+                ),
                 "rental_duration_days": lending.get("rental_duration_days", 0),
                 "meetup_location": lending.get("meetup_location", ""),
                 "meetup_time_window": lending.get("meetup_time_window", ""),
                 "meetup_time": lending.get("meetup_time"),
-                "pickup_confirmation_started_at": lending.get(
-                    "pickup_confirmation_started_at"
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    lending.get("pickup_confirmation_started_at")
                 ),
                 "user_confirmed_pickup": lending.get("user_confirmed_pickup", False),
                 "owner_confirmed_pickup": lending.get("owner_confirmed_pickup", False),
-                "return_confirmation_started_at": lending.get(
-                    "return_confirmation_started_at"
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    lending.get("return_confirmation_started_at")
                 ),
                 "user_confirmed_return": lending.get("user_confirmed_return", False),
                 "owner_confirmed_return": lending.get("owner_confirmed_return", False),

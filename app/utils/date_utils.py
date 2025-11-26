@@ -60,3 +60,22 @@ class DateUtils:
             return time_obj.strftime("%I:%M %p").lstrip("0")
         except Exception:
             return time_24
+
+    @staticmethod
+    def format_datetime_to_iso(dt) -> str | None:
+        """
+        Convert datetime to ISO 8601 format string.
+        """
+        if not dt:
+            return None
+
+        if isinstance(dt, str):
+            try:
+                dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+            except Exception:
+                return dt
+
+        if isinstance(dt, datetime):
+            return dt.isoformat()
+
+        return None
