@@ -56,3 +56,9 @@ class WalletQueries:
         FROM readits_wallets
         WHERE user_id = %s;
     """
+
+    UPDATE_RESERVED_AMOUNT = """
+        UPDATE readits_wallets
+        SET reserved_amount = %s
+        WHERE user_id = %s
+    """

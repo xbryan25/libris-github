@@ -1,4 +1,4 @@
-from app.db.queries.rentals import RentalQueries
+from app.db.queries.rental_queries import RentalsQueries
 from flask import current_app
 from typing import Any
 import logging
@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RentalRepository:
+class RentalsRepository:
     @staticmethod
     def get_user_rentals_with_status(user_id: str) -> list[dict[str, Any]]:
         """
@@ -22,7 +22,7 @@ class RentalRepository:
         db = current_app.extensions["db"]
         params = (user_id,)
 
-        result = db.fetch_all(RentalQueries.GET_USER_RENTALS_WITH_STATUS, params)
+        result = db.fetch_all(RentalsQueries.GET_USER_RENTALS_WITH_STATUS, params)
         return result if result else []
 
     @staticmethod
@@ -40,7 +40,7 @@ class RentalRepository:
         db = current_app.extensions["db"]
         params = (user_id,)
 
-        result = db.fetch_all(RentalQueries.GET_USER_LENDINGS_WITH_STATUS, params)
+        result = db.fetch_all(RentalsQueries.GET_USER_LENDINGS_WITH_STATUS, params)
         return result if result else []
 
     @staticmethod
@@ -50,7 +50,7 @@ class RentalRepository:
         """
         db = current_app.extensions["db"]
         params = (rental_id,)
-        result = db.fetch_one(RentalQueries.GET_RENTAL_BY_ID, params)
+        result = db.fetch_one(RentalsQueries.GET_RENTAL_BY_ID, params)
         return result
 
     @staticmethod
@@ -68,7 +68,7 @@ class RentalRepository:
         db = current_app.extensions["db"]
         params = (meetup_time, rental_id)
 
-        result = db.fetch_one(RentalQueries.APPROVE_RENTAL, params)
+        result = db.fetch_one(RentalsQueries.APPROVE_RENTAL, params)
 
         return result
 
@@ -86,6 +86,61 @@ class RentalRepository:
         db = current_app.extensions["db"]
         params = (rental_id,)
 
-        result = db.fetch_one(RentalQueries.DELETE_RENTAL, params)
+        result = db.fetch_one(RentalsQueries.DELETE_RENTAL, params)
 
         return result
+
+    @staticmethod
+    def insert_rental(rental_data: dict) -> dict | None:
+        """
+        Insert a new rental record into the database with proper defaults.
+
+        Args:
+            rental_data (dict): Dictionary containing rental details:
+                - user_id
+                - book_id
+                - reserved_at
+                - reservation_expires_at
+                - total_rent_cost
+                - rental_duration_days
+                - meetup_time_window
+                - meetup_location
+                - meetup_date
+
+        Returns:
+            str: The rental_id of the inserted rental, or None if insertion failed.
+        """
+        db = current_app.extensions["db"]
+
+        params = (
+            rental_data["user_id"],
+            rental_data["book_id"],
+            rental_data["reserved_at"],
+            rental_data["reservation_expires_at"],
+            rental_data["total_rent_cost"],
+            rental_data["rental_duration_days"],
+            rental_data["meetup_time_window"],
+            rental_data["meetup_location"],
+            rental_data["meetup_date"],
+        )
+
+        result = db.fetch_one(RentalsQueries.INSERT_RENTAL, params)
+
+        if result:
+            rental_data["rental_id"] = result["rental_id"]
+            return rental_data
+
+        return None
+
+    @staticmethod
+    def exists_pending_rental(user_id: str, book_id: str) -> bool:
+        """
+        Check if a pending rental exists for the given user and book.
+
+        Returns:
+            bool: True if a pending rental exists, False otherwise.
+        """
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(RentalsQueries.CHECK_PENDING_RENTAL, (user_id, book_id))
+        return bool(result)

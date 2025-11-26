@@ -1,1 +1,6 @@
-from .enums import GenderEnum, BookAvailabilityEnum, BookConditionEnum  # noqa: F401
+from .enums import (  # noqa: F401
+    GenderEnum,
+    BookAvailabilityEnum,
+    BookConditionEnum,
+    AuthProviderEnum,
+)

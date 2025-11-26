@@ -1,17 +1,18 @@
-from .repository import RentalRepository
+from .repository import RentalsRepository
 from app.features.wallets.repository import WalletRepository
 from typing import Any
 from app.utils import DateUtils
 from datetime import datetime
 import logging
+import traceback
 
 logger = logging.getLogger(__name__)
 
 
-class RentalServices:
+class RentalsServices:
     @staticmethod
     def get_user_rentals_with_status(user_id: str) -> list[dict[str, Any]]:
-        raw_rentals = RentalRepository.get_user_rentals_with_status(user_id)
+        raw_rentals = RentalsRepository.get_user_rentals_with_status(user_id)
 
         formatted_rentals = []
         for rental in raw_rentals:
@@ -67,7 +68,7 @@ class RentalServices:
 
     @staticmethod
     def get_user_lendings_with_status(user_id: str) -> list[dict[str, Any]]:
-        raw_lendings = RentalRepository.get_user_lendings_with_status(user_id)
+        raw_lendings = RentalsRepository.get_user_lendings_with_status(user_id)
 
         formatted_lendings = []
         for lending in raw_lendings:
@@ -174,7 +175,7 @@ class RentalServices:
             meetup_time_12hour = DateUtils.convert_to_12_hour_format(meetup_time)
 
             # Get rental details
-            rental = RentalRepository.get_rental_by_id(rental_id)
+            rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
                 return None, "Rental not found"
@@ -194,7 +195,7 @@ class RentalServices:
                 return None, f"Rental cannot be approved. Current status: {rent_status}"
 
             # Validate meetup time against time window
-            is_valid, error_msg = RentalServices.validate_meetup_time(
+            is_valid, error_msg = RentalsServices.validate_meetup_time(
                 meetup_time_12hour, time_window
             )
 
@@ -233,7 +234,7 @@ class RentalServices:
                 # Note: The wallet deduction already happened, so we log but don't fail
 
             # Approve the rental with 12-hour format time
-            result = RentalRepository.approve_rental(rental_id, meetup_time_12hour)
+            result = RentalsRepository.approve_rental(rental_id, meetup_time_12hour)
 
             if not result:
                 return None, "Failed to update rental status"
@@ -261,7 +262,7 @@ class RentalServices:
         2. Deduct the total_cost from the renter's reserved_amount
         """
         try:
-            rental = RentalRepository.get_rental_by_id(rental_id)
+            rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
                 return None, "Rental not found"
@@ -294,7 +295,7 @@ class RentalServices:
                 # Continue with deletion even if wallet update fails
 
             # Delete the rental entry
-            delete_result = RentalRepository.delete_rental(rental_id)
+            delete_result = RentalsRepository.delete_rental(rental_id)
 
             if not delete_result:
                 return None, "Failed to delete rental entry"
@@ -315,3 +316,46 @@ class RentalServices:
         except Exception as e:
             logger.error(f"Error in reject_rental_request: {str(e)}")
             return None, f"Error: {str(e)}"
+
+    @staticmethod
+    def create_rental_service(rental_data: dict[str, Any]) -> dict[str, Any] | None:
+        """
+        Create a new rental request in the database.
+
+        Args:
+            rental_data (dict): A dictionary containing rental details:
+            - user_id
+            - book_id
+            - reserved_at
+            - reservation_expires_at
+            - total_rent_cost
+            - rental_duration_days
+            - meetup_time_window
+            - meetup_location
+            - meetup_date
+
+        Returns:
+            dict: The inserted rental record if successful, None otherwise.
+        """
+        try:
+            rental = RentalsRepository.insert_rental(rental_data)
+            if not rental:
+                return None
+            return rental
+        except Exception:
+            traceback.print_exc()
+            return None
+
+    @staticmethod
+    def check_pending_rental(user_id: str, book_id: str) -> bool:
+        """
+        Check if the user already has a pending rental for the given book.
+
+        Returns:
+            bool: True if a pending rental exists, False otherwise.
+        """
+        try:
+            return RentalsRepository.exists_pending_rental(user_id, book_id)
+        except Exception:
+            traceback.print_exc()
+            return False

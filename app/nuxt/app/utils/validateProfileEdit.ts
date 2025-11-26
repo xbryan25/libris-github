@@ -1,12 +1,12 @@
 import type { FormError } from '@nuxt/ui'
 
-export function validateProfileForm(state: any): FormError[] {
-	// Improved regex patterns
-	const nameRegex = /^[A-Za-z]+(?:\s+[A-Za-z]+)*$/ // Allows letters and spaces, but no leading/trailing spaces or consecutive spaces
-	const countryRegex = /^[A-Za-z\s]+$/ // Allows letters and spaces for country names
-	const phoneRegex = /^[0-9]{11}$/
-	const whitespaceRegex = /^\s*$/
+// Improved regex patterns
+const nameRegex = /^[A-Za-z]+(?:\s+[A-Za-z]+)*$/ // Allows letters and spaces, but no leading/trailing spaces or consecutive spaces
+const countryRegex = /^[A-Za-z\s]+$/ // Allows letters and spaces for country names
+const phoneRegex = /^[0-9]{11}$/
+const whitespaceRegex = /^\s*$/
 
+export function validatePersonalInfo(state: any): FormError[] {
 	const errors: FormError[] = []
 
 	// First name validation
@@ -34,17 +34,39 @@ export function validateProfileForm(state: any): FormError[] {
 
 		// Check if contains non-numeric characters
 		if (!/^[0-9]+$/.test(phoneValue)) {
-		errors.push({ name: 'phone_number', message: 'Phone number must contain only numbers.' })
+			errors.push({ name: 'phone_number', message: 'Phone number must contain only numbers.' })
 		}
 		// Check if not exactly 11 digits
 		else if (phoneValue.length !== 11) {
-		errors.push({ name: 'phone_number', message: 'Phone number must be exactly 11 digits.' })
+			errors.push({ name: 'phone_number', message: 'Phone number must be exactly 11 digits.' })
 		}
 	}
 
+	return errors
+}
+
+export function validateAddress(state: any): FormError[] {
+	const errors: FormError[] = []
+
 	// Country validation
-	if (state.address?.country && !whitespaceRegex.test(state.address.country) && !countryRegex.test(state.address.country.trim())) {
+	if (state.country && !whitespaceRegex.test(state.country) && !countryRegex.test(state.country.trim())) {
 		errors.push({ name: 'address.country', message: 'Country must contain only letters and spaces.' })
+	}
+
+	return errors
+}
+
+export function validateProfileForm(state: any): FormError[] {
+	const errors: FormError[] = []
+
+	// Validate personal info
+	const personalErrors = validatePersonalInfo(state)
+	errors.push(...personalErrors)
+
+	// Validate address
+	if (state.address) {
+		const addressErrors = validateAddress(state.address)
+		errors.push(...addressErrors)
 	}
 
 	return errors
