@@ -6,27 +6,26 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['approval-success']);
+const emit = defineEmits(['approval-success', 'rejection-success']);
 
 const isApprovalModalOpen = ref(false);
-const toast = useToast(); // Assuming you're using Nuxt UI toast
+const isRejectModalOpen = ref(false);
+const toast = useToast(); 
 
 const handleCancelRequest = () => {
   console.log('Cancel request');
-  // Add your cancel logic here
+
 }
 
 const handleApproveClick = () => {
   isApprovalModalOpen.value = true;
 }
 
-const handleRejectRental = () => {
-  console.log('Reject rental');
-  // Add your reject logic here
+const handleRejectClick = () => {
+  isRejectModalOpen.value = true;
 }
 
 const handleApprovalSuccess = () => {
-  // Show success message
   toast.add({
     title: 'Success',
     description: 'Rental approved successfully!',
@@ -34,6 +33,17 @@ const handleApprovalSuccess = () => {
   });
   
   emit('approval-success');
+}
+
+const handleRejectionSuccess = () => {
+  toast.add({
+    title: 'Rental Rejected',
+    description: 'The rental request has been rejected.',
+    icon: 'i-lucide-x-circle',
+  });
+  
+  emit('rejection-success');
+  navigateTo('/rentals');
 }
 </script>
 
@@ -71,7 +81,7 @@ const handleApprovalSuccess = () => {
         Approve Rental
       </button>
       <button 
-        @click="handleRejectRental"
+        @click="handleRejectClick"
         class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
       >
         <Icon name="lucide:x" class="w-4 h-4" />
@@ -84,6 +94,13 @@ const handleApprovalSuccess = () => {
       v-model="isApprovalModalOpen"
       :rental-id="rentalId"
       @success="handleApprovalSuccess"
+    />
+
+    <!-- Rejection Modal Component -->
+    <RentalRejectModal
+      v-model="isRejectModalOpen"
+      :rental-id="rentalId"
+      @success="handleRejectionSuccess"
     />
   </div>
 </template>

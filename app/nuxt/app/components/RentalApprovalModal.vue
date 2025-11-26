@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUserLendings } from '~/composables/useUserLendings';
-import { useRentalApproval } from '~/composables/useRentalApproval';
+import { useRentalActions } from '~/composables/useRentalActions';
 
 interface Props {
   rentalId: string;
@@ -12,7 +12,7 @@ const isOpen = defineModel<boolean>();
 const emit = defineEmits(['submit', 'success']);
 
 const { lendings, fetchUserLendings } = useUserLendings();
-const { approveRental, loading: submitting } = useRentalApproval();
+const { approveRental, loading: submitting } = useRentalActions();
 
 const approvalForm = reactive({
   meetupTime: '',

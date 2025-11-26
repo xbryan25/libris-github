@@ -1,9 +1,8 @@
-// composables/useRentalApproval.ts
 import { ref } from 'vue'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-export const useRentalApproval = () => {
+export const useRentalActions = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -32,7 +31,6 @@ export const useRentalApproval = () => {
       })
 
       console.log('Approval response:', response)
-      loading.value = false
       return { success: true }
     } catch (e: any) {
       console.error('Error approving rental:', e)
@@ -54,8 +52,59 @@ export const useRentalApproval = () => {
       }
       
       error.value = errorMessage
-      loading.value = false
       return { success: false, error: errorMessage }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const rejectRental = async (
+    rentalId: string,
+    reason: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    loading.value = true
+    error.value = null
+
+    console.log('Rejecting rental:', { rentalId, reason })
+    console.log('API URL:', `${API_URL}/api/rentals/${rentalId}/reject`)
+
+    try {
+      const response = await $apiFetch(`${API_URL}/api/rentals/${rentalId}/reject`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reason,
+        }),
+      })
+
+      console.log('Rejection response:', response)
+      return { success: true }
+    } catch (e: any) {
+      console.error('Error rejecting rental:', e)
+      console.error('Error details:', {
+        data: e.data,
+        status: e.status,
+        statusText: e.statusText,
+        message: e.message
+      })
+      
+      let errorMessage = 'Failed to reject rental'
+      
+      if (e.data?.error) {
+        errorMessage = e.data.error
+      } else if (e.message) {
+        errorMessage = e.message
+      } else if (e.statusText) {
+        errorMessage = `Request failed: ${e.statusText}`
+      }
+      
+      error.value = errorMessage
+      return { success: false, error: errorMessage }
+    } finally {
+      loading.value = false
     }
   }
 
@@ -63,5 +112,6 @@ export const useRentalApproval = () => {
     loading,
     error,
     approveRental,
+    rejectRental,
   }
 }
