@@ -102,3 +102,25 @@ class WalletRepository:
         )
 
         return result
+
+    @staticmethod
+    def deduct_from_reserved_amount(user_id: str, amount: int) -> dict | None:
+        """
+        Deduct amount from reserved_amount only (release reserved funds).
+
+        Args:
+            user_id: The user's ID
+            amount: Amount to deduct from reserved_amount
+
+        Returns:
+            dict with wallet_id, balance, reserved_amount or None if insufficient reserved funds
+        """
+        db = current_app.extensions["db"]
+        last_updated = datetime.now()
+
+        result = db.fetch_one(
+            WalletQueries.DEDUCT_FROM_RESERVED_AMOUNT,
+            (amount, last_updated, user_id, amount),
+        )
+
+        return result

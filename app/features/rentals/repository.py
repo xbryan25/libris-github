@@ -71,3 +71,21 @@ class RentalRepository:
         result = db.fetch_one(RentalQueries.APPROVE_RENTAL, params)
 
         return result
+
+    @staticmethod
+    def delete_rental(rental_id: str) -> dict[str, Any] | None:
+        """
+        Delete a rental entry from rented_books.
+
+        Args:
+            rental_id (str): The rental ID to delete.
+
+        Returns:
+            dict[str, Any] | None: Deleted rental ID or None if deletion failed.
+        """
+        db = current_app.extensions["db"]
+        params = (rental_id,)
+
+        result = db.fetch_one(RentalQueries.DELETE_RENTAL, params)
+
+        return result

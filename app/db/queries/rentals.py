@@ -93,3 +93,10 @@ class RentalQueries:
         JOIN books b ON rb.book_id = b.book_id
         WHERE rb.rental_id = %s;
     """
+
+    DELETE_RENTAL = """
+    DELETE FROM rented_books
+    WHERE rental_id = %s
+    AND rent_status = 'pending'
+    RETURNING rental_id;
+"""

@@ -30,6 +30,16 @@ class WalletQueries:
         RETURNING wallet_id, balance, reserved_amount;
     """
 
+    DEDUCT_FROM_RESERVED_AMOUNT = """
+        UPDATE readits_wallets
+        SET
+            reserved_amount = reserved_amount - %s,
+            last_updated = %s
+        WHERE user_id = %s
+        AND reserved_amount >= %s
+        RETURNING wallet_id, balance, reserved_amount;
+    """
+
     INSERT_TRANSACTION_USING_WALLET_ID = """
         INSERT INTO transactions (
             wallet_id,

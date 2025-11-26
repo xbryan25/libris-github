@@ -100,3 +100,27 @@ def approve_rental(rental_id: str) -> tuple[Response, int]:
     Approve a rental request and set meetup time.
     """
     return RentalControllers.approve_rental_controller(rental_id)
+
+
+@rentals_bp.route("/<rental_id>/reject", methods=["POST"])
+@jwt_required()
+def reject_rental(rental_id: str) -> tuple[Response, int]:
+    """
+    Reject a rental request and release reserved funds.
+
+    Request Body:
+        {
+            "reason": str (optional)
+        }
+
+    Response:
+        {
+            "message": str,
+            "result": {
+                "rental_id": str,
+                "reason": str,
+                "released_amount": int
+            }
+        }
+    """
+    return RentalControllers.reject_rental_controller(rental_id)

@@ -249,3 +249,69 @@ class RentalServices:
         except Exception as e:
             logger.error(f"Error in approve_rental_request: {str(e)}")
             return None, f"Error: {str(e)}"
+
+    @staticmethod
+    def reject_rental_request(
+        rental_id: str, reason: str, rejecter_user_id: str
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        """
+        Reject a rental request.
+        This will:
+        1. Delete the rental entry from rented_books
+        2. Deduct the total_cost from the renter's reserved_amount
+        """
+        try:
+            rental = RentalRepository.get_rental_by_id(rental_id)
+
+            if not rental:
+                return None, "Rental not found"
+
+            owner_id = rental.get("owner_id")
+            rent_status = rental.get("rent_status")
+            renter_user_id = rental.get("user_id")
+            total_cost = int(rental.get("total_rent_cost", 0))
+
+            # Verify the rejecter is the owner
+            if str(owner_id) != str(rejecter_user_id):
+                return None, "Unauthorized: Only the book owner can reject this rental"
+
+            if rent_status != "pending":
+                return None, f"Rental cannot be rejected. Current status: {rent_status}"
+
+            if not renter_user_id:
+                return None, "Renter user ID not found"
+            renter_user_id_str = str(renter_user_id)
+
+            wallet_result = WalletRepository.deduct_from_reserved_amount(
+                renter_user_id_str, total_cost
+            )
+
+            if not wallet_result:
+                logger.warning(
+                    f"Failed to release reserved funds for rental {rental_id}. "
+                    f"User: {renter_user_id_str}, Amount: {total_cost}"
+                )
+                # Continue with deletion even if wallet update fails
+
+            # Delete the rental entry
+            delete_result = RentalRepository.delete_rental(rental_id)
+
+            if not delete_result:
+                return None, "Failed to delete rental entry"
+
+            logger.info(
+                f"Rental {rental_id} rejected by owner {rejecter_user_id}. "
+                f"Reason: {reason}. "
+                f"Released {total_cost} from reserved_amount for user {renter_user_id_str}. "
+                f"Rental entry deleted."
+            )
+
+            return {
+                "rental_id": rental_id,
+                "reason": reason,
+                "released_amount": total_cost,
+            }, None
+
+        except Exception as e:
+            logger.error(f"Error in reject_rental_request: {str(e)}")
+            return None, f"Error: {str(e)}"
