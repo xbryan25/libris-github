@@ -6,15 +6,15 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['approval-success', 'rejection-success']);
+const emit = defineEmits(['approval-success', 'rejection-success', 'cancel-success']);
 
 const isApprovalModalOpen = ref(false);
 const isRejectModalOpen = ref(false);
+const isCancelModalOpen = ref(false);
 const toast = useToast(); 
 
-const handleCancelRequest = () => {
-  console.log('Cancel request');
-
+const handleCancelClick = () => {
+  isCancelModalOpen.value = true;
 }
 
 const handleApproveClick = () => {
@@ -45,6 +45,17 @@ const handleRejectionSuccess = () => {
   emit('rejection-success');
   navigateTo('/rentals');
 }
+
+const handleCancelSuccess = () => {
+  toast.add({
+    title: 'Request Cancelled',
+    description: 'Your rental request has been cancelled.',
+    icon: 'i-lucide-x-circle',
+  });
+  
+  emit('cancel-success');
+  navigateTo('/rentals');
+}
 </script>
 
 <template>
@@ -57,11 +68,18 @@ const handleRejectionSuccess = () => {
       </div>
     </div>
     <button 
-      @click="handleCancelRequest"
-      class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+      @click="handleCancelClick"
+      class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
     >
       Cancel Request
     </button>
+
+    <!-- Cancel Modal Component -->
+    <RentalCancelModal
+      v-model="isCancelModalOpen"
+      :rental-id="rentalId"
+      @success="handleCancelSuccess"
+    />
   </div>
 
   <!-- For Lending: Action Required -->

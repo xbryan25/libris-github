@@ -126,6 +126,24 @@ def reject_rental(rental_id: str) -> tuple[Response, int]:
     return RentalsController.reject_rental_controller(rental_id)
 
 
+@rentals_bp.route("/<rental_id>/cancel", methods=["POST"])
+@jwt_required()
+def cancel_rental(rental_id: str) -> tuple[Response, int]:
+    """
+    Cancel a rental request by the renter and release reserved funds.
+
+    Response:
+        {
+            "message": str,
+            "result": {
+                "rental_id": str,
+                "released_amount": int
+            }
+        }
+    """
+    return RentalsController.cancel_rental_controller(rental_id)
+
+
 @rentals_bp.route("/create", methods=["POST"])
 @jwt_required()
 def create_rental() -> tuple[Response, int]:

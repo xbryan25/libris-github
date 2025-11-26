@@ -237,3 +237,32 @@ class RentalsController:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def cancel_rental_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to cancel a rental request by the renter.
+        This will delete the rental entry and release reserved funds.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = RentalsServices.cancel_rental_request(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Rental cancelled successfully. Reserved funds have been released.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

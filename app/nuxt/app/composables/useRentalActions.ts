@@ -108,10 +108,57 @@ export const useRentalActions = () => {
     }
   }
 
+  const cancelRental = async (
+    rentalId: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    loading.value = true
+    error.value = null
+
+    console.log('Cancelling rental:', { rentalId })
+    console.log('API URL:', `${API_URL}/api/rentals/${rentalId}/cancel`)
+
+    try {
+      const response = await $apiFetch(`${API_URL}/api/rentals/${rentalId}/cancel`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      console.log('Cancel response:', response)
+      return { success: true }
+    } catch (e: any) {
+      console.error('Error cancelling rental:', e)
+      console.error('Error details:', {
+        data: e.data,
+        status: e.status,
+        statusText: e.statusText,
+        message: e.message
+      })
+      
+      let errorMessage = 'Failed to cancel rental'
+      
+      if (e.data?.error) {
+        errorMessage = e.data.error
+      } else if (e.message) {
+        errorMessage = e.message
+      } else if (e.statusText) {
+        errorMessage = `Request failed: ${e.statusText}`
+      }
+      
+      error.value = errorMessage
+      return { success: false, error: errorMessage }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
     approveRental,
     rejectRental,
+    cancelRental,
   }
 }

@@ -326,6 +326,71 @@ class RentalsServices:
             return None, f"Error: {str(e)}"
 
     @staticmethod
+    def cancel_rental_request(
+        rental_id: str, canceller_user_id: str
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        """
+        Cancel a rental request by the renter.
+        This will:
+        1. Delete the rental entry from rented_books
+        2. Deduct the total_cost from the renter's reserved_amount
+        """
+        try:
+            rental = RentalsRepository.get_rental_by_id(rental_id)
+
+            if not rental:
+                return None, "Rental not found"
+
+            renter_user_id = rental.get("user_id")
+            rent_status = rental.get("rent_status")
+            total_cost = int(rental.get("total_rent_cost", 0))
+
+            # Verify the canceller is the renter
+            if str(renter_user_id) != str(canceller_user_id):
+                return None, "Unauthorized: Only the renter can cancel this rental"
+
+            if rent_status != "pending":
+                return (
+                    None,
+                    f"Rental cannot be cancelled. Current status: {rent_status}",
+                )
+
+            if not renter_user_id:
+                return None, "Renter user ID not found"
+            renter_user_id_str = str(renter_user_id)
+
+            wallet_result = WalletRepository.deduct_from_reserved_amount(
+                renter_user_id_str, total_cost
+            )
+
+            if not wallet_result:
+                logger.warning(
+                    f"Failed to release reserved funds for rental {rental_id}. "
+                    f"User: {renter_user_id_str}, Amount: {total_cost}"
+                )
+                # Continue with deletion even if wallet update fails
+
+            delete_result = RentalsRepository.delete_rental(rental_id)
+
+            if not delete_result:
+                return None, "Failed to delete rental entry"
+
+            logger.info(
+                f"Rental {rental_id} cancelled by renter {canceller_user_id}. "
+                f"Released {total_cost} from reserved_amount for user {renter_user_id_str}. "
+                f"Rental entry deleted."
+            )
+
+            return {
+                "rental_id": rental_id,
+                "released_amount": total_cost,
+            }, None
+
+        except Exception as e:
+            logger.error(f"Error in cancel_rental_request: {str(e)}")
+            return None, f"Error: {str(e)}"
+
+    @staticmethod
     def create_rental_service(rental_data: dict[str, Any]) -> dict[str, Any] | None:
         """
         Create a new rental request in the database.
