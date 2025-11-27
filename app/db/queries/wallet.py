@@ -18,6 +18,15 @@ class WalletQueries:
         WHERE u.user_id = %s;
     """
 
+    ADD_RENTAL_FEE_TO_OWNER = """
+        UPDATE readits_wallets
+        SET
+            balance = balance + %s,
+            last_updated = %s
+        WHERE user_id = %s
+        RETURNING wallet_id, balance, user_id;
+    """
+
     DEDUCT_FROM_RESERVED_AND_BALANCE = """
         UPDATE readits_wallets
         SET

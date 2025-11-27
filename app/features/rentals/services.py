@@ -176,8 +176,9 @@ class RentalsServices:
         Approve a rental request with meetup time.
         This will:
         1. Set all_fees_captured to TRUE
-        2. Deduct amount from reserved_amount and balance
-        3. Create transaction log
+        2. Deduct amount from reserved_amount and balance (renter)
+        3. Add rental fee to owner's wallet
+        4. Create transaction logs for both users
         """
         try:
             if not meetup_time:
@@ -218,8 +219,9 @@ class RentalsServices:
             if not renter_user_id:
                 return None, "Renter user ID not found"
             renter_user_id_str = str(renter_user_id)
+            owner_user_id_str = str(owner_id)
 
-            # Deduct from reserved_amount and balance
+            # Deduct from renter's reserved_amount and balance
             wallet_result = WalletRepository.deduct_from_reserved_and_balance(
                 renter_user_id_str, total_cost
             )
@@ -227,23 +229,49 @@ class RentalsServices:
             if not wallet_result:
                 return None, "Insufficient funds or wallet not found"
 
-            wallet_id = wallet_result.get("wallet_id")
+            renter_wallet_id = wallet_result.get("wallet_id")
 
             # Ensure wallet_id is a string
-            if not wallet_id:
+            if not renter_wallet_id:
                 return None, "Wallet ID not found after deduction"
-            wallet_id_str = str(wallet_id)
+            renter_wallet_id_str = str(renter_wallet_id)
 
-            # Create transaction log
-            transaction_result = WalletRepository.insert_transaction(
-                wallet_id=wallet_id_str,
-                amount=-total_cost,  # Negative because it's a deduction
+            # Add rental fee to owner's wallet
+            owner_wallet_result = WalletRepository.add_rental_fee_to_owner(
+                owner_user_id_str, total_cost
+            )
+
+            if not owner_wallet_result:
+                logger.error(
+                    f"Failed to add rental fee to owner wallet for rental {rental_id}"
+                )
+                return None, "Failed to credit owner's wallet"
+
+            owner_wallet_id = str(owner_wallet_result.get("wallet_id"))
+
+            # Create transaction log for renter (deduction)
+            renter_transaction = WalletRepository.insert_transaction(
+                wallet_id=renter_wallet_id_str,
+                amount=-total_cost,
                 transaction_type="rent",
             )
 
-            if not transaction_result:
-                logger.error(f"Failed to create transaction log for rental {rental_id}")
-                # Note: The wallet deduction already happened, so we log but don't fail
+            # Create transaction log for owner (credit)
+            owner_transaction = WalletRepository.insert_transaction(
+                wallet_id=owner_wallet_id,
+                amount=total_cost,
+                transaction_type="rent",
+            )
+
+            if not renter_transaction:
+                logger.error(
+                    f"Failed to create renter transaction log for rental {rental_id}"
+                )
+
+            if not owner_transaction:
+                logger.error(
+                    f"Failed to create owner transaction log for rental {rental_id}"
+                )
 
             # Approve the rental with 12-hour format time
             result = RentalsRepository.approve_rental(rental_id, meetup_time_12hour)
@@ -253,14 +281,17 @@ class RentalsServices:
 
             logger.info(
                 f"Rental {rental_id} approved. "
-                f"Deducted {total_cost} from user {renter_user_id_str}. "
-                f"Transaction ID: {transaction_result.get('transaction_id') if transaction_result else 'N/A'}"
+                f"Deducted {total_cost} from renter {renter_user_id_str}. "
+                f"Added {total_cost} to owner {owner_user_id_str}. "
+                f"Renter transaction: {renter_transaction.get('transaction_id') if renter_transaction else 'N/A'}, "
+                f"Owner transaction: {owner_transaction.get('transaction_id') if owner_transaction else 'N/A'}"
             )
 
             return result, None
 
         except Exception as e:
             logger.error(f"Error in approve_rental_request: {str(e)}")
+            traceback.print_exc()
             return None, f"Error: {str(e)}"
 
     @staticmethod

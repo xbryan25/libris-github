@@ -86,7 +86,14 @@ class RentalsController:
             result = RentalsServices.create_rental_service(rental_data)
 
             if result is None:
-                return jsonify({"error": "Failed to create rental."}), 500
+                return (
+                    jsonify(
+                        {
+                            "error": "Failed to create rental. You may have insufficient balance."
+                        }
+                    ),
+                    400,
+                )
 
             resp = make_response(
                 {

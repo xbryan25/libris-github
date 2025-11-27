@@ -250,3 +250,25 @@ class WalletRepository:
         result = db.fetch_one(WalletQueries.INSERT_DEPOSIT_TRANSACTION, params)
 
         return result
+
+    @staticmethod
+    def add_rental_fee_to_owner(
+        owner_user_id: str, amount: int
+    ) -> dict[str, Any] | None:
+        """
+        Add rental fee to owner's wallet balance.
+
+        Args:
+            owner_user_id: The owner's user ID
+            amount: The rental fee amount to add
+
+        Returns:
+            dict with wallet_id, balance, user_id or None if failed
+        """
+        db = current_app.extensions["db"]
+        now = datetime.now()
+
+        params = (amount, now, owner_user_id)
+        result = db.fetch_one(WalletQueries.ADD_RENTAL_FEE_TO_OWNER, params)
+
+        return result
