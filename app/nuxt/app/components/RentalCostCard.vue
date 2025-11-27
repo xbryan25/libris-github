@@ -3,9 +3,12 @@ interface Props {
   cost: number;
   allFeesCaptured: boolean;
   from: string;
+  securityDeposit: number;
+  dailyRate: number;
+  rentalDurationDays: number;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -19,7 +22,7 @@ defineProps<Props>();
         <p class="text-xs text-muted mb-1">Security Deposit</p>
         <div class="flex items-center gap-1">
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
-          <span class="font-bold text-lg text-accent">15</span>
+          <span class="font-bold text-lg text-accent">{{ securityDeposit }}</span>
         </div>
       </div>
       
@@ -27,7 +30,15 @@ defineProps<Props>();
         <p class="text-xs text-muted mb-1">Daily Rate</p>
         <div class="flex items-center gap-1">
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
-          <span class="font-bold text-lg text-accent">3</span>
+          <span class="font-bold text-lg text-accent">{{ dailyRate }}</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs text-muted mb-1">Rental Cost ({{ rentalDurationDays }}d)</p>
+        <div class="flex items-center gap-1">
+          <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
+          <span class="font-bold text-lg text-accent">{{ dailyRate * rentalDurationDays }}</span>
         </div>
       </div>
 
@@ -39,11 +50,13 @@ defineProps<Props>();
           <span class="font-bold text-lg text-accent">{{ cost }}</span>
         </div>
       </div>
+    </div>
 
-      <div>
-        <p class="text-xs text-muted mb-1">Payment Status</p>
+    <div class="mt-4 pt-4 border-t border-base">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-muted">Payment Status</p>
         <p class="font-medium text-sm" :class="allFeesCaptured ? 'text-green-600' : 'text-yellow-600'">
-          {{ allFeesCaptured ? 'Captured' : 'Pending' }}
+          {{ allFeesCaptured ? '✓ Captured' : '⏳ Pending' }}
         </p>
       </div>
     </div>

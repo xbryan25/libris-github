@@ -17,7 +17,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(['refresh']);
 
-const { confirmPickup, loading } = useRentalActions();
+const { confirmPickup, confirmReturn, loading } = useRentalActions();
 const toast = useToast();
 
 const showPickupConfirmation = computed(() => {
@@ -54,12 +54,32 @@ const handleConfirmPickup = async () => {
       icon: 'i-lucide-check-circle',
     });
     
-    // Emit refresh event to parent
     emit('refresh');
   } else {
     toast.add({
       title: 'Error',
       description: result.error || 'Failed to confirm pickup',
+      icon: 'i-lucide-alert-circle',
+      color: 'red',
+    });
+  }
+};
+
+const handleConfirmReturn = async () => {
+  const result = await confirmReturn(props.rentalId);
+  
+  if (result.success) {
+    toast.add({
+      title: 'Success',
+      description: 'Return confirmed!',
+      icon: 'i-lucide-check-circle',
+    });
+    
+    emit('refresh');
+  } else {
+    toast.add({
+      title: 'Error',
+      description: result.error || 'Failed to confirm return',
       icon: 'i-lucide-alert-circle',
       color: 'red',
     });
@@ -141,10 +161,13 @@ const handleConfirmPickup = async () => {
 
     <button 
       v-if="!isReturnConfirmed"
-      class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+      @click="handleConfirmReturn"
+      :disabled="loading"
+      class="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
     >
-      <Icon name="lucide:check" class="w-5 h-5" />
-      {{ from === 'rental' ? 'Confirm Returned Book' : 'Confirm Received Back Book' }}
+      <Icon v-if="!loading" name="lucide:check" class="w-5 h-5" />
+      <Icon v-else name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+      {{ loading ? 'Confirming...' : (from === 'rental' ? 'Confirm Returned Book' : 'Confirm Received Back Book') }}
     </button>
   </div>
 </template>

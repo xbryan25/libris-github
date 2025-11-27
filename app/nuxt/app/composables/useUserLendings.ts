@@ -8,6 +8,8 @@ export type Lending = {
   author: string
   image: string
   to: string
+  security_deposit: number
+  daily_rate: number
   all_fees_captured: boolean
   reserved_at: string
   reservation_expires_at: string

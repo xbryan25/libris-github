@@ -119,6 +119,9 @@ onMounted(() => {
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
         :from="from"
+        :security-deposit="currentItem.security_deposit"
+        :daily-rate="currentItem.daily_rate"
+        :rental-duration-days="currentItem.rental_duration_days"
       />
 
       <!-- Rating Card (for rate_user and completed) -->

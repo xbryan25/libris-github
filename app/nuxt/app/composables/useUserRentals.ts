@@ -8,6 +8,8 @@ export type Rental = {
   author: string
   image: string
   from: string
+  security_deposit: number
+  daily_rate: number
   all_fees_captured: boolean
   reserved_at: string
   reservation_expires_at: string
