@@ -5,6 +5,7 @@ import type { Lending } from '~/composables/useUserLendings';
 interface Props {
   status: string;
   from: string;
+  deposit: number;
   item: Rental | Lending;
 }
 
@@ -33,7 +34,7 @@ const userRole = computed(() => {
           </p>
           <div class="flex items-center gap-2 mt-2">
             <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-green-600" />
-            <span class="text-green-800 font-bold text-xl">15 Readits</span>
+            <span class="text-green-800 font-bold text-xl">{{ props.deposit }} Readits</span>
           </div>
         </div>
       </div>
@@ -46,29 +47,8 @@ const userRole = computed(() => {
       </h2>
       <p class="text-center text-muted mb-6">How would you rate this user?</p>
       
-      <!-- Star Rating -->
-      <div class="flex justify-center gap-3 mb-6">
-        <Icon 
-          v-for="star in 5" 
-          :key="star"
-          name="lucide:star" 
-          class="w-12 h-12 cursor-pointer hover:scale-110 transition-transform fill-current text-gray-300 hover:text-yellow-500"
-        />
-      </div>
+      <!-- rating stuff herer-->
 
-      <!-- Comment Box -->
-      <div class="mb-4">
-        <textarea 
-          placeholder="Leave a comment"
-          class="w-full p-3 border border-base rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-surface"
-          rows="4"
-        ></textarea>
-      </div>
-
-      <!-- Submit Button -->
-      <button class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-        Submit Rating
-      </button>
     </div>
 
     <!-- Completed Message - Show if status is completed -->

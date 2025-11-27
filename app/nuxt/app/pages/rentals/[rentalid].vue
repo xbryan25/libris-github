@@ -128,6 +128,7 @@ onMounted(() => {
       <RentalRatingCard
         v-if="currentItem.rent_status === 'rate_user' || currentItem.rent_status === 'completed'"
         :status="currentItem.rent_status"
+        :deposit="currentItem.security_deposit"
         :from="from"
         :item="currentItem"
       />
