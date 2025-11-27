@@ -62,3 +62,32 @@ class WalletQueries:
         SET reserved_amount = %s
         WHERE user_id = %s
     """
+
+    RETURN_SECURITY_DEPOSIT_TO_RENTER = """
+        UPDATE readits_wallets
+        SET
+            balance = balance + %s,
+            last_updated = %s
+        WHERE user_id = %s
+        RETURNING wallet_id, balance, user_id;
+    """
+
+    DEDUCT_SECURITY_DEPOSIT_FROM_OWNER = """
+        UPDATE readits_wallets
+        SET
+            balance = balance - %s,
+            last_updated = %s
+        WHERE user_id = %s AND balance >= %s
+        RETURNING wallet_id, balance, user_id;
+    """
+
+    INSERT_DEPOSIT_TRANSACTION = """
+        INSERT INTO transactions (
+            wallet_id,
+            amount,
+            transaction_date,
+            type
+        )
+        VALUES (%s, %s, %s, %s)
+        RETURNING transaction_id, wallet_id, amount, type, transaction_date;
+    """

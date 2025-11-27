@@ -24,6 +24,8 @@ class RentalsServices:
                 "author": rental.get("author", ""),
                 "image": rental.get("image"),
                 "from": rental.get("from", ""),
+                "security_deposit": rental.get("security_deposit", 0),
+                "daily_rate": rental.get("daily_rent_price", 0),
                 "all_fees_captured": rental.get("all_fees_captured", False),
                 "reserved_at": DateUtils.format_datetime_to_iso(
                     rental.get("reserved_at")
@@ -84,6 +86,8 @@ class RentalsServices:
                 "author": lending.get("author", ""),
                 "image": lending.get("image"),
                 "to": lending.get("to", ""),
+                "security_deposit": lending.get("security_deposit", 0),
+                "daily_rate": lending.get("daily_rent_price", 0),
                 "all_fees_captured": lending.get("all_fees_captured", False),
                 "reserved_at": DateUtils.format_datetime_to_iso(
                     lending.get("reserved_at")
@@ -488,4 +492,115 @@ class RentalsServices:
 
         except Exception as e:
             logger.error(f"Error in confirm_pickup: {str(e)}")
+            return None, f"Error: {str(e)}"
+
+    @staticmethod
+    def confirm_return(
+        rental_id: str, confirmer_user_id: str
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        """
+        Confirm book return by either the renter or owner.
+        When both confirm, move to 'rate_user' status and return security deposit.
+        """
+        try:
+            rental = RentalsRepository.get_rental_by_id_full_return(rental_id)
+
+            if not rental:
+                return None, "Rental not found"
+
+            owner_id = rental.get("owner_id")
+            renter_user_id = rental.get("user_id")
+            rent_status = rental.get("rent_status")
+            user_confirmed = rental.get("user_confirmed_return", False)
+            owner_confirmed = rental.get("owner_confirmed_return", False)
+
+            # Check if rental is in correct status
+            if rent_status != "awaiting_return_confirmation":
+                return None, f"Cannot confirm return. Current status: {rent_status}"
+
+            # Determine if confirmer is owner or renter
+            is_owner = str(owner_id) == str(confirmer_user_id)
+            is_renter = str(renter_user_id) == str(confirmer_user_id)
+
+            if not is_owner and not is_renter:
+                return None, "Unauthorized: Only the renter or owner can confirm return"
+
+            # Update confirmation status
+            if is_owner and owner_confirmed:
+                return None, "You have already confirmed return"
+            if is_renter and user_confirmed:
+                return None, "You have already confirmed return"
+
+            # Confirm return
+            result = RentalsRepository.confirm_return(rental_id, is_owner, is_renter)
+
+            if not result:
+                return None, "Failed to confirm return"
+
+            # Check if both users have now confirmed (status changed to 'rate_user')
+            new_status = result.get("rent_status")
+
+            if new_status == "rate_user":
+                # Both users confirmed - return security deposit
+                security_deposit = result.get("security_deposit", 0)
+                renter_id = str(result.get("user_id"))
+                owner_id_str = str(result.get("owner_id"))
+
+                if security_deposit > 0:
+                    # Return deposit from owner to renter
+                    renter_wallet, owner_wallet = (
+                        WalletRepository.return_security_deposit(
+                            renter_id, owner_id_str, security_deposit
+                        )
+                    )
+
+                    if not renter_wallet or not owner_wallet:
+                        logger.error(
+                            f"Failed to return security deposit for rental {rental_id}. "
+                            f"Deposit amount: {security_deposit}"
+                        )
+                        return (
+                            None,
+                            "Failed to return security deposit. Owner may have insufficient funds.",
+                        )
+
+                    # Create transaction logs
+                    renter_wallet_id = str(renter_wallet.get("wallet_id"))
+                    owner_wallet_id = str(owner_wallet.get("wallet_id"))
+
+                    # Positive transaction for renter (receiving deposit back)
+                    renter_transaction = WalletRepository.insert_deposit_transaction(
+                        renter_wallet_id, security_deposit, "deposit_received"
+                    )
+
+                    # Negative transaction for owner (returning deposit)
+                    owner_transaction = WalletRepository.insert_deposit_transaction(
+                        owner_wallet_id, -security_deposit, "deposit_returned"
+                    )
+
+                    if not renter_transaction or not owner_transaction:
+                        logger.warning(
+                            f"Security deposit returned but failed to create transaction logs "
+                            f"for rental {rental_id}"
+                        )
+
+                    logger.info(
+                        f"Security deposit of {security_deposit} returned for rental {rental_id}. "
+                        f"From owner {owner_id_str} to renter {renter_id}. "
+                        f"Renter transaction (deposit_received): "
+                        f"{renter_transaction.get('transaction_id') if renter_transaction else 'N/A'}, "
+                        f"Owner transaction (deposit_returned): "
+                        f"{owner_transaction.get('transaction_id') if owner_transaction else 'N/A'}"
+                    )
+
+            logger.info(
+                f"Return confirmed for rental {rental_id} by "
+                f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
+            )
+
+            return result, None
+
+        except Exception as e:
+            logger.error(f"Error in confirm_return: {str(e)}")
+            traceback.print_exc()
             return None, f"Error: {str(e)}"

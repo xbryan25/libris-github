@@ -264,3 +264,12 @@ def confirm_pickup(rental_id: str) -> tuple[Response, int]:
     Confirm book pickup by either renter or owner.
     """
     return RentalsController.confirm_pickup_controller(rental_id)
+
+
+@rentals_bp.route("/<rental_id>/confirm-return", methods=["POST"])
+@jwt_required()
+def confirm_return(rental_id: str) -> tuple[Response, int]:
+    """
+    Confirm book return by either renter or owner.
+    """
+    return RentalsController.confirm_return_controller(rental_id)

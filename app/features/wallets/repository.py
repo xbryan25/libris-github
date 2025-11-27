@@ -1,6 +1,7 @@
 from app.db.queries import CommonQueries, WalletQueries
 from datetime import datetime
 from flask import current_app
+from typing import Any
 
 
 class WalletRepository:
@@ -168,5 +169,84 @@ class WalletRepository:
             WalletQueries.DEDUCT_FROM_RESERVED_AMOUNT,
             (amount, last_updated, user_id, amount),
         )
+
+        return result
+
+    @staticmethod
+    def return_security_deposit(
+        renter_user_id: str, owner_user_id: str, deposit_amount: int
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+        """
+        Return security deposit from owner to renter.
+        Deducts from owner's wallet and adds to renter's wallet.
+
+        Args:
+            renter_user_id: The renter's user ID
+            owner_user_id: The owner's user ID
+            deposit_amount: The security deposit amount to return
+
+        Returns:
+            tuple: (renter_wallet_result, owner_wallet_result) or (None, None) if failed
+        """
+
+        db = current_app.extensions["db"]
+        now = datetime.now()
+
+        # Add to renter's wallet
+        renter_params = (deposit_amount, now, renter_user_id)
+        renter_result = db.fetch_one(
+            WalletQueries.RETURN_SECURITY_DEPOSIT_TO_RENTER, renter_params
+        )
+
+        if not renter_result:
+            return None, None
+
+        # Deduct from owner's wallet
+        owner_params = (deposit_amount, now, owner_user_id, deposit_amount)
+        owner_result = db.fetch_one(
+            WalletQueries.DEDUCT_SECURITY_DEPOSIT_FROM_OWNER, owner_params
+        )
+
+        if not owner_result:
+            # Rollback renter's wallet if owner doesn't have sufficient funds
+            rollback_params = (deposit_amount, now, renter_user_id)
+            db.fetch_one(
+                """
+                UPDATE readits_wallets
+                SET
+                    balance = balance - %s,
+                    last_updated = %s
+                WHERE user_id = %s
+                RETURNING wallet_id;
+                """,
+                rollback_params,
+            )
+            return None, None
+
+        return renter_result, owner_result
+
+    @staticmethod
+    def insert_deposit_transaction(
+        wallet_id: str, amount: int, transaction_type: str
+    ) -> dict[str, Any] | None:
+        """
+        Create a transaction log for deposit return/received.
+
+        Args:
+            wallet_id: The wallet ID
+            amount: The transaction amount (positive for renter, negative for owner)
+            transaction_type: Either 'deposit_received' or 'deposit_returned'
+
+        Returns:
+            dict with transaction details or None if failed
+        """
+        from app.db.queries.wallet import WalletQueries
+        from datetime import datetime
+
+        db = current_app.extensions["db"]
+        now = datetime.now()
+
+        params = (wallet_id, amount, now, transaction_type)
+        result = db.fetch_one(WalletQueries.INSERT_DEPOSIT_TRANSACTION, params)
 
         return result

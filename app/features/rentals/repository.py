@@ -180,3 +180,34 @@ class RentalsRepository:
 
         result = db.fetch_one(RentalsQueries.CONFIRM_PICKUP, params)
         return result
+
+    @staticmethod
+    def get_rental_by_id_full_return(rental_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve full rental details by rental ID including return confirmation statuses.
+        """
+        db = current_app.extensions["db"]
+        params = (rental_id,)
+        result = db.fetch_one(RentalsQueries.GET_RENTAL_BY_ID_FULL_RETURN, params)
+        return result
+
+    @staticmethod
+    def confirm_return(
+        rental_id: str, is_owner: bool, is_renter: bool
+    ) -> dict[str, Any] | None:
+        """
+        Confirm return by owner or renter.
+        If both have confirmed, update status to 'rate_user'.
+        """
+        db = current_app.extensions["db"]
+
+        params = (
+            is_owner,
+            is_renter,
+            is_owner,
+            is_renter,
+            rental_id,
+        )
+
+        result = db.fetch_one(RentalsQueries.CONFIRM_RETURN, params)
+        return result

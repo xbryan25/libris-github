@@ -44,6 +44,8 @@ class RentalsQueries:
             b.book_id,
             b.title,
             b.author,
+            b.security_deposit,
+            b.daily_rent_price,
             bi.image_url AS image,
             u.username AS "from",
             rb.all_fees_captured,
@@ -73,14 +75,16 @@ class RentalsQueries:
     """
 
     GET_USER_LENDINGS_WITH_STATUS = """
-         SELECT
+        SELECT
             rb.rental_id,
             rb.rent_status,
             b.book_id,
             b.title,
             b.author,
+            b.security_deposit,
+            b.daily_rent_price,
             bi.image_url AS image,
-            u.username AS "to",  -- Changed from "from" to "to" (person borrowing)
+            u.username AS "to",
             rb.all_fees_captured,
             rb.reserved_at,
             rb.reservation_expires_at,
@@ -100,7 +104,7 @@ class RentalsQueries:
             rb.total_rent_cost AS cost
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
-        JOIN users u ON rb.user_id = u.user_id  -- Changed: join to renter (user_id)
+        JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE b.owner_id = %s
         AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
@@ -233,3 +237,48 @@ class RentalsQueries:
             rent_start_date,
             rent_end_date;
     """
+
+    GET_RENTAL_BY_ID_FULL_RETURN = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            rb.user_id,
+            rb.total_rent_cost,
+            rb.user_confirmed_return,
+            rb.owner_confirmed_return,
+            b.owner_id,
+            b.title,
+            b.security_deposit
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        WHERE rb.rental_id = %s;
+    """
+
+    CONFIRM_RETURN = """
+    UPDATE rented_books rb
+    SET
+        owner_confirmed_return = CASE
+            WHEN %s THEN TRUE
+            ELSE owner_confirmed_return
+        END,
+        user_confirmed_return = CASE
+            WHEN %s THEN TRUE
+            ELSE user_confirmed_return
+        END,
+        rent_status = CASE
+            WHEN (owner_confirmed_return OR %s) AND (user_confirmed_return OR %s)
+            THEN 'rate_user'::rental_status_enum
+            ELSE 'awaiting_return_confirmation'::rental_status_enum
+        END
+    FROM books b
+    WHERE rb.rental_id = %s
+    AND rb.book_id = b.book_id
+    RETURNING
+        rb.rental_id,
+        rb.rent_status,
+        rb.user_confirmed_return,
+        rb.owner_confirmed_return,
+        rb.user_id,
+        b.owner_id,
+        b.security_deposit;
+"""
