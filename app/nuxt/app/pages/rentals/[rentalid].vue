@@ -134,9 +134,15 @@ onMounted(() => {
         v-if="currentItem.rent_status === 'approved' || currentItem.rent_status === 'ongoing' || currentItem.rent_status === 'awaiting_pickup_confirmation' || currentItem.rent_status === 'awaiting_return_confirmation'"
         :status="currentItem.rent_status"
         :from="from"
+        :rental-id="rentalid"
         :meetup-date="currentItem.meetup_date"
         :meetup-time="currentItem.meetup_time"
         :rent-end-date="currentItem.rent_end_date"
+        :user-confirmed-pickup="currentItem.user_confirmed_pickup"
+        :owner-confirmed-pickup="currentItem.owner_confirmed_pickup"
+        :user-confirmed-return="currentItem.user_confirmed_return"
+        :owner-confirmed-return="currentItem.owner_confirmed_return"
+        @refresh="fetchRentalData"
       />
 
       <!-- Pending Actions -->

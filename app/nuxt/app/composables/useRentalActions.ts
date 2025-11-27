@@ -154,11 +154,50 @@ export const useRentalActions = () => {
     }
   }
 
+  const confirmPickup = async (
+  rentalId: string
+): Promise<{ success: boolean; error?: string; data?: any }> => {
+  loading.value = true
+  error.value = null
+
+  console.log('Confirming pickup:', { rentalId })
+
+  try {
+    const response = await $apiFetch(`${API_URL}/api/rentals/${rentalId}/confirm-pickup`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    console.log('Confirm pickup response:', response)
+    return { success: true, data: response}
+  } catch (e: any) {
+    console.error('Error confirming pickup:', e)
+    
+    let errorMessage = 'Failed to confirm pickup'
+    
+    if (e.data?.error) {
+      errorMessage = e.data.error
+    } else if (e.message) {
+      errorMessage = e.message
+    }
+    
+    error.value = errorMessage
+    return { success: false, error: errorMessage }
+  } finally {
+    loading.value = false
+  }
+}
+
+
   return {
     loading,
     error,
     approveRental,
     rejectRental,
     cancelRental,
+    confirmPickup
   }
 }
