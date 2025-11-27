@@ -432,3 +432,60 @@ class RentalsServices:
         except Exception:
             traceback.print_exc()
             return False
+
+    @staticmethod
+    def confirm_pickup(
+        rental_id: str, confirmer_user_id: str
+    ) -> tuple[dict[str, Any] | None, str | None]:
+        """
+        Confirm book pickup by either the renter or owner.
+        When both confirm, move to 'ongoing' status and set rent_start_date.
+        """
+        try:
+            rental = RentalsRepository.get_rental_by_id_full(rental_id)
+
+            if not rental:
+                return None, "Rental not found"
+
+            owner_id = rental.get("owner_id")
+            renter_user_id = rental.get("user_id")
+            rent_status = rental.get("rent_status")
+            user_confirmed = rental.get("user_confirmed_pickup", False)
+            owner_confirmed = rental.get("owner_confirmed_pickup", False)
+            rental_duration = rental.get("rental_duration_days", 0)
+
+            # Check if rental is in correct status
+            if rent_status != "awaiting_pickup_confirmation":
+                return None, f"Cannot confirm pickup. Current status: {rent_status}"
+
+            # Determine if confirmer is owner or renter
+            is_owner = str(owner_id) == str(confirmer_user_id)
+            is_renter = str(renter_user_id) == str(confirmer_user_id)
+
+            if not is_owner and not is_renter:
+                return None, "Unauthorized: Only the renter or owner can confirm pickup"
+
+            # Update confirmation status
+            if is_owner and owner_confirmed:
+                return None, "You have already confirmed pickup"
+            if is_renter and user_confirmed:
+                return None, "You have already confirmed pickup"
+
+            # Confirm pickup
+            result = RentalsRepository.confirm_pickup(
+                rental_id, is_owner, is_renter, rental_duration
+            )
+
+            if not result:
+                return None, "Failed to confirm pickup"
+
+            logger.info(
+                f"Pickup confirmed for rental {rental_id} by "
+                f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
+            )
+
+            return result, None
+
+        except Exception as e:
+            logger.error(f"Error in confirm_pickup: {str(e)}")
+            return None, f"Error: {str(e)}"

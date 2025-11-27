@@ -144,3 +144,39 @@ class RentalsRepository:
 
         result = db.fetch_one(RentalsQueries.CHECK_PENDING_RENTAL, (user_id, book_id))
         return bool(result)
+
+    @staticmethod
+    def get_rental_by_id_full(rental_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve full rental details by rental ID including confirmation statuses.
+        """
+        db = current_app.extensions["db"]
+        params = (rental_id,)
+        result = db.fetch_one(RentalsQueries.GET_RENTAL_BY_ID_FULL, params)
+        return result
+
+    @staticmethod
+    def confirm_pickup(
+        rental_id: str, is_owner: bool, is_renter: bool, rental_duration: int
+    ) -> dict[str, Any] | None:
+        """
+        Confirm pickup by owner or renter.
+        If both have confirmed, update status to 'ongoing' and set rent_start/end_date.
+        """
+        db = current_app.extensions["db"]
+
+        params = (
+            is_owner,
+            is_renter,
+            is_owner,
+            is_renter,
+            is_owner,
+            is_renter,
+            is_owner,
+            is_renter,
+            rental_duration,
+            rental_id,
+        )
+
+        result = db.fetch_one(RentalsQueries.CONFIRM_PICKUP, params)
+        return result

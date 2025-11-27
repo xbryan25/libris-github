@@ -266,3 +266,32 @@ class RentalsController:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def confirm_pickup_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to confirm book pickup by either user or owner.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = RentalsServices.confirm_pickup(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Pickup confirmed successfully.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

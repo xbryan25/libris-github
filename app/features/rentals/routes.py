@@ -255,3 +255,12 @@ def update_rental_statuses_manual() -> tuple[Response, int]:
     except Exception as e:
         print(f"Error in status update: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@rentals_bp.route("/<rental_id>/confirm-pickup", methods=["POST"])
+@jwt_required()
+def confirm_pickup(rental_id: str) -> tuple[Response, int]:
+    """
+    Confirm book pickup by either renter or owner.
+    """
+    return RentalsController.confirm_pickup_controller(rental_id)

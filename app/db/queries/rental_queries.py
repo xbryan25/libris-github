@@ -180,3 +180,56 @@ class RentalsQueries:
         )
         RETURNING rental_id, user_id, book_id;
     """
+
+    GET_RENTAL_BY_ID_FULL = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            rb.user_id,
+            rb.meetup_time_window,
+            rb.total_rent_cost,
+            rb.rental_duration_days,
+            rb.user_confirmed_pickup,
+            rb.owner_confirmed_pickup,
+            b.owner_id,
+            b.title
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        WHERE rb.rental_id = %s;
+    """
+
+    CONFIRM_PICKUP = """
+        UPDATE rented_books
+        SET
+            owner_confirmed_pickup = CASE
+                WHEN %s THEN TRUE
+                ELSE owner_confirmed_pickup
+            END,
+            user_confirmed_pickup = CASE
+                WHEN %s THEN TRUE
+                ELSE user_confirmed_pickup
+            END,
+            rent_status = CASE
+                WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
+                THEN 'ongoing'::rental_status_enum
+                ELSE 'awaiting_pickup_confirmation'::rental_status_enum
+            END,
+            rent_start_date = CASE
+                WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
+                THEN CURRENT_DATE
+                ELSE rent_start_date
+            END,
+            rent_end_date = CASE
+                WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
+                THEN CURRENT_DATE + (%s || ' days')::interval
+                ELSE rent_end_date
+            END
+        WHERE rental_id = %s
+        RETURNING
+            rental_id,
+            rent_status,
+            user_confirmed_pickup,
+            owner_confirmed_pickup,
+            rent_start_date,
+            rent_end_date;
+    """
