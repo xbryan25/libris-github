@@ -22,6 +22,8 @@ export type Rental = {
   return_confirmation_started_at: string
   user_confirmed_return: boolean
   owner_confirmed_return: boolean
+  user_rated: boolean
+  owner_rated: boolean
   cost: number
   meetup_date: string
   meetup_time: string

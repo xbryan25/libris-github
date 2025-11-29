@@ -22,6 +22,8 @@ export type Lending = {
   return_confirmation_started_at: string
   user_confirmed_return: boolean
   owner_confirmed_return: boolean
+  user_rated: boolean
+  owner_rated: boolean
   cost: number
   meetup_date: string
   meetup_time: string
@@ -92,11 +94,11 @@ export const useUserLendings = () => {
     const currentProgress = statusBadge.value(lending.rent_status).progress
     
     const steps: { label: string; status: RentalStatus }[] = [
-      { label: 'Requested', status: 'pending' },
+      { label: 'Pending', status: 'pending' },
       { label: 'Confirmed', status: 'approved' },
-      { label: 'Pickup', status: 'awaiting_pickup_confirmation' },
-      { label: 'Renting', status: 'ongoing' },
-      { label: 'Return', status: 'awaiting_return_confirmation' },
+      { label: 'Delivered', status: 'awaiting_pickup_confirmation' },
+      { label: 'Active', status: 'ongoing' },
+      { label: 'Pickup', status: 'awaiting_return_confirmation' },
       { label: 'Completed', status: 'completed' }
     ]
     

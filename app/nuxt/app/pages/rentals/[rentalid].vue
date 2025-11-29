@@ -2,6 +2,8 @@
 import auth from '~/middleware/auth';
 import { useUserRentals, type Rental } from '~/composables/useUserRentals';
 import { useUserLendings, type Lending } from '~/composables/useUserLendings';
+import RentalCompleteCard from '~/components/RentalCompleteCard.vue';
+import RentalRatingCard from '~/components/RentalRatingCard.vue';
 
 definePageMeta({
   middleware: auth,
@@ -17,6 +19,13 @@ const { lendings, fetchUserLendings } = useUserLendings();
 
 const currentItem = ref<Rental | Lending | null>(null);
 const loading = ref(true);
+const showRating = ref(false);
+
+const currentStatus = computed(() => {
+  if (!currentItem.value) return '';
+  if (showRating.value) return 'rate_user';
+  return currentItem.value.rent_status;
+});
 
 const fetchRentalData = async () => {
   loading.value = true;
@@ -35,10 +44,16 @@ const fetchRentalData = async () => {
   }
 }
 
-// Handle approval success - reload the data
 const handleApprovalSuccess = async () => {
-  console.log('Approval successful, reloading data...');
   await fetchRentalData();
+}
+
+const handleShowRating = () => {
+  showRating.value = true;
+}
+
+const handleBackToComplete = () => {
+  showRating.value = false;
 }
 
 onMounted(() => {
@@ -89,13 +104,17 @@ onMounted(() => {
 
     <!-- Content -->
     <div v-else class="space-y-6">
-      <!-- Book Info Card -->
-      <RentalBookInfoCard :item="currentItem" :from="from" />
+      <!-- Book Info Card (Hide when completed) -->
+      <RentalBookInfoCard 
+        v-if="currentItem.rent_status !== 'completed'"
+        :item="currentItem" 
+        :from="from" 
+      />
 
-      <!-- Progress Stepper -->
+      <!-- Progress Stepper (Show for all statuses, use computed status) -->
       <RentalProgressStepper 
         v-if="currentItem.rent_status !== 'pending'" 
-        :status="currentItem.rent_status" 
+        :status="currentStatus" 
         :from="from" 
       />
 
@@ -108,14 +127,14 @@ onMounted(() => {
 
       <!-- Dates & Meetup Grid -->
       <RentalDetailsGrid 
-        v-if="currentItem.rent_status !== 'completed' && currentItem.rent_status !== 'rate_user'"
+        v-if="currentItem.rent_status !== 'completed'"
         :item="currentItem"
         :from="from"
       />
 
       <!-- Cost Card -->
       <RentalCostCard 
-        v-if="currentItem.rent_status !== 'completed' && currentItem.rent_status !== 'rate_user'"
+        v-if="currentItem.rent_status !== 'completed'"
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
         :from="from"
@@ -124,14 +143,25 @@ onMounted(() => {
         :rental-duration-days="currentItem.rental_duration_days"
       />
 
-      <!-- Rating Card (for rate_user and completed) -->
-      <RentalRatingCard
-        v-if="currentItem.rent_status === 'rate_user' || currentItem.rent_status === 'completed'"
-        :status="currentItem.rent_status"
-        :deposit="currentItem.security_deposit"
-        :from="from"
-        :item="currentItem"
-      />
+      <!-- Complete Card or Rating Card (Toggle) -->
+      <template v-if="currentItem.rent_status === 'completed'">
+        <RentalCompleteCard
+          v-if="!showRating"
+          :status="currentItem.rent_status"
+          :deposit="currentItem.security_deposit"
+          :from="from"
+          :item="currentItem"
+          @show-rating="handleShowRating"
+        />
+        
+        <RentalRatingCard
+          v-else
+          :from="from"
+          :item="currentItem"
+          :rental-id="rentalid"
+          @back-to-complete="handleBackToComplete"
+        />
+      </template>
 
       <!-- Confirmation Cards (for approved and ongoing) -->
       <RentalConfirmationCard
@@ -155,6 +185,7 @@ onMounted(() => {
         :from="from"
         :rental-id="rentalid"
         @approval-success="handleApprovalSuccess"
+        @refresh="fetchRentalData"
       />
     </div>
   </div>

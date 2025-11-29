@@ -16,8 +16,8 @@ const getStatusBadge = (status: string) => {
     awaiting_pickup_confirmation: { label: 'Pickup Arranged', color: 'bg-orange-500' },
     ongoing: { label: 'Book Received', color: 'bg-purple-500' },
     awaiting_return_confirmation: { label: 'Return Initiated', color: 'bg-indigo-500' },
-    rate_user: { label: 'Rate User', color: 'bg-amber-500' },
-    completed: { label: 'Completed', color: 'bg-green-500' }
+    completed: { label: 'Completed', color: 'bg-green-500' },
+    rate_user: { label: 'Rate User', color: 'bg-amber-500' }
   }
   
   return statusConfig[status] || { label: status, color: 'bg-gray-500' }

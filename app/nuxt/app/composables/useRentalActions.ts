@@ -15,9 +15,6 @@ export const useRentalActions = () => {
     loading.value = true
     error.value = null
 
-    console.log('Approving rental:', { rentalId, meetupTime })
-    console.log('API URL:', `${API_URL}/api/rentals/${rentalId}/approve`)
-
     try {
       const response = await $apiFetch(`${API_URL}/api/rentals/${rentalId}/approve`, {
         method: 'POST',
@@ -30,25 +27,19 @@ export const useRentalActions = () => {
         }),
       })
 
-      console.log('Approval response:', response)
       return { success: true }
     } catch (e: any) {
       console.error('Error approving rental:', e)
-      console.error('Error details:', {
-        data: e.data,
-        status: e.status,
-        statusText: e.statusText,
-        message: e.message
-      })
       
       let errorMessage = 'Failed to approve rental'
       
-      if (e.data?.error) {
-        errorMessage = e.data.error
-      } else if (e.message) {
+      // The error message is directly in the error property
+      if (e?.error) {
+        errorMessage = e.error
+      } else if (e?.message) {
         errorMessage = e.message
-      } else if (e.statusText) {
-        errorMessage = `Request failed: ${e.statusText}`
+      } else if (typeof e === 'string') {
+        errorMessage = e
       }
       
       error.value = errorMessage
@@ -93,12 +84,12 @@ export const useRentalActions = () => {
       
       let errorMessage = 'Failed to reject rental'
       
-      if (e.data?.error) {
-        errorMessage = e.data.error
-      } else if (e.message) {
+      if (e?.error) {
+        errorMessage = e.error
+      } else if (e?.message) {
         errorMessage = e.message
-      } else if (e.statusText) {
-        errorMessage = `Request failed: ${e.statusText}`
+      } else if (typeof e === 'string') {
+        errorMessage = e
       }
       
       error.value = errorMessage
@@ -138,13 +129,13 @@ export const useRentalActions = () => {
       })
       
       let errorMessage = 'Failed to cancel rental'
-      
-      if (e.data?.error) {
-        errorMessage = e.data.error
-      } else if (e.message) {
+    
+      if (e?.error) {
+        errorMessage = e.error
+      } else if (e?.message) {
         errorMessage = e.message
-      } else if (e.statusText) {
-        errorMessage = `Request failed: ${e.statusText}`
+      } else if (typeof e === 'string') {
+        errorMessage = e
       }
       
       error.value = errorMessage
@@ -178,10 +169,12 @@ export const useRentalActions = () => {
       
       let errorMessage = 'Failed to confirm pickup'
       
-      if (e.data?.error) {
-        errorMessage = e.data.error
-      } else if (e.message) {
+      if (e?.error) {
+        errorMessage = e.error
+      } else if (e?.message) {
         errorMessage = e.message
+      } else if (typeof e === 'string') {
+        errorMessage = e
       }
       
       error.value = errorMessage
@@ -215,10 +208,12 @@ export const useRentalActions = () => {
       
       let errorMessage = 'Failed to confirm return'
       
-      if (e.data?.error) {
-        errorMessage = e.data.error
-      } else if (e.message) {
+      if (e?.error) {
+        errorMessage = e.error
+      } else if (e?.message) {
         errorMessage = e.message
+      } else if (typeof e === 'string') {
+        errorMessage = e
       }
       
       error.value = errorMessage

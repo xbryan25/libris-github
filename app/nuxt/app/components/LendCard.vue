@@ -15,8 +15,8 @@ const getStatusBadge = (status: string) => {
     awaiting_pickup_confirmation: { label: 'Pickup Arranged', color: 'bg-orange-500' },
     ongoing: { label: 'Book Received', color: 'bg-purple-500' },
     awaiting_return_confirmation: { label: 'Return Initiated', color: 'bg-indigo-500' },
-    rate_user: { label: 'Rate User', color: 'bg-amber-500' },
-    completed: { label: 'Return Complete', color: 'bg-green-500' }
+    completed: { label: 'Return Complete', color: 'bg-green-500' },
+    rate_user: { label: 'Rate User', color: 'bg-amber-500' }
   }
   
   return statusConfig[status] || { label: status, color: 'bg-gray-500' }
@@ -50,21 +50,29 @@ const getStepperItems = (status: string): StepperItem[] => {
       icon: 'i-lucide-package-check'
     },
     {
-      title: 'Rate',
-      description: 'Rate the experience',
-      icon: 'i-lucide-star'
-    },
-    {
       title: 'Completed',
       description: 'Rental finished',
       icon: 'i-lucide-circle-check'
+    },
+    {
+      title: 'Rate',
+      description: 'Rate the experience',
+      icon: 'i-lucide-star'
     }
   ]
 }
 
 const getCurrentStep = (status: string) => {
-  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'rate_user', 'completed']
-  return statusOrder.indexOf(status)
+  const statusMap: Record<string, number> = {
+    'pending': 0,
+    'approved': 1,
+    'awaiting_pickup_confirmation': 2,
+    'ongoing': 3,
+    'awaiting_return_confirmation': 4,
+    'completed': 5 
+  }
+  
+  return statusMap[status] ?? 0
 }
 </script>
 

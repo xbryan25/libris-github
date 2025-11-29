@@ -197,7 +197,7 @@ class RentalsRepository:
     ) -> dict[str, Any] | None:
         """
         Confirm return by owner or renter.
-        If both have confirmed, update status to 'rate_user'.
+        If both have confirmed, update status to 'completed'.
         """
         db = current_app.extensions["db"]
 
@@ -211,3 +211,35 @@ class RentalsRepository:
 
         result = db.fetch_one(RentalsQueries.CONFIRM_RETURN, params)
         return result
+
+    @staticmethod
+    def check_book_availability(book_id: str, owner_id: str) -> dict[str, Any] | None:
+        """
+        Check if a book already has an active rental (approved or ongoing).
+
+        Args:
+            book_id (str): The book ID to check
+            owner_id (str): The owner ID to verify ownership
+
+        Returns:
+            dict with rental details if book is unavailable, None if available
+        """
+        db = current_app.extensions["db"]
+        params = (book_id, owner_id)
+        result = db.fetch_one(RentalsQueries.CHECK_BOOK_AVAILABILITY, params)
+        return result
+
+    @staticmethod
+    def get_book_id_from_rental(rental_id: str) -> str | None:
+        """
+        Get the book_id for a given rental.
+
+        Args:
+            rental_id (str): The rental ID
+
+        Returns:
+            str: The book_id or None if not found
+        """
+        db = current_app.extensions["db"]
+        result = db.fetch_one(RentalsQueries.GET_BOOK_ID_FROM_RENTAL, (rental_id,))
+        return result.get("book_id") if result else None

@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import type { Rental } from '~/composables/useUserRentals';
 import type { Lending } from '~/composables/useUserLendings';
+import Rating from 'primevue/rating';
 
 interface Props {
-  status: string;
   from: string;
-  deposit: number;
   item: Rental | Lending;
+  rentalId: string;
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits(['back-to-complete']);
+
+const rating = ref(0);
+const review = ref('');
+const submitting = ref(false);
 
 const userName = computed(() => {
   return props.from === 'rental' 
@@ -17,46 +22,80 @@ const userName = computed(() => {
     : (props.item as Lending).to;
 });
 
-const userRole = computed(() => {
-  return props.from === 'rental' ? 'lender' : 'renter';
-});
+const handleSubmit = async () => {
+  if (rating.value === 0) {
+    return;
+  }
+  
+  submitting.value = true;
+  
+  // TODO hi husnie: CHANGE THIS TO A PROPER API CALL. THIS FOR TEST ONLY
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('Rating submitted:', { rating: rating.value, review: review.value });
+    navigateTo('/rentals');
+  } catch (error) {
+    console.error('Error submitting rating:', error);
+  } finally {
+    submitting.value = false;
+  }
+};
+
+const handleBack = () => {
+  emit('back-to-complete');
+};
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Deposit Return Card -->
-    <div class="bg-green-50 border border-green-200 rounded-lg p-5">
-      <div class="flex items-start gap-3">
-        <Icon name="lucide:check-circle" class="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0" />
-        <div class="flex-1">
-          <p class="text-green-900 font-medium text-lg mb-1">
-            Security deposit {{ from === 'rental' ? 'has been returned' : 'returned' }}
-          </p>
-          <div class="flex items-center gap-2 mt-2">
-            <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-green-600" />
-            <span class="text-green-800 font-bold text-xl">{{ props.deposit }} Readits</span>
-          </div>
-        </div>
+    <!-- Rating Card -->
+    <div class="bg-surface rounded-lg border border-base p-8">
+      <div class="text-center mb-6">
+        <Icon name="lucide:star" class="w-16 h-16 text-amber-500 mx-auto mb-4" />
+        <h2 class="text-2xl font-bold mb-2">Rate Your Experience</h2>
+        <p class="text-muted">How was your experience {{ from === 'rental' ? 'renting from' : 'lending to' }} {{ userName }}?</p>
       </div>
-    </div>
 
-    <!-- Rating Card - Only show if status is rate_user -->
-    <div v-if="status === 'rate_user'" class="bg-surface rounded-lg border border-base p-6">
-      <h2 class="text-2xl font-bold text-center mb-2">
-        Rate {{ userName }} as a {{ userRole }}
-      </h2>
-      <p class="text-center text-muted mb-6">How would you rate this user?</p>
-      
-      <!-- rating stuff herer-->
+      <!-- Star Rating -->
+      <div class="flex justify-center mb-6">
+        <Rating v-model="rating" :stars="5" :cancel="false" class="text-4xl" />
+      </div>
 
-    </div>
+      <!-- Review Text Area -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">
+          Share your thoughts (Optional)
+        </label>
+        <textarea
+          v-model="review"
+          placeholder="Tell us about your experience..."
+          rows="4"
+          class="w-full px-4 py-3 border border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-accent bg-background"
+        ></textarea>
+      </div>
 
-    <!-- Completed Message - Show if status is completed -->
-    <div v-if="status === 'completed'" class="bg-surface rounded-lg border border-base p-6">
-      <div class="text-center">
-        <Icon name="lucide:check-circle" class="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h2 class="text-2xl font-bold mb-2">Rental Completed!</h2>
-        <p class="text-muted">Thank you for using our service. Your rating has been submitted.</p>
+      <!-- Action Buttons -->
+      <div class="flex gap-3 justify-center">
+        <button
+          @click="handleBack"
+          class="px-6 py-3 border border-base rounded-lg font-medium hover:bg-surface transition-colors cursor-pointer"
+        >
+          Back
+        </button>
+        <button
+          @click="handleSubmit"
+          :disabled="rating === 0 || submitting"
+          :class="[
+            'px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2 cursor-pointer',
+            rating === 0 || submitting
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-accent hover:bg-accent/90 text-white'
+          ]"
+        >
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+          <Icon v-else name="lucide:send" class="w-5 h-5" />
+          {{ submitting ? 'Submitting...' : 'Submit Rating' }}
+        </button>
       </div>
     </div>
   </div>

@@ -175,10 +175,11 @@ class RentalsServices:
         """
         Approve a rental request with meetup time.
         This will:
-        1. Set all_fees_captured to TRUE
-        2. Deduct amount from reserved_amount and balance (renter)
-        3. Add rental fee to owner's wallet
-        4. Create transaction logs for both users
+        1. Check if book is still available (no other approved rentals)
+        2. Set all_fees_captured to TRUE
+        3. Deduct amount from reserved_amount and balance (renter)
+        4. Add rental fee to owner's wallet
+        5. Create transaction logs for both users
         """
         try:
             if not meetup_time:
@@ -206,6 +207,18 @@ class RentalsServices:
             # Check if rental is in pending status
             if rent_status != "pending":
                 return None, f"Rental cannot be approved. Current status: {rent_status}"
+
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+            if book_id:
+                active_rental = RentalsRepository.check_book_availability(
+                    book_id, str(owner_id)
+                )
+                if active_rental:
+                    renter_name = active_rental.get("renter_username", "another user")
+                    return (
+                        None,
+                        f"This book is already approved for rental to {renter_name}. Please reject other pending requests first.",
+                    )
 
             # Validate meetup time against time window
             is_valid, error_msg = RentalsServices.validate_meetup_time(
@@ -531,7 +544,7 @@ class RentalsServices:
     ) -> tuple[dict[str, Any] | None, str | None]:
         """
         Confirm book return by either the renter or owner.
-        When both confirm, move to 'rate_user' status and return security deposit.
+        When both confirm, move to 'completed' status and return security deposit.
         """
         try:
             rental = RentalsRepository.get_rental_by_id_full_return(rental_id)
@@ -571,7 +584,7 @@ class RentalsServices:
             # Check if both users have now confirmed (status changed to 'rate_user')
             new_status = result.get("rent_status")
 
-            if new_status == "rate_user":
+            if new_status == "completed":
                 # Both users confirmed - return security deposit
                 security_deposit = result.get("security_deposit", 0)
                 renter_id = str(result.get("user_id"))

@@ -35,15 +35,15 @@ const getStepperItems = () => {
         icon: 'i-lucide-package-check'
       },
       {
+        title: 'Completed',
+        description: 'Rental finished',
+        icon: 'i-lucide-circle-check'
+      },  
+      {
         title: 'Rate',
         description: 'Rate the experience',
         icon: 'i-lucide-star'
       },
-      {
-        title: 'Completed',
-        description: 'Rental finished',
-        icon: 'i-lucide-circle-check'
-      }
     ]
   } else {
     return [
@@ -73,22 +73,31 @@ const getStepperItems = () => {
         icon: 'i-lucide-package-check'
       },
       {
-        title: 'Rate',
-        description: 'Rate the experience',
-        icon: 'i-lucide-star'
-      },
-      {
         title: 'Completed',
         description: 'Rental finished',
         icon: 'i-lucide-circle-check'
+      },
+      {
+        title: 'Rate',
+        description: 'Rate the experience',
+        icon: 'i-lucide-star'
       }
     ]
   }
 }
 
 const getCurrentStep = () => {
-  const statusOrder = ['pending', 'approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation', 'rate_user', 'completed']
-  return statusOrder.indexOf(props.status)
+  const statusMap: Record<string, number> = {
+    'pending': 0,
+    'approved': 1,
+    'awaiting_pickup_confirmation': 2,
+    'ongoing': 3,
+    'awaiting_return_confirmation': 4,
+    'completed': 5,
+    'rate_user': 6
+  }
+  
+  return statusMap[props.status] ?? 0
 }
 </script>
 

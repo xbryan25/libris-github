@@ -64,14 +64,19 @@ class RentalsQueries:
             rb.return_confirmation_started_at,
             rb.user_confirmed_return,
             rb.owner_confirmed_return,
+            rb.user_rated,
+            rb.owner_rated,
             rb.total_rent_cost AS cost
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON b.owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE rb.user_id = %s
-        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
-        'ongoing', 'awaiting_return_confirmation', 'rate_user');
+        AND (
+            rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
+            'ongoing', 'awaiting_return_confirmation')
+            OR (rb.rent_status = 'completed' AND rb.user_rated = false)
+        );
     """
 
     GET_USER_LENDINGS_WITH_STATUS = """
@@ -101,14 +106,19 @@ class RentalsQueries:
             rb.return_confirmation_started_at,
             rb.user_confirmed_return,
             rb.owner_confirmed_return,
+            rb.user_rated,
+            rb.owner_rated,
             rb.total_rent_cost AS cost
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE b.owner_id = %s
-        AND rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
-        'ongoing', 'awaiting_return_confirmation', 'rate_user');
+        AND (
+            rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
+            'ongoing', 'awaiting_return_confirmation')
+            OR (rb.rent_status = 'completed' AND rb.owner_rated = false)
+        );
     """
 
     APPROVE_RENTAL = """
@@ -267,7 +277,7 @@ class RentalsQueries:
         END,
         rent_status = CASE
             WHEN (owner_confirmed_return OR %s) AND (user_confirmed_return OR %s)
-            THEN 'rate_user'::rental_status_enum
+            THEN 'completed'::rental_status_enum
             ELSE 'awaiting_return_confirmation'::rental_status_enum
         END
     FROM books b
@@ -282,3 +292,23 @@ class RentalsQueries:
         b.owner_id,
         b.security_deposit;
 """
+
+    CHECK_BOOK_AVAILABILITY = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            u.username as renter_username
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.user_id = u.user_id
+        WHERE b.book_id = %s
+        AND b.owner_id = %s
+        AND rb.rent_status IN ('approved', 'awaiting_pickup_confirmation', 'ongoing', 'awaiting_return_confirmation')
+        LIMIT 1;
+    """
+
+    GET_BOOK_ID_FROM_RENTAL = """
+        SELECT book_id
+        FROM rented_books
+        WHERE rental_id = %s;
+    """

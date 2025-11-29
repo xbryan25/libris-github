@@ -6,7 +6,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['approval-success', 'rejection-success', 'cancel-success']);
+const emit = defineEmits(['approval-success', 'rejection-success', 'cancel-success', 'refresh']);
 
 const isApprovalModalOpen = ref(false);
 const isRejectModalOpen = ref(false);
@@ -33,6 +33,18 @@ const handleApprovalSuccess = () => {
   });
   
   emit('approval-success');
+}
+
+const handleApprovalConflict = () => {
+  // Book is already rented to someone else
+  toast.add({
+    title: 'Rental Status Changed',
+    description: 'This book has been approved for another renter. Refreshing...',
+    icon: 'i-lucide-info',
+  });
+  
+  // Trigger refresh in parent component
+  emit('refresh');
 }
 
 const handleRejectionSuccess = () => {
@@ -112,6 +124,7 @@ const handleCancelSuccess = () => {
       v-model="isApprovalModalOpen"
       :rental-id="rentalId"
       @success="handleApprovalSuccess"
+      @conflict="handleApprovalConflict"
     />
 
     <!-- Rejection Modal Component -->

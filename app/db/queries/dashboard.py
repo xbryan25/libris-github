@@ -1,7 +1,7 @@
 class DashboardQueries:
     DASHBOARD_COUNTS = """
             SELECT
-            (SELECT COUNT(*) FROM rented_books WHERE user_id = %s) AS books_borrowed,
+            (SELECT COUNT(*) FROM rented_books WHERE user_id = %s AND rent_status = 'completed') AS books_borrowed,
             (SELECT COUNT(*)
                 FROM rented_books rb
                 JOIN books b ON rb.book_id = b.book_id
