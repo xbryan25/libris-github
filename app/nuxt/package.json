@@ -17,6 +17,7 @@
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/color-mode": "^3.5.2",
     "@pinia/nuxt": "^0.11.2",
+    "@primeuix/themes": "^2.0.1",
     "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/vite": "^4.1.13",
     "@unovis/ts": "^1.6.1",
@@ -27,6 +28,7 @@
     "lodash": "^4.17.21",
     "nuxt": "^4.1.0",
     "pinia": "^3.0.3",
+    "primevue": "^4.5.0",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.13",
     "vite": "^7.1.4",
@@ -37,6 +39,7 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@primevue/nuxt-module": "^4.5.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
