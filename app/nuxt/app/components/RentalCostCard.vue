@@ -3,8 +3,8 @@ interface Props {
   cost: number;
   allFeesCaptured: boolean;
   from: string;
-  securityDeposit: number;
-  dailyRate: number;
+  actualDeposit: number;
+  actualRate: number;
   rentalDurationDays: number;
 }
 
@@ -22,7 +22,7 @@ const props = defineProps<Props>();
         <p class="text-xs text-muted mb-1">Security Deposit</p>
         <div class="flex items-center gap-1">
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
-          <span class="font-bold text-lg text-accent">{{ securityDeposit }}</span>
+          <span class="font-bold text-lg text-accent">{{ actualDeposit }}</span>
         </div>
       </div>
       
@@ -30,7 +30,7 @@ const props = defineProps<Props>();
         <p class="text-xs text-muted mb-1">Daily Rate</p>
         <div class="flex items-center gap-1">
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
-          <span class="font-bold text-lg text-accent">{{ dailyRate }}</span>
+          <span class="font-bold text-lg text-accent">{{ actualRate }}</span>
         </div>
       </div>
 
@@ -38,7 +38,7 @@ const props = defineProps<Props>();
         <p class="text-xs text-muted mb-1">Rental Cost ({{ rentalDurationDays }}d)</p>
         <div class="flex items-center gap-1">
           <Icon name="fluent:book-coins-20-regular" class="w-4 h-4 text-accent" />
-          <span class="font-bold text-lg text-accent">{{ dailyRate * rentalDurationDays }}</span>
+          <span class="font-bold text-lg text-accent">{{ actualRate * rentalDurationDays }}</span>
         </div>
       </div>
 
@@ -56,7 +56,7 @@ const props = defineProps<Props>();
       <div class="flex items-center justify-between">
         <p class="text-sm text-muted">Payment Status</p>
         <p class="font-medium text-sm" :class="allFeesCaptured ? 'text-green-600' : 'text-yellow-600'">
-          {{ allFeesCaptured ? '✓ Captured' : '⏳ Pending' }}
+          {{ allFeesCaptured ? 'Captured' : 'Pending' }}
         </p>
       </div>
     </div>

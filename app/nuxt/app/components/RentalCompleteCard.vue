@@ -5,7 +5,7 @@ import type { Lending } from '~/composables/useUserLendings';
 interface Props {
   status: string;
   from: string;
-  deposit: number;
+  actualDeposit: number;
   item: Rental | Lending;
 }
 
@@ -39,7 +39,7 @@ const handleRateUser = () => {
           </p>
           <div class="flex items-center gap-2 mt-2">
             <Icon name="fluent:book-coins-20-regular" class="w-5 h-5 text-green-600" />
-            <span class="text-green-800 font-bold text-xl">{{ props.deposit }} Readits</span>
+            <span class="text-green-800 font-bold text-xl">{{ props.actualDeposit }} Readits</span>
           </div>
         </div>
       </div>

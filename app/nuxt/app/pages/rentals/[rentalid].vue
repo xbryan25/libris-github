@@ -138,8 +138,8 @@ onMounted(() => {
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
         :from="from"
-        :security-deposit="currentItem.security_deposit"
-        :daily-rate="currentItem.daily_rate"
+        :actual-deposit="currentItem.actual_deposit"
+        :actual-rate="currentItem.actual_rate"
         :rental-duration-days="currentItem.rental_duration_days"
       />
 
@@ -148,7 +148,7 @@ onMounted(() => {
         <RentalCompleteCard
           v-if="!showRating"
           :status="currentItem.rent_status"
-          :deposit="currentItem.security_deposit"
+          :actual-deposit="currentItem.actual_deposit"
           :from="from"
           :item="currentItem"
           @show-rating="handleShowRating"

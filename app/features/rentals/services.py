@@ -24,8 +24,8 @@ class RentalsServices:
                 "author": rental.get("author", ""),
                 "image": rental.get("image"),
                 "from": rental.get("from", ""),
-                "security_deposit": rental.get("security_deposit", 0),
-                "daily_rate": rental.get("daily_rent_price", 0),
+                "actual_deposit": rental.get("actual_deposit", 0),
+                "actual_rate": rental.get("actual_rate", 0),
                 "all_fees_captured": rental.get("all_fees_captured", False),
                 "reserved_at": DateUtils.format_datetime_to_iso(
                     rental.get("reserved_at")
@@ -86,8 +86,8 @@ class RentalsServices:
                 "author": lending.get("author", ""),
                 "image": lending.get("image"),
                 "to": lending.get("to", ""),
-                "security_deposit": lending.get("security_deposit", 0),
-                "daily_rate": lending.get("daily_rent_price", 0),
+                "actual_deposit": lending.get("actual_deposit", 0),
+                "actual_rate": lending.get("actual_rate", 0),
                 "all_fees_captured": lending.get("all_fees_captured", False),
                 "reserved_at": DateUtils.format_datetime_to_iso(
                     lending.get("reserved_at")
@@ -586,22 +586,22 @@ class RentalsServices:
 
             if new_status == "completed":
                 # Both users confirmed - return security deposit
-                security_deposit = result.get("security_deposit", 0)
+                actual_deposit = result.get("actual_deposit", 0)
                 renter_id = str(result.get("user_id"))
                 owner_id_str = str(result.get("owner_id"))
 
-                if security_deposit > 0:
+                if actual_deposit > 0:
                     # Return deposit from owner to renter
                     renter_wallet, owner_wallet = (
                         WalletRepository.return_security_deposit(
-                            renter_id, owner_id_str, security_deposit
+                            renter_id, owner_id_str, actual_deposit
                         )
                     )
 
                     if not renter_wallet or not owner_wallet:
                         logger.error(
                             f"Failed to return security deposit for rental {rental_id}. "
-                            f"Deposit amount: {security_deposit}"
+                            f"Deposit amount: {actual_deposit}"
                         )
                         return (
                             None,
@@ -614,12 +614,12 @@ class RentalsServices:
 
                     # Positive transaction for renter (receiving deposit back)
                     renter_transaction = WalletRepository.insert_deposit_transaction(
-                        renter_wallet_id, security_deposit, "deposit_received"
+                        renter_wallet_id, actual_deposit, "deposit_received"
                     )
 
                     # Negative transaction for owner (returning deposit)
                     owner_transaction = WalletRepository.insert_deposit_transaction(
-                        owner_wallet_id, -security_deposit, "deposit_returned"
+                        owner_wallet_id, -actual_deposit, "deposit_returned"
                     )
 
                     if not renter_transaction or not owner_transaction:
@@ -629,7 +629,7 @@ class RentalsServices:
                         )
 
                     logger.info(
-                        f"Security deposit of {security_deposit} returned for rental {rental_id}. "
+                        f"Security deposit of {actual_deposit} returned for rental {rental_id}. "
                         f"From owner {owner_id_str} to renter {renter_id}. "
                         f"Renter transaction (deposit_received): "
                         f"{renter_transaction.get('transaction_id') if renter_transaction else 'N/A'}, "

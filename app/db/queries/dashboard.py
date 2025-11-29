@@ -14,7 +14,7 @@ class DashboardQueries:
             (SELECT COUNT(*) FROM purchased_books WHERE user_id = %s AND purchase_status = 'completed') AS books_bought,
             (
                 COALESCE(
-                (SELECT SUM(rb.total_rent_cost)
+                (SELECT SUM(rb.total_rent_cost - rb.actual_deposit)
                 FROM rented_books rb
                 JOIN books b ON rb.book_id = b.book_id
                 WHERE b.owner_id = %s

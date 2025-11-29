@@ -22,6 +22,8 @@ class RentalsController:
             - meetup_time_window: Preferred time window for meetup
             - meetup_location: Location for meetup
             - meetup_date: Date for meetup (ISO 8601)
+            - actual_rate: Daily rental rate at time of booking
+            - actual_deposit: Security deposit at time of booking
 
         Backend defaults:
             - rent_status: "pending"
@@ -53,6 +55,8 @@ class RentalsController:
                 "meetup_time_window",
                 "meetup_location",
                 "meetup_date",
+                "actual_rate",
+                "actual_deposit",
             ]
 
             missing_fields = [
@@ -81,6 +85,8 @@ class RentalsController:
                 "meetup_time_window": rental_data_json["meetup_time_window"],
                 "meetup_location": rental_data_json["meetup_location"],
                 "meetup_date": rental_data_json["meetup_date"],
+                "actual_rate": rental_data_json["actual_rate"],
+                "actual_deposit": rental_data_json["actual_deposit"],
             }
 
             result = RentalsServices.create_rental_service(rental_data)

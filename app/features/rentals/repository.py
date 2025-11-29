@@ -106,6 +106,8 @@ class RentalsRepository:
                 - meetup_time_window
                 - meetup_location
                 - meetup_date
+                - actual_rate
+                - actual_deposit
 
         Returns:
             str: The rental_id of the inserted rental, or None if insertion failed.
@@ -122,6 +124,8 @@ class RentalsRepository:
             rental_data["meetup_time_window"],
             rental_data["meetup_location"],
             rental_data["meetup_date"],
+            rental_data["actual_rate"],
+            rental_data["actual_deposit"],
         )
 
         result = db.fetch_one(RentalsQueries.INSERT_RENTAL, params)
