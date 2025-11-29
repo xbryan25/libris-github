@@ -1,5 +1,4 @@
 from flask import request, jsonify, make_response, current_app, Response
-
 from flask_jwt_extended import (
     create_access_token,
     set_access_cookies,
@@ -8,12 +7,9 @@ from flask_jwt_extended import (
     get_jwt_identity,
     unset_jwt_cookies,
 )
-
 import traceback
 import uuid
-
 from .services import UserServices
-
 from app.utils.camel_case_converter import dict_keys_to_camel
 
 
@@ -21,8 +17,7 @@ class UserControllers:
 
     @staticmethod
     def user_login_controller() -> tuple[Response, int]:
-        """Generate JWT access and refresh tokens, and set them as HTTP-only cookies after validating user credentials."""
-
+        """Generate JWT tokens and set as HTTP-only cookies."""
         user_login_details = request.get_json()
 
         if user_login_details is None:
@@ -51,6 +46,7 @@ class UserControllers:
             set_access_cookies(
                 resp, access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
             )
+
             set_refresh_cookies(
                 resp,
                 refresh_token,
@@ -65,8 +61,7 @@ class UserControllers:
 
     @staticmethod
     def user_signup_controller() -> tuple[Response, int]:
-        """Create a new user account and initialize their wallet."""
-
+        """Create a new user account and initialize wallet."""
         user_signup_details = request.get_json()
 
         if user_signup_details is None:
@@ -80,7 +75,11 @@ class UserControllers:
             if not username or not email_address or not password:
                 return (
                     jsonify(
-                        {"error": "Username, email address, and password are required."}
+                        {
+                            "error": (
+                                "Username, email address, and password " "are required."
+                            )
+                        }
                     ),
                     400,
                 )
@@ -93,10 +92,15 @@ class UserControllers:
             if "error" in result:
                 return jsonify({"error": result["error"]}), 400
 
+            user_id = result.get("user_id")
+
             resp = make_response(
                 {
+                    "userId": user_id,
                     "messageTitle": "Account created successfully!",
-                    "message": "Welcome to Libris! Please log in to continue.",
+                    "message": (
+                        "Welcome to Libris! " "Please verify your email to continue."
+                    ),
                 }
             )
 
@@ -107,9 +111,174 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def user_logout_controller() -> tuple[Response, int]:
-        """Unsets both access and refresh tokens."""
+    def send_verification_email_controller() -> tuple[Response, int]:
+        """Send verification email to user."""
+        try:
+            print(
+                "\n[CONTROLLER] ========== SEND VERIFICATION " "EMAIL CALLED =========="
+            )
 
+            data = request.get_json()
+            print(f"[CONTROLLER] Request body: {data}")
+
+            user_id = data.get("userId") if data else None
+            print(f"[CONTROLLER] User ID: {user_id}")
+
+            if not user_id:
+                print("[CONTROLLER] ERROR: User ID is missing!")
+                return jsonify({"error": "User ID is required."}), 400
+
+            print(
+                "[CONTROLLER] Calling "
+                "UserServices.send_verification_email_service..."
+            )
+            result = UserServices.send_verification_email_service(user_id)
+
+            print(f"[CONTROLLER] Service result: {result}")
+
+            if "error" in result:
+                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
+                return jsonify({"error": result["error"]}), 400
+
+            print("[CONTROLLER] Success! Returning response")
+            response = {
+                "messageTitle": "Email Sent!",
+                "message": ("Please check your inbox for the verification code."),
+            }
+            print(f"[CONTROLLER] Response: {response}")
+            print(
+                "[CONTROLLER] ========== SEND VERIFICATION "
+                "EMAIL COMPLETE ==========\n"
+            )
+
+            return jsonify(response), 200
+
+        except Exception as e:
+            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def verify_email_code_controller() -> tuple[Response, int]:
+        """Verify the email verification code."""
+        try:
+            print("\n[CONTROLLER] ========== VERIFY EMAIL CODE " "CALLED ==========")
+
+            data = request.get_json()
+            print(f"[CONTROLLER] Request body: {data}")
+
+            user_id = data.get("userId") if data else None
+            code = data.get("code") if data else None
+
+            print(f"[CONTROLLER] User ID: {user_id}")
+            print(f"[CONTROLLER] Code: {code}")
+
+            if not user_id or not code:
+                print("[CONTROLLER] ERROR: User ID or code is missing!")
+                error_response = {"error": "User ID and code are required."}
+                print(f"[CONTROLLER] Returning error: {error_response}")
+                print(
+                    "[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n"
+                )
+                return jsonify(error_response), 400
+
+            print("[CONTROLLER] Calling " "UserServices.verify_email_code_service...")
+            result = UserServices.verify_email_code_service(user_id, code)
+
+            print(f"[CONTROLLER] Service result: {result}")
+
+            if "error" in result:
+                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
+                error_response = {"error": result["error"]}
+                print(f"[CONTROLLER] Returning error response: " f"{error_response}")
+                print(
+                    "[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n"
+                )
+                return jsonify(error_response), 400
+
+            print("[CONTROLLER] Success! Email verified")
+            response = {
+                "messageTitle": "Email Verified!",
+                "message": ("Your email has been successfully verified."),
+            }
+            print(f"[CONTROLLER] Response: {response}")
+            print("[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n")
+
+            return jsonify(response), 200
+
+        except Exception as e:
+            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+            traceback.print_exc()
+            error_response = {"error": str(e)}
+            print(f"[CONTROLLER] Returning exception error: " f"{error_response}")
+            print("[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n")
+            return jsonify(error_response), 500
+
+    @staticmethod
+    def resend_verification_code_controller() -> tuple[Response, int]:
+        """Resend verification email to user."""
+        try:
+            print(
+                "\n[CONTROLLER] ========== RESEND VERIFICATION "
+                "CODE CALLED =========="
+            )
+
+            data = request.get_json()
+            print(f"[CONTROLLER] Request body: {data}")
+
+            user_id = data.get("userId") if data else None
+            print(f"[CONTROLLER] User ID: {user_id}")
+
+            if not user_id:
+                print("[CONTROLLER] ERROR: User ID is missing!")
+                print(
+                    "[CONTROLLER] ========== RESEND VERIFICATION "
+                    "CODE COMPLETE ==========\n"
+                )
+                return jsonify({"error": "User ID is required."}), 400
+
+            print(
+                "[CONTROLLER] Calling "
+                "UserServices.send_verification_email_service "
+                "for resend..."
+            )
+            result = UserServices.send_verification_email_service(user_id)
+
+            print(f"[CONTROLLER] Service result: {result}")
+
+            if "error" in result:
+                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
+                print(
+                    "[CONTROLLER] ========== RESEND VERIFICATION "
+                    "CODE COMPLETE ==========\n"
+                )
+                return jsonify({"error": result["error"]}), 400
+
+            print("[CONTROLLER] Success! Code resent")
+            response = {
+                "messageTitle": "Code Resent!",
+                "message": ("A new verification code has been sent to your email."),
+            }
+            print(f"[CONTROLLER] Response: {response}")
+            print(
+                "[CONTROLLER] ========== RESEND VERIFICATION "
+                "CODE COMPLETE ==========\n"
+            )
+
+            return jsonify(response), 200
+
+        except Exception as e:
+            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+            traceback.print_exc()
+            print(
+                "[CONTROLLER] ========== RESEND VERIFICATION "
+                "CODE COMPLETE ==========\n"
+            )
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def user_logout_controller() -> tuple[Response, int]:
+        """Unset both access and refresh tokens."""
         try:
             resp = make_response(
                 {
@@ -128,8 +297,7 @@ class UserControllers:
 
     @staticmethod
     def get_current_user_controller() -> tuple[Response, int]:
-        "Retrieve the currently authenticated user's username."
-
+        """Retrieve the currently authenticated user's username."""
         try:
             user_id = get_jwt_identity()
 
@@ -145,9 +313,10 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_username_from_user_id_controller(user_id) -> tuple[Response, int]:
-        "Retrieve the username of a user by their user ID."
-
+    def get_username_from_user_id_controller(
+        user_id: str,
+    ) -> tuple[Response, int]:
+        """Retrieve the username of a user by their user ID."""
         try:
             username = UserServices.get_username_service(user_id)
 
@@ -159,8 +328,7 @@ class UserControllers:
 
     @staticmethod
     def refresh_access_token_controller() -> tuple[Response, int]:
-        "Generate a new access token using a valid refresh token."
-
+        """Generate a new access token using a refresh token."""
         try:
             identity = get_jwt_identity()
 
@@ -169,7 +337,9 @@ class UserControllers:
             resp = make_response({"message": "access_token refreshed successfully."})
 
             set_access_cookies(
-                resp, new_access_token, max_age=current_app.config["COOKIE_MAX_AGE"]
+                resp,
+                new_access_token,
+                max_age=current_app.config["COOKIE_MAX_AGE"],
             )
 
             return resp, 200
@@ -180,8 +350,7 @@ class UserControllers:
 
     @staticmethod
     def get_profile_info_controller() -> tuple[Response, int]:
-        "Retrieve the full profile (personal + address) of the authenticated user."
-
+        """Retrieve the authenticated user's profile."""
         try:
             user_id = get_jwt_identity()
 
@@ -208,9 +377,10 @@ class UserControllers:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_other_user_profile_controller(user_id: str) -> tuple[Response, int]:
-        "Retrieve the full profile (personal + address) of another user by user_id."
-
+    def get_other_user_profile_controller(
+        user_id: str,
+    ) -> tuple[Response, int]:
+        """Retrieve another user's profile by user_id."""
         try:
             try:
                 uuid.UUID(user_id)
@@ -238,8 +408,7 @@ class UserControllers:
 
     @staticmethod
     def get_trust_score_comparison_controller() -> tuple[Response, int]:
-        """Retrieve trust score percentile for the authenticated user (UUID)."""
-
+        """Retrieve trust score percentile for authenticated user."""
         try:
             user_id = str(get_jwt_identity())
 
@@ -262,8 +431,7 @@ class UserControllers:
 
     @staticmethod
     def update_user_profile_controller() -> tuple[Response, int]:
-        """Update the authenticated user's profile information."""
-
+        """Update authenticated user's profile information."""
         try:
             user_id = get_jwt_identity()
 
@@ -287,9 +455,12 @@ class UserControllers:
                 )
 
             if profile_success and address_success:
-                return jsonify({"message": "Profile updated successfully"}), 200
-            else:
-                return jsonify({"message": "Failed to update profile"}), 500
+                return (
+                    jsonify({"message": "Profile updated successfully"}),
+                    200,
+                )
+
+            return jsonify({"message": "Failed to update profile"}), 500
 
         except Exception as e:
             traceback.print_exc()
@@ -299,6 +470,7 @@ class UserControllers:
     def get_other_user_trust_score_comparison_controller(
         user_id: str,
     ) -> tuple[Response, int]:
+        """Retrieve trust score percentile for another user."""
         try:
             comparison_stats = UserServices.get_trust_score_comparison_service(user_id)
 
@@ -316,22 +488,20 @@ class UserControllers:
 
     @staticmethod
     def patch_user_profile_controller() -> tuple[Response, int]:
-        """Partially update the authenticated user's profile."""
-
+        """Partially update authenticated user's profile."""
         try:
             user_id = get_jwt_identity()
-            # print("JWT user_id:", user_id)  # <-- add this
 
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
             profile_data = request.get_json()
-            # print("PATCH request body:", profile_data)  # <-- add this
 
             if not profile_data:
                 return jsonify({"message": "No data provided"}), 400
 
             profile_success = True
+
             address_success = True
 
             if "profile_image_url" in profile_data or any(
@@ -354,22 +524,29 @@ class UserControllers:
                 )
 
             if profile_success and address_success:
-                return jsonify({"message": "Profile updated successfully"}), 200
-            else:
-                return jsonify({"message": "Failed to update profile"}), 500
+                return (
+                    jsonify({"message": "Profile updated successfully"}),
+                    200,
+                )
+
+            return jsonify({"message": "Failed to update profile"}), 500
 
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_library_details_controller(user_id) -> tuple[Response, int]:
-        """Retrieve the number of owned, rented, and bought books for a specific user."""
-
+    def get_library_details_controller(
+        user_id: str,
+    ) -> tuple[Response, int]:
+        """Retrieve book counts for a specific user."""
         try:
             library_details = UserServices.get_library_details_service(user_id)
 
-            return jsonify(dict_keys_to_camel(library_details or {})), 200
+            return (
+                jsonify(dict_keys_to_camel(library_details or {})),
+                200,
+            )
 
         except Exception as e:
             traceback.print_exc()

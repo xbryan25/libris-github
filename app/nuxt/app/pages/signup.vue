@@ -13,26 +13,52 @@ const isLoading = ref(false);
 
 const onSubmitSignup = async (username: string, emailAddress: string, password: string) => {
   if (isLoading.value) return;
-
+  
   isLoading.value = true;
-
+  
   try {
-    const { messageTitle, message } = await auth.signup(username, emailAddress, password);
+    const response = await auth.signup(username, emailAddress, password);
+    
+    console.log("Signup response:", response);
+    
     toast.add({
-      title: messageTitle,
-      description: message,
+      title: response.messageTitle,
+      description: response.message,
       color: 'success',
     });
-    navigateTo('/login');
+    
+    const userId = response.userId;
+    console.log("User ID:", userId);
+    
+    if (!userId) {
+      console.error("No userId in response!");
+      return;
+    }
+    
+    try {
+      console.log("Sending verification email...");
+      const emailResponse = await useSendVerificationEmail(userId);
+      console.log("Email response:", emailResponse);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    console.log("Redirecting to verify-email...");
+    await navigateTo(`/verify-email?userId=${userId}`);
+    
   } catch (error: any) {
+    console.error("Signup error:", error);
+    
     let errorMessage = 'An unexpected error occurred.';
-
+    
     if (error.data?.error) {
       errorMessage = error.data.error;
     } else if (error.message) {
       errorMessage = error.message;
     }
-
+    
     toast.add({
       title: 'Signup failed.',
       description: errorMessage,
@@ -45,7 +71,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 </script>
 
 <template>
-  <div class="h-screen w-full flex overflow-hidden bg-background text-base">
+  <div class="max-h-screen w-full flex overflow-hidden bg-background text-base">
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="signup"
