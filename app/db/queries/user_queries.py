@@ -17,23 +17,24 @@ class UserQueries:
         ") sub "
         "WHERE user_id::text = %s"
     )
-
     UPDATE_USER_PROFILE = (
         "UPDATE users SET first_name = %s, middle_name = %s, last_name = %s, "
         "date_of_birth = %s, phone_number = %s, profile_image_url = %s WHERE user_id = %s"
     )
-    INSERT_USER_ADDRESS = """INSERT INTO user_address (
+    INSERT_USER_ADDRESS = """INSERT INTO user_address
             country,
             city,
             barangay,
             street,
             postal_code,
+            latitude,
+            longitude,
             user_id)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
     UPDATE_USER_ADDRESS = (
         "UPDATE user_address SET country = %s, city = %s, barangay = %s, "
-        "street = %s, postal_code = %s WHERE user_id = %s"
+        "street = %s, postal_code = %s, latitude = %s, longitude = %s WHERE user_id = %s"
     )
     GET_USER_PROFILE = (
         "SELECT first_name, middle_name, last_name, date_of_birth, phone_number, profile_image_url "
@@ -48,13 +49,11 @@ class UserQueries:
                     WHERE b.owner_id = %s
                     AND (p.purchase_status IS NULL OR p.purchase_status != 'completed')
                 ) AS books_owned,
-
                 (
                     SELECT COUNT(*)
                     FROM rented_books AS r
                     WHERE r.user_id = %s
                 ) AS books_rented,
-
                 (
                     SELECT COUNT(*)
                     FROM purchased_books AS p2

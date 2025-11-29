@@ -9,11 +9,14 @@ definePageMeta({
 
 const toast = useToast();
 const auth = useAuthStore();
+
+const isDisabled = ref(false);
 const isLoading = ref(false);
 
 const onSubmitSignup = async (username: string, emailAddress: string, password: string) => {
   if (isLoading.value) return;
-  
+
+  isDisabled.value = true;
   isLoading.value = true;
   
   try {
@@ -65,6 +68,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
       color: 'error',
     });
   } finally {
+    isDisabled.value = false;
     isLoading.value = false;
   }
 };

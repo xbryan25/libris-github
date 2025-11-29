@@ -11,6 +11,24 @@ def user_login() -> tuple[Response, int]:
     return UserControllers.user_login_controller()
 
 
+@users_bp.route("/google-login", methods=["POST"])
+def user_google_login() -> tuple[Response, int]:
+    """
+    add later
+    """
+
+    return UserControllers.user_google_login_controller()
+
+
+@users_bp.route("/new-username", methods=["POST"])
+def update_username_by_user_id() -> tuple[Response, int]:
+    """
+    add later
+    """
+
+    return UserControllers.update_username_by_user_id_controller()
+
+
 @users_bp.route("/signup", methods=["POST"])
 def user_signup() -> tuple[Response, int]:
     """Register new user account."""
@@ -104,6 +122,62 @@ def update_user_profile() -> tuple[Response, int]:
 def patch_user_profile() -> tuple[Response, int]:
     """Partially update authenticated user profile."""
     return UserControllers.patch_user_profile_controller()
+
+
+@users_bp.route("/profile/me/personal", methods=["PUT"])
+@jwt_required()
+def update_personal_info() -> tuple[Response, int]:
+    """
+    Update only the personal information (not address) of the authenticated user.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It allows updating personal information fields only.
+
+    Request body:
+        A JSON object containing the fields to update:
+            - first_name (optional): User's first name
+            - middle_name (optional): User's middle name
+            - last_name (optional): User's last name
+            - date_of_birth (optional): User's date of birth
+            - phone_number (optional): User's phone number
+
+    Response JSON:
+        message: Success or error message
+
+    Possible errors:
+        401 if the user is not authenticated or the token is missing/invalid.
+        400 if no data is provided.
+        500 if an unexpected error occurs during processing.
+    """
+    return UserControllers.update_personal_info_controller()
+
+
+@users_bp.route("/profile/me/address", methods=["PUT"])
+@jwt_required()
+def update_address() -> tuple[Response, int]:
+    """
+    Update only the address information of the authenticated user.
+
+    This endpoint requires a valid access token (HTTP-only cookie) to identify the user.
+    It allows updating address fields only.
+
+    Request body:
+        A JSON object containing address fields to update:
+            - country (optional): User's country
+            - city (optional): User's city
+            - barangay (optional): User's barangay
+            - street (optional): User's street
+            - postal_code (optional): User's postal code
+
+    Response JSON:
+        message: Success or error message
+
+    Possible errors:
+        401 if the user is not authenticated or the token is missing/invalid.
+        400 if no data is provided.
+        500 if an unexpected error occurs during processing.
+    """
+    return UserControllers.update_address_controller()
 
 
 @users_bp.route("/library-details/<string:user_id>", methods=["GET"])

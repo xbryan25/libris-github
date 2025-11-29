@@ -6,6 +6,8 @@ import random
 from datetime import datetime, timedelta, timezone
 from app.services.email_service import EmailService
 
+from app.exceptions.custom_exceptions import EmailInUseByGoogleError
+
 
 class UserServices:
 
@@ -16,6 +18,11 @@ class UserServices:
 
         if not user:
             return None
+
+        if user and user["auth_provider"] == "google":
+            raise EmailInUseByGoogleError(
+                "Email address is linked to a Google account. Try logging in using Google."
+            )
 
         user["user_id"] = str(user["user_id"])
         user_dataclass = convert_user_dict(user)
@@ -37,8 +44,13 @@ class UserServices:
 
         existing_user_by_email = UserRepository.get_user_by_email_address(email_address)
         if existing_user_by_email:
-            print("[SIGNUP SERVICE] Email already exists!")
-            return {"error": "Email address already exists.", "type": "email"}
+            if existing_user_by_email["auth_provider"] == "google":
+                return {
+                    "error": "Email address is already linked to a Google account.",
+                    "type": "email",
+                }
+            else:
+                return {"error": "Email address is already in use.", "type": "email"}
 
         existing_user_by_username = UserRepository.get_user_by_username(username)
         if existing_user_by_username:
@@ -179,12 +191,74 @@ class UserServices:
             return {"error": "An unexpected error occurred."}
 
     @staticmethod
+    def user_google_signup_service(
+        email_address: str,
+        first_name: str,
+        last_name: str,
+        profile_image_url: str | None,
+    ) -> str | None:
+        """
+        add later
+        """
+
+        user_id = UserRepository.create_user_from_google(
+            email_address, first_name, last_name, profile_image_url
+        )
+
+        UserRepository.initialize_wallet(user_id)
+
+        return user_id
+
+    @staticmethod
+    def update_username_by_user_id_service(user_id: str, username: str) -> None:
+        """
+        add later
+        """
+
+        UserRepository.update_username_by_user_id(user_id, username)
+
+    @staticmethod
     def get_username_service(user_id) -> str | None:
         """Get the username of a user using the user_id."""
         username_dict = UserRepository.get_username(user_id)
         if username_dict is None:
             return None
         return username_dict["username"]
+
+    @staticmethod
+    def check_if_username_is_taken_service(username: str) -> bool:
+        """
+        Get the username of a user using the user_id.
+
+        Args:
+            user_id (str): user_id of the user.
+
+        Returns:
+            str: The username of the user if found, otherwise None.
+        """
+
+        is_username_taken = UserRepository.check_if_username_is_taken(username)
+
+        return is_username_taken["exists"]
+
+    @staticmethod
+    def get_user_by_email_address_service(email: str) -> dict[str, Any] | None:
+        """
+        Retrieve a user and their details using an email.
+
+        Args:
+            email (str): The email used to retreive a user.
+
+        Returns:
+            str: The username of the user if found, otherwise None.
+        """
+
+        user_dict = UserRepository.get_user_by_email_address(email)
+
+        if user_dict is None:
+            return None
+
+        return user_dict
 
     @staticmethod
     def get_profile_info_service(user_id: str) -> dict[str, Any] | None:

@@ -14,3 +14,9 @@ class InvalidParameterError(ValidationError):
     """Raised when a query parameter has an invalid or disallowed value."""
 
     pass
+
+
+class EmailInUseByGoogleError(Exception):
+    """Raised when an email is already registered via Google Sign-In."""
+
+    pass
