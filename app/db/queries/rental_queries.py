@@ -12,7 +12,9 @@ class RentalsQueries:
             all_fees_captured,
             meetup_time_window,
             meetup_location,
-            meetup_date
+            meetup_date,
+            actual_rate,
+            actual_deposit
         )
         VALUES (
             gen_random_uuid(),
@@ -26,7 +28,9 @@ class RentalsQueries:
             false,  -- all_fees_captured
             %s,  -- meetup_time_window
             %s,  -- meetup_location
-            %s   -- meetup_date
+            %s,  -- meetup_date
+            %s,  -- actual_rate
+            %s   -- actual_deposit
         )
         RETURNING rental_id;
     """
@@ -44,8 +48,8 @@ class RentalsQueries:
             b.book_id,
             b.title,
             b.author,
-            b.security_deposit,
-            b.daily_rent_price,
+            rb.actual_deposit,
+            rb.actual_rate,
             bi.image_url AS image,
             u.username AS "from",
             rb.all_fees_captured,
@@ -86,8 +90,8 @@ class RentalsQueries:
             b.book_id,
             b.title,
             b.author,
-            b.security_deposit,
-            b.daily_rent_price,
+            rb.actual_deposit,
+            rb.actual_rate,
             bi.image_url AS image,
             u.username AS "to",
             rb.all_fees_captured,
@@ -258,7 +262,7 @@ class RentalsQueries:
             rb.owner_confirmed_return,
             b.owner_id,
             b.title,
-            b.security_deposit
+            rb.actual_deposit
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
         WHERE rb.rental_id = %s;
@@ -290,7 +294,7 @@ class RentalsQueries:
         rb.owner_confirmed_return,
         rb.user_id,
         b.owner_id,
-        b.security_deposit;
+        rb.actual_deposit;
 """
 
     CHECK_BOOK_AVAILABILITY = """

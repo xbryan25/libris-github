@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { Rental } from '~/composables/useUserRentals';
 import type { Lending } from '~/composables/useUserLendings';
-import Rating from 'primevue/rating';
+import { useRating } from '~/composables/useRating';
 
 interface Props {
-  from: string;
+  from: string; // 'rental' or 'lending'
   item: Rental | Lending;
   rentalId: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits(['back-to-complete']);
+
+const { submitRating, loading: ratingLoading } = useRating();
+const toast = useToast();
 
 const rating = ref(0);
 const review = ref('');
@@ -22,20 +25,54 @@ const userName = computed(() => {
     : (props.item as Lending).to;
 });
 
+const selectRating = (value: number) => {
+  rating.value = value;
+  console.log('Rating selected:', value);
+};
+
 const handleSubmit = async () => {
+  console.log('Submitting rating:', rating.value);
+  
   if (rating.value === 0) {
+    toast.add({
+      title: 'Rating Required',
+      description: 'Please select a rating before submitting.',
+      icon: 'i-lucide-alert-circle',
+    });
     return;
   }
   
   submitting.value = true;
   
-  // TODO hi husnie: CHANGE THIS TO A PROPER API CALL. THIS FOR TEST ONLY
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Rating submitted:', { rating: rating.value, review: review.value });
-    navigateTo('/rentals');
+    const result = await submitRating(
+      props.rentalId,
+      rating.value,
+      review.value,
+      props.from as 'rental' | 'lending'
+    );
+    
+    if (result.success) {
+      toast.add({
+        title: 'Rating Submitted',
+        description: 'Thank you for your feedback!',
+        icon: 'i-lucide-check-circle',
+      });
+      navigateTo('/rentals');
+    } else {
+      toast.add({
+        title: 'Submission Failed',
+        description: result.error || 'Failed to submit rating',
+        icon: 'i-lucide-x-circle',
+      });
+    }
   } catch (error) {
     console.error('Error submitting rating:', error);
+    toast.add({
+      title: 'Submission Failed',
+      description: 'An error occurred while submitting your rating',
+      icon: 'i-lucide-x-circle',
+    });
   } finally {
     submitting.value = false;
   }
@@ -57,8 +94,27 @@ const handleBack = () => {
       </div>
 
       <!-- Star Rating -->
-      <div class="flex justify-center mb-6">
-        <Rating v-model="rating" :stars="5" :cancel="false" class="text-4xl" />
+      <div class="mb-6">
+        <div class="flex justify-center items-center gap-3 mb-2">
+          <button
+            v-for="star in [1, 2, 3, 4, 5]"
+            :key="star"
+            @click="selectRating(star)"
+            type="button"
+            class="cursor-pointer focus:outline-none rounded-full p-1 transition-all duration-200 hover:scale-125"
+          >
+            <Icon
+              name="lucide:star"
+              :class="[
+                'w-14 h-14 transition-all duration-200',
+                star <= rating ? 'text-amber-400 fill-amber-400' : 'text-gray-300'
+              ]"
+            />
+          </button>
+        </div>
+        <p class="text-center text-sm text-muted">
+          {{ rating === 0 ? 'Click to rate' : `${rating} out of 5 stars` }}
+        </p>
       </div>
 
       <!-- Review Text Area -->
