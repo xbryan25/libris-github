@@ -5,10 +5,19 @@ definePageMeta({
   middleware: auth,
 });
 
+interface PriceRange {
+  minPrice: number | null;
+  maxPrice: number | null;
+}
+
 const headerState = reactive({
   searchValue: '',
   selectedBookGenre: 'All Genres',
   selectedBookAvailability: 'All',
+  selectedPriceRange: { 
+    minPrice: null, 
+    maxPrice: null 
+  } as PriceRange,
 });
 
 const currentWalletBalance = ref(0);
@@ -70,6 +79,9 @@ onMounted(async () => {
       @update:selected-book-availability="
         (newSelectedBookAvailability) =>
           (headerState.selectedBookAvailability = newSelectedBookAvailability)
+      "
+      @update:selected-price-range="
+        (newPriceRange: PriceRange) => (headerState.selectedPriceRange = newPriceRange)
       "
     />
 
