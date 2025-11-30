@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import RentalHistoryCard from '~/components/RentalHistoryCard.vue';
-import LendCard from '~/components/LendCard.vue';
+import RentalHistoryCard from './RentalHistoryCard.vue';
+import LendHistoryCard from './LendHistoryCard.vue';
 import { useUserRentals } from '~/composables/useUserRentals';
 
 interface Props {
@@ -13,8 +13,9 @@ const {
   rentals,
   loading: rentalsLoading,
   error: rentalsError,
-  fetchUserRentals,
+  fetchUserCompletedRentals,
 } = useUserRentals();
+
 const {
   lendings,
   loading: lendingsLoading,
@@ -23,7 +24,7 @@ const {
 } = useUserLendings();
 
 onMounted(() => {
-  fetchUserRentals();
+  fetchUserCompletedRentals();
   fetchUserLendings();
 });
 </script>
@@ -63,7 +64,7 @@ onMounted(() => {
       </div>
 
       <div v-else class="space-y-4">
-        <LendCard v-for="lending in lendings" :key="lending.rental_id" :lending="lending" />
+        <LendHistoryCard v-for="lending in lendings" :key="lending.rental_id" :lending="lending" />
       </div>
     </div>
 
@@ -100,7 +101,7 @@ onMounted(() => {
       </div>
 
       <div v-else class="space-y-4">
-        <RentalCard v-for="rental in rentals" :key="rental.rental_id" :rental="rental" />
+        <RentalHistoryCard v-for="rental in rentals" :key="rental.rental_id" :rental="rental" />
       </div>
     </div>
   </div>

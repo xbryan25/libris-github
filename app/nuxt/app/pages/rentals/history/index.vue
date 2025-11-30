@@ -36,7 +36,7 @@ watch(activeTab, (val) => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen w-full pt-4 px-4 md:px-8 lg:px-15">
+  <div class="flex flex-col h-auto w-full pt-4 px-4 md:px-8 lg:px-15">
     <div class="mb-6 flex justify-between items-start">
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
@@ -82,6 +82,6 @@ watch(activeTab, (val) => {
     </div>
 
     <!-- Pass activeTab to RentalsSection as prop -->
-    <RentalsSection :active-tab="activeTab" />
+    <RentalsHistorySection :active-tab="activeTab" />
   </div>
 </template>

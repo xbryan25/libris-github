@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { Rental } from '~/composables/useUserRentals'
-import type { StepperItem } from '@nuxt/ui'
+import type { Rental } from '~/composables/useUserRentals';
+import type { StepperItem } from '@nuxt/ui';
 
 interface Props {
-  rental: Rental
+  rental: Rental;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const getStatusBadge = (status: string) => {
   const statusConfig: Record<string, { label: string; color: string }> = {
@@ -16,72 +16,72 @@ const getStatusBadge = (status: string) => {
     ongoing: { label: 'Book Received', color: 'bg-purple-500' },
     awaiting_return_confirmation: { label: 'Return Initiated', color: 'bg-indigo-500' },
     completed: { label: 'Return Complete', color: 'bg-green-500' },
-    rate_user: { label: 'Rate User', color: 'bg-amber-500' }
-  }
-  
-  return statusConfig[status] || { label: status, color: 'bg-gray-500' }
-}
+    rate_user: { label: 'Rate User', color: 'bg-amber-500' },
+  };
+
+  return statusConfig[status] || { label: status, color: 'bg-gray-500' };
+};
 
 const getStepperItems = (status: string): StepperItem[] => {
   return [
     {
       title: 'Requested',
       description: 'Rental request sent',
-      icon: 'i-lucide-send'
+      icon: 'i-lucide-send',
     },
     {
       title: 'Confirmed',
       description: 'Owner approved request',
-      icon: 'i-lucide-check-circle'
+      icon: 'i-lucide-check-circle',
     },
     {
       title: 'Pickup',
       description: 'Ready for pickup',
-      icon: 'i-lucide-package'
+      icon: 'i-lucide-package',
     },
     {
       title: 'Renting',
       description: 'Currently renting',
-      icon: 'i-lucide-book-open'
+      icon: 'i-lucide-book-open',
     },
     {
       title: 'Return',
       description: 'Ready for return',
-      icon: 'i-lucide-package-check'
+      icon: 'i-lucide-package-check',
     },
     {
       title: 'Completed',
       description: 'Rental finished',
-      icon: 'i-lucide-circle-check'
+      icon: 'i-lucide-circle-check',
     },
     {
       title: 'Rate',
       description: 'Rate the experience',
-      icon: 'i-lucide-star'
-    }
-  ]
-}
+      icon: 'i-lucide-star',
+    },
+  ];
+};
 
 const getCurrentStep = (status: string) => {
   const statusMap: Record<string, number> = {
-    'pending': 0,
-    'approved': 1,
-    'awaiting_pickup_confirmation': 2,
-    'ongoing': 3,
-    'awaiting_return_confirmation': 4,
-    'completed': 5 
-  }
-  
-  return statusMap[status] ?? 0
-}
+    pending: 0,
+    approved: 1,
+    awaiting_pickup_confirmation: 2,
+    ongoing: 3,
+    awaiting_return_confirmation: 4,
+    completed: 5,
+  };
+
+  return statusMap[status] ?? 0;
+};
 </script>
 
 <template>
-  <NuxtLink 
+  <NuxtLink
     :to="{
       path: `/rentals/${rental.rental_id}`,
-      query: { from: 'rental' }
-    }" 
+      query: { from: 'rental' },
+    }"
     class="block"
   >
     <div class="bg-surface rounded-lg border border-base p-6 hover:shadow-md transition-shadow">
@@ -100,11 +100,14 @@ const getCurrentStep = (status: string) => {
             </div>
           </div>
         </div>
-        
+
         <!-- Status Badge and Readits -->
         <div class="flex items-center gap-3">
-          <span 
-            :class="[getStatusBadge(rental.rent_status).color, 'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap']"
+          <span
+            :class="[
+              getStatusBadge(rental.rent_status).color,
+              'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap',
+            ]"
           >
             {{ getStatusBadge(rental.rent_status).label }}
           </span>
@@ -118,9 +121,9 @@ const getCurrentStep = (status: string) => {
 
       <!-- Progress Steps using UStepper -->
       <div class="mt-6">
-        <UStepper 
+        <UStepper
           disabled
-          :items="getStepperItems(rental.rent_status)" 
+          :items="getStepperItems(rental.rent_status)"
           :model-value="getCurrentStep(rental.rent_status)"
         />
       </div>
