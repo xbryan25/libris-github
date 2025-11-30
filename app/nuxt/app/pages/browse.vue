@@ -18,6 +18,9 @@ const headerState = reactive({
     minPrice: null, 
     maxPrice: null 
   } as PriceRange,
+  mileRadius: null as number | null,
+  userLat: null as number | null,
+  userLng: null as number | null,
 });
 
 const currentWalletBalance = ref(0);
@@ -28,6 +31,17 @@ onMounted(async () => {
 
   const data = await useCurrentWalletBalance();
   currentWalletBalance.value = data.currentWalletBalance ?? 0;
+
+  // Get user's location from profile
+  const { profile, fetchProfile } = useProfile();
+  if (!profile.value) {
+    await fetchProfile();
+  }
+  
+  if (profile.value?.address?.latitude && profile.value?.address?.longitude) {
+    headerState.userLat = profile.value.address.latitude;
+    headerState.userLng = profile.value.address.longitude;
+  }
 
   isFetching.value = false;
 });
@@ -83,6 +97,7 @@ onMounted(async () => {
       @update:selected-price-range="
         (newPriceRange: PriceRange) => (headerState.selectedPriceRange = newPriceRange)
       "
+      @update:mile-radius="(newMileRadius: number | null) => (headerState.mileRadius = newMileRadius)"
     />
 
     <BookList book-list-variant="default" :header-state="headerState" />

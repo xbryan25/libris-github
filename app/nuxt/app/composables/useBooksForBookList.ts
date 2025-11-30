@@ -8,6 +8,9 @@ export function useBooksForBookList(options?: {
   bookAvailability: string,
   minPrice?: number | null,
   maxPrice?: number | null,
+  mileRadius?: number | null,
+  userLat?: number | null,
+  userLng?: number | null,
 }) {
 
   const { $apiFetch } = useNuxtApp();

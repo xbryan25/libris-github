@@ -350,6 +350,8 @@ class UserControllers:
                 "barangay": profile_info.pop("barangay", None),
                 "street": profile_info.pop("street", None),
                 "postal_code": profile_info.pop("postal_code", None),
+                "latitude": profile_info.pop("latitude", None),
+                "longitude": profile_info.pop("longitude", None),
             }
 
             return jsonify(profile_info), 200
@@ -379,6 +381,8 @@ class UserControllers:
                 "barangay": profile_info.pop("barangay", None),
                 "street": profile_info.pop("street", None),
                 "postal_code": profile_info.pop("postal_code", None),
+                "latitude": profile_info.pop("latitude", None),
+                "longitude": profile_info.pop("longitude", None),
             }
 
             return jsonify(profile_info), 200

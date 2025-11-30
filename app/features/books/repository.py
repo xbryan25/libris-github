@@ -63,6 +63,43 @@ class BookRepository:
         return ""
 
     @staticmethod
+    def _build_distance_filter(
+        mile_radius: Optional[float],
+        user_lat: Optional[float],
+        user_lng: Optional[float],
+    ) -> str:
+        """
+        Build a SQL distance filter clause using Haversine formula.
+        Note: Values are validated in the controller before reaching here.
+
+        Args:
+            mile_radius: Maximum distance in miles (None if not set)
+            user_lat: User's latitude (None if not set)
+            user_lng: User's longitude (None if not set)
+
+        Returns:
+            SQL WHERE clause fragment for distance filtering
+        """
+        if mile_radius is None or user_lat is None or user_lng is None:
+            return ""
+
+        # Haversine formula for distance calculation in miles
+        # Earth's radius in miles: 3959
+        # Formula: distance = 2 * 3959 * asin(sqrt(sin²((lat2-lat1)/2) + cos(lat1) * cos(lat2) * sin²((lng2-lng1)/2)))
+        # We'll use PostgreSQL's point type and distance operator for better performance
+        # But since we're using numeric lat/lng, we'll use the Haversine formula directly
+
+        # Convert miles to approximate degrees (rough approximation: 1 degree ≈ 69 miles)
+        # More accurate: use the full Haversine formula
+        distance_condition = (
+            f"3959 * acos(cos(radians({user_lat})) * cos(radians(ua.latitude)) * "
+            f"cos(radians(ua.longitude) - radians({user_lng})) + "
+            f"sin(radians({user_lat})) * sin(radians(ua.latitude))) <= {mile_radius}"
+        )
+
+        return f"AND ua.latitude IS NOT NULL AND ua.longitude IS NOT NULL AND ({distance_condition}) "
+
+    @staticmethod
     def get_books_for_book_list(
         params, get_books_from_a_specific_user
     ) -> list[dict[str, str]]:
@@ -108,6 +145,13 @@ class BookRepository:
             params.get("min_price"), params.get("max_price"), params["availability"]
         )
 
+        # Build distance filter clause
+        distance_filter = BookRepository._build_distance_filter(
+            params.get("mile_radius"),
+            params.get("user_lat"),
+            params.get("user_lng"),
+        )
+
         # Both fetches are randomized
 
         if get_books_from_a_specific_user:
@@ -117,6 +161,7 @@ class BookRepository:
                     sort_field="RANDOM()",
                     sort_order="ASC",
                     price_filter=price_filter,
+                    distance_filter=distance_filter,
                 ),
                 (
                     search_pattern,
@@ -136,6 +181,7 @@ class BookRepository:
                     sort_field="RANDOM()",
                     sort_order="ASC",
                     price_filter=price_filter,
+                    distance_filter=distance_filter,
                 ),
                 (
                     search_pattern,
@@ -184,10 +230,19 @@ class BookRepository:
             params.get("min_price"), params.get("max_price"), params["availability"]
         )
 
+        # Build distance filter clause
+        distance_filter = BookRepository._build_distance_filter(
+            params.get("mile_radius"),
+            params.get("user_lat"),
+            params.get("user_lng"),
+        )
+
         if get_book_count_from_a_specific_user:
             return db.fetch_one(
                 BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER.format(
-                    search_by="title", price_filter=price_filter
+                    search_by="title",
+                    price_filter=price_filter,
+                    distance_filter=distance_filter,
                 ),
                 (
                     search_pattern,
@@ -200,7 +255,9 @@ class BookRepository:
         else:
             return db.fetch_one(
                 BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(
-                    search_by="title", price_filter=price_filter
+                    search_by="title",
+                    price_filter=price_filter,
+                    distance_filter=distance_filter,
                 ),
                 (
                     search_pattern,
