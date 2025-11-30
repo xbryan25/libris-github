@@ -26,6 +26,24 @@ class RentalsRepository:
         return result if result else []
 
     @staticmethod
+    def get_user_completed_rentals(user_id: str) -> list[dict[str, Any]]:
+        """
+        Retrieve all completed rentals for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed rentals are being fetched.
+
+        Returns:
+            list[dict[str, Any]]: A list of rental dictionaries with book and owner details.
+                Returns empty list if no completed rentals found.
+        """
+        db = current_app.extensions["db"]
+        params = (user_id,)
+
+        result = db.fetch_all(RentalsQueries.GET_USER_COMPLETED_RENTALS, params)
+        return result if result else []
+
+    @staticmethod
     def get_user_lendings_with_status(user_id: str) -> list[dict[str, Any]]:
         """
         Retrieve all lendings for a user with statuses.
@@ -41,6 +59,24 @@ class RentalsRepository:
         params = (user_id,)
 
         result = db.fetch_all(RentalsQueries.GET_USER_LENDINGS_WITH_STATUS, params)
+        return result if result else []
+
+    @staticmethod
+    def get_user_completed_lendings(user_id: str) -> list[dict[str, Any]]:
+        """
+        Retrieve all completed lendings for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed lendings are being fetched.
+
+        Returns:
+            list[dict[str, Any]]: A list of lending dictionaries with book and borrower details.
+                Returns empty list if no completed lendings found.
+        """
+        db = current_app.extensions["db"]
+        params = (user_id,)
+
+        result = db.fetch_all(RentalsQueries.GET_USER_COMPLETED_LENDINGS, params)
         return result if result else []
 
     @staticmethod

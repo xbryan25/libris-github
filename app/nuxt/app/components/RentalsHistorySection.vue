@@ -20,12 +20,12 @@ const {
   lendings,
   loading: lendingsLoading,
   error: lendingsError,
-  fetchUserLendings,
+  fetchUserCompletedLendings,
 } = useUserLendings();
 
 onMounted(() => {
   fetchUserCompletedRentals();
-  fetchUserLendings();
+  fetchUserCompletedLendings();
 });
 </script>
 
@@ -37,7 +37,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:loader-2" class="w-8 h-8 text-muted mx-auto animate-spin" />
-            <p class="text-muted mt-4 text-lg">Loading your Lendings...</p>
+            <p class="text-muted mt-4 text-lg">Loading your past lendings...</p>
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
-            <p class="text-muted mt-4 text-lg">No active Lendings</p>
+            <p class="text-muted mt-4 text-lg">No past lendings yet...</p>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="lucide:loader-2" class="w-8 h-8 text-muted mx-auto animate-spin" />
-            <p class="text-muted mt-4 text-lg">Loading your rentals...</p>
+            <p class="text-muted mt-4 text-lg">Loading your past rentals...</p>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
-            <p class="text-muted mt-4 text-lg">No active rentals</p>
+            <p class="text-muted mt-4 text-lg">No past rentals yet...</p>
           </div>
         </div>
       </div>
