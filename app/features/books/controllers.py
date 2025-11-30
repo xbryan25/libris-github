@@ -55,7 +55,34 @@ class BookControllers:
                     "bookAvailability", "for rent"
                 ).lower(),
                 "user_id": request.args.get("userId"),
+                "min_price": request.args.get("minPrice"),
+                "max_price": request.args.get("maxPrice"),
             }
+
+            try:
+                min_price = float(params["min_price"]) if params["min_price"] else None
+                max_price = float(params["max_price"]) if params["max_price"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Price filter values ('minPrice', 'maxPrice') must be valid numbers."
+                )
+
+            params["min_price"] = min_price
+            params["max_price"] = max_price
+
+            if (min_price is not None and min_price < 0) or (
+                max_price is not None and max_price < 0
+            ):
+                raise InvalidParameterError("Price values must be non-negative.")
+
+            if (
+                min_price is not None
+                and max_price is not None
+                and min_price > max_price
+            ):
+                raise InvalidParameterError(
+                    "Minimum price cannot be greater than maximum price."
+                )
 
             if params["user_id"]:
                 get_books_from_a_specific_user = True
@@ -131,7 +158,34 @@ class BookControllers:
                     "bookAvailability", "for rent"
                 ).lower(),
                 "user_id": request.args.get("userId"),
+                "min_price": request.args.get("minPrice"),
+                "max_price": request.args.get("maxPrice"),
             }
+
+            try:
+                min_price = float(params["min_price"]) if params["min_price"] else None
+                max_price = float(params["max_price"]) if params["max_price"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Price filter values ('minPrice', 'maxPrice') must be valid numbers."
+                )
+
+            params["min_price"] = min_price
+            params["max_price"] = max_price
+
+            if (min_price is not None and min_price < 0) or (
+                max_price is not None and max_price < 0
+            ):
+                raise InvalidParameterError("Price values must be non-negative.")
+
+            if (
+                min_price is not None
+                and max_price is not None
+                and min_price > max_price
+            ):
+                raise InvalidParameterError(
+                    "Minimum price cannot be greater than maximum price."
+                )
 
             if params["user_id"]:
                 get_book_count_from_a_specific_user = True

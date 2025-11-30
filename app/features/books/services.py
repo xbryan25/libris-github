@@ -37,6 +37,8 @@ class BookServices:
                     - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
                     - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
                                         other user, get all books that that user owns
+                    - "min_price" (float | None): The minimum price for filtering.
+                    - "max_price" (float | None): The maximum price for filtering.
             get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
                                                         or only from a specific user
 

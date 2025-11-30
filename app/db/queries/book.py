@@ -24,6 +24,7 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
@@ -53,6 +54,7 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
@@ -72,6 +74,7 @@ class BookQueries:
         "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
+        "{price_filter} "
     )
 
     GET_BOOK_COUNT_FOR_BOOK_LIST = (
@@ -89,6 +92,7 @@ class BookQueries:
         "AND b.is_soft_deleted != TRUE "
         "AND (pb.purchase_status = 'pending' OR pb.purchase_status IS NULL) "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' OR rb.rent_status IS NULL) "
+        "{price_filter} "
     )
 
     GET_MY_LIBRARY_BOOKS = (

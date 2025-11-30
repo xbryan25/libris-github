@@ -2,14 +2,21 @@
 import type { Book } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
+interface PriceRange {
+  minPrice: number | null;
+  maxPrice: number | null;
+}
+
 const props = defineProps<{
   headerState: {
     searchValue: string;
     selectedBookGenre: string;
     selectedBookAvailability: string;
+    selectedPriceRange: PriceRange;
   };
   userId?: string;
 }>();
+
 
 const booksData = ref<Book[]>([]);
 
@@ -51,6 +58,8 @@ const loadBooks = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
   };
 
   const data = await useBooksForBookList(options);
@@ -63,6 +72,8 @@ const getTotalBookCount = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
@@ -117,26 +128,15 @@ const handleResize = useDebounceFn(async () => {
 }, 400);
 
 watch(
-  () => pageNumber.value,
-  async () => {
-    isFetching.value = true;
-
-    try {
-      await debouncedLoadBooks();
-    } finally {
-      isFetching.value = false;
-    }
-  },
-);
-
-watch(
   [
-    () => props.headerState.searchValue,
-    () => props.headerState.selectedBookAvailability,
-    () => props.headerState.selectedBookGenre,
+   () => props.headerState.searchValue,
+   () => props.headerState.selectedBookAvailability,
+   () => props.headerState.selectedBookGenre,
+    () => props.headerState.selectedPriceRange, 
   ],
   async () => {
     isFetching.value = true;
+    pageNumber.value = 1; 
     try {
       await debouncedLoadBooks();
       await debouncedLoadBookCount();
@@ -147,7 +147,7 @@ watch(
     }
   },
   { deep: true },
-);
+)
 
 onMounted(async () => {
   isFetching.value = true;

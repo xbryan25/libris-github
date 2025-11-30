@@ -6,6 +6,65 @@ from typing import Any, Optional
 
 class BookRepository:
     @staticmethod
+    def _build_price_filter(
+        min_price: Optional[float], max_price: Optional[float], availability: str
+    ) -> str:
+        """
+        Build a SQL price filter clause based on min/max price and availability type.
+        Note: Price values are validated in the controller before reaching here, so it's safe to format them.
+
+        Args:
+            min_price: Minimum price filter (None if not set)
+            max_price: Maximum price filter (None if not set)
+            availability: Book availability type ('rent', 'purchase', 'both', or 'all')
+
+        Returns:
+            SQL WHERE clause fragment for price filtering
+        """
+        if min_price is None and max_price is None:
+            return ""
+
+        # Determine which price fields to filter based on availability
+        if availability == "rent":
+            # Filter by daily_rent_price only
+            price_field = "b.daily_rent_price"
+        elif availability == "purchase":
+            # Filter by purchase_price only
+            price_field = "b.purchase_price"
+        elif availability == "both":
+            # Filter by either daily_rent_price OR purchase_price
+            conditions = []
+            if min_price is not None and max_price is not None:
+                conditions.append(
+                    f"(b.daily_rent_price >= {min_price} AND b.daily_rent_price <= {max_price})"
+                )
+                conditions.append(
+                    f"(b.purchase_price >= {min_price} AND b.purchase_price <= {max_price})"
+                )
+            elif min_price is not None:
+                conditions.append(f"b.daily_rent_price >= {min_price}")
+                conditions.append(f"b.purchase_price >= {min_price}")
+            elif max_price is not None:
+                conditions.append(f"b.daily_rent_price <= {max_price}")
+                conditions.append(f"b.purchase_price <= {max_price}")
+
+            if conditions:
+                return f"AND ({' OR '.join(conditions)}) "
+            return ""
+        else:
+            return ""
+
+        conditions = []
+        if min_price is not None:
+            conditions.append(f"{price_field} >= {min_price}")
+        if max_price is not None:
+            conditions.append(f"{price_field} <= {max_price}")
+
+        if conditions:
+            return f"AND ({' AND '.join(conditions)}) "
+        return ""
+
+    @staticmethod
     def get_books_for_book_list(
         params, get_books_from_a_specific_user
     ) -> list[dict[str, str]]:
@@ -46,12 +105,20 @@ class BookRepository:
             "%%" if params["availability"] == "all" else f"{params['availability']}"
         )
 
+        # Build price filter clause
+        price_filter = BookRepository._build_price_filter(
+            params.get("min_price"), params.get("max_price"), params["availability"]
+        )
+
         # Both fetches are randomized
 
         if get_books_from_a_specific_user:
             return db.fetch_all(
                 BookQueries.GET_BOOKS_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER.format(
-                    search_by="title", sort_field="RANDOM()", sort_order="ASC"
+                    search_by="title",
+                    sort_field="RANDOM()",
+                    sort_order="ASC",
+                    price_filter=price_filter,
                 ),
                 (
                     search_pattern,
@@ -67,7 +134,10 @@ class BookRepository:
         else:
             return db.fetch_all(
                 BookQueries.GET_BOOKS_FOR_BOOK_LIST.format(
-                    search_by="title", sort_field="RANDOM()", sort_order="ASC"
+                    search_by="title",
+                    sort_field="RANDOM()",
+                    sort_order="ASC",
+                    price_filter=price_filter,
                 ),
                 (
                     search_pattern,
@@ -111,10 +181,15 @@ class BookRepository:
             "%%" if params["availability"] == "all" else f"{params['availability']}"
         )
 
+        # Build price filter clause
+        price_filter = BookRepository._build_price_filter(
+            params.get("min_price"), params.get("max_price"), params["availability"]
+        )
+
         if get_book_count_from_a_specific_user:
             return db.fetch_one(
                 BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST_FROM_A_SPECIFIC_USER.format(
-                    search_by="title"
+                    search_by="title", price_filter=price_filter
                 ),
                 (
                     search_pattern,
@@ -126,7 +201,9 @@ class BookRepository:
 
         else:
             return db.fetch_one(
-                BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(search_by="title"),
+                BookQueries.GET_BOOK_COUNT_FOR_BOOK_LIST.format(
+                    search_by="title", price_filter=price_filter
+                ),
                 (
                     search_pattern,
                     genre,

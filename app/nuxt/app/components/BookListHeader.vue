@@ -93,8 +93,8 @@ watch(
     const min = (newMin !== null && newMin !== undefined) ? Number(newMin) : null;
     const max = (newMax !== null && newMax !== undefined) ? Number(newMax) : null;
 
-    const finalMin = (min !== null && isFinite(min)) ? min : null;
-    const finalMax = (max !== null && isFinite(max)) ? max : null;
+    const finalMin = (min !== null && isFinite(min) && min > 0) ? min : null;
+    const finalMax = (max !== null && isFinite(max) && max < 1000) ? max : null;
 
     emit('update:selectedPriceRange', {
       minPrice: finalMin,
@@ -134,13 +134,12 @@ onMounted(async () => {
         size="xl"
         class="flex-1"
       />
-      <UPopover>
+      <UPopover v-model:open="isPricePopoverOpen">
         <UButton
         color="neutral"
         variant="outline"
         size="xl"
         :label="priceButtonLabel"
-        
         :trailing-icon="isPricePopoverOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
         class="justify-between"
       />

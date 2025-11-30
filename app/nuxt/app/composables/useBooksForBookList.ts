@@ -1,14 +1,16 @@
 import type { Book } from "~/types"
 
 export function useBooksForBookList(options?: {
-                                booksPerPage?: number, 
-                                pageNumber?: number, 
-                                searchValue?: string, 
-                                bookGenre?: string,
-                                bookAvailability: string,
-                            }){
+  booksPerPage?: number,
+  pageNumber?: number,
+  searchValue?: string,
+  bookGenre?: string,
+  bookAvailability: string,
+  minPrice?: number | null,
+  maxPrice?: number | null,
+}) {
 
-  const { $apiFetch } = useNuxtApp();                            
+  const { $apiFetch } = useNuxtApp();
 
   return $apiFetch<Book[]>(`/api/books/book-list-books`, {
     method: 'GET',
