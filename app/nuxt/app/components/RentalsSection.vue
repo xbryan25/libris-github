@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import RentalHistoryCard from '~/components/RentalHistoryCard.vue';
 import LendCard from '~/components/LendCard.vue';
 import { useUserRentals } from '~/composables/useUserRentals';
 

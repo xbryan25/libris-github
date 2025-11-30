@@ -5,9 +5,12 @@ import { useUserRentals } from '~/composables/useUserRentals';
 
 interface Props {
   activeTab: 'lending' | 'renting';
+  sortBy: string;
+  sortOrder: string;
+  cardsPerPage: number;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const {
   rentals,
@@ -22,6 +25,26 @@ const {
   error: lendingsError,
   fetchUserCompletedLendings,
 } = useUserLendings();
+
+const pageNumber = ref(1);
+
+watch([() => props.sortBy, () => props.sortOrder, () => props.cardsPerPage], (newValues) => {
+  fetchUserCompletedRentals();
+  fetchUserCompletedLendings();
+});
+
+watch(
+  () => props.activeTab,
+  (newVal) => {
+    pageNumber.value = 1;
+
+    if (newVal === 'lending') {
+      fetchUserCompletedLendings();
+    } else {
+      fetchUserCompletedRentals();
+    }
+  },
+);
 
 onMounted(() => {
   fetchUserCompletedRentals();
@@ -65,6 +88,8 @@ onMounted(() => {
 
       <div v-else class="space-y-4">
         <LendHistoryCard v-for="lending in lendings" :key="lending.rental_id" :lending="lending" />
+
+        <UPagination v-model:page="pageNumber" :total="100" class="w-full flex justify-center" />
       </div>
     </div>
 
@@ -102,6 +127,8 @@ onMounted(() => {
 
       <div v-else class="space-y-4">
         <RentalHistoryCard v-for="rental in rentals" :key="rental.rental_id" :rental="rental" />
+
+        <UPagination v-model:page="pageNumber" :total="100" class="w-full flex justify-center" />
       </div>
     </div>
   </div>

@@ -93,6 +93,22 @@ export const useUserRentals = () => {
     }
   }
 
+  const fetchUserCompletedRentalsCount = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $apiFetch<{count: number}>(`${API_URL}/api/rentals/my-completed-rentals-count`, {
+        credentials: 'include'
+      })
+      rentals.value = Array.isArray(res) ? res : []
+    } catch (e: any) {
+      rentals.value = []
+      console.log('No rentals found or error fetching rental count:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const statusBadge = computed(() => (status: string): StatusBadge => {
     const statusConfig: Record<string, StatusBadge> = {
       pending: { label: 'Requested', color: 'bg-yellow-500', progress: 1 },
@@ -140,6 +156,7 @@ export const useUserRentals = () => {
     error,
     fetchUserRentals,
     fetchUserCompletedRentals,
+    fetchUserCompletedRentalsCount,
     statusBadge,
     progressSteps,
     filteredRentals,

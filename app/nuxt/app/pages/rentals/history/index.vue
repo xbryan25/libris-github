@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
-import RentalsSection from '~/components/RentalsSection.vue';
 import { ref, computed } from 'vue';
 
 definePageMeta({
@@ -28,6 +27,14 @@ const headerText = computed(() => {
   return activeTab.value === 'lending' ? 'Lend History' : 'Rent History';
 });
 
+const sortByItems = ref(['Start date', 'End date']);
+const sortOrderItems = ref(['newest first', 'oldest first']);
+const cardsPerPageItems = ref([10, 25, 50]);
+
+const sortBy = ref('Start date');
+const sortOrder = ref('newest first');
+const cardsPerPage = ref(10);
+
 watch(activeTab, (val) => {
   const url = new URL(window.location.href);
   url.searchParams.set('activeTab', val);
@@ -41,9 +48,9 @@ watch(activeTab, (val) => {
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />
-          Rental History
+          My Rental History
         </h1>
-        <p class="text-muted">View lent and rent history</p>
+        <p class="text-muted">See your lending and renting activity</p>
       </div>
     </div>
 
@@ -70,18 +77,47 @@ watch(activeTab, (val) => {
       </div>
     </div>
 
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold text-foreground">{{ headerText }}</h2>
-      <NuxtLink
-        :to="{ path: '/rentals', query: { activeTab } }"
-        class="text-foreground font-medium bg-default hover:bg-default active:bg-default flex items-center gap-1 cursor-pointer"
-      >
-        Transactions
-        <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
-      </NuxtLink>
+    <div class="flex mb-6">
+      <h2 class="flex-1 text-xl font-bold text-foreground">{{ headerText }}</h2>
+
+      <div class="flex-[3] flex justify-center gap-2">
+        <div class="flex items-center gap-2">
+          <p>Sort by</p>
+          <USelect v-model="sortBy" :items="sortByItems" class="w-45" />
+        </div>
+
+        <USeparator orientation="vertical" color="primary" size="sm" />
+
+        <div class="flex items-center gap-2">
+          <p>Show</p>
+          <USelect v-model="sortOrder" :items="sortOrderItems" class="w-45" />
+        </div>
+
+        <USeparator orientation="vertical" color="primary" size="sm" />
+
+        <div class="flex items-center gap-2">
+          <USelect v-model="cardsPerPage" :items="cardsPerPageItems" class="w-20" />
+          <p>cards per page</p>
+        </div>
+      </div>
+
+      <div class="flex-1 flex justify-end items-center">
+        <NuxtLink
+          :to="{ path: '/rentals', query: { activeTab } }"
+          class="text-foreground font-medium flex gap-1 cursor-pointer"
+        >
+          Current {{ activeTab === 'lending' ? 'lendings' : 'rentals' }}
+          <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
+        </NuxtLink>
+      </div>
     </div>
 
-    <!-- Pass activeTab to RentalsSection as prop -->
-    <RentalsHistorySection :active-tab="activeTab" />
+    <!-- Pass activeTab to RentalsHistorySection as prop -->
+    <RentalsHistorySection
+      :sort-by="sortBy"
+      :sort-order="sortOrder"
+      :cards-per-page="cardsPerPage"
+      :active-tab="activeTab"
+    />
   </div>
 </template>
