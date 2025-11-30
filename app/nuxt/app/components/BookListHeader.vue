@@ -6,12 +6,22 @@ interface PriceRange {
   maxPrice: number | null;
 }
 
+const mileRadiusOptions = [
+  { label: 'Any Distance', value: null },
+  { label: '2 Miles', value: 2 },
+  { label: '5 Miles', value: 5 },
+  { label: '10 Miles', value: 10 },
+  { label: '25 Miles', value: 25 },
+  { label: '> 30 Miles', value: 30 },
+];
+
 const props = defineProps<{
   headerState: {
     searchValue: string;
     selectedBookGenre: string;
     selectedBookAvailability: string;
     selectedPriceRange: PriceRange;
+    mileRadius: number | null;
   };
 }>();
 
@@ -22,9 +32,15 @@ const emit = defineEmits<{
     value: string,
   ): void;
    (e: 'update:selectedPriceRange', value: PriceRange): void;
+   (e: 'update:mileRadius', value: number | null): void;
 }>();
 
 const searchValue = ref(props.headerState.searchValue);
+
+const mileRadiusItems = ref(mileRadiusOptions);
+const mileRadiusValue = ref(
+  mileRadiusOptions.find(item => item.value === props.headerState.mileRadius) || mileRadiusOptions[0]
+);
 
 const bookGenreItems = ref(['All Genres']);
 const bookGenreValue = ref(props.headerState.selectedBookGenre);
@@ -103,6 +119,14 @@ watch(
   },
 );
 
+watch(
+  () => mileRadiusValue.value,
+  (newItem) => {
+    if (!newItem) return; 
+    emit('update:mileRadius', newItem.value)
+  }
+)
+
 onMounted(async () => {
   await loadBookGenreItems();
 });
@@ -167,6 +191,12 @@ onMounted(async () => {
           </div>
         </template>
     </UPopover>
+    <USelectMenu
+      v-model="mileRadiusValue"
+      :items="mileRadiusItems"
+      size="xl"
+      class="flex-1"
+    />
     </div>
   </div>
 </template>

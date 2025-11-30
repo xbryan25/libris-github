@@ -24,16 +24,13 @@ class BookRepository:
         if min_price is None and max_price is None:
             return ""
 
-        # Determine which price fields to filter based on availability
         if availability == "rent":
-            # Filter by daily_rent_price only
             price_field = "b.daily_rent_price"
+
         elif availability == "purchase":
-            # Filter by purchase_price only
             price_field = "b.purchase_price"
+
         elif availability in ("both", "all"):
-            # Filter by either daily_rent_price OR purchase_price
-            # "all" means show all books regardless of availability type, so check both price fields
             conditions = []
             if min_price is not None and max_price is not None:
                 conditions.append(

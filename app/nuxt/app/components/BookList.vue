@@ -13,6 +13,9 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
     selectedPriceRange: PriceRange;
+    mileRadius: number | null;
+    userLat: number | null;
+    userLng: number | null;
   };
   userId?: string;
 }>();
@@ -60,6 +63,9 @@ const loadBooks = async () => {
     userId: props.userId,
     minPrice: props.headerState.selectedPriceRange.minPrice,
     maxPrice: props.headerState.selectedPriceRange.maxPrice,
+    mileRadius: props.headerState.mileRadius,
+    userLat: props.headerState.userLat,
+    userLng: props.headerState.userLng,
   };
 
   const data = await useBooksForBookList(options);
@@ -74,6 +80,9 @@ const getTotalBookCount = async () => {
     userId: props.userId,
     minPrice: props.headerState.selectedPriceRange.minPrice,
     maxPrice: props.headerState.selectedPriceRange.maxPrice,
+    mileRadius: props.headerState.mileRadius,
+    userLat: props.headerState.userLat,
+    userLng: props.headerState.userLng,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
@@ -132,7 +141,10 @@ watch(
    () => props.headerState.searchValue,
    () => props.headerState.selectedBookAvailability,
    () => props.headerState.selectedBookGenre,
-    () => props.headerState.selectedPriceRange, 
+   () => props.headerState.selectedPriceRange,
+   () => props.headerState.mileRadius, 
+   () => props.headerState.userLat,
+   () => props.headerState.userLng, 
   ],
   async () => {
     isFetching.value = true;
