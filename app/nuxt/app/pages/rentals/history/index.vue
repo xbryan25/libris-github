@@ -20,12 +20,12 @@ if (tab && !Array.isArray(tab)) {
 navigateTo({ query: { activeTab: activeTab.value } }, { replace: true });
 
 const tabs = [
-  { id: 'lending', label: "Books I'm Lending", icon: 'lucide:trending-up' },
-  { id: 'renting', label: "Books I'm Renting", icon: 'lucide:trending-down' },
+  { id: 'lending', label: "Books I've Lent", icon: 'lucide:trending-up' },
+  { id: 'renting', label: "Books I've Rented", icon: 'lucide:trending-down' },
 ] as const;
 
 const headerText = computed(() => {
-  return activeTab.value === 'lending' ? 'Lend Status' : 'Rent Status';
+  return activeTab.value === 'lending' ? 'Lend History' : 'Rent History';
 });
 
 watch(activeTab, (val) => {
@@ -41,9 +41,9 @@ watch(activeTab, (val) => {
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />
-          My Rentals
+          Rental History
         </h1>
-        <p class="text-muted">Manage your lending and renting activities</p>
+        <p class="text-muted">View lent and rent history</p>
       </div>
     </div>
 
@@ -73,10 +73,10 @@ watch(activeTab, (val) => {
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold text-foreground">{{ headerText }}</h2>
       <NuxtLink
-        :to="{ path: '/rentals/history', query: { activeTab } }"
+        :to="{ path: '/rentals', query: { activeTab } }"
         class="text-foreground font-medium bg-default hover:bg-default active:bg-default flex items-center gap-1 cursor-pointer"
       >
-        History
+        Transactions
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
       </NuxtLink>
     </div>
