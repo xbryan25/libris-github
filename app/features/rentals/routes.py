@@ -95,6 +95,18 @@ def get_my_completed_rentals() -> tuple[Response, int]:
     return RentalsController.get_user_completed_rentals_controller()
 
 
+@rentals_bp.route("/my-completed-rentals-count", methods=["GET"])
+@jwt_required()
+def get_my_completed_rentals_count() -> tuple[Response, int]:
+    """
+    Retrieve the total count of completed rentals for the authenticated user.
+
+    Response JSON:
+        { count: int }
+    """
+    return RentalsController.get_user_completed_rentals_count_controller()
+
+
 @rentals_bp.route("/my-lendings", methods=["GET"])
 @jwt_required()
 def get_my_lendings() -> tuple[Response, int]:
@@ -174,6 +186,18 @@ def get_my_completed_lendings() -> tuple[Response, int]:
         ]
     """
     return RentalsController.get_user_completed_lendings_controller()
+
+
+@rentals_bp.route("/my-completed-lendings-count", methods=["GET"])
+@jwt_required()
+def get_my_completed_lendings_count() -> tuple[Response, int]:
+    """
+    Retrieve the total count of completed lendings for the authenticated user.
+
+    Response JSON:
+        { count: int }
+    """
+    return RentalsController.get_user_completed_lendings_count_controller()
 
 
 @rentals_bp.route("/<rental_id>/approve", methods=["POST"])

@@ -88,6 +88,8 @@ export const useUserRentals = () => {
         }
       })
       rentals.value = Array.isArray(res) ? res : []
+
+      console.log(rentals.value)
     } catch (e: any) {
       rentals.value = []
       console.log('No rentals found or error fetching rentals:', e)

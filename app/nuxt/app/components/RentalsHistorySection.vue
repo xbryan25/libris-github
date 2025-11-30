@@ -19,36 +19,52 @@ const {
 } = useUserRentals();
 
 const {
+  completedRentalsCount,
+  loading: rentalsCountLoading,
+  fetchUserCompletedRentalsCount,
+} = useUserRentalsCount();
+
+const {
   lendings,
   loading: lendingsLoading,
   error: lendingsError,
   fetchUserCompletedLendings,
 } = useUserLendings();
 
+const {
+  completedLendingsCount,
+  loading: lendingsCountLoading,
+  fetchUserCompletedLendingsCount,
+} = useUserLendingsCount();
+
 const pageNumber = ref(1);
 
 watch(
   [() => props.sortBy, () => props.sortOrder, () => props.cardsPerPage, pageNumber],
-  (newValues) => {
-    fetchUserCompletedRentals(newValues[0], newValues[1], newValues[2], pageNumber.value);
-    fetchUserCompletedLendings(newValues[0], newValues[1], newValues[2], pageNumber.value);
+  async (newValues) => {
+    if (props.activeTab === 'renting') {
+      console.log('does it even reach here??');
+      await fetchUserCompletedRentals(newValues[0], newValues[1], newValues[2], pageNumber.value);
+    } else {
+      await fetchUserCompletedLendings(newValues[0], newValues[1], newValues[2], pageNumber.value);
+    }
   },
 );
 
 watch(
   () => props.activeTab,
-  (newVal) => {
+  async (newVal) => {
     pageNumber.value = 1;
 
     if (newVal === 'renting') {
-      fetchUserCompletedRentals(
+      await fetchUserCompletedRentals(
         props.sortBy,
         props.sortOrder,
         props.cardsPerPage,
         pageNumber.value,
       );
     } else {
-      fetchUserCompletedLendings(
+      await fetchUserCompletedLendings(
         props.sortBy,
         props.sortOrder,
         props.cardsPerPage,
@@ -58,9 +74,26 @@ watch(
   },
 );
 
-onMounted(() => {
-  fetchUserCompletedRentals(props.sortBy, props.sortOrder, props.cardsPerPage, pageNumber.value);
-  fetchUserCompletedLendings(props.sortBy, props.sortOrder, props.cardsPerPage, pageNumber.value);
+onMounted(async () => {
+  // Get count during mount, as it won't change while user is in this page
+  await fetchUserCompletedRentalsCount();
+  await fetchUserCompletedLendingsCount();
+
+  if (props.activeTab === 'renting') {
+    await fetchUserCompletedRentals(
+      props.sortBy,
+      props.sortOrder,
+      props.cardsPerPage,
+      pageNumber.value,
+    );
+  } else {
+    await fetchUserCompletedLendings(
+      props.sortBy,
+      props.sortOrder,
+      props.cardsPerPage,
+      pageNumber.value,
+    );
+  }
 });
 </script>
 
@@ -101,7 +134,13 @@ onMounted(() => {
       <div v-else class="space-y-4">
         <LendHistoryCard v-for="lending in lendings" :key="lending.rental_id" :lending="lending" />
 
-        <UPagination v-model:page="pageNumber" :total="100" class="w-full flex justify-center" />
+        <UPagination
+          v-if="!lendingsCountLoading"
+          v-model:page="pageNumber"
+          :items-per-page="cardsPerPage"
+          :total="completedLendingsCount"
+          class="w-full flex justify-center"
+        />
       </div>
     </div>
 
@@ -140,7 +179,13 @@ onMounted(() => {
       <div v-else class="space-y-4">
         <RentalHistoryCard v-for="rental in rentals" :key="rental.rental_id" :rental="rental" />
 
-        <UPagination v-model:page="pageNumber" :total="100" class="w-full flex justify-center" />
+        <UPagination
+          v-if="!rentalsCountLoading"
+          v-model:page="pageNumber"
+          :items-per-page="cardsPerPage"
+          :total="completedRentalsCount"
+          class="w-full flex justify-center"
+        />
       </div>
     </div>
   </div>

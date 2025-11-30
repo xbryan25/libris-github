@@ -74,7 +74,7 @@ watch(activeTab, (val) => {
       <h2 class="text-xl font-bold text-foreground">{{ headerText }}</h2>
       <NuxtLink
         :to="{ path: '/rentals/history', query: { activeTab } }"
-        class="text-foreground font-medium bg-default hover:bg-default active:bg-default flex items-center gap-1 cursor-pointer"
+        class="text-foreground font-medium flex items-center gap-1 cursor-pointer"
       >
         {{ activeTab === 'lending' ? 'Lend' : 'Rent' }} history
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />

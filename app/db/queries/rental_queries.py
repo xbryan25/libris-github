@@ -124,6 +124,17 @@ class RentalsQueries:
         LIMIT %s OFFSET %s
     """
 
+    GET_USER_COMPLETED_RENTALS_COUNT = """
+        SELECT COUNT(*) AS count
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.user_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE rb.user_id = %s
+        AND rb.rent_status = 'completed'
+        AND rb.user_rated = true
+    """
+
     GET_USER_LENDINGS_WITH_STATUS = """
         SELECT
             rb.rental_id,
@@ -205,6 +216,17 @@ class RentalsQueries:
         AND rb.owner_rated = true
         ORDER BY {sort_by} {sort_order}
         LIMIT %s OFFSET %s
+    """
+
+    GET_USER_COMPLETED_LENDINGS_COUNT = """
+        SELECT COUNT(*) AS count
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.user_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE b.owner_id = %s
+        AND rb.rent_status = 'completed'
+        AND rb.owner_rated = true
     """
 
     APPROVE_RENTAL = """

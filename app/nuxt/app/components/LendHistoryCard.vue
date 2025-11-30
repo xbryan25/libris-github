@@ -50,7 +50,7 @@ const convertDateFormat = (dateString: string) => {
               <Icon name="lucide:calendar" class="w-4 h-4" />
               <span
                 >{{ convertDateFormat(lending.rent_start_date) }} -
-                {{ convertDateFormat(lending.rent_start_date) }}</span
+                {{ convertDateFormat(lending.rent_end_date) }}</span
               >
             </div>
           </div>

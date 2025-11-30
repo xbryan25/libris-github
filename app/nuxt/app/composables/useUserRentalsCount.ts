@@ -19,6 +19,8 @@ export const useUserRentalsCount = () => {
         credentials: 'include'
       })
       completedRentalsCount.value = res.count
+
+      console.log('rent counttt ' + completedRentalsCount.value)
     } catch (e: any) {
       completedRentalsCount.value = 0
       console.log('No rentals found or error fetching rental count:', e)
@@ -28,6 +30,7 @@ export const useUserRentalsCount = () => {
   }
 
   return {
+    completedRentalsCount,
     loading,
     error,
     fetchUserCompletedRentalsCount

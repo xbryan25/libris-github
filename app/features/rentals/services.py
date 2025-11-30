@@ -145,6 +145,11 @@ class RentalsServices:
         return formatted_rentals
 
     @staticmethod
+    def get_user_completed_rentals_count_service(user_id: str) -> int:
+
+        return RentalsRepository.get_user_completed_rentals_count(user_id)["count"]
+
+    @staticmethod
     def get_user_lendings_with_status(user_id: str) -> list[dict[str, Any]]:
         raw_lendings = RentalsRepository.get_user_lendings_with_status(user_id)
 
@@ -275,6 +280,11 @@ class RentalsServices:
             }
             formatted_lendings.append(formatted_lending)
         return formatted_lendings
+
+    @staticmethod
+    def get_user_completed_lendings_count_service(user_id: str) -> int:
+
+        return RentalsRepository.get_user_completed_lendings_count(user_id)["count"]
 
     @staticmethod
     def validate_meetup_time(meetup_time: str, time_window: str) -> tuple[bool, str]:
