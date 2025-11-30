@@ -77,33 +77,18 @@ export const useUserLendings = () => {
     }
   }
 
-  const fetchUserCompletedLendings = async () => {
+  const fetchUserCompletedLendings = async (sortBy: string, sortOrder: string, cardsPerPage: number, pageNumber: number) => {
     loading.value = true
     error.value = null
     try {
       const res = await $apiFetch<Lending[]>(`${API_URL}/api/rentals/my-completed-lendings`, {
-        credentials: 'include'
+        credentials: 'include',
+        query: {sortBy, sortOrder, cardsPerPage, pageNumber}
       })
       lendings.value = Array.isArray(res) ? res : []
     } catch (e: any) {
       lendings.value = []
       console.log('No lendings found or error fetching lendings:', e)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const fetchUserCompletedLendingsCount = async () => {
-    loading.value = true
-    error.value = null
-    try {
-      const res = await $apiFetch<Lending[]>(`${API_URL}/api/rentals/my-completed-lendings-count`, {
-        credentials: 'include'
-      })
-      lendings.value = Array.isArray(res) ? res : []
-    } catch (e: any) {
-      lendings.value = []
-      console.log('No lendings found or error fetching lending count:', e)
     } finally {
       loading.value = false
     }
@@ -156,7 +141,6 @@ export const useUserLendings = () => {
     error,
     fetchUserLendings,
     fetchUserCompletedLendings,
-    fetchUserCompletedLendingsCount,
     statusBadge,
     progressSteps,
     filteredLendings,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import RentalHistoryCard from './RentalHistoryCard.vue';
 import LendHistoryCard from './LendHistoryCard.vue';
-import { useUserRentals } from '~/composables/useUserRentals';
 
 interface Props {
   activeTab: 'lending' | 'renting';
@@ -28,27 +27,40 @@ const {
 
 const pageNumber = ref(1);
 
-watch([() => props.sortBy, () => props.sortOrder, () => props.cardsPerPage], (newValues) => {
-  fetchUserCompletedRentals();
-  fetchUserCompletedLendings();
-});
+watch(
+  [() => props.sortBy, () => props.sortOrder, () => props.cardsPerPage, pageNumber],
+  (newValues) => {
+    fetchUserCompletedRentals(newValues[0], newValues[1], newValues[2], pageNumber.value);
+    fetchUserCompletedLendings(newValues[0], newValues[1], newValues[2], pageNumber.value);
+  },
+);
 
 watch(
   () => props.activeTab,
   (newVal) => {
     pageNumber.value = 1;
 
-    if (newVal === 'lending') {
-      fetchUserCompletedLendings();
+    if (newVal === 'renting') {
+      fetchUserCompletedRentals(
+        props.sortBy,
+        props.sortOrder,
+        props.cardsPerPage,
+        pageNumber.value,
+      );
     } else {
-      fetchUserCompletedRentals();
+      fetchUserCompletedLendings(
+        props.sortBy,
+        props.sortOrder,
+        props.cardsPerPage,
+        pageNumber.value,
+      );
     }
   },
 );
 
 onMounted(() => {
-  fetchUserCompletedRentals();
-  fetchUserCompletedLendings();
+  fetchUserCompletedRentals(props.sortBy, props.sortOrder, props.cardsPerPage, pageNumber.value);
+  fetchUserCompletedLendings(props.sortBy, props.sortOrder, props.cardsPerPage, pageNumber.value);
 });
 </script>
 

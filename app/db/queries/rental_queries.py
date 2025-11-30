@@ -120,6 +120,8 @@ class RentalsQueries:
         WHERE rb.user_id = %s
         AND rb.rent_status = 'completed'
         AND rb.user_rated = true
+        ORDER BY {sort_by} {sort_order}
+        LIMIT %s OFFSET %s
     """
 
     GET_USER_LENDINGS_WITH_STATUS = """
@@ -201,6 +203,8 @@ class RentalsQueries:
         WHERE b.owner_id = %s
         AND rb.rent_status = 'completed'
         AND rb.owner_rated = true
+        ORDER BY {sort_by} {sort_order}
+        LIMIT %s OFFSET %s
     """
 
     APPROVE_RENTAL = """

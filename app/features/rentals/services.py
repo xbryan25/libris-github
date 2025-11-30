@@ -73,8 +73,18 @@ class RentalsServices:
         return formatted_rentals
 
     @staticmethod
-    def get_user_completed_rentals_service(user_id: str) -> list[dict[str, Any]]:
-        raw_completed_rentals = RentalsRepository.get_user_completed_rentals(user_id)
+    def get_user_completed_rentals_service(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+
+        if params["sort_by"] and params["sort_by"] == "start date":
+            params["sort_by"] = "rent_start_date"
+        elif params["sort_by"]:
+            params["sort_by"] = "rent_end_date"
+
+        raw_completed_rentals = RentalsRepository.get_user_completed_rentals(
+            user_id, params
+        )
 
         formatted_rentals = []
         for rental in raw_completed_rentals:
@@ -196,8 +206,18 @@ class RentalsServices:
         return formatted_lendings
 
     @staticmethod
-    def get_user_completed_lendings_service(user_id: str) -> list[dict[str, Any]]:
-        raw_completed_lendings = RentalsRepository.get_user_completed_lendings(user_id)
+    def get_user_completed_lendings_service(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+
+        if params["sort_by"] and params["sort_by"] == "start date":
+            params["sort_by"] = "rent_start_date"
+        elif params["sort_by"]:
+            params["sort_by"] = "rent_end_date"
+
+        raw_completed_lendings = RentalsRepository.get_user_completed_lendings(
+            user_id, params
+        )
 
         formatted_lendings = []
         for lending in raw_completed_lendings:

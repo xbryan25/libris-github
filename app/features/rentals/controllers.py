@@ -3,7 +3,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 import traceback
 import datetime
 
-
 from .services import RentalsServices
 
 
@@ -161,8 +160,17 @@ class RentalsController:
             if not user_id:
                 return jsonify({"error": "Unauthorized"}), 401
 
+            params = {
+                "sort_by": (request.args.get("sortBy", "start date")).strip().lower(),
+                "sort_order": (request.args.get("sortOrder", "newest first"))
+                .strip()
+                .lower(),
+                "cards_per_page": int(request.args.get("cardsPerPage", 5)),
+                "page_number": int(request.args.get("pageNumber", 1)),
+            }
+
             completed_rentals = RentalsServices.get_user_completed_rentals_service(
-                user_id
+                user_id, params
             )
 
             return jsonify(completed_rentals), 200
@@ -193,8 +201,17 @@ class RentalsController:
             if not user_id:
                 return jsonify({"error": "Unauthorized"}), 401
 
+            params = {
+                "sort_by": (request.args.get("sortBy", "start date")).strip().lower(),
+                "sort_order": (request.args.get("sortOrder", "newest first"))
+                .strip()
+                .lower(),
+                "cards_per_page": int(request.args.get("cardsPerPage", 5)),
+                "page_number": int(request.args.get("pageNumber", 1)),
+            }
+
             completed_lendings = RentalsServices.get_user_completed_lendings_service(
-                user_id
+                user_id, params
             )
 
             return jsonify(completed_lendings), 200

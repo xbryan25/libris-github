@@ -26,7 +26,9 @@ class RentalsRepository:
         return result if result else []
 
     @staticmethod
-    def get_user_completed_rentals(user_id: str) -> list[dict[str, Any]]:
+    def get_user_completed_rentals(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Retrieve all completed rentals for a user.
 
@@ -38,9 +40,28 @@ class RentalsRepository:
                 Returns empty list if no completed rentals found.
         """
         db = current_app.extensions["db"]
-        params = (user_id,)
 
-        result = db.fetch_all(RentalsQueries.GET_USER_COMPLETED_RENTALS, params)
+        if params["sort_order"] and params["sort_order"] == "newest first":
+            sort_order = "DESC"
+        elif params["sort_order"]:
+            sort_order = "ASC"
+        else:
+            sort_order = "DESC"
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["cards_per_page"]
+        )
+
+        query_params = (user_id, params["cards_per_page"], offset)
+
+        result = db.fetch_all(
+            RentalsQueries.GET_USER_COMPLETED_RENTALS.format(
+                sort_by=params["sort_by"], sort_order=sort_order
+            ),
+            query_params,
+        )
         return result if result else []
 
     @staticmethod
@@ -62,7 +83,9 @@ class RentalsRepository:
         return result if result else []
 
     @staticmethod
-    def get_user_completed_lendings(user_id: str) -> list[dict[str, Any]]:
+    def get_user_completed_lendings(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """
         Retrieve all completed lendings for a user.
 
@@ -74,9 +97,28 @@ class RentalsRepository:
                 Returns empty list if no completed lendings found.
         """
         db = current_app.extensions["db"]
-        params = (user_id,)
 
-        result = db.fetch_all(RentalsQueries.GET_USER_COMPLETED_LENDINGS, params)
+        if params["sort_order"] and params["sort_order"] == "newest first":
+            sort_order = "DESC"
+        elif params["sort_order"]:
+            sort_order = "ASC"
+        else:
+            sort_order = "DESC"
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["cards_per_page"]
+        )
+
+        query_params = (user_id, params["cards_per_page"], offset)
+
+        result = db.fetch_all(
+            RentalsQueries.GET_USER_COMPLETED_LENDINGS.format(
+                sort_by=params["sort_by"], sort_order=sort_order
+            ),
+            query_params,
+        )
         return result if result else []
 
     @staticmethod

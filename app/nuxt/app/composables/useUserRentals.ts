@@ -77,33 +77,20 @@ export const useUserRentals = () => {
     }
   }
 
-  const fetchUserCompletedRentals = async () => {
+  const fetchUserCompletedRentals = async (sortBy: string, sortOrder: string, cardsPerPage: number, pageNumber: number) => {
     loading.value = true
     error.value = null
     try {
       const res = await $apiFetch<Rental[]>(`${API_URL}/api/rentals/my-completed-rentals`, {
-        credentials: 'include'
+        credentials: 'include',
+        query: {
+          sortBy, sortOrder, cardsPerPage, pageNumber
+        }
       })
       rentals.value = Array.isArray(res) ? res : []
     } catch (e: any) {
       rentals.value = []
       console.log('No rentals found or error fetching rentals:', e)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const fetchUserCompletedRentalsCount = async () => {
-    loading.value = true
-    error.value = null
-    try {
-      const res = await $apiFetch<{count: number}>(`${API_URL}/api/rentals/my-completed-rentals-count`, {
-        credentials: 'include'
-      })
-      rentals.value = Array.isArray(res) ? res : []
-    } catch (e: any) {
-      rentals.value = []
-      console.log('No rentals found or error fetching rental count:', e)
     } finally {
       loading.value = false
     }
@@ -156,7 +143,6 @@ export const useUserRentals = () => {
     error,
     fetchUserRentals,
     fetchUserCompletedRentals,
-    fetchUserCompletedRentalsCount,
     statusBadge,
     progressSteps,
     filteredRentals,
