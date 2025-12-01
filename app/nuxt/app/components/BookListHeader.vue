@@ -36,6 +36,7 @@ const emit = defineEmits<{
    (e: 'update:mileRadius', value: number | null): void;
 }>();
 
+
 const searchValue = ref(props.headerState.searchValue);
 
 const mileRadiusItems = ref(mileRadiusOptions);
@@ -49,19 +50,43 @@ const bookGenreValue = ref(props.headerState.selectedBookGenre);
 const bookAvailabilityItems = ref(['All', 'For Rent', 'For Sale', 'Both']);
 const bookAvailabilityValue = ref(props.headerState.selectedBookAvailability);
 
-const minPriceValue = ref<number | null>(props.headerState.selectedPriceRange.minPrice ?? null);
-const maxPriceValue = ref<number | null>(props.headerState.selectedPriceRange.maxPrice ?? null);
+const _minPrice = ref<number | null>(props.headerState.selectedPriceRange.minPrice ?? null);
+const _maxPrice = ref<number | null>(props.headerState.selectedPriceRange.maxPrice ?? null);
+
+const minPriceValue = computed({
+  get: () => _minPrice.value,
+  set: (val: number | string | null) => {
+    if (val === '' || val === null) {
+      _minPrice.value = null;
+    } else {
+      _minPrice.value = Number(val);
+    }
+  }
+});
+
+const maxPriceValue = computed({
+  get: () => _maxPrice.value,
+  set: (val: number | string | null) => {
+    if (val === '' || val === null) {
+      _maxPrice.value = null;
+    } else {
+      _maxPrice.value = Number(val);
+    }
+  }
+});
 
 const priceRange = computed<number[]>({
   get: () => [
-    minPriceValue.value ?? 0, 
-    maxPriceValue.value ?? 1000
+    (_minPrice.value && _minPrice.value > 0) ? _minPrice.value : 1,
+    (_maxPrice.value && _maxPrice.value > 0) ? _maxPrice.value : 1000
   ],
   set: ([min, max]: number[]) => {
-    minPriceValue.value = min as number; 
-    maxPriceValue.value = max as number;
+    minPriceValue.value = min ?? null; 
+    maxPriceValue.value = max ?? null; 
   }
 });
+
+const priceErrorMessage = ref('');
 
 const isFetching = ref(true);
 const isPricePopoverOpen = ref(false);
@@ -104,18 +129,33 @@ watch(
 );
 
 watch(
-  [minPriceValue, maxPriceValue],
+  [_minPrice, _maxPrice],
   ([newMin, newMax]) => {
-    
-    const min = (newMin !== null && newMin !== undefined) ? Number(newMin) : null;
-    const max = (newMax !== null && newMax !== undefined) ? Number(newMax) : null;
+    priceErrorMessage.value = ''; 
 
-    const finalMin = (min !== null && isFinite(min) && min > 0) ? min : null;
-    const finalMax = (max !== null && isFinite(max) && max < 1000) ? max : null;
+    if ((newMin !== null && newMin <= 0) || (newMax !== null && newMax <= 0)) {
+        priceErrorMessage.value = "Prices must be greater than 0.";
+        
+        emit('update:selectedPriceRange', {
+            minPrice: (newMin && newMin > 0) ? newMin : null,
+            maxPrice: (newMax && newMax > 0) ? newMax : null,
+        });
+        return;
+    }
+
+    if (newMin !== null && newMax !== null && newMin >= newMax) {
+        priceErrorMessage.value = "Min price must be less than Max price.";
+        
+        emit('update:selectedPriceRange', {
+            minPrice: null,
+            maxPrice: null,
+        });
+        return;
+    }
 
     emit('update:selectedPriceRange', {
-      minPrice: finalMin,
-      maxPrice: finalMax,
+      minPrice: newMin,
+      maxPrice: newMax,
     });
   },
 );
@@ -172,7 +212,10 @@ onMounted(async () => {
         <template #content>
           <div class="p-4 flex flex-col gap-4 w-64" @click.stop>
                 <label class="font-semibold text-sm">Price Range</label>
-                <USlider v-model="priceRange" :min="0" :max="1000" />
+                <p v-if="priceErrorMessage" class="text-red-500 text-xs font-medium">
+                    {{ priceErrorMessage }}
+                </p>
+                <USlider v-model="priceRange" :min="1" :max="1000" />
                 <label class="font-semibold text-sm">Min Price</label>
                 <UInput
                   v-model="minPriceValue"
