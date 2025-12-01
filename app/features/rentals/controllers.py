@@ -4,7 +4,7 @@ import traceback
 import datetime
 
 
-from .services import RentalsService
+from .services import RentalsServices
 
 
 class RentalsController:
@@ -22,6 +22,8 @@ class RentalsController:
             - meetup_time_window: Preferred time window for meetup
             - meetup_location: Location for meetup
             - meetup_date: Date for meetup (ISO 8601)
+            - actual_rate: Daily rental rate at time of booking
+            - actual_deposit: Security deposit at time of booking
 
         Backend defaults:
             - rent_status: "pending"
@@ -53,6 +55,8 @@ class RentalsController:
                 "meetup_time_window",
                 "meetup_location",
                 "meetup_date",
+                "actual_rate",
+                "actual_deposit",
             ]
 
             missing_fields = [
@@ -81,12 +85,21 @@ class RentalsController:
                 "meetup_time_window": rental_data_json["meetup_time_window"],
                 "meetup_location": rental_data_json["meetup_location"],
                 "meetup_date": rental_data_json["meetup_date"],
+                "actual_rate": rental_data_json["actual_rate"],
+                "actual_deposit": rental_data_json["actual_deposit"],
             }
 
-            result = RentalsService.create_rental_service(rental_data)
+            result = RentalsServices.create_rental_service(rental_data)
 
             if result is None:
-                return jsonify({"error": "Failed to create rental."}), 500
+                return (
+                    jsonify(
+                        {
+                            "error": "Failed to create rental. You may have insufficient balance."
+                        }
+                    ),
+                    400,
+                )
 
             resp = make_response(
                 {
@@ -120,8 +133,207 @@ class RentalsController:
         """
         try:
             current_user_id = get_jwt_identity()
-            exists = RentalsService.check_pending_rental(current_user_id, book_id)
+            exists = RentalsServices.check_pending_rental(current_user_id, book_id)
             return jsonify({"exists": exists}), 200
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_rentals_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            rentals = RentalsServices.get_user_rentals_with_status(user_id)
+
+            return jsonify(rentals), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_lendings_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            lendings = RentalsServices.get_user_lendings_with_status(user_id)
+
+            return jsonify(lendings), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def approve_rental_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to approve a rental request.
+        This will capture fees, deduct from wallet, and log transaction.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            # Get request data
+            data = request.get_json()
+
+            if not data:
+                return jsonify({"error": "Invalid request body"}), 400
+
+            meetup_time = data.get("meetupTime")
+
+            if not meetup_time:
+                return jsonify({"error": "Meetup time is required"}), 400
+
+            result, error = RentalsServices.approve_rental_request(
+                rental_id, meetup_time, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Rental approved successfully. Fees captured and transaction logged.",
+                        "rental": result,
+                    }
+                ),
+                200,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def reject_rental_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to reject a rental request.
+        This will delete the rental entry and release reserved funds.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            # Get request data
+            data = request.get_json()
+
+            if not data:
+                return jsonify({"error": "Invalid request body"}), 400
+
+            reason = data.get("reason", "No reason provided")
+
+            result, error = RentalsServices.reject_rental_request(
+                rental_id, reason, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Rental rejected successfully. Reserved funds have been released.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def cancel_rental_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to cancel a rental request by the renter.
+        This will delete the rental entry and release reserved funds.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = RentalsServices.cancel_rental_request(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Rental cancelled successfully. Reserved funds have been released.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def confirm_pickup_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to confirm book pickup by either user or owner.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = RentalsServices.confirm_pickup(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Pickup confirmed successfully.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def confirm_return_controller(rental_id: str) -> tuple[Response, int]:
+        """
+        Controller to confirm book return by either user or owner.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = RentalsServices.confirm_return(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Return confirmed successfully.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500

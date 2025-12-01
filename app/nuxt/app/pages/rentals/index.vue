@@ -29,14 +29,7 @@
           </h1>
           <p class="text-muted">Manage your lending and renting activities</p>
         </div>
-        <div class="flex-1 flex flex-col items-end gap-1">
-        <p class="text-muted">Your Readits</p>
 
-        <div class="flex items-center gap-2">
-          <Icon name="fluent:book-coins-20-regular" class="w-8 h-8 text-accent" />
-          <h1 class="font-bold text-3xl text-accent">1</h1> <!-- Placeholder value -->
-        </div>
-      </div>
     </div>
 
     <div class="w-full bg-background">

@@ -218,7 +218,7 @@ class BookQueries:
                 b.author,
                 bi.image_url AS image,
                 u.username AS "from",
-                rb.return_due_date AS return_date,
+                rb.rent_end_date AS return_date,
                 rb.total_rent_cost AS cost
             FROM rented_books rb
             JOIN books b ON rb.book_id = b.book_id
@@ -250,7 +250,7 @@ class BookQueries:
                 b.author,
                 bi.image_url as image,
                 u.username as "by",
-                rb.return_due_date as return_date,
+                rb.rent_end_date as return_date,
                 rb.total_rent_cost as cost
             FROM rented_books rb
             JOIN books b ON rb.book_id = b.book_id
