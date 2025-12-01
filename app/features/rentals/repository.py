@@ -26,6 +26,63 @@ class RentalsRepository:
         return result if result else []
 
     @staticmethod
+    def get_user_completed_rentals(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """
+        Retrieve all completed rentals for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed rentals are being fetched.
+
+        Returns:
+            list[dict[str, Any]]: A list of rental dictionaries with book and owner details.
+                Returns empty list if no completed rentals found.
+        """
+        db = current_app.extensions["db"]
+
+        if params["sort_order"] and params["sort_order"] == "newest first":
+            sort_order = "DESC"
+        elif params["sort_order"]:
+            sort_order = "ASC"
+        else:
+            sort_order = "DESC"
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["cards_per_page"]
+        )
+
+        query_params = (user_id, params["cards_per_page"], offset)
+
+        result = db.fetch_all(
+            RentalsQueries.GET_USER_COMPLETED_RENTALS.format(
+                sort_by=params["sort_by"], sort_order=sort_order
+            ),
+            query_params,
+        )
+        return result if result else []
+
+    @staticmethod
+    def get_user_completed_rentals_count(user_id: str) -> dict[str, int]:
+        """
+        Retrieve the count of all completed rentals for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed rentals are being fetched.
+
+        Returns:
+            dict[str, int]: Returns a dictionary containing the count of all completed rentals for a user
+        """
+        db = current_app.extensions["db"]
+
+        params = (user_id,)
+
+        result = db.fetch_one(RentalsQueries.GET_USER_COMPLETED_RENTALS_COUNT, params)
+        return result
+
+    @staticmethod
     def get_user_lendings_with_status(user_id: str) -> list[dict[str, Any]]:
         """
         Retrieve all lendings for a user with statuses.
@@ -42,6 +99,63 @@ class RentalsRepository:
 
         result = db.fetch_all(RentalsQueries.GET_USER_LENDINGS_WITH_STATUS, params)
         return result if result else []
+
+    @staticmethod
+    def get_user_completed_lendings(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """
+        Retrieve all completed lendings for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed lendings are being fetched.
+
+        Returns:
+            list[dict[str, Any]]: A list of lending dictionaries with book and borrower details.
+                Returns empty list if no completed lendings found.
+        """
+        db = current_app.extensions["db"]
+
+        if params["sort_order"] and params["sort_order"] == "newest first":
+            sort_order = "DESC"
+        elif params["sort_order"]:
+            sort_order = "ASC"
+        else:
+            sort_order = "DESC"
+
+        offset = (
+            0
+            if params["page_number"] <= 0
+            else (params["page_number"] - 1) * params["cards_per_page"]
+        )
+
+        query_params = (user_id, params["cards_per_page"], offset)
+
+        result = db.fetch_all(
+            RentalsQueries.GET_USER_COMPLETED_LENDINGS.format(
+                sort_by=params["sort_by"], sort_order=sort_order
+            ),
+            query_params,
+        )
+        return result if result else []
+
+    @staticmethod
+    def get_user_completed_lendings_count(user_id: str) -> dict[str, int]:
+        """
+        Retrieve the count of all completed lendings for a user.
+
+        Args:
+            user_id (str): The ID of the user whose completed lendings are being fetched.
+
+        Returns:
+            dict[str, int]: Returns a dictionary containing the count of all completed lendings for a user
+        """
+        db = current_app.extensions["db"]
+
+        params = (user_id,)
+
+        result = db.fetch_one(RentalsQueries.GET_USER_COMPLETED_LENDINGS_COUNT, params)
+        return result
 
     @staticmethod
     def get_rental_by_id(rental_id: str) -> dict[str, Any] | None:
