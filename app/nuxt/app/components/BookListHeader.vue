@@ -23,6 +23,7 @@ const props = defineProps<{
     selectedPriceRange: PriceRange;
     mileRadius: number | null;
   };
+  isLibraryMode?: boolean;
 }>();
 
 
@@ -192,6 +193,7 @@ onMounted(async () => {
         </template>
     </UPopover>
     <USelectMenu
+      v-if="!isLibraryMode"
       v-model="mileRadiusValue"
       :items="mileRadiusItems"
       size="xl"

@@ -2,6 +2,11 @@
 import type { MyLibraryBook } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
+interface PriceRange {
+    minPrice: number | null;
+    maxPrice: number | null;
+}
+
 const props = defineProps<{
   headerState: {
     searchValue: string;
@@ -10,6 +15,7 @@ const props = defineProps<{
   };
   addBookRefreshTrigger: number;
   userId?: string;
+  
 }>();
 
 const emit = defineEmits<{
@@ -58,6 +64,10 @@ const loadBooks = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    selectedPriceRange: { 
+        minPrice: null, 
+        maxPrice: null 
+    } as PriceRange,
   };
 
   const data = await useBooksForMyLibrary(options);

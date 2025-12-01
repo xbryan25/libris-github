@@ -6,11 +6,29 @@ definePageMeta({
   middleware: auth,
 });
 
+interface PriceRange {
+    minPrice: number | null;
+    maxPrice: number | null;
+}
+
 const headerState = reactive({
   searchValue: '',
   selectedBookGenre: 'All Genres',
   selectedBookAvailability: 'All',
+  selectedPriceRange: { 
+        minPrice: null, 
+        maxPrice: null 
+    } as PriceRange,
+    mileRadius: null as number | null,
 });
+
+const handlePriceRangeUpdate = (newPriceRange: PriceRange) => {
+    headerState.selectedPriceRange = newPriceRange;
+}
+
+const handleMileRadiusUpdate = (newRadius: number | null) => {
+    headerState.mileRadius = newRadius;
+}
 
 const authStore = useAuthStore();
 
@@ -82,6 +100,7 @@ onMounted(async () => {
     <div v-if="totalBookCount > 0" class="w-full">
       <BookListHeader
         :header-state="headerState"
+        :is-library-mode="true"
         @update:search-value="
           (newSearchValue: string) => (headerState.searchValue = newSearchValue)
         "
@@ -93,6 +112,8 @@ onMounted(async () => {
           (newSelectedBookAvailability: string) =>
             (headerState.selectedBookAvailability = newSelectedBookAvailability)
         "
+        @update:selected-price-range="handlePriceRangeUpdate"
+        @update:mile-radius="handleMileRadiusUpdate"
       />
 
       <MyLibraryBookList
