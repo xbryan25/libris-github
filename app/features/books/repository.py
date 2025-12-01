@@ -298,7 +298,6 @@ class BookRepository:
             else (params["page_number"] - 1) * params["books_per_page"]
         )
 
-        # Search is 'Contains'
         search_pattern = f"%{params['search_value']}%"
 
         genre = "%%" if params["genre"] == "all genres" else f"{params['genre']}"
@@ -306,10 +305,16 @@ class BookRepository:
             "%%" if params["availability"] == "all" else f"{params['availability']}"
         )
 
-        # Randomized
+        price_filter = BookRepository._build_price_filter(
+            params.get("min_price"), params.get("max_price"), params["availability"]
+        )
+
         return db.fetch_all(
             BookQueries.GET_MY_LIBRARY_BOOKS.format(
-                search_by="title", sort_field="RANDOM()", sort_order="ASC"
+                search_by="title",
+                sort_field="RANDOM()",
+                sort_order="ASC",
+                price_filter=price_filter,
             ),
             (
                 search_pattern,

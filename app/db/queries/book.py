@@ -129,6 +129,7 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )

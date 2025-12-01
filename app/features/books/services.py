@@ -110,16 +110,15 @@ class BookServices:
                     - "search_value" (str): The value to search for.
                     - "genre" (str): The genre or category of books to filter by.
                     - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
-                    - "user_id" (str): user_id of the user to prevent getting books that the current user owns, or, if from
-                                        other user, get all books that that user owns
-            get_books_from_a_specific_user (bool): A boolean value that determine whether the books retrived will be from everyone
-                                                        or only from a specific user
+                    - "min_price" (float | None): The minimum price for filtering.
+                    - "max_price" (float | None): The maximum price for filtering.
+                    - "user_id" (str): user_id of the user whose library is being viewed.
+            user_id (str): The ID of the authenticated user.
 
         Returns:
             list[MyLibraryBook]: A list of MyLibraryBook dataclass instances representing books_per_page books.
         """
 
-        # Clean 'availability' values from 'for rent' to 'rent' and 'for sale' to 'purchase'
         if params["availability"] == "for rent":
             params["availability"] = "rent"
         elif params["availability"] == "for sale":
@@ -130,12 +129,10 @@ class BookServices:
         my_library_book_dataclasses = []
 
         for my_library_book in my_library_books:
-            # Convert dict to dataclass before appending
             my_library_book_dataclasses.append(
                 convert_my_library_book_dict(my_library_book)
             )
 
-        # print(my_library_book_dataclasses)
         return my_library_book_dataclasses
 
     @staticmethod
