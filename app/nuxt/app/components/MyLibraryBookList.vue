@@ -12,6 +12,7 @@ const props = defineProps<{
     searchValue: string;
     selectedBookGenre: string;
     selectedBookAvailability: string;
+    selectedPriceRange: PriceRange;
   };
   addBookRefreshTrigger: number;
   userId?: string;
@@ -64,10 +65,8 @@ const loadBooks = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
-    selectedPriceRange: { 
-        minPrice: null, 
-        maxPrice: null 
-    } as PriceRange,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
   };
 
   const data = await useBooksForMyLibrary(options);
@@ -80,6 +79,8 @@ const getTotalBookCount = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalCountForMyLibrary(options);
@@ -165,6 +166,7 @@ watch(
     () => props.headerState.selectedBookGenre,
     () => props.addBookRefreshTrigger,
     () => editDeleteBookRefreshTrigger,
+    () => props.headerState.selectedPriceRange,
   ],
   () => debouncedHandler(),
   { deep: true },
