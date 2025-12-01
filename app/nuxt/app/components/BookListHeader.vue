@@ -12,7 +12,6 @@ const mileRadiusOptions = [
   { label: '5 Miles', value: 5 },
   { label: '10 Miles', value: 10 },
   { label: '25 Miles', value: 25 },
-  { label: '> 30 Miles', value: 30 },
 ];
 
 const props = defineProps<{
