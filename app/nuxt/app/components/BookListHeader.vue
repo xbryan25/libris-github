@@ -55,10 +55,11 @@ const _maxPrice = ref<number | null>(props.headerState.selectedPriceRange.maxPri
 const minPriceValue = computed({
   get: () => _minPrice.value,
   set: (val: number | string | null) => {
-    if (val === '' || val === null) {
+    const num = Number(val);
+    if (val === '' || val === null || isNaN(num) || num <= 0) {
       _minPrice.value = null;
     } else {
-      _minPrice.value = Number(val);
+      _minPrice.value = num;
     }
   }
 });
@@ -66,10 +67,11 @@ const minPriceValue = computed({
 const maxPriceValue = computed({
   get: () => _maxPrice.value,
   set: (val: number | string | null) => {
-    if (val === '' || val === null) {
+    const num = Number(val);
+    if (val === '' || val === null || isNaN(num) || num <= 0) {
       _maxPrice.value = null;
     } else {
-      _maxPrice.value = Number(val);
+      _maxPrice.value = num;
     }
   }
 });
@@ -79,9 +81,12 @@ const priceRange = computed<number[]>({
     (_minPrice.value && _minPrice.value > 0) ? _minPrice.value : 1,
     (_maxPrice.value && _maxPrice.value > 0) ? _maxPrice.value : 1000
   ],
-  set: ([min, max]: number[]) => {
-    minPriceValue.value = min ?? null; 
-    maxPriceValue.value = max ?? null; 
+  set: (val: number[]) => {
+    const min = val[0];
+    const max = val[1];
+
+    minPriceValue.value = (typeof min === 'number' && min > 1) ? min : null;
+    maxPriceValue.value = (typeof max === 'number' && max < 1000) ? max : null;
   }
 });
 

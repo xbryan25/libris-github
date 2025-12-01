@@ -117,7 +117,6 @@ const debouncedLoadBookCount = useDebounceFn(async () => {
 let lastCapacity = 0;
 
 const handleResize = useDebounceFn(async () => {
-  // Wait for layout to stabilize
   await nextTick();
   await new Promise((resolve) => requestAnimationFrame(resolve));
   await new Promise((resolve) => setTimeout(resolve, 80));
@@ -136,6 +135,17 @@ const handleResize = useDebounceFn(async () => {
   }
 }, 400);
 
+const refreshBooksData = useDebounceFn(async () => {
+  try {
+    await loadBooks();
+    await getTotalBookCount();
+  } catch (err) {
+    console.error('Error loading books:', err);
+  } finally {
+    isFetching.value = false;
+  }
+}, 700);
+
 watch(
   [
     () => props.headerState.searchValue,
@@ -146,18 +156,11 @@ watch(
     () => props.headerState.userLat,
     () => props.headerState.userLng, 
   ],
-  async () => {
-    isFetching.value = true;
+  () => {
+    isFetching.value = true; 
     pageNumber.value = 1; 
     
-    try {
-      await debouncedLoadBooks();
-      await debouncedLoadBookCount();
-    } catch (err) {
-      console.error('Error loading books:', err);
-    } finally {
-      isFetching.value = false;
-    }
+    refreshBooksData(); 
   },
   { deep: true },
 );
