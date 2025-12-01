@@ -15,6 +15,7 @@ python-dateutil = "*"
 flask-socketio = "*"
 eventlet = "*"
 types-requests = "*"
+apscheduler = "==3.10.4"
 
 [dev-packages]
 pre-commit = "*"
