@@ -70,11 +70,13 @@ const maxPriceValue = computed({
   get: () => _maxPrice.value,
   set: (val: number | string | null) => {
     const num = Number(val);
-    if (val === '' || val === null || isNaN(num) || num <= 0) {
+
+    if (val === '' || val === null || isNaN(num)) {
       _maxPrice.value = null;
-    } else {
-      _maxPrice.value = num;
+      return;
     }
+
+    _maxPrice.value = num;
   }
 });
 
@@ -141,6 +143,7 @@ watch(
 watch(
   [_minPrice, _maxPrice],
   ([newMin, newMax]) => {
+    if (isFetching.value) return;
     priceErrorMessage.value = ''; 
 
     if ((newMin !== null && newMin <= 0) || (newMax !== null && newMax <= 0)) {
