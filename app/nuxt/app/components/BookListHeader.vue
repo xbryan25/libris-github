@@ -56,11 +56,13 @@ const minPriceValue = computed({
   get: () => _minPrice.value,
   set: (val: number | string | null) => {
     const num = Number(val);
-    if (val === '' || val === null || isNaN(num) || num <= 0) {
+
+    if (val === '' || val === null || isNaN(num)) {
       _minPrice.value = null;
-    } else {
-      _minPrice.value = num;
+      return;
     }
+
+    _minPrice.value = num;
   }
 });
 
@@ -95,17 +97,21 @@ const priceErrorMessage = ref('');
 const isFetching = ref(true);
 const isPricePopoverOpen = ref(false);
 
+const priceButtonColor = computed(() => {
+  return priceErrorMessage.value ? 'error' : 'neutral'
+})
+
 const priceButtonLabel = computed(() => {
   const isFilterActive = 
     (minPriceValue.value !== null && minPriceValue.value !== undefined) || 
     (maxPriceValue.value !== null && maxPriceValue.value !== undefined);
-  
+
   if (isFilterActive) {
-    const min = minPriceValue.value?.toString() ?? '0';
+    const min = minPriceValue.value?.toString() ?? '1';
     const max = maxPriceValue.value?.toString() ?? 'Max';
     return `Price: ${min} - ${max}`;
   }
-  
+
   return 'Price Range';
 });
 
@@ -141,7 +147,7 @@ watch(
         priceErrorMessage.value = "Prices must be greater than 0.";
         
         emit('update:selectedPriceRange', {
-            minPrice: (newMin && newMin > 0) ? newMin : null,
+            minPrice: (newMin && newMin > 0) ? newMin : 1,
             maxPrice: (newMax && newMax > 0) ? newMax : null,
         });
         return;
@@ -149,16 +155,15 @@ watch(
 
     if (newMin !== null && newMax !== null && newMin >= newMax) {
         priceErrorMessage.value = "Min price must be less than Max price.";
-        
         emit('update:selectedPriceRange', {
-            minPrice: null,
+            minPrice: 1,
             maxPrice: null,
         });
         return;
     }
 
     emit('update:selectedPriceRange', {
-      minPrice: newMin,
+      minPrice: newMin ?? 1,
       maxPrice: newMax,
     });
   },
@@ -205,13 +210,13 @@ onMounted(async () => {
       />
       <UPopover v-model:open="isPricePopoverOpen">
         <UButton
-        color="neutral"
-        variant="outline"
-        size="xl"
-        :label="priceButtonLabel"
-        :trailing-icon="isPricePopoverOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-        class="justify-between"
-      />
+          :color="priceButtonColor"
+          variant="outline"
+          size="xl"
+          :label="priceButtonLabel"
+          :trailing-icon="isPricePopoverOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+          class="justify-between"
+        />
 
         <template #content>
           <div class="p-4 flex flex-col gap-4 w-64" @click.stop>
