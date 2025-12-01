@@ -138,17 +138,18 @@ const handleResize = useDebounceFn(async () => {
 
 watch(
   [
-   () => props.headerState.searchValue,
-   () => props.headerState.selectedBookAvailability,
-   () => props.headerState.selectedBookGenre,
-   () => props.headerState.selectedPriceRange,
-   () => props.headerState.mileRadius, 
-   () => props.headerState.userLat,
-   () => props.headerState.userLng, 
+    () => props.headerState.searchValue,
+    () => props.headerState.selectedBookAvailability,
+    () => props.headerState.selectedBookGenre,
+    () => props.headerState.selectedPriceRange,
+    () => props.headerState.mileRadius, 
+    () => props.headerState.userLat,
+    () => props.headerState.userLng, 
   ],
   async () => {
     isFetching.value = true;
     pageNumber.value = 1; 
+    
     try {
       await debouncedLoadBooks();
       await debouncedLoadBookCount();
@@ -159,7 +160,22 @@ watch(
     }
   },
   { deep: true },
-)
+);
+
+watch(
+  () => pageNumber.value,
+  async () => {
+    isFetching.value = true;
+
+    try {
+      await loadBooks(); 
+    } catch (err) {
+      console.error('Error changing page:', err);
+    } finally {
+      isFetching.value = false;
+    }
+  },
+);
 
 onMounted(async () => {
   isFetching.value = true;
