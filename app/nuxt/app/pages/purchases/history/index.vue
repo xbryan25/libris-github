@@ -6,12 +6,12 @@ definePageMeta({
   middleware: auth,
 });
 
-const activeTab = ref<'lending' | 'renting'>('lending');
+const activeTab = ref<'selling' | 'buying'>('buying');
 const route = useRoute();
 
 const currentTab = route.query.activeTab;
 if (currentTab && !Array.isArray(currentTab)) {
-  if (currentTab === 'lending' || currentTab === 'renting') {
+  if (currentTab === 'selling' || currentTab === 'buying') {
     activeTab.value = currentTab;
   }
 }
@@ -19,12 +19,12 @@ if (currentTab && !Array.isArray(currentTab)) {
 navigateTo({ query: { activeTab: activeTab.value } }, { replace: true });
 
 const tabs = [
-  { id: 'lending', label: "Books I've Lent", icon: 'lucide:trending-up' },
-  { id: 'renting', label: "Books I've Rented", icon: 'lucide:trending-down' },
+  { id: 'selling', label: "Books I'm Selling", icon: 'lucide:trending-up' },
+  { id: 'buying', label: 'Books Buy Request', icon: 'lucide:trending-down' },
 ] as const;
 
 const headerText = computed(() => {
-  return activeTab.value === 'lending' ? 'Lend History' : 'Rent History';
+  return activeTab.value === 'selling' ? 'Sell History' : 'Purchase History';
 });
 
 const sortByItems = ref(['Start date', 'End date']);
@@ -54,9 +54,9 @@ watch(activeTab, (val) => {
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />
-          My Rental History
+          My Sell And Purchase History
         </h1>
-        <p class="text-muted">See your lending and renting activity</p>
+        <p class="text-muted">See your selling and buying activity</p>
       </div>
     </div>
 
@@ -112,14 +112,14 @@ watch(activeTab, (val) => {
           :to="{ path: '/rentals', query: { activeTab } }"
           class="text-foreground font-medium flex gap-1 cursor-pointer"
         >
-          Current {{ activeTab === 'lending' ? 'lendings' : 'rentals' }}
+          Current {{ activeTab === 'selling' ? 'sold' : 'purchases' }}
           <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
         </NuxtLink>
       </div>
     </div>
 
     <!-- Pass activeTab to RentalsHistorySection as prop -->
-    <RentalsHistorySection
+    <PurchasesHistorySection
       :sort-by="sortBy"
       :sort-order="sortOrder"
       :cards-per-page="cardsPerPage"
