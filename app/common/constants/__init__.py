@@ -6,4 +6,4 @@ from .enums import (  # noqa: F401
     AuthProviderEnum,
 )
 
-from notification_messages import NotificationMessages  # noqa: F401
+from .notification_messages import NotificationMessages  # noqa: F401
