@@ -1,4 +1,4 @@
-class PurchasedBooksQueries:
+class PurchasesQueries:
     INSERT_PURCHASE = """
         INSERT INTO purchased_books (
             purchase_id,
@@ -33,4 +33,181 @@ class PurchasedBooksQueries:
         SELECT 1 FROM purchased_books
         WHERE user_id = %s AND book_id = %s AND purchase_status = 'pending'
         LIMIT 1;
+    """
+
+    GET_USER_PURCHASES_WITH_STATUS = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            b.book_id,
+            b.title,
+            b.author,
+            bi.image_url AS image,
+            u.username AS "from",
+            pb.all_fees_captured,
+            pb.reserved_at,
+            pb.reservation_expires_at,
+            pb.meetup_location,
+            pb.meetup_time_window,
+            pb.meetup_time,
+            pb.meetup_date,
+            pb.pickup_confirmation_started_at,
+            pb.user_confirmed_pickup,
+            pb.owner_confirmed_pickup,
+            pb.user_rated,
+            pb.owner_rated,
+            pb.total_buy_cost AS cost
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        JOIN users u ON b.owner_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE pb.user_id = %s
+        AND (
+            pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
+            OR (pb.purchase_status = 'completed' AND pb.user_rated = false)
+        );
+    """
+
+    GET_USER_SALES_WITH_STATUS = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            b.book_id,
+            b.title,
+            b.author,
+            bi.image_url AS image,
+            u.username AS "to",
+            pb.all_fees_captured,
+            pb.reserved_at,
+            pb.reservation_expires_at,
+            pb.meetup_date,
+            pb.meetup_location,
+            pb.meetup_time_window,
+            pb.meetup_time,
+            pb.pickup_confirmation_started_at,
+            pb.user_confirmed_pickup,
+            pb.owner_confirmed_pickup,
+            pb.user_rated,
+            pb.owner_rated,
+            pb.total_buy_cost AS cost
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        JOIN users u ON pb.user_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE b.owner_id = %s
+        AND (
+            pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
+            OR (pb.purchase_status = 'completed' AND pb.owner_rated = false)
+        );
+    """
+
+    APPROVE_PURCHASE = """
+        UPDATE purchased_books
+        SET
+            purchase_status = 'approved',
+            meetup_time = %s,
+            all_fees_captured = TRUE
+        WHERE purchase_id = %s
+        AND purchase_status = 'pending'
+        RETURNING purchase_id, purchase_status, meetup_time, all_fees_captured;
+    """
+
+    GET_PURCHASE_BY_ID = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            pb.user_id,
+            pb.meetup_time_window,
+            pb.total_buy_cost,
+            b.owner_id,
+            b.title
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        WHERE pb.purchase_id = %s;
+    """
+
+    DELETE_PURCHASE = """
+    DELETE FROM purchased_books
+    WHERE purchase_id = %s
+    AND purchase_status = 'pending'
+    RETURNING purchase_id;
+    """
+
+    UPDATE_APPROVED_TO_PICKUP_CONFIRMATION = """
+        UPDATE purchased_books
+        SET
+            purchase_status = 'awaiting_pickup_confirmation',
+            pickup_confirmation_started_at = NOW()
+        WHERE purchase_status = 'approved'
+        AND meetup_date IS NOT NULL
+        AND meetup_time IS NOT NULL
+        AND (
+            (meetup_date + meetup_time::time) - INTERVAL '1 hour'
+            <= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        AND (
+            (meetup_date + meetup_time::time)
+            >= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
+        )
+        RETURNING purchase_id, user_id, book_id;
+    """
+
+    GET_PURCHASE_BY_ID_FULL = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            pb.user_id,
+            pb.meetup_time_window,
+            pb.total_buy_cost,
+            pb.user_confirmed_pickup,
+            pb.owner_confirmed_pickup,
+            b.owner_id,
+            b.title
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        WHERE pb.purchase_id = %s;
+    """
+
+    CONFIRM_PICKUP = """
+        UPDATE purchased_books
+        SET
+            owner_confirmed_pickup = CASE
+                WHEN %s THEN TRUE
+                ELSE owner_confirmed_pickup
+            END,
+            user_confirmed_pickup = CASE
+                WHEN %s THEN TRUE
+                ELSE user_confirmed_pickup
+            END,
+            purchase_status = CASE
+                WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
+                THEN 'completed'::purchase_status_enum
+                ELSE 'awaiting_pickup_confirmation'::purchase_status_enum
+            END
+        WHERE purchase_id = %s
+        RETURNING
+            purchase_id,
+            purchase_status,
+            user_confirmed_pickup,
+            owner_confirmed_pickup;
+    """
+
+    CHECK_BOOK_AVAILABILITY = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            u.username as buyer_username
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        JOIN users u ON pb.user_id = u.user_id
+        WHERE b.book_id = %s
+        AND b.owner_id = %s
+        AND pb.purchase_status IN ('approved', 'awaiting_pickup_confirmation')
+        LIMIT 1;
+    """
+
+    GET_BOOK_ID_FROM_PURCHASE = """
+        SELECT book_id
+        FROM purchased_books
+        WHERE purchase_id = %s;
     """

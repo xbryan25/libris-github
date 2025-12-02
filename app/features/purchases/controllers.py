@@ -3,7 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 import traceback
 import datetime
 
-from .services import PurchasesService
+from .services import PurchasesServices
 
 
 class PurchasesController:
@@ -79,7 +79,7 @@ class PurchasesController:
                 "meetup_date": purchase_data_json["meetup_date"],
             }
 
-            result = PurchasesService.create_purchase_service(purchase_data)
+            result = PurchasesServices.create_purchase_service(purchase_data)
 
             if result is None:
                 return jsonify({"error": "Failed to create purchase."}), 500
@@ -116,8 +116,180 @@ class PurchasesController:
         """
         try:
             current_user_id = get_jwt_identity()
-            exists = PurchasesService.check_pending_purchase(current_user_id, book_id)
+            exists = PurchasesServices.check_pending_purchase(current_user_id, book_id)
             return jsonify({"exists": exists}), 200
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_purchases_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            purchases = PurchasesServices.get_user_purchases_with_status(user_id)
+
+            return jsonify(purchases), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_sales_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            sales = PurchasesServices.get_user_sales_with_status(user_id)
+
+            return jsonify(sales), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def approve_purchase_controller(purchase_id: str) -> tuple[Response, int]:
+        """
+        Controller to approve a purchase request.
+        This will capture fees, deduct from wallet, and log transaction.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            # Get request data
+            data = request.get_json()
+
+            if not data:
+                return jsonify({"error": "Invalid request body"}), 400
+
+            meetup_time = data.get("meetupTime")
+
+            if not meetup_time:
+                return jsonify({"error": "Meetup time is required"}), 400
+
+            result, error = PurchasesServices.approve_purchase_request(
+                purchase_id, meetup_time, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Purchase approved successfully. Fees captured and transaction logged.",
+                        "purchase": result,
+                    }
+                ),
+                200,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def reject_purchase_controller(purchase_id: str) -> tuple[Response, int]:
+        """
+        Controller to reject a purchase request.
+        This will delete the purchase entry and release reserved funds.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            # Get request data
+            data = request.get_json()
+
+            if not data:
+                return jsonify({"error": "Invalid request body"}), 400
+
+            reason = data.get("reason", "No reason provided")
+
+            result, error = PurchasesServices.reject_purchase_request(
+                purchase_id, reason, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Purchase rejected successfully. Reserved funds have been released.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def cancel_purchase_controller(purchase_id: str) -> tuple[Response, int]:
+        """
+        Controller to cancel a purchase request by the buyer.
+        This will delete the purchase entry and release reserved funds.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = PurchasesServices.cancel_purchase_request(
+                purchase_id, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Purchase cancelled successfully. Reserved funds have been released.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def confirm_pickup_controller(purchase_id: str) -> tuple[Response, int]:
+        """
+        Controller to confirm book pickup by either buyer or owner.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            result, error = PurchasesServices.confirm_pickup(purchase_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Pickup confirmed successfully.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
