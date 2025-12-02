@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import RentalCard from '~/components/RentCard.vue'
 import LendCard from '~/components/LendCard.vue';
-import { useUserRentals } from '~/composables/useUserRentals'
+import { useUserRentals } from '~/composables/useUserRentals';
 
 interface Props {
   activeTab: 'lending' | 'renting';
@@ -9,13 +8,23 @@ interface Props {
 
 defineProps<Props>();
 
-const { rentals, loading: rentalsLoading, error: rentalsError, fetchUserRentals } = useUserRentals()
-const { lendings, loading: lendingsLoading, error: lendingsError, fetchUserLendings } = useUserLendings()
+const {
+  rentals,
+  loading: rentalsLoading,
+  error: rentalsError,
+  fetchUserRentals,
+} = useUserRentals();
+const {
+  lendings,
+  loading: lendingsLoading,
+  error: lendingsError,
+  fetchUserLendings,
+} = useUserLendings();
 
 onMounted(() => {
-  fetchUserRentals()
-  fetchUserLendings()
-})
+  fetchUserRentals();
+  fetchUserLendings();
+});
 </script>
 
 <template>
@@ -30,7 +39,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div v-else-if="lendingsError" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
@@ -39,8 +48,11 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
-      <div v-else-if="lendings.length === 0" class="bg-surface rounded-lg p-6 w-full border border-base">
+
+      <div
+        v-else-if="lendings.length === 0"
+        class="bg-surface rounded-lg p-6 w-full border border-base"
+      >
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
@@ -48,13 +60,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div v-else class="space-y-4">
-        <LendCard 
-          v-for="lending in lendings" 
-          :key="lending.rental_id" 
-          :lending="lending" 
-        />
+        <LendCard v-for="lending in lendings" :key="lending.rental_id" :lending="lending" />
       </div>
     </div>
 
@@ -68,7 +76,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div v-else-if="rentalsError" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
@@ -77,8 +85,11 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
-      <div v-else-if="rentals.length === 0" class="bg-surface rounded-lg p-6 w-full border border-base">
+
+      <div
+        v-else-if="rentals.length === 0"
+        class="bg-surface rounded-lg p-6 w-full border border-base"
+      >
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
@@ -86,13 +97,9 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <div v-else class="space-y-4">
-        <RentalCard 
-          v-for="rental in rentals" 
-          :key="rental.rental_id" 
-          :rental="rental" 
-        />
+        <RentalCard v-for="rental in rentals" :key="rental.rental_id" :rental="rental" />
       </div>
     </div>
   </div>
