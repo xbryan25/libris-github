@@ -150,6 +150,11 @@ class NotificationControllers:
                 )
             )
 
+            print(
+                "-------------------------------------------------------emit to "
+                + str(user_id)
+            )
+
             socketio.emit(
                 "update_unread_notifications_count",
                 {"unreadNotificationsCount": unread_notifications_count},

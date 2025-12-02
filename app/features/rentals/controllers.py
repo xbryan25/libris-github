@@ -3,8 +3,15 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 import traceback
 import datetime
 
-
 from .services import RentalsServices
+
+from ..notifications.services import NotificationServices
+
+from ..books.services import BookServices
+
+from ..users.services import UserServices
+
+from app.common.constants import NotificationMessages
 
 
 class RentalsController:
@@ -107,6 +114,30 @@ class RentalsController:
                     "messageTitle": "Rental request created successfully.",
                     "message": "Your rental request has been sent.",
                 }
+            )
+
+            book_details = BookServices.get_book_details_service(
+                rental_data_json["book_id"]
+            )
+
+            target_user_id = (
+                str(book_details["owner_user_id"]) if book_details else None
+            )
+
+            username = UserServices.get_username_service(target_user_id)
+
+            notification_header = NotificationMessages.RENTAL_REQUEST_HEADER
+            notification_message = NotificationMessages.RENTAL_REQUEST_MESSAGE.format(
+                title=f"{book_details['title'] if book_details else None}",
+                username=username,
+            )
+
+            NotificationServices.add_notification_service(
+                current_user_id,
+                target_user_id,
+                "rent",
+                notification_header,
+                notification_message,
             )
 
             return resp, 201

@@ -4,6 +4,26 @@ from flask import current_app
 
 
 class NotificationRepository:
+
+    @staticmethod
+    def add_notification(
+        user_id, target_user_id, notification_type, header, message
+    ) -> None:
+        """
+        add later
+        """
+
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.INSERT.format(
+                table="notifications",
+                columns="header, message, notification_type, sender_id, receiver_id",
+                placeholders="%s, %s, %s, %s, %s",
+            ),
+            (header, message, notification_type, user_id, target_user_id),
+        )
+
     @staticmethod
     def get_notifications(user_id, params) -> list[dict[str, str]]:
         """
