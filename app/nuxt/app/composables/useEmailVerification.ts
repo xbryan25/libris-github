@@ -1,9 +1,7 @@
 export const useSendVerificationEmail = async (userId: string) => {
-  const config = useRuntimeConfig()
-
-  console.log('[useEmailVerification] Sending verification email for user:', userId)
+  const { $apiFetch } = useNuxtApp();   
   
-  const response = await $fetch(`${config.public.apiBaseUrl}/api/users/send-verification-email`, {
+  const response = await $apiFetch(`/api/users/send-verification-email`, {
     method: 'POST',
     credentials: 'include',
     body: {
@@ -11,16 +9,14 @@ export const useSendVerificationEmail = async (userId: string) => {
     },
   })
 
-  console.log('[useEmailVerification] Send verification response:', response)
+  console.log('send email')
   return response
 }
 
 export const useVerifyEmailCode = async (userId: string, code: string) => {
-  const config = useRuntimeConfig()
-
-  console.log('[useEmailVerification] Verifying email code for user:', userId, 'code:', code)
+  const { $apiFetch } = useNuxtApp(); 
   
-  const response = await $fetch(`${config.public.apiBaseUrl}/api/users/verify-email`, {
+  const response = await $apiFetch(`/api/users/verify-email`, {
     method: 'POST',
     credentials: 'include',
     body: {
@@ -29,16 +25,13 @@ export const useVerifyEmailCode = async (userId: string, code: string) => {
     },
   })
 
-  console.log('[useEmailVerification] Verify email response:', response)
   return response
 }
 
 export const useResendVerificationCode = async (userId: string) => {
-  const config = useRuntimeConfig()
+  const { $apiFetch } = useNuxtApp(); 
 
-  console.log('[useEmailVerification] Resending verification code for user:', userId)
-  
-  const response = await $fetch(`${config.public.apiBaseUrl}/api/users/resend-verification-code`, {
+  const response = await $apiFetch(`/api/users/resend-verification-code`, {
     method: 'POST',
     credentials: 'include',
     body: {
@@ -46,6 +39,5 @@ export const useResendVerificationCode = async (userId: string) => {
     },
   })
 
-  console.log('[useEmailVerification] Resend verification response:', response)
   return response
 }

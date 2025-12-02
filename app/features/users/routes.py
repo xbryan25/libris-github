@@ -38,6 +38,9 @@ def user_signup() -> tuple[Response, int]:
 @users_bp.route("/send-verification-email", methods=["POST"])
 def send_verification_email() -> tuple[Response, int]:
     """Send email verification code to user."""
+
+    print("===========================================REACH HERE")
+
     return UserControllers.send_verification_email_controller()
 
 

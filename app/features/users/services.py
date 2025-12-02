@@ -62,25 +62,6 @@ class UserServices:
 
         UserRepository.initialize_wallet(user_id)
         print("[SIGNUP SERVICE] Wallet initialized")
-
-        # Generate and send verification code
-        print("[SIGNUP SERVICE] Generating verification code...")
-        code = UserServices.generate_verification_code()
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
-
-        success = UserRepository.create_verification_code(user_id, code, expires_at)
-        if not success:
-            print("[SIGNUP SERVICE] Failed to store verification code " "in database!")
-            return {"error": "Failed to create verification code."}
-
-        print("[SIGNUP SERVICE] Verification code stored. Sending email...")
-        email_sent = EmailService.send_verification_email(email_address, code, username)
-
-        if not email_sent:
-            print("[SIGNUP SERVICE] Failed to send verification email!")
-            return {"error": "Failed to send verification email."}
-
-        print("[SIGNUP SERVICE] Success! Email sent.")
         return {"success": True, "user_id": user_id}
 
     @staticmethod

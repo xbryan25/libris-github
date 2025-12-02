@@ -18,50 +18,47 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 
   isDisabled.value = true;
   isLoading.value = true;
-  
+
   try {
     const response = await auth.signup(username, emailAddress, password);
-    
-    console.log("Signup response:", response);
-    
+
+    console.log('Signup response:', response);
+
     toast.add({
       title: response.messageTitle,
       description: response.message,
       color: 'success',
     });
-    
+
     const userId = response.userId;
-    console.log("User ID:", userId);
-    
+    console.log('User ID:', userId);
+
     if (!userId) {
-      console.error("No userId in response!");
+      console.error('No userId in response!');
       return;
     }
-    
+
     try {
-      console.log("Sending verification email...");
-      const emailResponse = await useSendVerificationEmail(userId);
-      console.log("Email response:", emailResponse);
+      await useSendVerificationEmail(userId);
     } catch (emailError) {
-      console.error("Failed to send verification email:", emailError);
+      console.error('Failed to send verification email:', emailError);
     }
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log("Redirecting to verify-email...");
-    await navigateTo(`/verify-email?userId=${userId}`);
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    console.log('Redirecting to verify-email...');
+    navigateTo(`/verify-email?userId=${userId}`);
   } catch (error: any) {
-    console.error("Signup error:", error);
-    
+    console.error('Signup error:', error);
+
     let errorMessage = 'An unexpected error occurred.';
-    
+
     if (error.data?.error) {
       errorMessage = error.data.error;
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     toast.add({
       title: 'Signup failed.',
       description: errorMessage,
