@@ -29,6 +29,8 @@ export const useCreateRental = () => {
     meetup_time_window: string
     meetup_location: string
     meetup_date: string
+    actual_rate: number
+    actual_deposit: number
   }) => {
     loading.value = true
     error.value = null

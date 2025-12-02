@@ -211,7 +211,9 @@ async function sendRental() {
       rental_duration_days: finalDays.value!,
       meetup_time_window: `${startStr} - ${endStr}`, 
       meetup_location: meetupAddressQuery.value,
-      meetup_date: meetupDate.value!
+      meetup_date: meetupDate.value!,
+      actual_rate: props.dailyRentPrice ?? 0,
+      actual_deposit: props.securityDeposit ?? 0
     })
 
     emit('update:rentalExists', true)

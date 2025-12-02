@@ -15,6 +15,10 @@ const isOpenNotificationPopover = ref(false);
 const isActive = (path: string) => {
   if (route.path === path) return true;
 
+  if (path === '/rentals') {
+    return route.path.startsWith('/rentals');
+  }
+
   if (route.path.startsWith('/books/') && route.query.from) {
     if (path === '/browse' && route.query.from === 'browse') return true;
   }
