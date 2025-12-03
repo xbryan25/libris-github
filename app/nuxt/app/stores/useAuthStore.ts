@@ -8,14 +8,9 @@ export const useAuthStore = defineStore('auth', () => {
   const username = ref<string | null>(null)
   const isAuthenticated = ref(false)
 
-  const login = async (
-    email: string,
-    password: string
-  ): Promise<{ messageTitle: string; message: string }> => {
+  const login = async (email: string, password: string): Promise<{messageTitle: string, message: string}> => {
     try {
-      console.log('before response?')
-      const response = await useUserLogin(email, password);
-      console.log(response)
+    const response = await useUserLogin(email, password)
 
       userId.value = response.user_id;
       username.value = response.username;
@@ -60,10 +55,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const signup = async (username: string, email: string, password: string): Promise<{messageTitle: string, message: string}> => {
+  const signup = async (username: string, email: string, password: string): Promise<{userId: response.userId, messageTitle: string, message: string}> => {
     const response = await useUserSignup(username, email, password)
 
-    return {messageTitle: response.messageTitle, message: response.message}
+    return {userId: response.userId, messageTitle: response.messageTitle, message: response.message}
   }
 
   const logout = async () => {

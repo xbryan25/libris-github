@@ -2,22 +2,14 @@ from app.db.queries.common import CommonQueries
 from app.db.queries.user_queries import UserQueries
 from flask import current_app
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 
 class UserRepository:
 
     @staticmethod
     def get_user_by_email_address(email_address: str) -> dict[str, str] | None:
-        """
-        Retrieve a user record from the database by email address.
-
-        Args:
-            email_address (str): The email address of the user to retrieve.
-
-        Returns:
-            dict: A dictionary containing the user's details if found, otherwise None.
-        """
-
+        """Retrieve user record by email address."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -29,16 +21,7 @@ class UserRepository:
 
     @staticmethod
     def get_user_by_username(username: str) -> dict[str, str] | None:
-        """
-        Retrieve a user record from the database by username.
-
-        Args:
-            username (str): The username of the user to retrieve.
-
-        Returns:
-            dict: A dictionary containing the user's details if found, otherwise None.
-        """
-
+        """Retrieve user record by username."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -65,17 +48,7 @@ class UserRepository:
 
     @staticmethod
     def get_username(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the username of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's username in the format (None if no matching user):
-                {"username": str}
-        """
-
+        """Retrieve username by user_id."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -100,24 +73,14 @@ class UserRepository:
 
     @staticmethod
     def create_user(username: str, email_address: str, password: str) -> str:
-        """
-        Create a new user in the database.
-
-        Args:
-            username (str): The username for the new user.
-            email_address (str): The email address for the new user.
-            password (str): The plain text password (will be hashed).
-
-        Returns:
-            str: The user_id of the newly created user.
-        """
-
+        """Create new user in database."""
         db = current_app.extensions["db"]
 
         hashed_password = generate_password_hash(password)
 
         result = db.fetch_one(
-            "INSERT INTO users (username, email_address, password_hash, trust_score) VALUES (%s, %s, %s, 0) RETURNING user_id",
+            "INSERT INTO users (username, email_address, password_hash, "
+            "trust_score) VALUES (%s, %s, %s, 0) RETURNING user_id",
             (username, email_address, hashed_password),
         )
 
@@ -147,13 +110,7 @@ class UserRepository:
 
     @staticmethod
     def initialize_wallet(user_id: str) -> None:
-        """
-        Initialize a wallet for a new user with balance of 0.
-
-        Args:
-            user_id (str): The user_id of the user to initialize wallet for.
-        """
-
+        """Initialize wallet for new user with balance of 0."""
         db = current_app.extensions["db"]
 
         db.execute_query(
@@ -162,17 +119,146 @@ class UserRepository:
         )
 
     @staticmethod
+    def create_verification_code(user_id: str, code: str, expires_at: datetime) -> bool:
+        """Store email verification code in database."""
+        db = current_app.extensions["db"]
+
+        try:
+            print(
+                "[REPOSITORY] Deleting old verification codes for " f"user: {user_id}"
+            )
+
+            # Delete old codes for this user first
+            db.execute_query(
+                "DELETE FROM email_verifications WHERE user_id = %s",
+                (user_id,),
+            )
+
+            print("[REPOSITORY] Old codes deleted")
+
+            print(
+                f"[REPOSITORY] Inserting new verification code: {code}, "
+                f"expires at: {expires_at}"
+            )
+
+            # Insert new code
+            db.execute_query(
+                "INSERT INTO email_verifications "
+                "(user_id, code, expires_at) VALUES (%s, %s, %s)",
+                (user_id, code, expires_at),
+            )
+
+            print("[REPOSITORY] New code inserted successfully")
+
+            return True
+
+        except Exception as e:
+            print(f"[REPOSITORY] Error creating verification code: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return False
+
+    @staticmethod
+    def verify_email_code(user_id: str, code: str) -> bool:
+        """Verify if code is valid and not expired."""
+        db = current_app.extensions["db"]
+
+        print("\n[REPOSITORY] ========== VERIFY EMAIL CODE ==========")
+        print(f"[REPOSITORY] User ID: {user_id}")
+        print(f"[REPOSITORY] Code to verify: {code}")
+
+        try:
+            # Query for matching code that hasn't expired
+            result = db.fetch_one(
+                "SELECT * FROM email_verifications "
+                "WHERE user_id = %s AND code = %s AND expires_at > NOW()",
+                (user_id, code),
+            )
+
+            print(f"[REPOSITORY] Query result: {result}")
+
+            if result is None:
+                print(
+                    "[REPOSITORY] Code verification FAILED - "
+                    "no matching code or code expired"
+                )
+                print(
+                    "[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE ====="
+                    "======\n"
+                )
+                return False
+
+            print("[REPOSITORY] Code verification SUCCESSFUL")
+            print("[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE =====" "======\n")
+            return True
+
+        except Exception as e:
+            print(f"[REPOSITORY] ERROR during code verification: {e}")
+            import traceback
+
+            traceback.print_exc()
+            print("[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE =====" "======\n")
+            return False
+
+    @staticmethod
+    def mark_email_as_verified(user_id: str) -> bool:
+        """Mark user email as verified and delete verification code."""
+        db = current_app.extensions["db"]
+
+        try:
+            print(f"[REPOSITORY] Marking email as verified for " f"user: {user_id}")
+
+            db.execute_query(
+                "UPDATE users SET is_email_verified = TRUE " "WHERE user_id = %s",
+                (user_id,),
+            )
+
+            print("[REPOSITORY] Email marked as verified")
+
+            print(f"[REPOSITORY] Deleting verification codes for " f"user: {user_id}")
+
+            db.execute_query(
+                "DELETE FROM email_verifications WHERE user_id = %s",
+                (user_id,),
+            )
+
+            print("[REPOSITORY] Verification codes deleted")
+
+            return True
+
+        except Exception as e:
+            print(f"[REPOSITORY] Error marking email as verified: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return False
+
+    @staticmethod
+    def get_user_email_and_username(user_id: str) -> dict | None:
+        """Get user email and username for verification email."""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            "SELECT email_address, username FROM users WHERE user_id = %s",
+            (user_id,),
+        )
+
+    @staticmethod
+    def is_email_verified(user_id: str) -> bool:
+        """Check if user email is already verified."""
+        db = current_app.extensions["db"]
+
+        result = db.fetch_one(
+            "SELECT is_email_verified FROM users WHERE user_id = %s",
+            (user_id,),
+        )
+
+        return result and result.get("is_email_verified", False)
+
+    @staticmethod
     def get_profile_info(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the profile information of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's profile information (None if no matching user).
-        """
-
+        """Retrieve profile information by user_id."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -182,16 +268,7 @@ class UserRepository:
 
     @staticmethod
     def get_trust_score_percentile(user_id: str) -> dict[str, float] | None:
-        """
-        Retrieve the trust score percentile for a specific user.
-
-        Args:
-            user_id (str): The UUID of the user.
-
-        Returns:
-            dict: A dictionary containing trust_score_percentile (None if no data).
-        """
-
+        """Retrieve trust score percentile for specific user."""
         db = current_app.extensions["db"]
 
         stats = db.fetch_one(
@@ -208,17 +285,7 @@ class UserRepository:
 
     @staticmethod
     def update_user_profile(user_id: str, profile_data: dict) -> bool:
-        """
-        Update user profile information.
-
-        Args:
-            user_id (str): The unique ID of the user.
-            profile_data (dict): Dictionary containing profile fields to update.
-
-        Returns:
-            bool: True if update was successful, False otherwise.
-        """
-
+        """Update user profile information."""
         db = current_app.extensions["db"]
 
         try:
@@ -242,17 +309,7 @@ class UserRepository:
 
     @staticmethod
     def update_user_address(user_id: str, address_data: dict) -> bool:
-        """
-        Update user address information.
-
-        Args:
-            user_id (str): The unique ID of the user.
-            address_data (dict): Dictionary containing address fields to update.
-
-        Returns:
-            bool: True if update was successful, False otherwise.
-        """
-
+        """Update user address information."""
         db = current_app.extensions["db"]
 
         try:
@@ -272,6 +329,7 @@ class UserRepository:
                         user_id,
                     ),
                 )
+
             else:
                 db.execute_query(
                     UserQueries.UPDATE_USER_ADDRESS,
@@ -294,16 +352,7 @@ class UserRepository:
 
     @staticmethod
     def get_user_address(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the address information of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's address information (None if no matching user).
-        """
-
+        """Retrieve address information by user_id."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -313,16 +362,7 @@ class UserRepository:
 
     @staticmethod
     def get_user_profile(user_id: str) -> dict[str, str] | None:
-        """
-        Retrieve the profile information of a user by their user_id.
-
-        Args:
-            user_id (str): The unique ID of the user.
-
-        Returns:
-            dict: A dictionary containing the user's profile information (None if no matching user).
-        """
-
+        """Retrieve profile information by user_id."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
@@ -332,21 +372,7 @@ class UserRepository:
 
     @staticmethod
     def get_library_details(user_id: str) -> dict[str, int] | None:
-        """
-        Retrieve the number of owned, rented, and bought books for a specific user.
-
-        Args:
-            user_id (str): The unique identifier of the user.
-
-        Returns:
-            dict: A dictionary containing the total number of books the user owns, has rented, and has bought, in the format:
-                {
-                    "owned_books": int,
-                    "rented_books": int,
-                    "bought_books": int
-                }
-        """
-
+        """Retrieve book counts for specific user."""
         db = current_app.extensions["db"]
 
         return db.fetch_one(
