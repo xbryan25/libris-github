@@ -57,7 +57,7 @@ class BookControllers:
                 "user_id": request.args.get("userId"),
                 "min_price": request.args.get("minPrice"),
                 "max_price": request.args.get("maxPrice"),
-                "mile_radius": request.args.get("mileRadius"),
+                "km_radius": request.args.get("kmRadius"),
                 "user_lat": request.args.get("userLat"),
                 "user_lng": request.args.get("userLng"),
             }
@@ -89,17 +89,15 @@ class BookControllers:
 
             # Validate and parse distance filter parameters
             try:
-                mile_radius = (
-                    float(params["mile_radius"]) if params["mile_radius"] else None
-                )
+                km_radius = float(params["km_radius"]) if params["km_radius"] else None
                 user_lat = float(params["user_lat"]) if params["user_lat"] else None
                 user_lng = float(params["user_lng"]) if params["user_lng"] else None
             except ValueError:
                 raise InvalidParameterError(
-                    "Distance filter values ('mileRadius', 'userLat', 'userLng') must be valid numbers."
+                    "Distance filter values ('kmRadius', 'userLat', 'userLng') must be valid numbers."
                 )
 
-            params["mile_radius"] = mile_radius
+            params["km_radius"] = km_radius
             params["user_lat"] = user_lat
             params["user_lng"] = user_lng
 
@@ -110,13 +108,13 @@ class BookControllers:
             if user_lng is not None and (user_lng < -180 or user_lng > 180):
                 raise InvalidParameterError("Longitude must be between -180 and 180.")
 
-            if mile_radius is not None and mile_radius < 0:
-                raise InvalidParameterError("Mile radius must be non-negative.")
+            if km_radius is not None and km_radius < 0:
+                raise InvalidParameterError("km radius must be non-negative.")
 
-            # If mile radius is set, user location must be provided
-            if mile_radius is not None and (user_lat is None or user_lng is None):
+            # If km radius is set, user location must be provided
+            if km_radius is not None and (user_lat is None or user_lng is None):
                 raise InvalidParameterError(
-                    "User location (userLat, userLng) is required when mileRadius is specified."
+                    "User location (userLat, userLng) is required when kmRadius is specified."
                 )
 
             if params["user_id"]:
@@ -195,7 +193,7 @@ class BookControllers:
                 "user_id": request.args.get("userId"),
                 "min_price": request.args.get("minPrice"),
                 "max_price": request.args.get("maxPrice"),
-                "mile_radius": request.args.get("mileRadius"),
+                "km_radius": request.args.get("kmRadius"),
                 "user_lat": request.args.get("userLat"),
                 "user_lng": request.args.get("userLng"),
             }
@@ -227,17 +225,15 @@ class BookControllers:
 
             # Validate and parse distance filter parameters
             try:
-                mile_radius = (
-                    float(params["mile_radius"]) if params["mile_radius"] else None
-                )
+                km_radius = float(params["km_radius"]) if params["km_radius"] else None
                 user_lat = float(params["user_lat"]) if params["user_lat"] else None
                 user_lng = float(params["user_lng"]) if params["user_lng"] else None
             except ValueError:
                 raise InvalidParameterError(
-                    "Distance filter values ('mileRadius', 'userLat', 'userLng') must be valid numbers."
+                    "Distance filter values ('kmRadius', 'userLat', 'userLng') must be valid numbers."
                 )
 
-            params["mile_radius"] = mile_radius
+            params["km_radius"] = km_radius
             params["user_lat"] = user_lat
             params["user_lng"] = user_lng
 
@@ -248,13 +244,13 @@ class BookControllers:
             if user_lng is not None and (user_lng < -180 or user_lng > 180):
                 raise InvalidParameterError("Longitude must be between -180 and 180.")
 
-            if mile_radius is not None and mile_radius < 0:
-                raise InvalidParameterError("Mile radius must be non-negative.")
+            if km_radius is not None and km_radius < 0:
+                raise InvalidParameterError("km radius must be non-negative.")
 
-            # If mile radius is set, user location must be provided
-            if mile_radius is not None and (user_lat is None or user_lng is None):
+            # If km radius is set, user location must be provided
+            if km_radius is not None and (user_lat is None or user_lng is None):
                 raise InvalidParameterError(
-                    "User location (userLat, userLng) is required when mileRadius is specified."
+                    "User location (userLat, userLng) is required when kmRadius is specified."
                 )
 
             if params["user_id"]:

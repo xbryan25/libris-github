@@ -19,15 +19,15 @@ const headerState = reactive({
         minPrice: null, 
         maxPrice: null 
     } as PriceRange,
-    mileRadius: null as number | null,
+    kmRadius: null as number | null,
 });
 
 const handlePriceRangeUpdate = (newPriceRange: PriceRange) => {
     headerState.selectedPriceRange = newPriceRange;
 }
 
-const handleMileRadiusUpdate = (newRadius: number | null) => {
-    headerState.mileRadius = newRadius;
+const handlekmRadiusUpdate = (newRadius: number | null) => {
+    headerState.kmRadius = newRadius;
 }
 
 const authStore = useAuthStore();
@@ -113,7 +113,7 @@ onMounted(async () => {
             (headerState.selectedBookAvailability = newSelectedBookAvailability)
         "
         @update:selected-price-range="handlePriceRangeUpdate"
-        @update:mile-radius="handleMileRadiusUpdate"
+        @update:km-radius="handlekmRadiusUpdate"
       />
 
       <MyLibraryBookList

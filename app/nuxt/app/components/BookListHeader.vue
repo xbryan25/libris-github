@@ -6,12 +6,13 @@ interface PriceRange {
   maxPrice: number | null;
 }
 
-const mileRadiusOptions = [
+const kmRadiusOptions = [
   { label: 'Any Distance', value: null },
-  { label: '2 Miles', value: 2 },
-  { label: '5 Miles', value: 5 },
-  { label: '10 Miles', value: 10 },
-  { label: '25 Miles', value: 25 },
+  { label: '2 km', value: 2 },
+  { label: '5 km', value: 5 },
+  { label: '10 km', value: 10 },
+  { label: '25 km', value: 25 },
+  { label: '50 km', value: 50 },
 ];
 
 const props = defineProps<{
@@ -20,7 +21,7 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
     selectedPriceRange: PriceRange;
-    mileRadius: number | null;
+    kmRadius: number | null;
   };
   isLibraryMode?: boolean;
 }>();
@@ -32,15 +33,15 @@ const emit = defineEmits<{
     value: string,
   ): void;
    (e: 'update:selectedPriceRange', value: PriceRange): void;
-   (e: 'update:mileRadius', value: number | null): void;
+   (e: 'update:kmRadius', value: number | null): void;
 }>();
 
 
 const searchValue = ref(props.headerState.searchValue);
 
-const mileRadiusItems = ref(mileRadiusOptions);
-const mileRadiusValue = ref(
-  mileRadiusOptions.find(item => item.value === props.headerState.mileRadius) || mileRadiusOptions[0]
+const kmRadiusItems = ref(kmRadiusOptions);
+const kmRadiusValue = ref(
+  kmRadiusOptions.find(item => item.value === props.headerState.kmRadius) || kmRadiusOptions[0]
 );
 
 const bookGenreItems = ref(['All Genres']);
@@ -173,10 +174,10 @@ watch(
 );
 
 watch(
-  () => mileRadiusValue.value,
+  () => kmRadiusValue.value,
   (newItem) => {
     if (!newItem) return; 
-    emit('update:mileRadius', newItem.value)
+    emit('update:kmRadius', newItem.value)
   }
 )
 
@@ -249,8 +250,8 @@ onMounted(async () => {
     </UPopover>
     <USelectMenu
       v-if="!isLibraryMode"
-      v-model="mileRadiusValue"
-      :items="mileRadiusItems"
+      v-model="kmRadiusValue"
+      :items="kmRadiusItems"
       size="xl"
       class="flex-1"
     />

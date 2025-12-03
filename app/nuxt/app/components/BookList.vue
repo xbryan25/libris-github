@@ -13,7 +13,7 @@ const props = defineProps<{
     selectedBookGenre: string;
     selectedBookAvailability: string;
     selectedPriceRange: PriceRange;
-    mileRadius: number | null;
+    kmRadius: number | null;
     userLat: number | null;
     userLng: number | null;
   };
@@ -63,7 +63,7 @@ const loadBooks = async () => {
     userId: props.userId,
     minPrice: props.headerState.selectedPriceRange.minPrice,
     maxPrice: props.headerState.selectedPriceRange.maxPrice,
-    mileRadius: props.headerState.mileRadius,
+    kmRadius: props.headerState.kmRadius,
     userLat: props.headerState.userLat,
     userLng: props.headerState.userLng,
   };
@@ -80,7 +80,7 @@ const getTotalBookCount = async () => {
     userId: props.userId,
     minPrice: props.headerState.selectedPriceRange.minPrice,
     maxPrice: props.headerState.selectedPriceRange.maxPrice,
-    mileRadius: props.headerState.mileRadius,
+    kmRadius: props.headerState.kmRadius,
     userLat: props.headerState.userLat,
     userLng: props.headerState.userLng,
   };
@@ -152,7 +152,7 @@ watch(
     () => props.headerState.selectedBookAvailability,
     () => props.headerState.selectedBookGenre,
     () => props.headerState.selectedPriceRange,
-    () => props.headerState.mileRadius, 
+    () => props.headerState.kmRadius, 
     () => props.headerState.userLat,
     () => props.headerState.userLng, 
   ],

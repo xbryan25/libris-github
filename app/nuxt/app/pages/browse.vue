@@ -18,7 +18,7 @@ const headerState = reactive({
     minPrice: null, 
     maxPrice: null 
   } as PriceRange,
-  mileRadius: null as number | null,
+  kmRadius: null as number | null,
   userLat: null as number | null,
   userLng: null as number | null,
 });
@@ -97,7 +97,7 @@ onMounted(async () => {
       @update:selected-price-range="
         (newPriceRange: PriceRange) => (headerState.selectedPriceRange = newPriceRange)
       "
-      @update:mile-radius="(newMileRadius: number | null) => (headerState.mileRadius = newMileRadius)"
+      @update:km-radius="(newkmRadius: number | null) => (headerState.kmRadius = newkmRadius)"
     />
 
     <BookList book-list-variant="default" :header-state="headerState" />
