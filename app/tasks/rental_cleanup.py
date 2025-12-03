@@ -37,10 +37,6 @@ class RentalCleanupTask:
 
             expired_rentals = db.fetch_all(query, ())
 
-            print(
-                f"Found {len(expired_rentals) if expired_rentals else 0} expired rentals"
-            )
-
             if expired_rentals:
                 for r in expired_rentals:
                     print(
