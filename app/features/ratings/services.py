@@ -62,10 +62,35 @@ class RatingServices:
         if not result:
             return {"success": False, "error": "Failed to insert rating"}
 
-        # Update flag
+        try:
+            current_score = RatingRepository.get_user_trust_score(rated_user_id)
+
+            impact = RatingServices._calculate_score_impact(score)
+
+            new_score = max(0, min(1000, current_score + impact))
+
+            RatingRepository.update_user_trust_score(rated_user_id, new_score)
+
+        except Exception as e:
+            print(f"Error updating trust score: {e}")
+
         if flag == "user_rated":
             RatingRepository.update_user_rated_flag(rental_id)
         else:
             RatingRepository.update_owner_rated_flag(rental_id)
 
         return {"success": True, "message": "Rating submitted"}
+
+    @staticmethod
+    def _calculate_score_impact(rating: int) -> int:
+        if rating == 5:
+            return 15
+        if rating == 4:
+            return 10
+        if rating == 3:
+            return 0
+        if rating == 2:
+            return -10
+        if rating == 1:
+            return -30
+        return 0
