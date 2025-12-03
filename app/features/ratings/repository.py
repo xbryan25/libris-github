@@ -31,3 +31,21 @@ class RatingRepository:
         """Set owner_rated to TRUE."""
         db = current_app.extensions["db"]
         db.fetch_one(RatingQueries.UPDATE_OWNER_RATED_FLAG, (rental_id,))
+
+    @staticmethod
+    def get_purchase_info(purchase_id: str) -> dict | None:
+        """Get purchase information."""
+        db = current_app.extensions["db"]
+        return db.fetch_one(RatingQueries.GET_PURCHASE_INFO, (purchase_id,))
+
+    @staticmethod
+    def update_purchase_user_rated_flag(purchase_id: str) -> None:
+        """Set user_rated to TRUE for purchase."""
+        db = current_app.extensions["db"]
+        db.fetch_one(RatingQueries.UPDATE_PURCHASE_USER_RATED_FLAG, (purchase_id,))
+
+    @staticmethod
+    def update_purchase_owner_rated_flag(purchase_id: str) -> None:
+        """Set owner_rated to TRUE for purchase."""
+        db = current_app.extensions["db"]
+        db.fetch_one(RatingQueries.UPDATE_PURCHASE_OWNER_RATED_FLAG, (purchase_id,))

@@ -57,3 +57,30 @@ class RatingQueries:
         JOIN books b ON rb.book_id = b.book_id
         WHERE rb.rental_id = %s
     """
+
+    UPDATE_PURCHASE_USER_RATED_FLAG = """
+        UPDATE purchased_books
+        SET user_rated = TRUE
+        WHERE purchase_id = %s
+        RETURNING purchase_id
+    """
+
+    UPDATE_PURCHASE_OWNER_RATED_FLAG = """
+        UPDATE purchased_books
+        SET owner_rated = TRUE
+        WHERE purchase_id = %s
+        RETURNING purchase_id
+    """
+
+    GET_PURCHASE_INFO = """
+        SELECT
+            pb.purchase_id,
+            pb.user_id,
+            b.owner_id,
+            pb.purchase_status,
+            pb.user_rated,
+            pb.owner_rated
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        WHERE pb.purchase_id = %s
+    """
