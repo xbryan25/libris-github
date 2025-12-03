@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import PurchaseCard from './PurchaseCard.vue';
 import SaleCard from './SaleCard.vue';
-import { useUserPurchases } from '~/composables/useUserPurchases'
 import { useUserSales } from '~/composables/useUserSales'
+import { useUserPurchases } from '~/composables/useUserPurchases'
 
 interface Props {
   activeTab: 'selling' | 'buying';
