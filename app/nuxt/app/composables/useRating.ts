@@ -32,18 +32,18 @@ export const useRating = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body:{
           rating,
           review,
           from,
-        }),
+        },
       })
 
       return { success: true }
     } catch (e: any) {
       console.error('Error submitting rating:', e)
       
-      let errorMessage = 'Failed to submit rating'
+      let errorMessage = e.data?.error || e.message || 'Failed to submit rating'
       
       if (e?.error) {
         errorMessage = e.error

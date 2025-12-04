@@ -4,6 +4,7 @@ class BookQueries:
         "b.*, u.username AS owner_username, bi.image_url AS first_image_url "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN user_address AS ua ON u.user_id = ua.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
         "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
         "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id AND "
@@ -25,6 +26,8 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
+        "{distance_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
@@ -34,6 +37,7 @@ class BookQueries:
         "b.*, u.username AS owner_username, bi.image_url AS first_image_url "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN user_address AS ua ON u.user_id = ua.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
         "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
         "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id AND "
@@ -55,6 +59,8 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
+        "{distance_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
@@ -63,6 +69,7 @@ class BookQueries:
         "SELECT COUNT(DISTINCT b.book_id) "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN user_address AS ua ON u.user_id = ua.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
         "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
         "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id AND "
@@ -75,12 +82,15 @@ class BookQueries:
         "AND b.is_soft_deleted != TRUE "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' "
         "OR rb.rent_status IS NULL) "
+        "{price_filter} "
+        "{distance_filter} "
     )
 
     GET_BOOK_COUNT_FOR_BOOK_LIST = (
         "SELECT COUNT(DISTINCT b.book_id) "
         "FROM books AS b "
         "JOIN users AS u ON b.owner_id = u.user_id "
+        "LEFT JOIN user_address AS ua ON u.user_id = ua.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
         "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
         "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id AND "
@@ -93,6 +103,8 @@ class BookQueries:
         "AND b.is_soft_deleted != TRUE "
         "AND (rb.rent_status = 'pending' OR rb.rent_status = 'completed' "
         "OR rb.rent_status IS NULL) "
+        "{price_filter} "
+        "{distance_filter} "
     )
 
     GET_MY_LIBRARY_BOOKS = (
@@ -121,6 +133,7 @@ class BookQueries:
         "        AND bg2.book_genre_name ILIKE %s"
         "    )"
         ") "
+        "{price_filter} "
         "ORDER BY b.book_id, {sort_field} {sort_order} "
         "LIMIT %s OFFSET %s"
     )
