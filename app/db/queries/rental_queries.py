@@ -300,7 +300,7 @@ class RentalsQueries:
             (rent_end_date + meetup_time::time)
             >= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
         )
-        RETURNING rental_id, user_id, book_id;
+        RETURNING rental_id, user_id, book_id, meetup_location;
     """
 
     GET_RENTAL_BY_ID_FULL = """

@@ -520,12 +520,6 @@ class RentalsServices:
                 )
                 # Continue with deletion even if wallet update fails
 
-            # Delete the rental entry
-            delete_result = RentalsRepository.delete_rental(rental_id)
-
-            if not delete_result:
-                return None, "Failed to delete rental entry", None
-
             logger.info(
                 f"Rental {rental_id} rejected by owner {rejecter_user_id}. "
                 f"Reason: {reason}. "
@@ -591,11 +585,6 @@ class RentalsServices:
                     f"User: {renter_user_id_str}, Amount: {total_cost}"
                 )
                 # Continue with deletion even if wallet update fails
-
-            delete_result = RentalsRepository.delete_rental(rental_id)
-
-            if not delete_result:
-                return None, "Failed to delete rental entry"
 
             logger.info(
                 f"Rental {rental_id} cancelled by renter {canceller_user_id}. "

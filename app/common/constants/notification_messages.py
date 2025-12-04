@@ -94,7 +94,6 @@ class NotificationMessages:
         "Please verify that the book has been returned in good condition."
     )
 
-    # TODO: VERIFY IF PROPER NOTIF (SENDER AND RECEIVER)
     RENTAL_COMPLETED_HEADER = "Rental Completed"
     RETURN_COMPLETED_RENTER_MESSAGE = (
         "Excellent! Both parties have confirmed the return of '{title}'. Your rental transaction is now complete! "

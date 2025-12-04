@@ -396,6 +396,9 @@ class RentalsController:
                 )
             )
 
+            # Delete the rental entry before sending the notification
+            RentalsRepository.delete_rental(rental_id)
+
             NotificationServices.add_notification_service(
                 user_id,
                 renter_id,
@@ -446,11 +449,14 @@ class RentalsController:
 
             notification_header = NotificationMessages.RENTAL_REQUEST_CANCELLED_HEADER
             notification_message = (
-                NotificationMessages.RENTAL_REQUEST_CANCELLED_HEADER.format(
+                NotificationMessages.RENTAL_REQUEST_CANCELLED_MESSAGE.format(
                     title=f"{book_details['title'] if book_details else None}",
                     username=renter_username,
                 )
             )
+
+            # Delete the rental entry before sending the notification
+            RentalsRepository.delete_rental(rental_id)
 
             NotificationServices.add_notification_service(
                 user_id,
