@@ -16,9 +16,20 @@ class NotificationMessages:
         "free to send a new request or explore similar titles available for rent."
     )
 
-    # TODO: ADD RENTAL REQUEST REJECTED NOTIF
+    RENTAL_REQUEST_REJECTED_HEADER = "Rental Request Rejected"
+    RENTAL_REQUEST_REJECTED_MESSAGE = (
+        "We're sorry! Your request to rent '{title}' from {username} "
+        "has been declined. The reason being: '{reason}.' "
+        "You may explore other available books or submit a new request "
+        "if you're still interested in renting this book."
+    )
 
-    # TODO: ADD RENTAL REQUEST cANCELLED NOTIF
+    RENTAL_REQUEST_CANCELLED_HEADER = "Rental Request Cancelled"
+    RENTAL_REQUEST_CANCELLED_MESSAGE = (
+        "The rental request for your book '{title}' "
+        "has been cancelled by {username}. You may now accept "
+        "requests from other interested renters."
+    )
 
     RENTAL_REQUEST_APPROVED_HEADER = "Rental Request Approved"
     RENTAL_REQUEST_APPROVED_MESSAGE = (

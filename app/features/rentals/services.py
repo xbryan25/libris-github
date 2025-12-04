@@ -324,7 +324,7 @@ class RentalsServices:
     @staticmethod
     def approve_rental_request(
         rental_id: str, meetup_time: str, approver_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None]:
         """
         Approve a rental request with meetup time.
         This will:
@@ -336,7 +336,7 @@ class RentalsServices:
         """
         try:
             if not meetup_time:
-                return None, "Meetup time is required"
+                return None, "Meetup time is required", None
 
             # Convert 24-hour format to 12-hour format
             meetup_time_12hour = DateUtils.convert_to_12_hour_format(meetup_time)
@@ -345,7 +345,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None
 
             owner_id = rental.get("owner_id")
             rent_status = rental.get("rent_status")
@@ -355,11 +355,19 @@ class RentalsServices:
 
             # Verify the approver is the owner
             if str(owner_id) != str(approver_user_id):
-                return None, "Unauthorized: Only the book owner can approve this rental"
+                return (
+                    None,
+                    "Unauthorized: Only the book owner can approve this rental",
+                    None,
+                )
 
             # Check if rental is in pending status
             if rent_status != "pending":
-                return None, f"Rental cannot be approved. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Rental cannot be approved. Current status: {rent_status}",
+                    None,
+                )
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
             if book_id:
@@ -371,6 +379,7 @@ class RentalsServices:
                     return (
                         None,
                         f"This book is already approved for rental to {renter_name}. Please reject other pending requests first.",
+                        None,
                     )
 
             # Validate meetup time against time window
@@ -379,11 +388,11 @@ class RentalsServices:
             )
 
             if not is_valid:
-                return None, error_msg
+                return None, error_msg, None
 
             # Ensure renter_user_id is a string
             if not renter_user_id:
-                return None, "Renter user ID not found"
+                return None, "Renter user ID not found", None
             renter_user_id_str = str(renter_user_id)
             owner_user_id_str = str(owner_id)
 
@@ -393,13 +402,13 @@ class RentalsServices:
             )
 
             if not wallet_result:
-                return None, "Insufficient funds or wallet not found"
+                return None, "Insufficient funds or wallet not found", None
 
             renter_wallet_id = wallet_result.get("wallet_id")
 
             # Ensure wallet_id is a string
             if not renter_wallet_id:
-                return None, "Wallet ID not found after deduction"
+                return None, "Wallet ID not found after deduction", None
             renter_wallet_id_str = str(renter_wallet_id)
 
             # Add rental fee to owner's wallet
@@ -411,7 +420,7 @@ class RentalsServices:
                 logger.error(
                     f"Failed to add rental fee to owner wallet for rental {rental_id}"
                 )
-                return None, "Failed to credit owner's wallet"
+                return None, "Failed to credit owner's wallet", None
 
             owner_wallet_id = str(owner_wallet_result.get("wallet_id"))
 
@@ -443,7 +452,7 @@ class RentalsServices:
             result = RentalsRepository.approve_rental(rental_id, meetup_time_12hour)
 
             if not result:
-                return None, "Failed to update rental status"
+                return None, "Failed to update rental status", None
 
             logger.info(
                 f"Rental {rental_id} approved. "
@@ -453,17 +462,17 @@ class RentalsServices:
                 f"Owner transaction: {owner_transaction.get('transaction_id') if owner_transaction else 'N/A'}"
             )
 
-            return result, None
+            return result, None, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in approve_rental_request: {str(e)}")
             traceback.print_exc()
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None
 
     @staticmethod
     def reject_rental_request(
         rental_id: str, reason: str, rejecter_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None]:
         """
         Reject a rental request.
         This will:
@@ -474,7 +483,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None
 
             owner_id = rental.get("owner_id")
             rent_status = rental.get("rent_status")
@@ -483,13 +492,21 @@ class RentalsServices:
 
             # Verify the rejecter is the owner
             if str(owner_id) != str(rejecter_user_id):
-                return None, "Unauthorized: Only the book owner can reject this rental"
+                return (
+                    None,
+                    "Unauthorized: Only the book owner can reject this rental",
+                    None,
+                )
 
             if rent_status != "pending":
-                return None, f"Rental cannot be rejected. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Rental cannot be rejected. Current status: {rent_status}",
+                    None,
+                )
 
             if not renter_user_id:
-                return None, "Renter user ID not found"
+                return None, "Renter user ID not found", None
             renter_user_id_str = str(renter_user_id)
 
             wallet_result = WalletRepository.deduct_from_reserved_amount(
@@ -507,7 +524,7 @@ class RentalsServices:
             delete_result = RentalsRepository.delete_rental(rental_id)
 
             if not delete_result:
-                return None, "Failed to delete rental entry"
+                return None, "Failed to delete rental entry", None
 
             logger.info(
                 f"Rental {rental_id} rejected by owner {rejecter_user_id}. "
@@ -516,15 +533,19 @@ class RentalsServices:
                 f"Rental entry deleted."
             )
 
-            return {
-                "rental_id": rental_id,
-                "reason": reason,
-                "released_amount": total_cost,
-            }, None
+            return (
+                {
+                    "rental_id": rental_id,
+                    "reason": reason,
+                    "released_amount": total_cost,
+                },
+                None,
+                renter_user_id,
+            )
 
         except Exception as e:
             logger.error(f"Error in reject_rental_request: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None
 
     @staticmethod
     def cancel_rental_request(

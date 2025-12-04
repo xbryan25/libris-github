@@ -309,7 +309,7 @@ class RentalsController:
             if not meetup_time:
                 return jsonify({"error": "Meetup time is required"}), 400
 
-            result, error = RentalsServices.approve_rental_request(
+            result, error, renter_id = RentalsServices.approve_rental_request(
                 rental_id, meetup_time, user_id
             )
 
@@ -322,8 +322,6 @@ class RentalsController:
                 raise EntityNotFoundError(f"Book {book_id} does not exist.")
 
             book_details = BookServices.get_book_details_service(book_id)
-
-            renter_id = str(book_details["owner_user_id"]) if book_details else None
 
             owner_username = UserServices.get_username_service(user_id)
 
@@ -376,8 +374,34 @@ class RentalsController:
 
             reason = data.get("reason", "No reason provided")
 
-            result, error = RentalsServices.reject_rental_request(
+            result, error, renter_id = RentalsServices.reject_rental_request(
                 rental_id, reason, user_id
+            )
+
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.RENTAL_REQUEST_REJECTED_HEADER
+            notification_message = (
+                NotificationMessages.RENTAL_REQUEST_REJECTED_MESSAGE.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=owner_username,
+                    reason=reason,
+                )
+            )
+
+            NotificationServices.add_notification_service(
+                user_id,
+                renter_id,
+                "rent",
+                notification_header,
+                notification_message,
             )
 
             if error:
@@ -408,6 +432,33 @@ class RentalsController:
                 return jsonify({"error": "Unauthorized"}), 401
 
             result, error = RentalsServices.cancel_rental_request(rental_id, user_id)
+
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_id = str(book_details["owner_user_id"]) if book_details else None
+
+            renter_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.RENTAL_REQUEST_CANCELLED_HEADER
+            notification_message = (
+                NotificationMessages.RENTAL_REQUEST_CANCELLED_HEADER.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=renter_username,
+                )
+            )
+
+            NotificationServices.add_notification_service(
+                user_id,
+                owner_id,
+                "rent",
+                notification_header,
+                notification_message,
+            )
 
             if error:
                 return jsonify({"error": error}), 400
