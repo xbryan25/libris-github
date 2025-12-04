@@ -7,8 +7,12 @@ class BookQueries:
         "LEFT JOIN user_address AS ua ON u.user_id = ua.user_id "
         "LEFT JOIN book_genre_links AS bgl ON b.book_id = bgl.book_id "
         "LEFT JOIN book_genres AS bg ON bgl.book_genre_id = bg.book_genre_id "
-        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id AND "
-        "pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation') "
+        "LEFT JOIN purchased_books AS pb ON b.book_id = pb.book_id "
+        "AND pb.original_owner_id = b.owner_id "
+        "AND ("
+        "    pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation') "
+        "    OR (pb.purchase_status = 'completed' AND pb.transfer_decision_pending = TRUE)"
+        ") "
         "LEFT JOIN rented_books AS rb ON b.book_id = rb.book_id "
         "LEFT JOIN book_images AS bi ON b.book_id = bi.book_id AND bi.order_num = 1 "
         "WHERE b.{search_by} ILIKE %s "
@@ -188,11 +192,18 @@ class BookQueries:
                 WHERE rb2.book_id = b.book_id
                 AND rb2.rent_status = 'ongoing'
             ) AS is_rented,
-            -- Check if book has been purchased (completed status)
+            -- Check if book has an ACTIVE purchase from the CURRENT owner
+            -- Exclude completed purchases where ownership was transferred (new owner scenario)
             EXISTS(
                 SELECT 1 FROM purchased_books pb
                 WHERE pb.book_id = b.book_id
-                AND pb.purchase_status = 'completed'
+                AND pb.original_owner_id = b.owner_id
+                AND (
+                    -- Active purchase statuses
+                    pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
+                    -- OR completed but decision still pending
+                    OR (pb.purchase_status = 'completed' AND pb.transfer_decision_pending = TRUE)
+                )
             ) AS is_purchased
         FROM books b
         JOIN users u ON b.owner_id = u.user_id
