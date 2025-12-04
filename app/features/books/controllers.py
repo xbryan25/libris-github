@@ -55,7 +55,67 @@ class BookControllers:
                     "bookAvailability", "for rent"
                 ).lower(),
                 "user_id": request.args.get("userId"),
+                "min_price": request.args.get("minPrice"),
+                "max_price": request.args.get("maxPrice"),
+                "km_radius": request.args.get("kmRadius"),
+                "user_lat": request.args.get("userLat"),
+                "user_lng": request.args.get("userLng"),
             }
+
+            try:
+                min_price = float(params["min_price"]) if params["min_price"] else None
+                max_price = float(params["max_price"]) if params["max_price"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Price filter values ('minPrice', 'maxPrice') must be valid numbers."
+                )
+
+            params["min_price"] = min_price
+            params["max_price"] = max_price
+
+            if (min_price is not None and min_price < 0) or (
+                max_price is not None and max_price < 0
+            ):
+                raise InvalidParameterError("Price values must be non-negative.")
+
+            if (
+                min_price is not None
+                and max_price is not None
+                and min_price > max_price
+            ):
+                raise InvalidParameterError(
+                    "Minimum price cannot be greater than maximum price."
+                )
+
+            # Validate and parse distance filter parameters
+            try:
+                km_radius = float(params["km_radius"]) if params["km_radius"] else None
+                user_lat = float(params["user_lat"]) if params["user_lat"] else None
+                user_lng = float(params["user_lng"]) if params["user_lng"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Distance filter values ('kmRadius', 'userLat', 'userLng') must be valid numbers."
+                )
+
+            params["km_radius"] = km_radius
+            params["user_lat"] = user_lat
+            params["user_lng"] = user_lng
+
+            # Validate latitude and longitude ranges
+            if user_lat is not None and (user_lat < -90 or user_lat > 90):
+                raise InvalidParameterError("Latitude must be between -90 and 90.")
+
+            if user_lng is not None and (user_lng < -180 or user_lng > 180):
+                raise InvalidParameterError("Longitude must be between -180 and 180.")
+
+            if km_radius is not None and km_radius < 0:
+                raise InvalidParameterError("km radius must be non-negative.")
+
+            # If km radius is set, user location must be provided
+            if km_radius is not None and (user_lat is None or user_lng is None):
+                raise InvalidParameterError(
+                    "User location (userLat, userLng) is required when kmRadius is specified."
+                )
 
             if params["user_id"]:
                 get_books_from_a_specific_user = True
@@ -131,7 +191,67 @@ class BookControllers:
                     "bookAvailability", "for rent"
                 ).lower(),
                 "user_id": request.args.get("userId"),
+                "min_price": request.args.get("minPrice"),
+                "max_price": request.args.get("maxPrice"),
+                "km_radius": request.args.get("kmRadius"),
+                "user_lat": request.args.get("userLat"),
+                "user_lng": request.args.get("userLng"),
             }
+
+            try:
+                min_price = float(params["min_price"]) if params["min_price"] else None
+                max_price = float(params["max_price"]) if params["max_price"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Price filter values ('minPrice', 'maxPrice') must be valid numbers."
+                )
+
+            params["min_price"] = min_price
+            params["max_price"] = max_price
+
+            if (min_price is not None and min_price < 0) or (
+                max_price is not None and max_price < 0
+            ):
+                raise InvalidParameterError("Price values must be non-negative.")
+
+            if (
+                min_price is not None
+                and max_price is not None
+                and min_price > max_price
+            ):
+                raise InvalidParameterError(
+                    "Minimum price cannot be greater than maximum price."
+                )
+
+            # Validate and parse distance filter parameters
+            try:
+                km_radius = float(params["km_radius"]) if params["km_radius"] else None
+                user_lat = float(params["user_lat"]) if params["user_lat"] else None
+                user_lng = float(params["user_lng"]) if params["user_lng"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Distance filter values ('kmRadius', 'userLat', 'userLng') must be valid numbers."
+                )
+
+            params["km_radius"] = km_radius
+            params["user_lat"] = user_lat
+            params["user_lng"] = user_lng
+
+            # Validate latitude and longitude ranges
+            if user_lat is not None and (user_lat < -90 or user_lat > 90):
+                raise InvalidParameterError("Latitude must be between -90 and 90.")
+
+            if user_lng is not None and (user_lng < -180 or user_lng > 180):
+                raise InvalidParameterError("Longitude must be between -180 and 180.")
+
+            if km_radius is not None and km_radius < 0:
+                raise InvalidParameterError("km radius must be non-negative.")
+
+            # If km radius is set, user location must be provided
+            if km_radius is not None and (user_lat is None or user_lng is None):
+                raise InvalidParameterError(
+                    "User location (userLat, userLng) is required when kmRadius is specified."
+                )
 
             if params["user_id"]:
                 get_book_count_from_a_specific_user = True
@@ -171,12 +291,12 @@ class BookControllers:
 
     @staticmethod
     def get_my_library_books_controller() -> tuple[Response, int]:
-        """Retrieve details of different books based on pagination, optional search, genre, and availability filters."""
+        """Retrieve details of different books based on pagination,
+        optional search, genre, and availability filters, including price."""
 
         ALLOWED_AVAILABILITY_FILTERS = {"for rent", "for sale", "both", "all"}
 
         try:
-
             user_id = get_jwt_identity()
 
             if not user_id:
@@ -190,7 +310,34 @@ class BookControllers:
                 "availability": request.args.get(
                     "bookAvailability", "for rent"
                 ).lower(),
+                "min_price": request.args.get("minPrice"),
+                "max_price": request.args.get("maxPrice"),
             }
+
+            try:
+                min_price = float(params["min_price"]) if params["min_price"] else None
+                max_price = float(params["max_price"]) if params["max_price"] else None
+            except ValueError:
+                raise InvalidParameterError(
+                    "Price filter values ('minPrice', 'maxPrice') must be valid numbers."
+                )
+
+            params["min_price"] = min_price
+            params["max_price"] = max_price
+
+            if (min_price is not None and min_price < 0) or (
+                max_price is not None and max_price < 0
+            ):
+                raise InvalidParameterError("Price values must be non-negative.")
+
+            if (
+                min_price is not None
+                and max_price is not None
+                and min_price > max_price
+            ):
+                raise InvalidParameterError(
+                    "Minimum price cannot be greater than maximum price."
+                )
 
             if params["books_per_page"] < 0:
                 raise InvalidParameterError(
