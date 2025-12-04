@@ -58,4 +58,6 @@ class RatingQueries:
         WHERE rb.rental_id = %s
     """
 
-    UPDATE_USER_TRUST_SCORE = "UPDATE users SET trust_score = %s WHERE user_id = %s"
+    UPDATE_USER_TRUST_SCORE = (
+        "UPDATE users SET trust_score = %s WHERE user_id = %s RETURNING trust_score"
+    )
