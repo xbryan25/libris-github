@@ -104,11 +104,11 @@ class RentalCleanupTask:
                         rental.get("book_id")
                     )
 
-                    book_owner_user_id = (
+                    owner_id = (
                         str(book_details["owner_user_id"]) if book_details else None
                     )
 
-                    username = UserServices.get_username_service(book_owner_user_id)
+                    owner_username = UserServices.get_username_service(owner_id)
 
                     notification_header = (
                         NotificationMessages.RENTAL_REQUEST_EXPIRED_HEADER
@@ -116,12 +116,12 @@ class RentalCleanupTask:
                     notification_message = (
                         NotificationMessages.RENTAL_REQUEST_EXPIRED_MESSAGE.format(
                             title=f"{book_details['title'] if book_details else None}",
-                            username=username,
+                            username=owner_username,
                         )
                     )
 
                     NotificationServices.add_notification_service(
-                        book_owner_user_id,
+                        owner_id,
                         user_id,
                         "rent",
                         notification_header,

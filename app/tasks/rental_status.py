@@ -39,11 +39,11 @@ class RentalStatusTask:
                         updated_rental["book_id"]
                     )
 
-                    owner_user_id = (
+                    owner_id = (
                         str(book_details["owner_user_id"]) if book_details else None
                     )
 
-                    owner_username = UserServices.get_username_service(owner_user_id)
+                    owner_username = UserServices.get_username_service(owner_id)
                     renter_username = UserServices.get_username_service(
                         updated_rental["user_id"]
                     )
@@ -68,7 +68,7 @@ class RentalStatusTask:
 
                     # Send notification to renter
                     NotificationServices.add_notification_service(
-                        owner_user_id,
+                        owner_id,
                         updated_rental["user_id"],
                         "rent",
                         notification_header,
@@ -78,7 +78,7 @@ class RentalStatusTask:
                     # Send notification to owner
                     NotificationServices.add_notification_service(
                         updated_rental["user_id"],
-                        owner_user_id,
+                        owner_id,
                         "rent",
                         notification_header,
                         notification_message_owner,
@@ -135,16 +135,16 @@ class RentalStatusTask:
                     notification_message_renter = (
                         NotificationMessages.RETURN_REMINDER_RENTER_MESSAGE.format(
                             title=f"{book_details['title'] if book_details else None}",
-                            username=owner_username,
                             meetup_location=updated_rental["meetup_location"],
+                            username=owner_username,
                         )
                     )
 
                     notification_message_owner = (
                         NotificationMessages.RETURN_REMINDER_OWNER_MESSAGE.format(
                             title=f"{book_details['title'] if book_details else None}",
-                            username=renter_username,
                             meetup_location=updated_rental["meetup_location"],
+                            username=renter_username,
                         )
                     )
 

@@ -124,21 +124,19 @@ class RentalsController:
                 rental_data_json["book_id"]
             )
 
-            target_user_id = (
-                str(book_details["owner_user_id"]) if book_details else None
-            )
+            owner_id = str(book_details["owner_user_id"]) if book_details else None
 
-            username = UserServices.get_username_service(target_user_id)
+            renter_username = UserServices.get_username_service(current_user_id)
 
             notification_header = NotificationMessages.RENTAL_REQUEST_HEADER
             notification_message = NotificationMessages.RENTAL_REQUEST_MESSAGE.format(
+                username=renter_username,
                 title=f"{book_details['title'] if book_details else None}",
-                username=username,
             )
 
             NotificationServices.add_notification_service(
                 current_user_id,
-                target_user_id,
+                owner_id,
                 "rent",
                 notification_header,
                 notification_message,
@@ -235,29 +233,30 @@ class RentalsController:
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
-            if book_id:
-                book_details = BookServices.get_book_details_service(book_id)
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
 
-                target_user_id = (
-                    str(book_details["owner_user_id"]) if book_details else None
-                )
+            book_details = BookServices.get_book_details_service(book_id)
 
-                notification_header = (
-                    NotificationMessages.RENTAL_REQUEST_APPROVED_HEADER
-                )
-                notification_message = (
-                    NotificationMessages.RENTAL_REQUEST_APPROVED_MESSAGE.format(
-                        title=f"{book_details['title'] if book_details else None}"
-                    )
-                )
+            renter_id = str(book_details["owner_user_id"]) if book_details else None
 
-                NotificationServices.add_notification_service(
-                    user_id,
-                    target_user_id,
-                    "rent",
-                    notification_header,
-                    notification_message,
+            owner_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.RENTAL_REQUEST_APPROVED_HEADER
+            notification_message = (
+                NotificationMessages.RENTAL_REQUEST_APPROVED_MESSAGE.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=owner_username,
                 )
+            )
+
+            NotificationServices.add_notification_service(
+                user_id,
+                renter_id,
+                "rent",
+                notification_header,
+                notification_message,
+            )
 
             return (
                 jsonify(
@@ -377,7 +376,7 @@ class RentalsController:
             if result["owner_confirmed_pickup"] and not result["user_confirmed_pickup"]:
                 notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
                 notification_message = (
-                    NotificationMessages.CONFIRM_BOOK_PICKUP_MESSAGE.format(
+                    NotificationMessages.CONFIRM_BOOK_PICKUP_RENTER_MESSAGE.format(
                         username=owner_username,
                         title=f"{book_details['title'] if book_details else None}",
                     )
@@ -395,7 +394,7 @@ class RentalsController:
             ):
                 notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
                 notification_message = (
-                    NotificationMessages.CONFIRM_BOOK_PICKUP_MESSAGE.format(
+                    NotificationMessages.CONFIRM_BOOK_PICKUP_OWNER_MESSAGE.format(
                         username=renter_username,
                         title=f"{book_details['title'] if book_details else None}",
                     )
@@ -412,7 +411,7 @@ class RentalsController:
                 notification_header = NotificationMessages.RENTAL_STARTED_HEADER
                 notification_message = (
                     NotificationMessages.RENTAL_STARTED_MESSAGE.format(
-                        username=renter_username,
+                        username=owner_username,
                         title=f"{book_details['title'] if book_details else None}",
                     )
                 )
@@ -513,15 +512,15 @@ class RentalsController:
                 notification_header = NotificationMessages.RENTAL_COMPLETED_HEADER
                 notification_message_renter = (
                     NotificationMessages.RETURN_COMPLETED_RENTER_MESSAGE.format(
-                        username=owner_username,
                         title=f"{book_details['title'] if book_details else None}",
+                        username=owner_username,
                     )
                 )
 
                 notification_message_owner = (
                     NotificationMessages.RETURN_COMPLETED_OWNER_MESSAGE.format(
-                        username=renter_username,
                         title=f"{book_details['title'] if book_details else None}",
+                        username=owner_username,
                     )
                 )
 
