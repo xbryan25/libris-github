@@ -63,11 +63,13 @@ class RatingServices:
             return {"success": False, "error": "Failed to insert rating"}
 
         try:
-            current_score = RatingRepository.get_user_trust_score(rated_user_id)
+            rater_trust_score = RatingRepository.get_user_trust_score(rater_id)
 
-            impact = RatingServices._calculate_score_impact(score)
+            target_current_score = RatingRepository.get_user_trust_score(rated_user_id)
 
-            new_score = max(0, min(1000, current_score + impact))
+            impact = RatingServices._calculate_weighted_impact(score, rater_trust_score)
+
+            new_score = max(0, min(1000, target_current_score + impact))
 
             RatingRepository.update_user_trust_score(rated_user_id, new_score)
 
@@ -82,15 +84,23 @@ class RatingServices:
         return {"success": True, "message": "Rating submitted"}
 
     @staticmethod
-    def _calculate_score_impact(rating: int) -> int:
+    def _calculate_weighted_impact(rating: int, rater_score: int) -> int:
+        """
+        Calculate score impact scaled by the rater's credibility.
+        Formula: Base Impact * (0.5 + (RaterScore / 2000))
+        """
+        base = 0
         if rating == 5:
-            return 15
-        if rating == 4:
-            return 10
-        if rating == 3:
-            return 0
-        if rating == 2:
-            return -10
-        if rating == 1:
-            return -30
-        return 0
+            base = 15
+        elif rating == 4:
+            base = 10
+        elif rating == 3:
+            base = 0
+        elif rating == 2:
+            base = -10
+        elif rating == 1:
+            base = -30
+
+        multiplier = 0.5 + (rater_score / 2000)
+
+        return int(base * multiplier)
