@@ -2,9 +2,17 @@
 interface Props {
   status: string;
   from: string;
+  transferDecisionPending?: boolean; // Updated prop name
 }
 
 const props = defineProps<Props>();
+
+// Debug log
+console.log('Stepper props:', {
+  status: props.status,
+  from: props.from,
+  transferDecisionPending: props.transferDecisionPending
+});
 
 const getStepperItems = () => {
   if (props.from === 'purchase') {
@@ -25,6 +33,11 @@ const getStepperItems = () => {
         icon: 'i-lucide-package'
       },
       {
+        title: 'Transfer',
+        description: 'Ownership transfer',
+        icon: 'i-lucide-refresh-cw'
+      },
+      {
         title: 'Completed',
         description: 'Purchase finished',
         icon: 'i-lucide-circle-check'
@@ -36,6 +49,7 @@ const getStepperItems = () => {
       },
     ]
   } else {
+    // For sales (seller view), no Transfer step
     return [
       {
         title: 'Pending',
@@ -67,15 +81,41 @@ const getStepperItems = () => {
 }
 
 const getCurrentStep = () => {
-  const statusMap: Record<string, number> = {
-    'pending': 0,
-    'approved': 1,
-    'awaiting_pickup_confirmation': 2,
-    'completed': 3,
-    'rate_user': 4
-  }
+  console.log('getCurrentStep called:', {
+    from: props.from,
+    status: props.status,
+    transferDecisionPending: props.transferDecisionPending
+  });
   
-  return statusMap[props.status] ?? 0
+  // For purchases (buyer view), include Transfer step
+  if (props.from === 'purchase') {
+    // If status is completed but transfer is pending, show step 3 (Transfer)
+    if (props.status === 'completed' && props.transferDecisionPending === true) {
+      console.log('Returning step 3 (Transfer)');
+      return 3;
+    }
+    
+    const statusMap: Record<string, number> = {
+      'pending': 0,
+      'approved': 1,
+      'awaiting_pickup_confirmation': 2,
+      'completed': 4, // After transfer decision is made
+      'rate_user': 5
+    }
+    const step = statusMap[props.status] ?? 0;
+    console.log('Returning step from statusMap:', step);
+    return step;
+  } else {
+    // For sales (seller view), no Transfer step
+    const statusMap: Record<string, number> = {
+      'pending': 0,
+      'approved': 1,
+      'awaiting_pickup_confirmation': 2,
+      'completed': 3,
+      'rate_user': 4
+    }
+    return statusMap[props.status] ?? 0
+  }
 }
 </script>
 

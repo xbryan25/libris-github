@@ -21,6 +21,8 @@ export type Sale = {
   user_rated: boolean
   owner_rated: boolean
   cost: number
+  transfer_decision_pending: boolean  
+  ownership_transferred: boolean | null  
 }
 
 type PurchaseStatus = 

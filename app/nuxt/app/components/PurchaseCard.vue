@@ -8,7 +8,12 @@ interface Props {
 
 defineProps<Props>()
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, transferPending: boolean) => {
+  // If completed but transfer decision is pending, show as transfer decision
+  if (status === 'completed' && transferPending) {
+    return { label: 'Transfer Decision', color: 'bg-purple-500' }
+  }
+  
   const statusConfig: Record<string, { label: string; color: string }> = {
     pending: { label: 'Pending Approval', color: 'bg-yellow-500' },
     approved: { label: 'Confirmed', color: 'bg-blue-500' },
@@ -38,6 +43,11 @@ const getStepperItems = (status: string): StepperItem[] => {
       icon: 'i-lucide-package'
     },
     {
+      title: 'Transfer',
+      description: 'Ownership transfer',
+      icon: 'i-lucide-refresh-cw'
+    },
+    {
       title: 'Completed',
       description: 'Purchase finished',
       icon: 'i-lucide-circle-check'
@@ -50,12 +60,17 @@ const getStepperItems = (status: string): StepperItem[] => {
   ]
 }
 
-const getCurrentStep = (status: string) => {
+const getCurrentStep = (status: string, transferPending: boolean) => {
+  // If completed but transfer decision is pending, show as step 3 (transfer)
+  if (status === 'completed' && transferPending) {
+    return 3
+  }
+  
   const statusMap: Record<string, number> = {
     'pending': 0,
     'approved': 1,
     'awaiting_pickup_confirmation': 2,
-    'completed': 3
+    'completed': 4
   }
   
   return statusMap[status] ?? 0
@@ -86,9 +101,9 @@ const getCurrentStep = (status: string) => {
         <!-- Status Badge and Readits -->
         <div class="flex items-center gap-3">
           <span 
-            :class="[getStatusBadge(purchase.purchase_status).color, 'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap']"
+            :class="[getStatusBadge(purchase.purchase_status, purchase.transfer_decision_pending).color, 'text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap']"
           >
-            {{ getStatusBadge(purchase.purchase_status).label }}
+            {{ getStatusBadge(purchase.purchase_status, purchase.transfer_decision_pending).label }}
           </span>
           <div class="flex items-center gap-1">
             <span class="text-accent text-xl font-bold">-</span>
@@ -103,7 +118,7 @@ const getCurrentStep = (status: string) => {
         <UStepper 
           disabled
           :items="getStepperItems(purchase.purchase_status)" 
-          :model-value="getCurrentStep(purchase.purchase_status)"
+          :model-value="getCurrentStep(purchase.purchase_status, purchase.transfer_decision_pending)"
         />
       </div>
     </div>
