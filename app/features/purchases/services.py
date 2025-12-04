@@ -84,6 +84,10 @@ class PurchasesServices:
                 "owner_confirmed_pickup": purchase.get("owner_confirmed_pickup", False),
                 "user_rated": purchase.get("user_rated", False),
                 "owner_rated": purchase.get("owner_rated", False),
+                "transfer_decision_pending": purchase.get(
+                    "transfer_decision_pending", False
+                ),
+                "ownership_transferred": purchase.get("ownership_transferred"),
                 "cost": (
                     int(purchase.get("cost", 0))
                     if purchase.get("cost") not in (None, "")
@@ -130,6 +134,10 @@ class PurchasesServices:
                 "owner_confirmed_pickup": sale.get("owner_confirmed_pickup", False),
                 "user_rated": sale.get("user_rated", False),
                 "owner_rated": sale.get("owner_rated", False),
+                "transfer_decision_pending": sale.get(
+                    "transfer_decision_pending", False
+                ),
+                "ownership_transferred": sale.get("ownership_transferred", False),
                 "cost": (
                     int(sale.get("cost", 0))
                     if sale.get("cost") not in (None, "")
@@ -515,3 +523,55 @@ class PurchasesServices:
         except Exception as e:
             logger.error(f"Error in confirm_pickup: {str(e)}")
             return None, f"Error: {str(e)}"
+
+    @staticmethod
+    def process_transfer_decision_service(
+        purchase_id: str, transfer_ownership: bool, buyer_user_id: str
+    ) -> tuple[dict | None, str | None]:
+        """
+        Processes the buyer's final decision on book ownership transfer.
+        If transfer_ownership is true, updates book's owner_id.
+        If false, soft-deletes the book.
+        In both cases, sets transfer_decision_pending to false.
+        """
+        try:
+            # 1. Verify the purchase exists and the user is the buyer
+            # Use get_purchase_with_book_details which includes transfer_decision_pending
+            purchase = PurchasesRepository.get_purchase_with_book_details(purchase_id)
+            if not purchase:
+                return None, "Purchase not found."
+
+            if str(purchase["user_id"]) != str(buyer_user_id):
+                return None, "Unauthorized to make this transfer decision."
+
+            # 2. Check current status - the query should return transfer_decision_pending
+            if not purchase.get("transfer_decision_pending", False):
+                return (
+                    None,
+                    "Transfer decision is not currently pending for this purchase.",
+                )
+
+            # 3. Process the decision in the database
+            result = PurchasesRepository.process_transfer_decision(
+                purchase_id, transfer_ownership
+            )
+
+            if not result:
+                return None, "Failed to process transfer decision in the database."
+
+            logger.info(
+                f"Transfer decision processed for purchase {purchase_id}. "
+                f"Transfer ownership: {transfer_ownership}. "
+                f"Buyer: {buyer_user_id}"
+            )
+
+            return {
+                "purchase_id": purchase_id,
+                "transfer_ownership": transfer_ownership,
+                "message": "Transfer decision processed successfully.",
+            }, None
+
+        except Exception as e:
+            logger.error(f"Error in process_transfer_decision_service: {str(e)}")
+            traceback.print_exc()
+            return None, f"An unexpected error occurred: {str(e)}"

@@ -161,11 +161,13 @@ class PurchasesRepository:
     ) -> dict[str, Any] | None:
         """
         Confirm pickup by owner or buyer.
-        If both have confirmed, update status to 'completed'.
+        If both have confirmed, update status to 'completed' and set transfer_decision_pending to TRUE.
         """
         db = current_app.extensions["db"]
 
         params = (
+            is_owner,
+            is_buyer,
             is_owner,
             is_buyer,
             is_owner,
@@ -209,3 +211,47 @@ class PurchasesRepository:
             PurchasesQueries.GET_BOOK_ID_FROM_PURCHASE, (purchase_id,)
         )
         return result.get("book_id") if result else None
+
+    @staticmethod
+    def submit_transfer_decision(
+        purchase_id: str, transfer_ownership: bool
+    ) -> dict[str, Any] | None:
+        """
+        Submit the buyer's decision on whether to transfer ownership.
+        Sets transfer_decision_pending to FALSE.
+        """
+        db = current_app.extensions["db"]
+        params = (transfer_ownership, purchase_id)
+        result = db.fetch_one(PurchasesQueries.SUBMIT_TRANSFER_DECISION, params)
+        return result
+
+    @staticmethod
+    def get_purchase_with_book_details(purchase_id: str) -> dict[str, Any] | None:
+        """
+        Get purchase details with book information for transfer processing.
+        """
+        db = current_app.extensions["db"]
+        params = (purchase_id,)
+        result = db.fetch_one(PurchasesQueries.GET_PURCHASE_WITH_BOOK_DETAILS, params)
+        return result
+
+    @staticmethod
+    def process_transfer_decision(
+        purchase_id: str, transfer_ownership: bool
+    ) -> dict[str, Any] | None:
+        """
+        Process the buyer's transfer decision.
+        If yes: transfer book ownership to buyer
+        If no: soft delete the book
+        """
+        db = current_app.extensions["db"]
+        params = (purchase_id,)
+
+        if transfer_ownership:
+            result = db.fetch_one(
+                PurchasesQueries.PROCESS_TRANSFER_DECISION_YES, params
+            )
+        else:
+            result = db.fetch_one(PurchasesQueries.PROCESS_TRANSFER_DECISION_NO, params)
+
+        return result

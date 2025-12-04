@@ -293,3 +293,49 @@ class PurchasesController:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def process_transfer_decision_controller(purchase_id: str) -> tuple[Response, int]:
+        """
+        Controller to process the buyer's final ownership transfer decision.
+        """
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            decision_data = request.get_json()
+            if decision_data is None or "transfer_ownership" not in decision_data:
+                return (
+                    jsonify({"error": "Missing 'transfer_ownership' in request body."}),
+                    400,
+                )
+
+            transfer_ownership = decision_data["transfer_ownership"]
+
+            if not isinstance(transfer_ownership, bool):
+                return (
+                    jsonify({"error": "'transfer_ownership' must be a boolean."}),
+                    400,
+                )
+
+            result, error = PurchasesServices.process_transfer_decision_service(
+                purchase_id, transfer_ownership, user_id
+            )
+
+            if error:
+                return jsonify({"error": error}), 400
+
+            return (
+                jsonify(
+                    {
+                        "message": "Ownership transfer decision recorded successfully.",
+                        "result": result,
+                    }
+                ),
+                200,
+            )
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

@@ -56,7 +56,9 @@ class PurchasesQueries:
             pb.owner_confirmed_pickup,
             pb.user_rated,
             pb.owner_rated,
-            pb.total_buy_cost AS cost
+            pb.total_buy_cost AS cost,
+            pb.transfer_decision_pending,
+            pb.ownership_transferred
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
         JOIN users u ON b.owner_id = u.user_id
@@ -64,7 +66,8 @@ class PurchasesQueries:
         WHERE pb.user_id = %s
         AND (
             pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
-            OR (pb.purchase_status = 'completed' AND pb.user_rated = false)
+            OR (pb.purchase_status = 'completed' AND pb.transfer_decision_pending = TRUE)
+            OR (pb.purchase_status = 'completed' AND pb.user_rated = FALSE)
         );
     """
 
@@ -89,7 +92,9 @@ class PurchasesQueries:
             pb.owner_confirmed_pickup,
             pb.user_rated,
             pb.owner_rated,
-            pb.total_buy_cost AS cost
+            pb.total_buy_cost AS cost,
+            pb.transfer_decision_pending,
+            pb.ownership_transferred
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
         JOIN users u ON pb.user_id = u.user_id
@@ -97,7 +102,7 @@ class PurchasesQueries:
         WHERE b.owner_id = %s
         AND (
             pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
-            OR (pb.purchase_status = 'completed' AND pb.owner_rated = false)
+            OR (pb.purchase_status = 'completed' AND pb.owner_rated = FALSE)
         );
     """
 
@@ -183,13 +188,50 @@ class PurchasesQueries:
                 WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
                 THEN 'completed'::purchase_status_enum
                 ELSE 'awaiting_pickup_confirmation'::purchase_status_enum
+            END,
+            transfer_decision_pending = CASE
+                WHEN (owner_confirmed_pickup OR %s) AND (user_confirmed_pickup OR %s)
+                THEN TRUE
+                ELSE transfer_decision_pending
             END
         WHERE purchase_id = %s
         RETURNING
             purchase_id,
             purchase_status,
             user_confirmed_pickup,
-            owner_confirmed_pickup;
+            owner_confirmed_pickup,
+            transfer_decision_pending;
+    """
+
+    SUBMIT_TRANSFER_DECISION = """
+        UPDATE purchased_books
+        SET
+            ownership_transferred = %s,
+            transfer_decision_pending = FALSE
+        WHERE purchase_id = %s
+        AND purchase_status = 'completed'
+        AND transfer_decision_pending = TRUE
+        RETURNING
+            purchase_id,
+            purchase_status,
+            ownership_transferred,
+            transfer_decision_pending,
+            user_id,
+            book_id;
+    """
+
+    GET_PURCHASE_WITH_BOOK_DETAILS = """
+        SELECT
+            pb.purchase_id,
+            pb.user_id,
+            pb.book_id,
+            pb.ownership_transferred,
+            pb.transfer_decision_pending,
+            b.owner_id,
+            b.title
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        WHERE pb.purchase_id = %s;
     """
 
     CHECK_BOOK_AVAILABILITY = """
@@ -210,4 +252,38 @@ class PurchasesQueries:
         SELECT book_id
         FROM purchased_books
         WHERE purchase_id = %s;
+    """
+
+    PROCESS_TRANSFER_DECISION_YES = """
+        WITH updated_purchase AS (
+            UPDATE purchased_books
+            SET
+                ownership_transferred = TRUE,
+                transfer_decision_pending = FALSE
+            WHERE purchase_id = %s
+            AND purchase_status = 'completed'
+            AND transfer_decision_pending = TRUE
+            RETURNING book_id, user_id
+        )
+        UPDATE books
+        SET owner_id = (SELECT user_id FROM updated_purchase)
+        WHERE book_id = (SELECT book_id FROM updated_purchase)
+        RETURNING book_id, owner_id;
+    """
+
+    PROCESS_TRANSFER_DECISION_NO = """
+        WITH updated_purchase AS (
+            UPDATE purchased_books
+            SET
+                ownership_transferred = FALSE,
+                transfer_decision_pending = FALSE
+            WHERE purchase_id = %s
+            AND purchase_status = 'completed'
+            AND transfer_decision_pending = TRUE
+            RETURNING book_id
+        )
+        UPDATE books
+        SET is_soft_deleted = TRUE
+        WHERE book_id = (SELECT book_id FROM updated_purchase)
+        RETURNING book_id, is_soft_deleted;
     """

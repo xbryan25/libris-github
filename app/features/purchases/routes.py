@@ -202,3 +202,17 @@ def confirm_pickup(purchase_id: str) -> tuple[Response, int]:
 @jwt_required()
 def test_route():
     return jsonify({"message": "Purchases routes working!"}), 200
+
+
+@purchases_bp.route("/<purchase_id>/transfer-decision", methods=["POST"])
+@jwt_required()
+def process_transfer_decision(purchase_id: str) -> tuple[Response, int]:
+    """
+    Process the buyer's final decision on book ownership transfer.
+
+    Request Body:
+        {
+            "transfer_ownership": boolean
+        }
+    """
+    return PurchasesController.process_transfer_decision_controller(purchase_id)
