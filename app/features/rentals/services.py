@@ -484,7 +484,7 @@ class RentalsServices:
     @staticmethod
     def confirm_pickup(
         rental_id: str, confirmer_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Confirm book pickup by either the renter or owner.
         When both confirm, move to 'ongoing' status and set rent_start_date.
@@ -493,7 +493,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id_full(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None, None
 
             owner_id = rental.get("owner_id")
             renter_user_id = rental.get("user_id")
@@ -504,20 +504,30 @@ class RentalsServices:
 
             # Check if rental is in correct status
             if rent_status != "awaiting_pickup_confirmation":
-                return None, f"Cannot confirm pickup. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Cannot confirm pickup. Current status: {rent_status}",
+                    None,
+                    None,
+                )
 
             # Determine if confirmer is owner or renter
             is_owner = str(owner_id) == str(confirmer_user_id)
             is_renter = str(renter_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_renter:
-                return None, "Unauthorized: Only the renter or owner can confirm pickup"
+                return (
+                    None,
+                    "Unauthorized: Only the renter or owner can confirm pickup",
+                    None,
+                    None,
+                )
 
             # Update confirmation status
             if is_owner and owner_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
             if is_renter and user_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
 
             # Confirm pickup
             result = RentalsRepository.confirm_pickup(
@@ -525,23 +535,23 @@ class RentalsServices:
             )
 
             if not result:
-                return None, "Failed to confirm pickup"
+                return None, "Failed to confirm pickup", None, None
 
             logger.info(
                 f"Pickup confirmed for rental {rental_id} by "
                 f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
             )
 
-            return result, None
+            return result, None, owner_id, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in confirm_pickup: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
 
     @staticmethod
     def confirm_return(
         rental_id: str, confirmer_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Confirm book return by either the renter or owner.
         When both confirm, move to 'completed' status and return security deposit.
@@ -550,7 +560,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id_full_return(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None, None
 
             owner_id = rental.get("owner_id")
             renter_user_id = rental.get("user_id")
@@ -560,26 +570,36 @@ class RentalsServices:
 
             # Check if rental is in correct status
             if rent_status != "awaiting_return_confirmation":
-                return None, f"Cannot confirm return. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Cannot confirm return. Current status: {rent_status}",
+                    None,
+                    None,
+                )
 
             # Determine if confirmer is owner or renter
             is_owner = str(owner_id) == str(confirmer_user_id)
             is_renter = str(renter_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_renter:
-                return None, "Unauthorized: Only the renter or owner can confirm return"
+                return (
+                    None,
+                    "Unauthorized: Only the renter or owner can confirm return",
+                    None,
+                    None,
+                )
 
             # Update confirmation status
             if is_owner and owner_confirmed:
-                return None, "You have already confirmed return"
+                return None, "You have already confirmed return", None, None
             if is_renter and user_confirmed:
-                return None, "You have already confirmed return"
+                return None, "You have already confirmed return", None, None
 
             # Confirm return
             result = RentalsRepository.confirm_return(rental_id, is_owner, is_renter)
 
             if not result:
-                return None, "Failed to confirm return"
+                return None, "Failed to confirm return", None, None
 
             # Check if both users have now confirmed (status changed to 'rate_user')
             new_status = result.get("rent_status")
@@ -606,6 +626,8 @@ class RentalsServices:
                         return (
                             None,
                             "Failed to return security deposit. Owner may have insufficient funds.",
+                            None,
+                            None,
                         )
 
                     # Create transaction logs
@@ -642,9 +664,15 @@ class RentalsServices:
                 f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
             )
 
-            return result, None
+            return result, None, owner_id, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in confirm_return: {str(e)}")
             traceback.print_exc()
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
+
+    @staticmethod
+    def get_rental_details_for_pickup(rental_id: str) -> dict[str, Any] | None:
+        """Get the details of a rental from a rental_id"""
+
+        return RentalsRepository.get_rental_by_id_full(rental_id)

@@ -5,6 +5,8 @@ import datetime
 
 from .services import RentalsServices
 
+from .repository import RentalsRepository
+
 from ..notifications.services import NotificationServices
 
 from ..books.services import BookServices
@@ -12,6 +14,8 @@ from ..books.services import BookServices
 from ..users.services import UserServices
 
 from app.common.constants import NotificationMessages
+
+from app.exceptions.custom_exceptions import EntityNotFoundError
 
 
 class RentalsController:
@@ -229,6 +233,32 @@ class RentalsController:
             if error:
                 return jsonify({"error": error}), 400
 
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+
+            if book_id:
+                book_details = BookServices.get_book_details_service(book_id)
+
+                target_user_id = (
+                    str(book_details["owner_user_id"]) if book_details else None
+                )
+
+                notification_header = (
+                    NotificationMessages.RENTAL_REQUEST_APPROVED_HEADER
+                )
+                notification_message = (
+                    NotificationMessages.RENTAL_REQUEST_APPROVED_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}"
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    user_id,
+                    target_user_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+
             return (
                 jsonify(
                     {
@@ -321,7 +351,79 @@ class RentalsController:
             if not user_id:
                 return jsonify({"error": "Unauthorized"}), 401
 
-            result, error = RentalsServices.confirm_pickup(rental_id, user_id)
+            result, error, owner_id, renter_id = RentalsServices.confirm_pickup(
+                rental_id, user_id
+            )
+
+            if not result:
+                raise EntityNotFoundError(
+                    "There was an error in confirming book pickup."
+                )
+
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(owner_id)
+            renter_username = UserServices.get_username_service(renter_id)
+
+            # If both result["owner_confirmed_pickup"] and result["user_confirmed_pickup"] are both True,
+            # emit RENTAL_STARTED notification,
+            # otherwise emit CONFIRM_BOOK_PICKUP notification
+
+            if result["owner_confirmed_pickup"] and not result["user_confirmed_pickup"]:
+                notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
+                notification_message = (
+                    NotificationMessages.CONFIRM_BOOK_PICKUP_MESSAGE.format(
+                        username=owner_username,
+                        title=f"{book_details['title'] if book_details else None}",
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    renter_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            elif (
+                not result["owner_confirmed_pickup"] and result["user_confirmed_pickup"]
+            ):
+                notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
+                notification_message = (
+                    NotificationMessages.CONFIRM_BOOK_PICKUP_MESSAGE.format(
+                        username=renter_username,
+                        title=f"{book_details['title'] if book_details else None}",
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    renter_id,
+                    owner_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            else:
+                notification_header = NotificationMessages.RENTAL_STARTED_HEADER
+                notification_message = (
+                    NotificationMessages.RENTAL_STARTED_MESSAGE.format(
+                        username=renter_username,
+                        title=f"{book_details['title'] if book_details else None}",
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    renter_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
 
             if error:
                 return jsonify({"error": error}), 400
@@ -350,7 +452,94 @@ class RentalsController:
             if not user_id:
                 return jsonify({"error": "Unauthorized"}), 401
 
-            result, error = RentalsServices.confirm_return(rental_id, user_id)
+            result, error, owner_id, renter_id = RentalsServices.confirm_return(
+                rental_id, user_id
+            )
+
+            if not result:
+                raise EntityNotFoundError(
+                    "There was an error in confirming book return."
+                )
+
+            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(owner_id)
+            renter_username = UserServices.get_username_service(renter_id)
+
+            # If both result["owner_confirmed_return"] and result["user_confirmed_return"] are both True,
+            # emit RENTAL_COMPLETED notification,
+            # otherwise emit CONFIRM_BOOK_RETURN notification
+
+            if result["owner_confirmed_return"] and not result["user_confirmed_return"]:
+                notification_header = (
+                    NotificationMessages.RETURN_VERIFICATION_NEEDED_HEADER
+                )
+                notification_message = NotificationMessages.RETURN_VERIFICATION_NEEDED_RENTER_MESSAGE.format(
+                    username=owner_username,
+                    title=f"{book_details['title'] if book_details else None}",
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    renter_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            elif (
+                not result["owner_confirmed_return"] and result["user_confirmed_return"]
+            ):
+                notification_header = (
+                    NotificationMessages.RETURN_VERIFICATION_NEEDED_HEADER
+                )
+                notification_message = NotificationMessages.RETURN_VERIFICATION_NEEDED_OWNER_MESSAGE.format(
+                    username=renter_username,
+                    title=f"{book_details['title'] if book_details else None}",
+                )
+
+                NotificationServices.add_notification_service(
+                    renter_id,
+                    owner_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            else:
+                notification_header = NotificationMessages.RENTAL_COMPLETED_HEADER
+                notification_message_renter = (
+                    NotificationMessages.RETURN_COMPLETED_RENTER_MESSAGE.format(
+                        username=owner_username,
+                        title=f"{book_details['title'] if book_details else None}",
+                    )
+                )
+
+                notification_message_owner = (
+                    NotificationMessages.RETURN_COMPLETED_OWNER_MESSAGE.format(
+                        username=renter_username,
+                        title=f"{book_details['title'] if book_details else None}",
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    renter_id,
+                    "rent",
+                    notification_header,
+                    notification_message_renter,
+                )
+
+                NotificationServices.add_notification_service(
+                    renter_id,
+                    owner_id,
+                    "rent",
+                    notification_header,
+                    notification_message_owner,
+                )
 
             if error:
                 return jsonify({"error": error}), 400

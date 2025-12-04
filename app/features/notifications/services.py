@@ -11,33 +11,33 @@ class NotificationServices:
 
     @staticmethod
     def add_notification_service(
-        user_id, target_user_id, notification_type, header, message
+        sender_user_id, receiver_user_id, notification_type, header, message
     ) -> None:
         """
         add later
         """
 
         NotificationRepository.add_notification(
-            user_id, target_user_id, notification_type, header, message
+            sender_user_id, receiver_user_id, notification_type, header, message
         )
 
         unread_notifications_count = (
             NotificationServices.get_notifications_total_count_service(
-                target_user_id, {"read_status": "show only unread"}
+                receiver_user_id, {"read_status": "show only unread"}
             )
         )
 
         print(
             "-------------------------------------------------------emit to "
-            + str(target_user_id)
+            + str(receiver_user_id)
         )
 
-        print(f"data type of target_user_id {type(target_user_id)}")
+        print(f"data type of target_user_id {type(receiver_user_id)}")
 
         socketio.emit(
             "update_unread_notifications_count",
             {"unreadNotificationsCount": unread_notifications_count},
-            room=target_user_id,
+            room=receiver_user_id,
         )
 
     @staticmethod

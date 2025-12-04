@@ -7,7 +7,7 @@ class NotificationRepository:
 
     @staticmethod
     def add_notification(
-        user_id, target_user_id, notification_type, header, message
+        sender_user_id, receiver_user_id, notification_type, header, message
     ) -> None:
         """
         add later
@@ -21,7 +21,7 @@ class NotificationRepository:
                 columns="header, message, notification_type, sender_id, receiver_id",
                 placeholders="%s, %s, %s, %s, %s",
             ),
-            (header, message, notification_type, user_id, target_user_id),
+            (header, message, notification_type, sender_user_id, receiver_user_id),
         )
 
     @staticmethod
