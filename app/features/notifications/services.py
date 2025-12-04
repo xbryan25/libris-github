@@ -37,7 +37,7 @@ class NotificationServices:
         socketio.emit(
             "update_unread_notifications_count",
             {"unreadNotificationsCount": unread_notifications_count},
-            room=receiver_user_id,
+            room=str(receiver_user_id),
         )
 
     @staticmethod
