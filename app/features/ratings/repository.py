@@ -49,3 +49,12 @@ class RatingRepository:
         """Set owner_rated to TRUE for purchase."""
         db = current_app.extensions["db"]
         db.fetch_one(RatingQueries.UPDATE_PURCHASE_OWNER_RATED_FLAG, (purchase_id,))
+
+    @staticmethod
+    def check_existing_purchase_rating(purchase_id: str, rater_id: str) -> bool:
+        """Check if a rating already exists for a purchase."""
+        db = current_app.extensions["db"]
+        result = db.fetch_one(
+            RatingQueries.CHECK_EXISTING_RATING_PURCHASE, (purchase_id, rater_id)
+        )
+        return result.get("exists") if result else False

@@ -18,6 +18,21 @@ class RatingQueries:
         ) as exists
     """
 
+    CHECK_EXISTING_RATING_PURCHASE = """
+        SELECT EXISTS(
+            SELECT 1 FROM user_ratings r
+            JOIN purchased_books pb ON (
+                pb.purchase_id = %s
+                AND (
+                    (r.rater_id = pb.user_id AND r.rated_user_id = pb.original_owner_id)
+                    OR
+                    (r.rater_id = pb.original_owner_id AND r.rated_user_id = pb.user_id)
+                )
+            )
+            WHERE r.rater_id = %s
+        ) as exists
+    """
+
     GET_USER_RATINGS = """
         SELECT
             r.rating_id,
@@ -76,11 +91,10 @@ class RatingQueries:
         SELECT
             pb.purchase_id,
             pb.user_id,
-            b.owner_id,
+            pb.original_owner_id as owner_id,
             pb.purchase_status,
             pb.user_rated,
             pb.owner_rated
         FROM purchased_books pb
-        JOIN books b ON pb.book_id = b.book_id
         WHERE pb.purchase_id = %s
     """

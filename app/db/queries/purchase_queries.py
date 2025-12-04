@@ -4,6 +4,7 @@ class PurchasesQueries:
             purchase_id,
             user_id,
             book_id,
+            original_owner_id,
             purchase_status,
             reserved_at,
             reservation_expires_at,
@@ -17,7 +18,8 @@ class PurchasesQueries:
             gen_random_uuid(),
             %s,  -- user_id
             %s,  -- book_id
-            'pending',  -- purchase_status
+            (SELECT owner_id FROM books WHERE book_id = %s),
+            'pending',
             %s,  -- reserved_at
             %s,  -- reservation_expires_at
             %s,  -- total_buy_cost
@@ -99,7 +101,7 @@ class PurchasesQueries:
         JOIN books b ON pb.book_id = b.book_id
         JOIN users u ON pb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE b.owner_id = %s
+        WHERE pb.original_owner_id = %s
         AND (
             pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
             OR (pb.purchase_status = 'completed' AND pb.owner_rated = FALSE)
@@ -124,7 +126,8 @@ class PurchasesQueries:
             pb.user_id,
             pb.meetup_time_window,
             pb.total_buy_cost,
-            b.owner_id,
+            pb.original_owner_id,  -- ADDED
+            b.owner_id as current_owner_id,  -- RENAMED for clarity
             b.title
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
@@ -166,7 +169,8 @@ class PurchasesQueries:
             pb.total_buy_cost,
             pb.user_confirmed_pickup,
             pb.owner_confirmed_pickup,
-            b.owner_id,
+            pb.original_owner_id,
+            b.owner_id as current_owner_id,
             b.title
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
@@ -227,7 +231,8 @@ class PurchasesQueries:
             pb.book_id,
             pb.ownership_transferred,
             pb.transfer_decision_pending,
-            b.owner_id,
+            pb.original_owner_id,
+            b.owner_id as current_owner_id,
             b.title
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
@@ -243,7 +248,7 @@ class PurchasesQueries:
         JOIN books b ON pb.book_id = b.book_id
         JOIN users u ON pb.user_id = u.user_id
         WHERE b.book_id = %s
-        AND b.owner_id = %s
+        AND pb.original_owner_id = %s
         AND pb.purchase_status IN ('approved', 'awaiting_pickup_confirmation')
         LIMIT 1;
     """

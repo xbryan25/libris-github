@@ -76,63 +76,68 @@ class RatingServices:
     ) -> dict:
         """
         Submit a rating for a purchase.
-
-        Steps:
-        1. Get purchase info
-        2. Verify purchase is completed
-        3. Determine who is rating whom
-        4. Insert rating
-        5. Update flag (user_rated or owner_rated)
         """
+        try:
+            # Get purchase info
+            purchase = RatingRepository.get_purchase_info(purchase_id)
 
-        # Get purchase info
-        purchase = RatingRepository.get_purchase_info(purchase_id)
+            if not purchase:
+                return {"success": False, "error": "Purchase not found"}
 
-        if not purchase:
-            return {"success": False, "error": "Purchase not found"}
+            buyer_id = str(purchase["user_id"])
+            seller_id = str(purchase["owner_id"])  # Uses original_owner_id from query
 
-        # Check if completed
-        if purchase["purchase_status"] != "completed":
-            return {"success": False, "error": "Purchase must be completed to rate"}
+            # Check if already rated
+            existing_rating = RatingRepository.check_existing_purchase_rating(
+                purchase_id, rater_id
+            )
 
-        buyer_id = str(purchase["user_id"])
-        seller_id = str(purchase["owner_id"])
+            if existing_rating:
+                return {"success": False, "error": "Already rated this transaction"}
 
-        # Determine who rates whom
-        if from_perspective == "purchase":
-            # Buyer rating seller
-            if rater_id != buyer_id:
-                return {"success": False, "error": "Not authorized"}
+            # Determine who rates whom
+            if from_perspective == "purchase":
+                # Buyer rating seller
+                if rater_id != buyer_id:
+                    return {"success": False, "error": "Not authorized"}
 
-            if purchase["user_rated"]:
-                return {"success": False, "error": "Already rated"}
+                if purchase["user_rated"]:
+                    return {"success": False, "error": "Already rated"}
 
-            rated_user_id = seller_id
-            flag = "user_rated"
+                rated_user_id = seller_id
+                flag = "user_rated"
 
-        elif from_perspective == "sale":
-            # Seller rating buyer
-            if rater_id != seller_id:
-                return {"success": False, "error": "Not authorized"}
+            elif from_perspective == "sale":
+                # Seller rating buyer
+                if rater_id != seller_id:  # Now correctly compares with original seller
+                    return {"success": False, "error": "Not authorized"}
 
-            if purchase["owner_rated"]:
-                return {"success": False, "error": "Already rated"}
+                if purchase["owner_rated"]:
+                    return {"success": False, "error": "Already rated"}
 
-            rated_user_id = buyer_id
-            flag = "owner_rated"
-        else:
-            return {"success": False, "error": "Invalid perspective"}
+                rated_user_id = buyer_id
+                flag = "owner_rated"
+            else:
+                return {"success": False, "error": "Invalid perspective"}
 
-        # Insert rating
-        result = RatingRepository.insert_rating(rater_id, rated_user_id, score, comment)
+            # Insert rating
+            result = RatingRepository.insert_rating(
+                rater_id, rated_user_id, score, comment
+            )
 
-        if not result:
-            return {"success": False, "error": "Failed to insert rating"}
+            if not result:
+                return {"success": False, "error": "Failed to insert rating"}
 
-        # Update flag
-        if flag == "user_rated":
-            RatingRepository.update_purchase_user_rated_flag(purchase_id)
-        else:
-            RatingRepository.update_purchase_owner_rated_flag(purchase_id)
+            # Update flag
+            if flag == "user_rated":
+                RatingRepository.update_purchase_user_rated_flag(purchase_id)
+            else:
+                RatingRepository.update_purchase_owner_rated_flag(purchase_id)
 
-        return {"success": True, "message": "Rating submitted"}
+            return {"success": True, "message": "Rating submitted"}
+
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            return {"success": False, "error": str(e)}

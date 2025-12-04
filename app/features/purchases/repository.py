@@ -32,6 +32,7 @@ class PurchasesRepository:
         params = (
             purchase_data["user_id"],
             purchase_data["book_id"],
+            purchase_data["book_id"],  # Duplicate for the subquery to get owner_id
             purchase_data["reserved_at"],
             purchase_data["reservation_expires_at"],
             purchase_data["total_buy_cost"],

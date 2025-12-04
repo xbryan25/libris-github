@@ -213,14 +213,14 @@ class PurchasesServices:
             if not purchase:
                 return None, "Purchase not found"
 
-            owner_id = purchase.get("owner_id")
+            original_owner_id = purchase.get("original_owner_id")
             purchase_status = purchase.get("purchase_status")
             time_window = purchase.get("meetup_time_window", "")
             buyer_user_id = purchase.get("user_id")
             total_cost = int(purchase.get("total_buy_cost", 0))
 
             # Verify the approver is the owner
-            if str(owner_id) != str(approver_user_id):
+            if str(original_owner_id) != str(approver_user_id):
                 return (
                     None,
                     "Unauthorized: Only the book owner can approve this purchase",
@@ -236,7 +236,7 @@ class PurchasesServices:
             book_id = PurchasesRepository.get_book_id_from_purchase(purchase_id)
             if book_id:
                 active_purchase = PurchasesRepository.check_book_availability(
-                    book_id, str(owner_id)
+                    book_id, str(original_owner_id)
                 )
                 if active_purchase:
                     buyer_name = active_purchase.get("buyer_username", "another user")
@@ -258,7 +258,7 @@ class PurchasesServices:
             if not buyer_user_id:
                 return None, "Buyer user ID not found"
             buyer_user_id_str = str(buyer_user_id)
-            owner_user_id_str = str(owner_id)
+            owner_user_id_str = str(original_owner_id)
 
             # Deduct from buyer's reserved_amount and balance
             wallet_result = WalletRepository.deduct_from_reserved_and_balance(
@@ -351,13 +351,13 @@ class PurchasesServices:
             if not purchase:
                 return None, "Purchase not found"
 
-            owner_id = purchase.get("owner_id")
+            original_owner_id = purchase.get("original_owner_id")
             purchase_status = purchase.get("purchase_status")
             buyer_user_id = purchase.get("user_id")
             total_cost = int(purchase.get("total_buy_cost", 0))
 
             # Verify the rejecter is the owner
-            if str(owner_id) != str(rejecter_user_id):
+            if str(original_owner_id) != str(rejecter_user_id):
                 return (
                     None,
                     "Unauthorized: Only the book owner can reject this purchase",
@@ -484,7 +484,7 @@ class PurchasesServices:
             if not purchase:
                 return None, "Purchase not found"
 
-            owner_id = purchase.get("owner_id")
+            original_owner_id = purchase.get("original_owner_id")
             buyer_user_id = purchase.get("user_id")
             purchase_status = purchase.get("purchase_status")
             user_confirmed = purchase.get("user_confirmed_pickup", False)
@@ -495,7 +495,7 @@ class PurchasesServices:
                 return None, f"Cannot confirm pickup. Current status: {purchase_status}"
 
             # Determine if confirmer is owner or buyer
-            is_owner = str(owner_id) == str(confirmer_user_id)
+            is_owner = str(original_owner_id) == str(confirmer_user_id)
             is_buyer = str(buyer_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_buyer:
