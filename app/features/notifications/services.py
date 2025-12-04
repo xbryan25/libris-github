@@ -27,13 +27,6 @@ class NotificationServices:
             )
         )
 
-        print(
-            "-------------------------------------------------------emit to "
-            + str(receiver_user_id)
-        )
-
-        print(f"data type of target_user_id {type(receiver_user_id)}")
-
         socketio.emit(
             "update_unread_notifications_count",
             {"unreadNotificationsCount": unread_notifications_count},

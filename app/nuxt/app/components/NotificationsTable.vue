@@ -59,7 +59,7 @@ const columns: TableColumn<Notification>[] = [
           },
         },
         [
-          h('p', { class: 'font-bold min-w-40' }, row.original.header),
+          h('p', { class: 'font-bold min-w-50' }, row.original.header),
           h('p', { class: 'text-sm text-gray-500 truncate' }, row.original.message),
         ],
       );
@@ -171,10 +171,6 @@ const debouncedLoadEntities = useDebounceFn(async () => {
   await loadEntities();
 }, 700); // 700ms debounce
 
-const updatePagination = () => {
-  debouncedGetTotalEntityCount();
-};
-
 const getTotalEntityCount = async () => {
   const { totalCount }: { totalCount: number } = await useNotificationsTotalCount(readStatus.value);
 
@@ -247,6 +243,9 @@ watch(
   async () => {
     if (!clickedFromTable.value) {
       await debouncedLoadEntities();
+
+      selectedRows.value = new Set();
+      await debouncedGetTotalEntityCount();
     }
 
     clickedFromTable.value = false;
@@ -254,11 +253,11 @@ watch(
 );
 
 onMounted(() => {
-  updatePagination();
+  debouncedGetTotalEntityCount();
 
   debouncedLoadEntities();
 
-  window.addEventListener('resize', updatePagination);
+  window.addEventListener('resize', debouncedGetTotalEntityCount);
 });
 </script>
 

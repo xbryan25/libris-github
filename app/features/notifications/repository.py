@@ -44,7 +44,7 @@ class NotificationRepository:
                     table="notifications",
                     conditions="receiver_id = %s",
                     sort_field="created_at",
-                    sort_order="DESC",
+                    sort_order=params["order"],
                 ),
                 (user_id, params["rows_per_page"], offset),
             )
@@ -60,7 +60,7 @@ class NotificationRepository:
                     table="notifications",
                     conditions="receiver_id = %s AND is_read = %s",
                     sort_field="created_at",
-                    sort_order="DESC",
+                    sort_order=params["order"],
                 ),
                 (user_id, read_status_bool, params["rows_per_page"], offset),
             )
