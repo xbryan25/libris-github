@@ -4,7 +4,7 @@ from .repository import RatingRepository
 class RatingServices:
 
     @staticmethod
-    def submit_rating(
+    def submit_rental_rating(
         rental_id: str, rater_id: str, score: int, comment: str, from_perspective: str
     ) -> dict:
         """
@@ -98,20 +98,20 @@ class RatingServices:
         Submit a rating for a purchase.
         """
         try:
+            # ... [Validation logic matches your code] ...
+
             # Get purchase info
             purchase = RatingRepository.get_purchase_info(purchase_id)
-
             if not purchase:
                 return {"success": False, "error": "Purchase not found"}
 
             buyer_id = str(purchase["user_id"])
-            seller_id = str(purchase["owner_id"])  # Uses original_owner_id from query
+            seller_id = str(purchase["owner_id"])
 
             # Check if already rated
             existing_rating = RatingRepository.check_existing_purchase_rating(
                 purchase_id, rater_id
             )
-
             if existing_rating:
                 return {"success": False, "error": "Already rated this transaction"}
 
@@ -120,7 +120,6 @@ class RatingServices:
                 # Buyer rating seller
                 if rater_id != buyer_id:
                     return {"success": False, "error": "Not authorized"}
-
                 if purchase["user_rated"]:
                     return {"success": False, "error": "Already rated"}
 
@@ -129,9 +128,8 @@ class RatingServices:
 
             elif from_perspective == "sale":
                 # Seller rating buyer
-                if rater_id != seller_id:  # Now correctly compares with original seller
+                if rater_id != seller_id:
                     return {"success": False, "error": "Not authorized"}
-
                 if purchase["owner_rated"]:
                     return {"success": False, "error": "Already rated"}
 
@@ -152,6 +150,24 @@ class RatingServices:
 
             if not result:
                 return {"success": False, "error": "Failed to insert rating"}
+
+            try:
+                rater_trust_score = RatingRepository.get_user_trust_score(rater_id)
+                target_current_score = RatingRepository.get_user_trust_score(
+                    rated_user_id
+                )
+
+                impact = RatingServices._calculate_weighted_impact(
+                    score, rater_trust_score
+                )
+
+                # 3. Apply and Clamp
+                new_score = max(0, min(1000, target_current_score + impact))
+
+                RatingRepository.update_user_trust_score(rated_user_id, new_score)
+
+            except Exception as e:
+                print(f"Error updating trust score for purchase: {e}")
 
             # Update flag
             if flag == "user_rated":
