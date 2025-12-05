@@ -5,6 +5,18 @@ import datetime
 
 from .services import PurchasesServices
 
+# from .repository import PurchasesRepository
+
+from ..notifications.services import NotificationServices
+
+from ..books.services import BookServices
+
+from ..users.services import UserServices
+
+from app.common.constants import NotificationMessages
+
+from app.exceptions.custom_exceptions import EntityNotFoundError
+
 
 class PurchasesController:
 
@@ -92,6 +104,28 @@ class PurchasesController:
                 }
             )
 
+            book_details = BookServices.get_book_details_service(
+                purchase_data_json["book_id"]
+            )
+
+            owner_id = str(book_details["owner_user_id"]) if book_details else None
+
+            buyer_username = UserServices.get_username_service(current_user_id)
+
+            notification_header = NotificationMessages.PURCHASE_REQUEST_HEADER
+            notification_message = NotificationMessages.PURCHASE_REQUEST_MESSAGE.format(
+                username=buyer_username,
+                title=f"{book_details['title'] if book_details else None}",
+            )
+
+            NotificationServices.add_notification_service(
+                current_user_id,
+                owner_id,
+                "purchase",
+                notification_header,
+                notification_message,
+            )
+
             return resp, 201
 
         except Exception as e:
@@ -174,12 +208,37 @@ class PurchasesController:
             if not meetup_time:
                 return jsonify({"error": "Meetup time is required"}), 400
 
-            result, error = PurchasesServices.approve_purchase_request(
-                purchase_id, meetup_time, user_id
+            result, error, book_id, buyer_id = (
+                PurchasesServices.approve_purchase_request(
+                    purchase_id, meetup_time, user_id
+                )
             )
 
             if error:
                 return jsonify({"error": error}), 400
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.PURCHASE_REQUEST_APPROVED_HEADER
+            notification_message = (
+                NotificationMessages.PURCHASE_REQUEST_APPROVED_MESSAGE.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=owner_username,
+                )
+            )
+
+            NotificationServices.add_notification_service(
+                user_id,
+                buyer_id,
+                "purchase",
+                notification_header,
+                notification_message,
+            )
 
             return (
                 jsonify(

@@ -309,14 +309,12 @@ class RentalsController:
             if not meetup_time:
                 return jsonify({"error": "Meetup time is required"}), 400
 
-            result, error, renter_id = RentalsServices.approve_rental_request(
+            result, error, book_id, renter_id = RentalsServices.approve_rental_request(
                 rental_id, meetup_time, user_id
             )
 
             if error:
                 return jsonify({"error": error}), 400
-
-            book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
             if not book_id:
                 raise EntityNotFoundError(f"Book {book_id} does not exist.")
@@ -516,12 +514,12 @@ class RentalsController:
             # otherwise emit CONFIRM_BOOK_PICKUP notification
 
             if result["owner_confirmed_pickup"] and not result["user_confirmed_pickup"]:
-                notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
-                notification_message = (
-                    NotificationMessages.CONFIRM_BOOK_PICKUP_RENTER_MESSAGE.format(
-                        username=owner_username,
-                        title=f"{book_details['title'] if book_details else None}",
-                    )
+                notification_header = (
+                    NotificationMessages.RENTAL_CONFIRM_BOOK_PICKUP_HEADER
+                )
+                notification_message = NotificationMessages.RENTAL_CONFIRM_BOOK_PICKUP_RENTER_MESSAGE.format(
+                    username=owner_username,
+                    title=f"{book_details['title'] if book_details else None}",
                 )
 
                 NotificationServices.add_notification_service(
@@ -534,12 +532,12 @@ class RentalsController:
             elif (
                 not result["owner_confirmed_pickup"] and result["user_confirmed_pickup"]
             ):
-                notification_header = NotificationMessages.CONFIRM_BOOK_PICKUP_HEADER
-                notification_message = (
-                    NotificationMessages.CONFIRM_BOOK_PICKUP_OWNER_MESSAGE.format(
-                        username=renter_username,
-                        title=f"{book_details['title'] if book_details else None}",
-                    )
+                notification_header = (
+                    NotificationMessages.RENTAL_CONFIRM_BOOK_PICKUP_HEADER
+                )
+                notification_message = NotificationMessages.RENTAL_CONFIRM_BOOK_PICKUP_OWNER_MESSAGE.format(
+                    username=renter_username,
+                    title=f"{book_details['title'] if book_details else None}",
                 )
 
                 NotificationServices.add_notification_service(
@@ -618,9 +616,9 @@ class RentalsController:
 
             if result["owner_confirmed_return"] and not result["user_confirmed_return"]:
                 notification_header = (
-                    NotificationMessages.RETURN_VERIFICATION_NEEDED_HEADER
+                    NotificationMessages.RENTAL_RETURN_VERIFICATION_NEEDED_HEADER
                 )
-                notification_message = NotificationMessages.RETURN_VERIFICATION_NEEDED_RENTER_MESSAGE.format(
+                notification_message = NotificationMessages.RENTAL_RETURN_VERIFICATION_NEEDED_RENTER_MESSAGE.format(
                     username=owner_username,
                     title=f"{book_details['title'] if book_details else None}",
                 )
@@ -636,9 +634,9 @@ class RentalsController:
                 not result["owner_confirmed_return"] and result["user_confirmed_return"]
             ):
                 notification_header = (
-                    NotificationMessages.RETURN_VERIFICATION_NEEDED_HEADER
+                    NotificationMessages.RENTAL_RETURN_VERIFICATION_NEEDED_HEADER
                 )
-                notification_message = NotificationMessages.RETURN_VERIFICATION_NEEDED_OWNER_MESSAGE.format(
+                notification_message = NotificationMessages.RENTAL_RETURN_VERIFICATION_NEEDED_OWNER_MESSAGE.format(
                     username=renter_username,
                     title=f"{book_details['title'] if book_details else None}",
                 )

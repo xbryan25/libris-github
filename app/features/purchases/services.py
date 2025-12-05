@@ -190,7 +190,7 @@ class PurchasesServices:
     @staticmethod
     def approve_purchase_request(
         purchase_id: str, meetup_time: str, approver_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Approve a purchase request with meetup time.
         This will:
@@ -202,7 +202,7 @@ class PurchasesServices:
         """
         try:
             if not meetup_time:
-                return None, "Meetup time is required"
+                return None, "Meetup time is required", None, None
 
             # Convert 24-hour format to 12-hour format
             meetup_time_12hour = DateUtils.convert_to_12_hour_format(meetup_time)
@@ -211,7 +211,7 @@ class PurchasesServices:
             purchase = PurchasesRepository.get_purchase_by_id(purchase_id)
 
             if not purchase:
-                return None, "Purchase not found"
+                return None, "Purchase not found", None, None
 
             original_owner_id = purchase.get("original_owner_id")
             purchase_status = purchase.get("purchase_status")
@@ -224,6 +224,8 @@ class PurchasesServices:
                 return (
                     None,
                     "Unauthorized: Only the book owner can approve this purchase",
+                    None,
+                    None,
                 )
 
             # Check if purchase is in pending status
@@ -231,6 +233,8 @@ class PurchasesServices:
                 return (
                     None,
                     f"Purchase cannot be approved. Current status: {purchase_status}",
+                    None,
+                    None,
                 )
 
             book_id = PurchasesRepository.get_book_id_from_purchase(purchase_id)
@@ -242,8 +246,10 @@ class PurchasesServices:
                     buyer_name = active_purchase.get("buyer_username", "another user")
                     return (
                         None,
-                        f"This book is already approved for purchase to {buyer_name}."
+                        f"This book is already approved for purchase to {buyer_name}. "
                         f"Please reject other pending requests first.",
+                        None,
+                        None,
                     )
 
             # Validate meetup time against time window
@@ -252,11 +258,11 @@ class PurchasesServices:
             )
 
             if not is_valid:
-                return None, error_msg
+                return None, error_msg, None, None
 
             # Ensure buyer_user_id is a string
             if not buyer_user_id:
-                return None, "Buyer user ID not found"
+                return None, "Buyer user ID not found", None, None
             buyer_user_id_str = str(buyer_user_id)
             owner_user_id_str = str(original_owner_id)
 
@@ -266,13 +272,13 @@ class PurchasesServices:
             )
 
             if not wallet_result:
-                return None, "Insufficient funds or wallet not found"
+                return None, "Insufficient funds or wallet not found", None, None
 
             buyer_wallet_id = wallet_result.get("wallet_id")
 
             # Ensure wallet_id is a string
             if not buyer_wallet_id:
-                return None, "Wallet ID not found after deduction"
+                return None, "Wallet ID not found after deduction", None, None
             buyer_wallet_id_str = str(buyer_wallet_id)
 
             # Add purchase fee to owner's wallet
@@ -284,7 +290,7 @@ class PurchasesServices:
                 logger.error(
                     f"Failed to add purchase fee to owner wallet for purchase {purchase_id}"
                 )
-                return None, "Failed to credit owner's wallet"
+                return None, "Failed to credit owner's wallet", None, None
 
             owner_wallet_id = str(owner_wallet_result.get("wallet_id"))
 
@@ -318,7 +324,7 @@ class PurchasesServices:
             )
 
             if not result:
-                return None, "Failed to update purchase status"
+                return None, "Failed to update purchase status", None, None
 
             logger.info(
                 f"Purchase {purchase_id} approved. "
@@ -328,12 +334,12 @@ class PurchasesServices:
                 f"Owner transaction: {owner_transaction.get('transaction_id') if owner_transaction else 'N/A'}"
             )
 
-            return result, None
+            return result, None, book_id, buyer_user_id
 
         except Exception as e:
             logger.error(f"Error in approve_purchase_request: {str(e)}")
             traceback.print_exc()
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
 
     @staticmethod
     def reject_purchase_request(

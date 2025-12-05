@@ -2,6 +2,14 @@ from flask import current_app
 from datetime import datetime, timezone
 import logging
 
+from ..features.notifications.services import NotificationServices
+
+from ..features.books.services import BookServices
+
+from ..features.users.services import UserServices
+
+from app.common.constants import NotificationMessages
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +52,7 @@ class PurchaseCleanupTask:
 
             for purchase in expired_purchases:
                 purchase_id = purchase.get("purchase_id")
-                user_id = str(purchase.get("user_id"))
+                buyer_id = str(purchase.get("user_id"))
                 total_cost = int(purchase.get("total_buy_cost", 0))
 
                 try:
@@ -60,13 +68,13 @@ class PurchaseCleanupTask:
                     """
 
                     wallet_result = db.fetch_one(
-                        release_query, (total_cost, now, user_id, total_cost)
+                        release_query, (total_cost, now, buyer_id, total_cost)
                     )
 
                     if not wallet_result:
                         logger.warning(
                             f"Failed to release funds for expired purchase {purchase_id}. "
-                            f"User: {user_id}, Amount: {total_cost}"
+                            f"User: {buyer_id}, Amount: {total_cost}"
                         )
 
                     # Delete the purchase entry
@@ -79,11 +87,39 @@ class PurchaseCleanupTask:
 
                     delete_result = db.fetch_one(delete_query, (purchase_id,))
 
+                    book_details = BookServices.get_book_details_service(
+                        purchase.get("book_id")
+                    )
+
+                    owner_id = (
+                        str(book_details["owner_user_id"]) if book_details else None
+                    )
+
+                    owner_username = UserServices.get_username_service(owner_id)
+
+                    notification_header = (
+                        NotificationMessages.PURCHASE_REQUEST_EXPIRED_HEADER
+                    )
+                    notification_message = (
+                        NotificationMessages.PURCHASE_REQUEST_EXPIRED_MESSAGE.format(
+                            title=f"{book_details['title'] if book_details else None}",
+                            username=owner_username,
+                        )
+                    )
+
+                    NotificationServices.add_notification_service(
+                        owner_id,
+                        buyer_id,
+                        "rent",
+                        notification_header,
+                        notification_message,
+                    )
+
                     if delete_result:
                         cleaned_count += 1
                         logger.info(
                             f"Cleaned up expired purchase {purchase_id}. "
-                            f"Released {total_cost} readits for user {user_id}."
+                            f"Released {total_cost} readits for user {buyer_id}."
                         )
                     else:
                         error_count += 1

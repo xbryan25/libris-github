@@ -48,22 +48,20 @@ class RentalStatusTask:
                         updated_rental["user_id"]
                     )
 
-                    notification_header = NotificationMessages.PICKUP_REMINDER_HEADER
-
-                    notification_message_renter = (
-                        NotificationMessages.PICKUP_REMINDER_RENTER_MESSAGE.format(
-                            title=f"{book_details['title'] if book_details else None}",
-                            username=owner_username,
-                            meetup_location=updated_rental["meetup_location"],
-                        )
+                    notification_header = (
+                        NotificationMessages.RENTAL_PICKUP_REMINDER_HEADER
                     )
 
-                    notification_message_owner = (
-                        NotificationMessages.PICKUP_REMINDER_OWNER_MESSAGE.format(
-                            title=f"{book_details['title'] if book_details else None}",
-                            username=renter_username,
-                            meetup_location=updated_rental["meetup_location"],
-                        )
+                    notification_message_renter = NotificationMessages.RENTAL_PICKUP_REMINDER_RENTER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        username=owner_username,
+                        meetup_location=updated_rental["meetup_location"],
+                    )
+
+                    notification_message_owner = NotificationMessages.RENTAL_PICKUP_REMINDER_OWNER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        username=renter_username,
+                        meetup_location=updated_rental["meetup_location"],
                     )
 
                     # Send notification to renter
@@ -130,22 +128,20 @@ class RentalStatusTask:
                         updated_rental["user_id"]
                     )
 
-                    notification_header = NotificationMessages.RETURN_REMINDER_HEADER
-
-                    notification_message_renter = (
-                        NotificationMessages.RETURN_REMINDER_RENTER_MESSAGE.format(
-                            title=f"{book_details['title'] if book_details else None}",
-                            meetup_location=updated_rental["meetup_location"],
-                            username=owner_username,
-                        )
+                    notification_header = (
+                        NotificationMessages.RENTAL_RETURN_REMINDER_HEADER
                     )
 
-                    notification_message_owner = (
-                        NotificationMessages.RETURN_REMINDER_OWNER_MESSAGE.format(
-                            title=f"{book_details['title'] if book_details else None}",
-                            meetup_location=updated_rental["meetup_location"],
-                            username=renter_username,
-                        )
+                    notification_message_renter = NotificationMessages.RENTAL_RETURN_REMINDER_RENTER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        meetup_location=updated_rental["meetup_location"],
+                        username=owner_username,
+                    )
+
+                    notification_message_owner = NotificationMessages.RENTAL_RETURN_REMINDER_OWNER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        meetup_location=updated_rental["meetup_location"],
+                        username=renter_username,
                     )
 
                     # Send notification to renter
