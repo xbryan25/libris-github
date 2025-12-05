@@ -42,7 +42,7 @@ class RatingControllers:
                 return jsonify({"error": "Invalid 'from' parameter"}), 400
 
             # Submit
-            result = RatingServices.submit_rating(
+            result = RatingServices.submit_rental_rating(
                 rental_id, rater_id, score, comment, from_perspective
             )
 
