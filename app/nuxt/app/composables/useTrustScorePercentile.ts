@@ -23,8 +23,7 @@ export const useTrustScorePercentile = (userId?: string) => {
                 ? `${API_URL}/api/users/trust-score-percentile/${userId}`
                 : `${API_URL}/api/users/trust-score-percentile`
 
-            console.log('Making API call to:', endpoint)
-            const response = await $apiFetch(endpoint, {
+            const data = await $apiFetch<TrustScorePercentile>(endpoint, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -32,12 +31,8 @@ export const useTrustScorePercentile = (userId?: string) => {
                 }
             })
 
-            console.log('Response status:', response.status)
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+            percentile.value = data
 
-            const res = await response.json()
-            console.log('API response:', res)
-            percentile.value = res
         } catch (e: any) {
             console.error('Trust score percentile error:', e)
             error.value = e?.message || 'Failed to fetch trust score percentile'
