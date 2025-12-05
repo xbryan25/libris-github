@@ -57,7 +57,14 @@ class RatingServices:
             return {"success": False, "error": "Invalid perspective"}
 
         # Insert rating
-        result = RatingRepository.insert_rating(rater_id, rated_user_id, score, comment)
+        result = RatingRepository.insert_rating(
+            rater_id,
+            rated_user_id,
+            score,
+            comment,
+            rental_id=rental_id,
+            purchase_id=None,
+        )
 
         if not result:
             return {"success": False, "error": "Failed to insert rating"}
@@ -122,7 +129,12 @@ class RatingServices:
 
             # Insert rating
             result = RatingRepository.insert_rating(
-                rater_id, rated_user_id, score, comment
+                rater_id,
+                rated_user_id,
+                score,
+                comment,
+                rental_id=None,
+                purchase_id=purchase_id,
             )
 
             if not result:

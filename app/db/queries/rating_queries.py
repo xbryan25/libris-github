@@ -1,35 +1,24 @@
 class RatingQueries:
 
     INSERT_RATING = """
-        INSERT INTO user_ratings (rater_id, rated_user_id, score, comment)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO user_ratings (rater_id, rated_user_id, score, comment, rental_id, purchase_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
         RETURNING rating_id
     """
 
     CHECK_EXISTING_RATING = """
         SELECT EXISTS(
             SELECT 1 FROM user_ratings r
-            JOIN rented_books rb ON (
-                (r.rater_id = rb.user_id AND r.rated_user_id = (SELECT owner_id FROM books WHERE book_id = rb.book_id))
-                OR
-                (r.rater_id = (SELECT owner_id FROM books WHERE book_id = rb.book_id) AND r.rated_user_id = rb.user_id)
-            )
-            WHERE rb.rental_id = %s AND r.rater_id = %s
+            WHERE r.rental_id = %s
+            AND r.rater_id = %s
         ) as exists
     """
 
     CHECK_EXISTING_RATING_PURCHASE = """
         SELECT EXISTS(
             SELECT 1 FROM user_ratings r
-            JOIN purchased_books pb ON (
-                pb.purchase_id = %s
-                AND (
-                    (r.rater_id = pb.user_id AND r.rated_user_id = pb.original_owner_id)
-                    OR
-                    (r.rater_id = pb.original_owner_id AND r.rated_user_id = pb.user_id)
-                )
-            )
-            WHERE r.rater_id = %s
+            WHERE r.purchase_id = %s
+            AND r.rater_id = %s
         ) as exists
     """
 

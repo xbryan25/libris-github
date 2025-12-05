@@ -1,5 +1,6 @@
 from flask import current_app
 from app.db.queries.rating_queries import RatingQueries
+from typing import Optional
 
 
 class RatingRepository:
@@ -12,12 +13,18 @@ class RatingRepository:
 
     @staticmethod
     def insert_rating(
-        rater_id: str, rated_user_id: str, score: int, comment: str
+        rater_id: str,
+        rated_user_id: str,
+        score: int,
+        comment: str,
+        rental_id: Optional[str] = None,
+        purchase_id: Optional[str] = None,
     ) -> dict | None:
         """Insert a rating into database."""
         db = current_app.extensions["db"]
         return db.fetch_one(
-            RatingQueries.INSERT_RATING, (rater_id, rated_user_id, score, comment)
+            RatingQueries.INSERT_RATING,
+            (rater_id, rated_user_id, score, comment, rental_id, purchase_id),
         )
 
     @staticmethod
