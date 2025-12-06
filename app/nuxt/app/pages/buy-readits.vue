@@ -24,7 +24,7 @@ const setOpenConfirmPurchaseModal = (packName: string) => {
 watch(
   () => paymentSuccess.value,
   (amount) => {
-    if (amount) {
+    if (amount !== null && amount !== undefined) {
       currentWalletBalance.value = currentWalletBalance.value + amount;
     }
   },

@@ -48,6 +48,7 @@ watch(activeTab, (val) => {
           My Purchases
         </h1>
         <p class="text-muted">Manage your purchasing and selling activities</p>
+        <<<<<<< HEAD
       </div>
       <div class="flex-1 flex flex-col items-end gap-1">
         <p class="text-muted">Your Readits</p>
@@ -57,6 +58,7 @@ watch(activeTab, (val) => {
           <h1 class="font-bold text-3xl text-accent">1</h1>
           <!-- Placeholder value -->
         </div>
+        ======= >>>>>>> 5f093a2e01bddf1aabd665d8ae6548a2176d8d84
       </div>
     </div>
 
@@ -85,6 +87,7 @@ watch(activeTab, (val) => {
 
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold text-foreground">{{ headerText }}</h2>
+      <<<<<<< HEAD
       <NuxtLink
         :to="{ path: '/purchases/history', query: { activeTab } }"
         class="text-foreground font-medium flex items-center gap-1 cursor-pointer"
@@ -92,6 +95,12 @@ watch(activeTab, (val) => {
         {{ activeTab === 'selling' ? 'Sell' : 'Purchase' }} history
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
       </NuxtLink>
+      =======
+      <button class="text-foreground font-medium hover:text-accent flex items-center gap-1">
+        History
+        <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
+      </button>
+      >>>>>>> 5f093a2e01bddf1aabd665d8ae6548a2176d8d84
     </div>
 
     <!-- Pass activeTab to PurchasesSection as prop -->
