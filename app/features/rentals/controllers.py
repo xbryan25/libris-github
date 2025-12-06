@@ -56,18 +56,22 @@ class RentalsController:
             current_user_id = get_jwt_identity()
             rental_data_json = request.get_json()
 
+            print("\n\n\n--=====================")
+            print(rental_data_json)
+
             if not rental_data_json:
                 return jsonify({"error": "Request body is required."}), 400
 
             required_fields = [
-                "book_id",
-                "total_rent_cost",
-                "rental_duration_days",
-                "meetup_time_window",
-                "meetup_location",
-                "meetup_date",
-                "actual_rate",
-                "actual_deposit",
+                "bookId",
+                "totalRentCost",
+                "rentalDurationDays",
+                "meetupTimeWindow",
+                "meetupLocation",
+                "meetupDate",
+                "actualRate",
+                "actualDeposit",
+                "ownerUserId",
             ]
 
             missing_fields = [
@@ -88,16 +92,17 @@ class RentalsController:
 
             rental_data = {
                 "user_id": current_user_id,
-                "book_id": rental_data_json["book_id"],
+                "book_id": rental_data_json["bookId"],
                 "reserved_at": reserved_at,
                 "reservation_expires_at": reservation_expires_at,
-                "total_rent_cost": rental_data_json["total_rent_cost"],
-                "rental_duration_days": rental_data_json["rental_duration_days"],
-                "meetup_time_window": rental_data_json["meetup_time_window"],
-                "meetup_location": rental_data_json["meetup_location"],
-                "meetup_date": rental_data_json["meetup_date"],
-                "actual_rate": rental_data_json["actual_rate"],
-                "actual_deposit": rental_data_json["actual_deposit"],
+                "total_rent_cost": rental_data_json["totalRentCost"],
+                "rental_duration_days": rental_data_json["rentalDurationDays"],
+                "meetup_time_window": rental_data_json["meetupTimeWindow"],
+                "meetup_location": rental_data_json["meetupLocation"],
+                "meetup_date": rental_data_json["meetupDate"],
+                "actual_rate": rental_data_json["actualRate"],
+                "actual_deposit": rental_data_json["actualDeposit"],
+                "original_owner_id": rental_data_json["ownerUserId"],
             }
 
             result = RentalsServices.create_rental_service(rental_data)
@@ -120,9 +125,7 @@ class RentalsController:
                 }
             )
 
-            book_details = BookServices.get_book_details_service(
-                rental_data_json["book_id"]
-            )
+            book_details = BookServices.get_book_details_service(rental_data["book_id"])
 
             owner_id = str(book_details["owner_user_id"]) if book_details else None
 

@@ -620,6 +620,7 @@ class RentalsServices:
             - meetup_time_window
             - meetup_location
             - meetup_date
+            - original_user_id
 
         Returns:
             dict: The inserted rental record if successful, None otherwise.

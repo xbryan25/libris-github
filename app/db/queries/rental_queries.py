@@ -3,6 +3,7 @@ class RentalsQueries:
         INSERT INTO rented_books (
             rental_id,
             user_id,
+            original_owner_id,
             book_id,
             rent_status,
             reserved_at,
@@ -19,6 +20,7 @@ class RentalsQueries:
         VALUES (
             gen_random_uuid(),
             %s,  -- user_id
+            %s, -- original_owner_id
             %s,  -- book_id
             'pending',  -- rent_status
             %s,  -- reserved_at
