@@ -157,7 +157,7 @@ class PurchasesQueries:
             (meetup_date + meetup_time::time)
             >= (NOW() AT TIME ZONE 'UTC' + INTERVAL '8 hours')
         )
-        RETURNING purchase_id, user_id, book_id;
+        RETURNING purchase_id, user_id, book_id, meetup_location;
     """
 
     GET_PURCHASE_BY_ID_FULL = """

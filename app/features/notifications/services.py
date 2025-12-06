@@ -27,9 +27,17 @@ class NotificationServices:
             )
         )
 
+        socketio.start_background_task(
+            NotificationServices._emit_notification,
+            receiver_user_id,
+            unread_notifications_count,
+        )
+
+    @staticmethod
+    def _emit_notification(receiver_user_id, count):
         socketio.emit(
             "update_unread_notifications_count",
-            {"unreadNotificationsCount": unread_notifications_count},
+            {"unreadNotificationsCount": count},
             room=str(receiver_user_id),
         )
 

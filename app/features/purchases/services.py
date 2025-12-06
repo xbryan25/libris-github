@@ -344,7 +344,7 @@ class PurchasesServices:
     @staticmethod
     def reject_purchase_request(
         purchase_id: str, reason: str, rejecter_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None]:
         """
         Reject a purchase request.
         This will:
@@ -355,7 +355,7 @@ class PurchasesServices:
             purchase = PurchasesRepository.get_purchase_by_id(purchase_id)
 
             if not purchase:
-                return None, "Purchase not found"
+                return None, "Purchase not found", None
 
             original_owner_id = purchase.get("original_owner_id")
             purchase_status = purchase.get("purchase_status")
@@ -367,16 +367,18 @@ class PurchasesServices:
                 return (
                     None,
                     "Unauthorized: Only the book owner can reject this purchase",
+                    None,
                 )
 
             if purchase_status != "pending":
                 return (
                     None,
                     f"Purchase cannot be rejected. Current status: {purchase_status}",
+                    None,
                 )
 
             if not buyer_user_id:
-                return None, "Buyer user ID not found"
+                return None, "Buyer user ID not found", None
             buyer_user_id_str = str(buyer_user_id)
 
             wallet_result = WalletRepository.deduct_from_reserved_amount(
@@ -389,12 +391,6 @@ class PurchasesServices:
                     f"User: {buyer_user_id_str}, Amount: {total_cost}"
                 )
 
-            # Delete the purchase entry
-            delete_result = PurchasesRepository.delete_purchase(purchase_id)
-
-            if not delete_result:
-                return None, "Failed to delete purchase entry"
-
             logger.info(
                 f"Purchase {purchase_id} rejected by owner {rejecter_user_id}. "
                 f"Reason: {reason}. "
@@ -402,15 +398,19 @@ class PurchasesServices:
                 f"Purchase entry deleted."
             )
 
-            return {
-                "purchase_id": purchase_id,
-                "reason": reason,
-                "released_amount": total_cost,
-            }, None
+            return (
+                {
+                    "purchase_id": purchase_id,
+                    "reason": reason,
+                    "released_amount": total_cost,
+                },
+                None,
+                buyer_user_id,
+            )
 
         except Exception as e:
             logger.error(f"Error in reject_purchase_request: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None
 
     @staticmethod
     def cancel_purchase_request(
@@ -479,7 +479,7 @@ class PurchasesServices:
     @staticmethod
     def confirm_pickup(
         purchase_id: str, confirmer_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Confirm book pickup by either the buyer or owner.
         When both confirm, move to 'completed' status.
@@ -488,7 +488,7 @@ class PurchasesServices:
             purchase = PurchasesRepository.get_purchase_by_id_full(purchase_id)
 
             if not purchase:
-                return None, "Purchase not found"
+                return None, "Purchase not found", None, None
 
             original_owner_id = purchase.get("original_owner_id")
             buyer_user_id = purchase.get("user_id")
@@ -498,37 +498,47 @@ class PurchasesServices:
 
             # Check if purchase is in correct status
             if purchase_status != "awaiting_pickup_confirmation":
-                return None, f"Cannot confirm pickup. Current status: {purchase_status}"
+                return (
+                    None,
+                    f"Cannot confirm pickup. Current status: {purchase_status}",
+                    None,
+                    None,
+                )
 
             # Determine if confirmer is owner or buyer
             is_owner = str(original_owner_id) == str(confirmer_user_id)
             is_buyer = str(buyer_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_buyer:
-                return None, "Unauthorized: Only the buyer or owner can confirm pickup"
+                return (
+                    None,
+                    "Unauthorized: Only the buyer or owner can confirm pickup",
+                    None,
+                    None,
+                )
 
             # Update confirmation status
             if is_owner and owner_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
             if is_buyer and user_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
 
             # Confirm pickup
             result = PurchasesRepository.confirm_pickup(purchase_id, is_owner, is_buyer)
 
             if not result:
-                return None, "Failed to confirm pickup"
+                return None, "Failed to confirm pickup", None, None
 
             logger.info(
                 f"Pickup confirmed for purchase {purchase_id} by "
                 f"{'owner' if is_owner else 'buyer'} {confirmer_user_id}"
             )
 
-            return result, None
+            return result, None, original_owner_id, buyer_user_id
 
         except Exception as e:
             logger.error(f"Error in confirm_pickup: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
 
     @staticmethod
     def process_transfer_decision_service(

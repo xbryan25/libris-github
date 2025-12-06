@@ -110,7 +110,7 @@ class PurchaseCleanupTask:
                     NotificationServices.add_notification_service(
                         owner_id,
                         buyer_id,
-                        "rent",
+                        "purchase",
                         notification_header,
                         notification_message,
                     )

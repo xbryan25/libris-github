@@ -5,7 +5,7 @@ import datetime
 
 from .services import PurchasesServices
 
-# from .repository import PurchasesRepository
+from .repository import PurchasesRepository
 
 from ..notifications.services import NotificationServices
 
@@ -273,12 +273,41 @@ class PurchasesController:
 
             reason = data.get("reason", "No reason provided")
 
-            result, error = PurchasesServices.reject_purchase_request(
+            result, error, buyer_id = PurchasesServices.reject_purchase_request(
                 purchase_id, reason, user_id
             )
 
             if error:
                 return jsonify({"error": error}), 400
+
+            book_id = PurchasesRepository.get_book_id_from_purchase(purchase_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.PURCHASE_REQUEST_REJECTED_HEADER
+            notification_message = (
+                NotificationMessages.PURCHASE_REQUEST_REJECTED_MESSAGE.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=owner_username,
+                    reason=reason,
+                )
+            )
+
+            # Delete the purchase entry before sending the notification
+            PurchasesRepository.delete_purchase(purchase_id)
+
+            NotificationServices.add_notification_service(
+                user_id,
+                buyer_id,
+                "purchase",
+                notification_header,
+                notification_message,
+            )
 
             return (
                 jsonify(
@@ -311,6 +340,36 @@ class PurchasesController:
             if error:
                 return jsonify({"error": error}), 400
 
+            book_id = PurchasesRepository.get_book_id_from_purchase(purchase_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_id = str(book_details["owner_user_id"]) if book_details else None
+
+            renter_username = UserServices.get_username_service(user_id)
+
+            notification_header = NotificationMessages.PURCHASE_REQUEST_CANCELLED_HEADER
+            notification_message = (
+                NotificationMessages.PURCHASE_REQUEST_CANCELLED_MESSAGE.format(
+                    title=f"{book_details['title'] if book_details else None}",
+                    username=renter_username,
+                )
+            )
+
+            # Delete the rental entry before sending the notification
+            PurchasesRepository.delete_purchase(purchase_id)
+
+            NotificationServices.add_notification_service(
+                user_id,
+                owner_id,
+                "rent",
+                notification_header,
+                notification_message,
+            )
+
             return (
                 jsonify(
                     {
@@ -334,10 +393,97 @@ class PurchasesController:
             if not user_id:
                 return jsonify({"error": "Unauthorized"}), 401
 
-            result, error = PurchasesServices.confirm_pickup(purchase_id, user_id)
+            result, error, owner_id, buyer_id = PurchasesServices.confirm_pickup(
+                purchase_id, user_id
+            )
+
+            if not result:
+                raise EntityNotFoundError(
+                    "There was an error in confirming book pickup."
+                )
 
             if error:
                 return jsonify({"error": error}), 400
+
+            book_id = PurchasesRepository.get_book_id_from_purchase(purchase_id)
+
+            if not book_id:
+                raise EntityNotFoundError(f"Book {book_id} does not exist.")
+
+            book_details = BookServices.get_book_details_service(book_id)
+
+            owner_username = UserServices.get_username_service(owner_id)
+            buyer_username = UserServices.get_username_service(buyer_id)
+
+            # If both result["owner_confirmed_pickup"] and result["user_confirmed_pickup"] are both True,
+            # emit PURCHASE_COMPLETED notification,
+            # otherwise emit PURCHASE_CONFIRM_BOOK_PICKUP notification
+
+            if result["owner_confirmed_pickup"] and not result["user_confirmed_pickup"]:
+                notification_header = (
+                    NotificationMessages.PURCHASE_CONFIRM_BOOK_PICKUP_HEADER
+                )
+                notification_message = NotificationMessages.PURCHASE_CONFIRM_BOOK_PICKUP_BUYER_MESSAGE.format(
+                    username=owner_username,
+                    title=f"{book_details['title'] if book_details else None}",
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    buyer_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            elif (
+                not result["owner_confirmed_pickup"] and result["user_confirmed_pickup"]
+            ):
+                notification_header = (
+                    NotificationMessages.PURCHASE_CONFIRM_BOOK_PICKUP_HEADER
+                )
+                notification_message = NotificationMessages.PURCHASE_CONFIRM_BOOK_PICKUP_OWNER_MESSAGE.format(
+                    username=buyer_username,
+                    title=f"{book_details['title'] if book_details else None}",
+                )
+
+                NotificationServices.add_notification_service(
+                    buyer_id,
+                    owner_id,
+                    "rent",
+                    notification_header,
+                    notification_message,
+                )
+            else:
+                notification_header = NotificationMessages.PURCHASE_COMPLETED_HEADER
+                notification_message_buyer = (
+                    NotificationMessages.PURCHASE_COMPLETED_BUYER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        username=owner_username,
+                    )
+                )
+
+                notification_message_owner = (
+                    NotificationMessages.PURCHASE_COMPLETED_OWNER_MESSAGE.format(
+                        title=f"{book_details['title'] if book_details else None}",
+                        username=buyer_username,
+                    )
+                )
+
+                NotificationServices.add_notification_service(
+                    owner_id,
+                    buyer_id,
+                    "rent",
+                    notification_header,
+                    notification_message_buyer,
+                )
+
+                NotificationServices.add_notification_service(
+                    buyer_id,
+                    owner_id,
+                    "rent",
+                    notification_header,
+                    notification_message_owner,
+                )
 
             return (
                 jsonify(

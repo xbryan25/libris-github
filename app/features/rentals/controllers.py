@@ -376,6 +376,9 @@ class RentalsController:
                 rental_id, reason, user_id
             )
 
+            if error:
+                return jsonify({"error": error}), 400
+
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
             if not book_id:
@@ -405,9 +408,6 @@ class RentalsController:
                 notification_message,
             )
 
-            if error:
-                return jsonify({"error": error}), 400
-
             return (
                 jsonify(
                     {
@@ -433,6 +433,9 @@ class RentalsController:
                 return jsonify({"error": "Unauthorized"}), 401
 
             result, error = RentalsServices.cancel_rental_request(rental_id, user_id)
+
+            if error:
+                return jsonify({"error": error}), 400
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
@@ -463,9 +466,6 @@ class RentalsController:
                 notification_header,
                 notification_message,
             )
-
-            if error:
-                return jsonify({"error": error}), 400
 
             return (
                 jsonify(
@@ -498,6 +498,9 @@ class RentalsController:
                 raise EntityNotFoundError(
                     "There was an error in confirming book pickup."
                 )
+
+            if error:
+                return jsonify({"error": error}), 400
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
@@ -564,9 +567,6 @@ class RentalsController:
                     notification_message,
                 )
 
-            if error:
-                return jsonify({"error": error}), 400
-
             return (
                 jsonify(
                     {
@@ -599,6 +599,9 @@ class RentalsController:
                 raise EntityNotFoundError(
                     "There was an error in confirming book return."
                 )
+
+            if error:
+                return jsonify({"error": error}), 400
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
 
@@ -660,7 +663,7 @@ class RentalsController:
                 notification_message_owner = (
                     NotificationMessages.RETURN_COMPLETED_OWNER_MESSAGE.format(
                         title=f"{book_details['title'] if book_details else None}",
-                        username=owner_username,
+                        username=renter_username,
                     )
                 )
 
@@ -679,9 +682,6 @@ class RentalsController:
                     notification_header,
                     notification_message_owner,
                 )
-
-            if error:
-                return jsonify({"error": error}), 400
 
             return (
                 jsonify(
