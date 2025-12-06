@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 export type Sale = {
   purchase_id: string
   purchase_status: string
+  original_owner_id: string
+  user_id: string
   book_id: string
   title: string
   author: string
@@ -69,6 +71,27 @@ export const useUserSales = () => {
     }
   }
 
+  const fetchUserCompletedSales = async (sortOrder: string, cardsPerPage: number, pageNumber: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $apiFetch<Sale[]>(`${API_URL}/api/purchases/my-completed-sales`, {
+        credentials: 'include',
+        query: {
+          sortOrder, cardsPerPage, pageNumber
+        }
+      })
+      sales.value = Array.isArray(res) ? res : []
+
+      console.log(sales.value)
+    } catch (e: any) {
+      sales.value = []
+      console.log('No sales found or error fetching sales:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const statusBadge = computed(() => (status: string): StatusBadge => {
     const statusConfig: Record<string, StatusBadge> = {
       pending: { label: 'Requested', color: 'bg-yellow-500', progress: 1 },
@@ -111,6 +134,7 @@ export const useUserSales = () => {
     loading,
     error,
     fetchUserSales,
+    fetchUserCompletedSales,
     statusBadge,
     progressSteps,
     filteredSales,

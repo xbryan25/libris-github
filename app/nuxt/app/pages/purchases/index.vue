@@ -83,10 +83,6 @@ watch(activeTab, (val) => {
         {{ activeTab === 'selling' ? 'Sell' : 'Purchase' }} history
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
       </NuxtLink>
-      <button class="text-foreground font-medium hover:text-accent flex items-center gap-1">
-        History
-        <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
-      </button>
     </div>
 
     <!-- Pass activeTab to PurchasesSection as prop -->

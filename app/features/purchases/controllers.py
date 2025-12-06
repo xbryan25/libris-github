@@ -172,6 +172,47 @@ class PurchasesController:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def get_user_completed_purchases_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            params = {
+                "sort_order": (request.args.get("sortOrder", "newest first"))
+                .strip()
+                .lower(),
+                "cards_per_page": int(request.args.get("cardsPerPage", 5)),
+                "page_number": int(request.args.get("pageNumber", 1)),
+            }
+
+            completed_purchases = (
+                PurchasesServices.get_user_completed_purchases_service(user_id, params)
+            )
+
+            return jsonify(completed_purchases), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_completed_purchases_count_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_purchases_count = (
+                PurchasesServices.get_user_completed_purchases_count_service(user_id)
+            )
+            return jsonify({"count": completed_purchases_count}), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def get_user_sales_controller() -> tuple[Response, int]:
         try:
             user_id = get_jwt_identity()
@@ -181,6 +222,47 @@ class PurchasesController:
             sales = PurchasesServices.get_user_sales_with_status(user_id)
 
             return jsonify(sales), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_completed_sales_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            params = {
+                "sort_order": (request.args.get("sortOrder", "newest first"))
+                .strip()
+                .lower(),
+                "cards_per_page": int(request.args.get("cardsPerPage", 5)),
+                "page_number": int(request.args.get("pageNumber", 1)),
+            }
+
+            completed_sales = PurchasesServices.get_user_completed_sales_service(
+                user_id, params
+            )
+
+            return jsonify(completed_sales), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_user_completed_sales_count_controller() -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_sales_count = (
+                PurchasesServices.get_user_completed_sales_count_service(user_id)
+            )
+            return jsonify({"count": completed_sales_count}), 200
 
         except Exception as e:
             traceback.print_exc()

@@ -1,56 +1,47 @@
 <script setup lang="ts">
+import { useUserPurchasesCount } from '~/composables/useUserPurchasesCount';
+import { useUserSalesCount } from '~/composables/useUserSalesCount';
 import PurchaseHistoryCard from './PurchaseHistoryCard.vue';
-import SellHistoryCard from './SellHistoryCard.vue';
+import SaleHistoryCard from './SaleHistoryCard.vue';
 
 interface Props {
   activeTab: 'selling' | 'buying';
-  sortBy: string;
   sortOrder: string;
   cardsPerPage: number;
 }
 
 const props = defineProps<Props>();
 
-// const {
-//   rentals,
-//   loading: rentalsLoading,
-//   error: rentalsError,
-//   fetchUserCompletedRentals,
-// } = useUserRentals();
+const {
+  purchases,
+  loading: purchasesLoading,
+  error: purchasesError,
+  fetchUserCompletedPurchases,
+} = useUserPurchases();
 
-// const {
-//   completedRentalsCount,
-//   loading: rentalsCountLoading,
-//   fetchUserCompletedRentalsCount,
-// } = useUserRentalsCount();
+const {
+  completedPurchasesCount,
+  loading: purchasesCountLoading,
+  fetchUserCompletedPurchasesCount,
+} = useUserPurchasesCount();
 
-// const {
-//   lendings,
-//   loading: lendingsLoading,
-//   error: lendingsError,
-//   fetchUserCompletedLendings,
-// } = useUserLendings();
+const { sales, loading: salesLoading, error: salesError, fetchUserCompletedSales } = useUserSales();
 
-// const {
-//   completedLendingsCount,
-//   loading: lendingsCountLoading,
-//   fetchUserCompletedLendingsCount,
-// } = useUserLendingsCount();
+const {
+  completedSalesCount,
+  loading: salesCountLoading,
+  fetchUserCompletedSalesCount,
+} = useUserSalesCount();
 
 const pageNumber = ref(1);
 
-watch(
-  [() => props.sortBy, () => props.sortOrder, () => props.cardsPerPage, pageNumber],
-  async (newValues) => {
-    if (props.activeTab === 'buying') {
-      console.log('does it even reach here??');
-      // await fetchUserCompletedRentals(newValues[0], newValues[1], newValues[2], pageNumber.value);
-    } else {
-      // await fetchUserCompletedLendings(newValues[0], newValues[1], newValues[2], pageNumber.value);
-      console.log('uncomment later');
-    }
-  },
-);
+watch([() => props.sortOrder, () => props.cardsPerPage, pageNumber], async (newValues) => {
+  if (props.activeTab === 'buying') {
+    await fetchUserCompletedPurchases(newValues[0], newValues[1], pageNumber.value);
+  } else {
+    await fetchUserCompletedSales(newValues[0], newValues[1], pageNumber.value);
+  }
+});
 
 watch(
   () => props.activeTab,
@@ -58,23 +49,9 @@ watch(
     pageNumber.value = 1;
 
     if (newVal === 'buying') {
-      // await fetchUserCompletedRentals(
-      //   props.sortBy,
-      //   props.sortOrder,
-      //   props.cardsPerPage,
-      //   pageNumber.value,
-      // );
-
-      console.log('uncomment later');
+      await fetchUserCompletedPurchases(props.sortOrder, props.cardsPerPage, pageNumber.value);
     } else {
-      // await fetchUserCompletedLendings(
-      //   props.sortBy,
-      //   props.sortOrder,
-      //   props.cardsPerPage,
-      //   pageNumber.value,
-      // );
-
-      console.log('uncomment later');
+      await fetchUserCompletedSales(props.sortOrder, props.cardsPerPage, pageNumber.value);
     }
   },
 );
@@ -82,29 +59,13 @@ watch(
 onMounted(async () => {
   // Get count during mount, as it won't change while user is in this page
 
-  // await fetchUserCompletedRentalsCount();
-  // await fetchUserCompletedLendingsCount();
-
-  console.log('uncomment later');
+  await fetchUserCompletedPurchasesCount();
+  await fetchUserCompletedSalesCount();
 
   if (props.activeTab === 'buying') {
-    // await fetchUserCompletedRentals(
-    //   props.sortBy,
-    //   props.sortOrder,
-    //   props.cardsPerPage,
-    //   pageNumber.value,
-    // );
-
-    console.log('uncomment later');
+    await fetchUserCompletedPurchases(props.sortOrder, props.cardsPerPage, pageNumber.value);
   } else {
-    // await fetchUserCompletedLendings(
-    //   props.sortBy,
-    //   props.sortOrder,
-    //   props.cardsPerPage,
-    //   pageNumber.value,
-    // );
-
-    console.log('uncomment later');
+    await fetchUserCompletedSales(props.sortOrder, props.cardsPerPage, pageNumber.value);
   }
 });
 </script>
@@ -112,7 +73,7 @@ onMounted(async () => {
 <template>
   <div class="w-full bg-background">
     <div v-if="activeTab === 'selling'">
-      <!-- Lending content -->
+      <!-- Sell content -->
       <div v-if="salesLoading" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
@@ -144,7 +105,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="space-y-4">
-        <SellHistoryCard v-for="sale in sales" :key="sale.rental_id" :sale="sale" />
+        <SaleHistoryCard v-for="sale in sales" :key="sale.purchase_id" :sale="sale" />
 
         <UPagination
           v-if="!salesCountLoading"
@@ -157,7 +118,7 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <!-- Renting content -->
+      <!-- Purchase content -->
       <div v-if="purchasesLoading" class="bg-surface rounded-lg p-6 w-full border border-base">
         <div class="flex justify-center items-center">
           <div class="text-center">
@@ -191,7 +152,7 @@ onMounted(async () => {
       <div v-else class="space-y-4">
         <PurchaseHistoryCard
           v-for="purchase in purchases"
-          :key="purchase.rental_id"
+          :key="purchase.purchase_id"
           :purchase="purchase"
         />
 

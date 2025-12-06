@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Rental } from '~/composables/useUserRentals';
+import type { Purchase } from '~/composables/useUserPurchases';
 
 interface Props {
   purchase: Purchase;
@@ -33,7 +33,7 @@ const convertDateFormat = (dateString: string) => {
 <template>
   <NuxtLink
     :to="{
-      path: `/rentals/${rental.rental_id}`,
+      path: `/purchases/${props.purchase.purchase_id}`,
       query: { from: 'rental' },
     }"
     class="block"
@@ -44,18 +44,15 @@ const convertDateFormat = (dateString: string) => {
       <!-- Header -->
       <div class="flex justify-between items-start">
         <div class="flex-1">
-          <h3 class="text-xl font-bold text-foreground mb-2">{{ rental.title }}</h3>
+          <h3 class="text-xl font-bold text-foreground mb-2">{{ props.purchase.title }}</h3>
           <div class="flex items-center gap-4 text-sm text-muted">
             <div class="flex items-center gap-1">
               <Icon name="lucide:user" class="w-4 h-4" />
-              <span>Rented from {{ rental.from }}</span>
+              <span>Bought from {{ props.purchase.from }}</span>
             </div>
             <div class="flex items-center gap-1">
               <Icon name="lucide:calendar" class="w-4 h-4" />
-              <span
-                >{{ convertDateFormat(rental.rent_start_date) }} -
-                {{ convertDateFormat(rental.rent_end_date) }}</span
-              >
+              <span>{{ convertDateFormat(props.purchase.meetup_date) }}</span>
             </div>
           </div>
         </div>
@@ -64,7 +61,7 @@ const convertDateFormat = (dateString: string) => {
           <div class="flex items-center gap-1">
             <span class="text-accent text-xl font-bold">-</span>
             <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
-            <span class="text-accent text-xl font-bold">{{ rental.cost }}</span>
+            <span class="text-accent text-xl font-bold">{{ props.purchase.cost }}</span>
           </div>
         </div>
       </div>

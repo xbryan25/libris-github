@@ -104,6 +104,68 @@ class PurchasesServices:
         return formatted_purchases
 
     @staticmethod
+    def get_user_completed_purchases_service(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+
+        raw_completed_purchases = PurchasesRepository.get_user_completed_purchases(
+            user_id, params
+        )
+
+        formatted_purchases = []
+        for purchase in raw_completed_purchases:
+            formatted_purchase = {
+                "purchase_id": purchase.get("purchase_id"),
+                "purchase_status": purchase.get("purchase_status"),
+                "original_owner_id": purchase.get("original_owner_id"),
+                "user_id": purchase.get("user_id"),
+                "book_id": purchase.get("book_id"),
+                "title": purchase.get("title", ""),
+                "author": purchase.get("author", ""),
+                "image": purchase.get("image"),
+                "from": purchase.get("from", ""),
+                "all_fees_captured": purchase.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    purchase.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    purchase.get("reservation_expires_at")
+                ),
+                "meetup_location": purchase.get("meetup_location", ""),
+                "meetup_time_window": purchase.get("meetup_time_window", ""),
+                "meetup_time": purchase.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    purchase.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": purchase.get("user_confirmed_pickup", False),
+                "owner_confirmed_pickup": purchase.get("owner_confirmed_pickup", False),
+                "user_rated": purchase.get("user_rated", False),
+                "owner_rated": purchase.get("owner_rated", False),
+                "transfer_decision_pending": purchase.get(
+                    "transfer_decision_pending", False
+                ),
+                "ownership_transferred": purchase.get("ownership_transferred"),
+                "cost": (
+                    int(purchase.get("cost", 0))
+                    if purchase.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(purchase.get("meetup_date"))
+                    if purchase.get("meetup_date")
+                    else None
+                ),
+            }
+            formatted_purchases.append(formatted_purchase)
+
+        return formatted_purchases
+
+    @staticmethod
+    def get_user_completed_purchases_count_service(user_id: str) -> int:
+
+        return PurchasesRepository.get_user_completed_purchases_count(user_id)["count"]
+
+    @staticmethod
     def get_user_sales_with_status(user_id: str) -> list[dict[str, Any]]:
         raw_sales = PurchasesRepository.get_user_sales_with_status(user_id)
 
@@ -112,6 +174,8 @@ class PurchasesServices:
             formatted_sale = {
                 "purchase_id": sale.get("purchase_id"),
                 "purchase_status": sale.get("purchase_status"),
+                "original_owner_id": sale.get("original_owner_id"),
+                "user_id": sale.get("user_id"),
                 "book_id": sale.get("book_id"),
                 "title": sale.get("title", ""),
                 "author": sale.get("author", ""),
@@ -151,6 +215,68 @@ class PurchasesServices:
             }
             formatted_sales.append(formatted_sale)
         return formatted_sales
+
+    @staticmethod
+    def get_user_completed_sales_service(
+        user_id: str, params: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+
+        raw_completed_sales = PurchasesRepository.get_user_completed_sales(
+            user_id, params
+        )
+
+        formatted_sales = []
+        for sale in raw_completed_sales:
+            formatted_sale = {
+                "purchase_id": sale.get("purchase_id"),
+                "purchase_status": sale.get("purchase_status"),
+                "original_owner_id": sale.get("original_owner_id"),
+                "user_id": sale.get("user_id"),
+                "book_id": sale.get("book_id"),
+                "title": sale.get("title", ""),
+                "author": sale.get("author", ""),
+                "image": sale.get("image"),
+                "to": sale.get("to", ""),
+                "all_fees_captured": sale.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    sale.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    sale.get("reservation_expires_at")
+                ),
+                "meetup_location": sale.get("meetup_location", ""),
+                "meetup_time_window": sale.get("meetup_time_window", ""),
+                "meetup_time": sale.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    sale.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": sale.get("user_confirmed_pickup", False),
+                "owner_confirmed_pickup": sale.get("owner_confirmed_pickup", False),
+                "user_rated": sale.get("user_rated", False),
+                "owner_rated": sale.get("owner_rated", False),
+                "transfer_decision_pending": sale.get(
+                    "transfer_decision_pending", False
+                ),
+                "ownership_transferred": sale.get("ownership_transferred"),
+                "cost": (
+                    int(sale.get("cost", 0))
+                    if sale.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(sale.get("meetup_date"))
+                    if sale.get("meetup_date")
+                    else None
+                ),
+            }
+            formatted_sales.append(formatted_sale)
+
+        return formatted_sales
+
+    @staticmethod
+    def get_user_completed_sales_count_service(user_id: str) -> int:
+
+        return PurchasesRepository.get_user_completed_sales_count(user_id)["count"]
 
     @staticmethod
     def validate_meetup_time(meetup_time: str, time_window: str) -> tuple[bool, str]:

@@ -72,6 +72,8 @@ def get_my_purchases() -> tuple[Response, int]:
             {
                 "purchase_id": str,
                 "purchase_status": str,
+                "original_owner_id": str,
+                "user_id": str,
                 "book_id": str,
                 "title": str,
                 "author": str,
@@ -98,6 +100,59 @@ def get_my_purchases() -> tuple[Response, int]:
         500 if an unexpected error occurs
     """
     return PurchasesController.get_user_purchases_controller()
+
+
+@purchases_bp.route("/my-completed-purchases", methods=["GET"])
+@jwt_required()
+def get_my_completed_purchases() -> tuple[Response, int]:
+    """
+    Retrieve all completed purchases for the authenticated user.
+
+    Response JSON:
+        [
+            {
+                "purchase_id": str,
+                "purchase_status": str,
+                "original_owner_id": str,
+                "user_id": str,
+                "book_id": str,
+                "title": str,
+                "author": str,
+                "image": str,
+                "from": str,
+                "all_fees_captured": bool,
+                "reserved_at": str,
+                "reservation_expires_at": str,
+                "meetup_location": str,
+                "meetup_time_window": str,
+                "meetup_time": str,
+                "meetup_date": str,
+                "pickup_confirmation_started_at": str,
+                "user_confirmed_pickup": bool,
+                "owner_confirmed_pickup": bool,
+                "user_rated": bool,
+                "owner_rated": bool,
+                "cost": int
+            }
+        ]
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return PurchasesController.get_user_completed_purchases_controller()
+
+
+@purchases_bp.route("/my-completed-purchases-count", methods=["GET"])
+@jwt_required()
+def get_my_completed_purchases_count() -> tuple[Response, int]:
+    """
+    Retrieve the total count of completed purchases for the authenticated user.
+
+    Response JSON:
+        { count: int }
+    """
+    return PurchasesController.get_user_completed_purchases_count_controller()
 
 
 @purchases_bp.route("/my-sales", methods=["GET"])
@@ -136,6 +191,59 @@ def get_my_sales() -> tuple[Response, int]:
         ]
     """
     return PurchasesController.get_user_sales_controller()
+
+
+@purchases_bp.route("/my-completed-sales", methods=["GET"])
+@jwt_required()
+def get_my_completed_sales() -> tuple[Response, int]:
+    """
+    Retrieve all completed sales for the authenticated user.
+
+    Response JSON:
+        [
+            {
+                "purchase_id": str,
+                "purchase_status": str,
+                "original_owner_id": str,
+                "user_id": str,
+                "book_id": str,
+                "title": str,
+                "author": str,
+                "image": str,
+                "from": str,
+                "all_fees_captured": bool,
+                "reserved_at": str,
+                "reservation_expires_at": str,
+                "meetup_location": str,
+                "meetup_time_window": str,
+                "meetup_time": str,
+                "meetup_date": str,
+                "pickup_confirmation_started_at": str,
+                "user_confirmed_pickup": bool,
+                "owner_confirmed_pickup": bool,
+                "user_rated": bool,
+                "owner_rated": bool,
+                "cost": int
+            }
+        ]
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return PurchasesController.get_user_completed_sales_controller()
+
+
+@purchases_bp.route("/my-completed-sales-count", methods=["GET"])
+@jwt_required()
+def get_my_completed_sales_count() -> tuple[Response, int]:
+    """
+    Retrieve the total count of completed sales for the authenticated user.
+
+    Response JSON:
+        { count: int }
+    """
+    return PurchasesController.get_user_completed_sales_count_controller()
 
 
 @purchases_bp.route("/<purchase_id>/approve", methods=["POST"])

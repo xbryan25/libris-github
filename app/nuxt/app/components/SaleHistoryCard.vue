@@ -5,7 +5,7 @@ interface Props {
   sale: Sale;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const convertDateFormat = (dateString: string) => {
   const [yearStr, monthStr, dayStr] = dateString.split('-').map(Number);
@@ -24,12 +24,14 @@ const convertDateFormat = (dateString: string) => {
 
   return formatted;
 };
+
+console.log(props);
 </script>
 
 <template>
   <NuxtLink
     :to="{
-      path: `/rentals/history/${lending.rental_id}`,
+      path: `/purchases/history/${props.sale.purchase_id}`,
       query: { from: 'lending' },
     }"
     class="block"
@@ -40,18 +42,15 @@ const convertDateFormat = (dateString: string) => {
       <!-- Header -->
       <div class="flex justify-between items-start">
         <div class="flex-1">
-          <h3 class="text-xl font-bold text-foreground mb-2">{{ lending.title }}</h3>
+          <h3 class="text-xl font-bold text-foreground mb-2">{{ props.sale.title }}</h3>
           <div class="flex items-center gap-4 text-sm text-muted">
             <div class="flex items-center gap-1">
               <Icon name="lucide:user" class="w-4 h-4" />
-              <span>Lent to {{ lending.to }}</span>
+              <span>Sold to {{ props.sale.to }}</span>
             </div>
             <div class="flex items-center gap-1">
               <Icon name="lucide:calendar" class="w-4 h-4" />
-              <span
-                >{{ convertDateFormat(lending.rent_start_date) }} -
-                {{ convertDateFormat(lending.rent_end_date) }}</span
-              >
+              <span>{{ convertDateFormat(props.sale.meetup_date) }}</span>
             </div>
           </div>
         </div>
@@ -61,7 +60,7 @@ const convertDateFormat = (dateString: string) => {
           <div class="flex items-center gap-1">
             <span class="text-accent text-xl font-bold">+</span>
             <Icon name="fluent:book-coins-20-regular" class="w-6 h-6 text-accent" />
-            <span class="text-accent text-xl font-bold">{{ lending.cost }}</span>
+            <span class="text-accent text-xl font-bold">{{ props.sale.cost }}</span>
           </div>
         </div>
       </div>

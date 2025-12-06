@@ -19,19 +19,17 @@ if (currentTab && !Array.isArray(currentTab)) {
 navigateTo({ query: { activeTab: activeTab.value } }, { replace: true });
 
 const tabs = [
-  { id: 'selling', label: "Books I'm Selling", icon: 'lucide:trending-up' },
-  { id: 'buying', label: 'Books Buy Request', icon: 'lucide:trending-down' },
+  { id: 'selling', label: 'Books I Sold', icon: 'lucide:trending-up' },
+  { id: 'buying', label: 'Books I Bought', icon: 'lucide:trending-down' },
 ] as const;
 
 const headerText = computed(() => {
   return activeTab.value === 'selling' ? 'Sell History' : 'Purchase History';
 });
 
-const sortByItems = ref(['Start date', 'End date']);
 const sortOrderItems = ref(['newest first', 'oldest first']);
 const cardsPerPageItems = ref([10, 25, 50]);
 
-const sortBy = ref('Start date');
 const sortOrder = ref('newest first');
 const cardsPerPage = ref(10);
 
@@ -88,13 +86,6 @@ watch(activeTab, (val) => {
 
       <div class="flex-[3] flex justify-center gap-2">
         <div class="flex items-center gap-2">
-          <p>Sort by</p>
-          <USelect v-model="sortBy" :items="sortByItems" class="w-45" />
-        </div>
-
-        <USeparator orientation="vertical" color="primary" size="sm" />
-
-        <div class="flex items-center gap-2">
           <p>Show</p>
           <USelect v-model="sortOrder" :items="sortOrderItems" class="w-45" />
         </div>
@@ -109,7 +100,7 @@ watch(activeTab, (val) => {
 
       <div class="flex-1 flex justify-end items-center">
         <NuxtLink
-          :to="{ path: '/rentals', query: { activeTab } }"
+          :to="{ path: '/purchases', query: { activeTab } }"
           class="text-foreground font-medium flex gap-1 cursor-pointer"
         >
           Current {{ activeTab === 'selling' ? 'sold' : 'purchases' }}
@@ -120,7 +111,6 @@ watch(activeTab, (val) => {
 
     <!-- Pass activeTab to RentalsHistorySection as prop -->
     <PurchasesHistorySection
-      :sort-by="sortBy"
       :sort-order="sortOrder"
       :cards-per-page="cardsPerPage"
       :active-tab="activeTab"
