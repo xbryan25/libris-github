@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (email: string, password: string): Promise<{messageTitle: string, message: string}> => {
     try {
-    const response = await useUserLogin(email, password)
+      const response = await useUserLogin(email, password);
 
       userId.value = response.user_id;
       username.value = response.username;
