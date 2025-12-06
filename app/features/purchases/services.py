@@ -456,11 +456,6 @@ class PurchasesServices:
                     f"User: {buyer_user_id_str}, Amount: {total_cost}"
                 )
 
-            delete_result = PurchasesRepository.delete_purchase(purchase_id)
-
-            if not delete_result:
-                return None, "Failed to delete purchase entry"
-
             logger.info(
                 f"Purchase {purchase_id} cancelled by buyer {canceller_user_id}. "
                 f"Released {total_cost} from reserved_amount for user {buyer_user_id_str}. "
