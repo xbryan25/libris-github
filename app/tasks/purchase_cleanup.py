@@ -34,6 +34,7 @@ class PurchaseCleanupTask:
                 SELECT
                     pb.purchase_id,
                     pb.user_id,
+                    pb.book_id,
                     pb.total_buy_cost,
                     pb.reservation_expires_at
                 FROM purchased_books pb
