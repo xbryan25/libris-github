@@ -91,6 +91,8 @@ class RentalsServices:
             formatted_rental = {
                 "rental_id": rental.get("rental_id"),
                 "rent_status": rental.get("rent_status"),
+                "original_owner_id": rental.get("original_owner_id"),
+                "user_id": rental.get("user_id"),
                 "book_id": rental.get("book_id"),
                 "title": rental.get("title", ""),
                 "author": rental.get("author", ""),
@@ -229,6 +231,8 @@ class RentalsServices:
             formatted_lending = {
                 "rental_id": lending.get("rental_id"),
                 "rent_status": lending.get("rent_status"),
+                "original_owner_id": lending.get("original_owner_id"),
+                "user_id": lending.get("user_id"),
                 "book_id": lending.get("book_id"),
                 "title": lending.get("title", ""),
                 "author": lending.get("author", ""),

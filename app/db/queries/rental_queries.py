@@ -89,6 +89,8 @@ class RentalsQueries:
         SELECT
             rb.rental_id,
             rb.rent_status,
+            rb.original_owner_id,
+            rb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -117,7 +119,7 @@ class RentalsQueries:
             rb.total_rent_cost AS cost
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
-        JOIN users u ON b.owner_id = u.user_id
+        JOIN users u ON rb.original_owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE rb.user_id = %s
         AND rb.rent_status = 'completed'
@@ -183,6 +185,8 @@ class RentalsQueries:
         SELECT
             rb.rental_id,
             rb.rent_status,
+            rb.original_owner_id,
+            rb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -213,7 +217,7 @@ class RentalsQueries:
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE b.owner_id = %s
+        WHERE rb.original_owner_id = %s
         AND rb.rent_status = 'completed'
         AND rb.owner_rated = true
         ORDER BY {sort_by} {sort_order}

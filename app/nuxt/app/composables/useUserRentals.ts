@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 export type Rental = {
   rental_id: string
   rent_status: string
+  original_owner_id?: string
+  user_id?: string
   book_id: string
   title: string
   author: string
