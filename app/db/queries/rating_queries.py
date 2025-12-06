@@ -1,20 +1,24 @@
 class RatingQueries:
 
     INSERT_RATING = """
-        INSERT INTO user_ratings (rater_id, rated_user_id, score, comment)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO user_ratings (rater_id, rated_user_id, score, comment, rental_id, purchase_id)
+        VALUES (%s, %s, %s, %s, %s, %s)
         RETURNING rating_id
     """
 
     CHECK_EXISTING_RATING = """
         SELECT EXISTS(
             SELECT 1 FROM user_ratings r
-            JOIN rented_books rb ON (
-                (r.rater_id = rb.user_id AND r.rated_user_id = (SELECT owner_id FROM books WHERE book_id = rb.book_id))
-                OR
-                (r.rater_id = (SELECT owner_id FROM books WHERE book_id = rb.book_id) AND r.rated_user_id = rb.user_id)
-            )
-            WHERE rb.rental_id = %s AND r.rater_id = %s
+            WHERE r.rental_id = %s
+            AND r.rater_id = %s
+        ) as exists
+    """
+
+    CHECK_EXISTING_RATING_PURCHASE = """
+        SELECT EXISTS(
+            SELECT 1 FROM user_ratings r
+            WHERE r.purchase_id = %s
+            AND r.rater_id = %s
         ) as exists
     """
 
@@ -56,4 +60,30 @@ class RatingQueries:
         FROM rented_books rb
         JOIN books b ON rb.book_id = b.book_id
         WHERE rb.rental_id = %s
+    """
+
+    UPDATE_PURCHASE_USER_RATED_FLAG = """
+        UPDATE purchased_books
+        SET user_rated = TRUE
+        WHERE purchase_id = %s
+        RETURNING purchase_id
+    """
+
+    UPDATE_PURCHASE_OWNER_RATED_FLAG = """
+        UPDATE purchased_books
+        SET owner_rated = TRUE
+        WHERE purchase_id = %s
+        RETURNING purchase_id
+    """
+
+    GET_PURCHASE_INFO = """
+        SELECT
+            pb.purchase_id,
+            pb.user_id,
+            pb.original_owner_id as owner_id,
+            pb.purchase_status,
+            pb.user_rated,
+            pb.owner_rated
+        FROM purchased_books pb
+        WHERE pb.purchase_id = %s
     """

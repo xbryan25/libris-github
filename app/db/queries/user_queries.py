@@ -2,12 +2,15 @@ class UserQueries:
     GET_PROFILE_INFO = (
         "SELECT u.username, u.first_name, u.middle_name, u.last_name, u.date_of_birth, "
         "u.phone_number, u.account_activated_at, u.trust_score, u.profile_image_url, "
-        "a.country, a.city, a.barangay, a.street, a.postal_code "
+        "a.country, a.city, a.barangay, a.street, a.postal_code, a.latitude, a.longitude "
         "FROM users u "
         "LEFT JOIN user_address a ON u.user_id = a.user_id "
         "WHERE u.user_id = %s"
     )
-    GET_USER_ADDRESS = "SELECT country, city, barangay, street, postal_code FROM user_address WHERE user_id = %s LIMIT 1"
+    GET_USER_ADDRESS = (
+        "SELECT country, city, barangay, street, "
+        "postal_code, latitude, longitude FROM user_address WHERE user_id = %s LIMIT 1"
+    )
     GET_TRUST_SCORE_PERCENTILE = (
         "SELECT * FROM ( "
         "    SELECT "
@@ -21,7 +24,7 @@ class UserQueries:
         "UPDATE users SET first_name = %s, middle_name = %s, last_name = %s, "
         "date_of_birth = %s, phone_number = %s, profile_image_url = %s WHERE user_id = %s"
     )
-    INSERT_USER_ADDRESS = """INSERT INTO user_address
+    INSERT_USER_ADDRESS = """INSERT INTO user_address (
             country,
             city,
             barangay,
