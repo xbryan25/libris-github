@@ -331,19 +331,6 @@ class BookRepository:
     def get_total_my_library_book_count(user_id, params) -> dict[str, int]:
         """
         Retrieve the total number of books based on search, genre, and availability filters.
-
-        Args:
-            params (dict): A dictionary of query parameters. Expected keys include:
-                - "search_value" (str): The value to search for.
-                - "genre" (str): The genre or category of books to filter by.
-                - "availability" (str): The availability status of the book — can be "For Rent", "For Sale", or "Both".
-                - "user_id" (str): user_id of the user to prevent counting books that the current user owns, or, if from other
-                                    user, count all books that that user owns
-            get_book_count_from_a_specific_user (bool): A boolean value that determine whether the books counted will be from
-                                                        everyone or only from a specific user
-
-        Returns:
-             dict: A dictionary containing the total number of books that match the given search, genre, and availability filters.
         """
 
         db = current_app.extensions["db"]
@@ -360,9 +347,10 @@ class BookRepository:
             BookQueries.GET_MY_LIBRARY_BOOK_COUNT.format(search_by="title"),
             (
                 search_pattern,
-                genre,
-                availability,
-                user_id,
+                availability,  # This is parameter 2 for availability filter
+                user_id,  # This is parameter 3 for owner_id
+                genre,  # This is parameter 4 for first genre check
+                genre,  # This is parameter 5 for second genre pattern
             ),
         )
 
