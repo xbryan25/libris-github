@@ -13,9 +13,9 @@ const route = useRoute();
 const router = useRouter();
 const bookId = route.params.bookId as string;
 
-const { rentalExists, checkRentalExists } = useCreateRental()
+const { rentalExists, checkRentalExists } = useCreateRental();
 
-const { purchaseExists, checkPurchaseExists } = useCreatePurchase()
+const { purchaseExists, checkPurchaseExists } = useCreatePurchase();
 
 const isOpenRentBookModal = ref(false);
 
@@ -41,26 +41,25 @@ onMounted(async () => {
   reservedAmount.value = data.reserved_amount ?? 0;
 
   isFetching.value = false;
-})
+});
 
 const openRentBookModal = () => {
   isOpenRentBookModal.value = true;
 };
 
 const handleRentalSuccess = () => {
-  rentalExists.value = true
-  isOpenRentBookModal.value = false
-}
+  rentalExists.value = true;
+  isOpenRentBookModal.value = false;
+};
 
 const openPurchaseBookModal = () => {
   isOpenPurchaseBookModal.value = true;
 };
 
 const handlePurchaseSuccess = () => {
-  purchaseExists.value = true
-  isOpenRentBookModal.value = false
-}
-
+  purchaseExists.value = true;
+  isOpenRentBookModal.value = false;
+};
 
 const { book, loading, error, fetchBookDetails, availabilityBadges, ownerTrustBadge } =
   useBookDetails();
@@ -143,13 +142,9 @@ const getBadgeColorClasses = (color: string) => {
 
 onMounted(async () => {
   if (bookId) {
-    await Promise.all([
-      checkRentalExists(bookId),
-      checkPurchaseExists(bookId) 
-    ])
+    await Promise.all([checkRentalExists(bookId), checkPurchaseExists(bookId)]);
   }
-})
-
+});
 </script>
 
 <template>
@@ -163,16 +158,23 @@ onMounted(async () => {
     </div>
 
     <!-- Book Unavailable State -->
-    <div v-else-if="isBookUnavailable || isWrongCollection" class="flex items-center justify-center h-screen">
+    <div
+      v-else-if="isBookUnavailable || isWrongCollection"
+      class="flex items-center justify-center h-screen"
+    >
       <UCard class="bg-surface border-base max-w-md">
         <div class="text-center p-6">
-          <UIcon name="i-heroicons-exclamation-triangle" class="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <UIcon
+            name="i-heroicons-exclamation-triangle"
+            class="w-16 h-16 text-yellow-500 mx-auto mb-4"
+          />
           <h2 class="text-2xl font-bold text-base mb-2">Book Currently Unavailable</h2>
           <p v-if="isWrongCollection" class="text-muted mb-4">
             This book does not belong to this user's collection.
           </p>
           <p v-else class="text-muted mb-4">
-            This book is {{ book?.is_rented ? 'currently rented' : 'purchased' }} and cannot be viewed at this time.
+            This book is {{ book?.is_rented ? 'currently rented' : 'purchased' }} and cannot be
+            viewed at this time.
           </p>
           <button
             @click="goBack"
@@ -360,6 +362,7 @@ onMounted(async () => {
       :rental-exists="rentalExists"
       :current-wallet-balance="currentWalletBalance"
       :reserved-amount="reservedAmount"
+      :owner-user-id="book?.owner_user_id"
       @update:openRentBookModal="isOpenRentBookModal = $event"
       @rental-success="handleRentalSuccess"
     />

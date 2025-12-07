@@ -19,6 +19,10 @@ const isActive = (path: string) => {
     return route.path.startsWith('/rentals');
   }
 
+  if (path === '/purchases') {
+    return route.path.startsWith('/purchases');
+  }
+
   if (route.path.startsWith('/books/') && route.query.from) {
     if (path === '/browse' && route.query.from === 'browse') return true;
   }

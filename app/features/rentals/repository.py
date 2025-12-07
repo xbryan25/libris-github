@@ -212,6 +212,7 @@ class RentalsRepository:
         Args:
             rental_data (dict): Dictionary containing rental details:
                 - user_id
+                - original_owner_id
                 - book_id
                 - reserved_at
                 - reservation_expires_at
@@ -230,6 +231,7 @@ class RentalsRepository:
 
         params = (
             rental_data["user_id"],
+            rental_data["original_owner_id"],
             rental_data["book_id"],
             rental_data["reserved_at"],
             rental_data["reservation_expires_at"],

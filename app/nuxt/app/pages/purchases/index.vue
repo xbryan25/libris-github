@@ -8,6 +8,14 @@ definePageMeta({
 });
 
 const activeTab = ref<'selling' | 'buying'>('selling');
+const route = useRoute();
+
+const currentTab = route.query.activeTab;
+if (currentTab && !Array.isArray(currentTab)) {
+  if (currentTab === 'selling' || currentTab === 'buying') {
+    activeTab.value = currentTab;
+  }
+}
 
 const tabs = [
   { id: 'selling', label: "Books I'm Selling", icon: 'lucide:trending-up' },
@@ -16,6 +24,18 @@ const tabs = [
 
 const headerText = computed(() => {
   return activeTab.value === 'selling' ? 'Sell Status' : 'Buy Status';
+});
+
+const updateUrl = (newActiveTab: string) => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('activeTab', newActiveTab);
+  window.history.replaceState({}, '', url.toString());
+};
+
+updateUrl(activeTab.value);
+
+watch(activeTab, (val) => {
+  updateUrl(val);
 });
 </script>
 
@@ -56,10 +76,13 @@ const headerText = computed(() => {
 
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold text-foreground">{{ headerText }}</h2>
-      <button class="text-foreground font-medium hover:text-accent flex items-center gap-1">
-        History
+      <NuxtLink
+        :to="{ path: '/purchases/history', query: { activeTab } }"
+        class="text-foreground font-medium flex items-center gap-1 cursor-pointer"
+      >
+        {{ activeTab === 'selling' ? 'Sell' : 'Purchase' }} history
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
-      </button>
+      </NuxtLink>
     </div>
 
     <!-- Pass activeTab to PurchasesSection as prop -->

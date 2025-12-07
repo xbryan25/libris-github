@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 export type Purchase = {
   purchase_id: string
   purchase_status: string
+  original_owner_id: string
+  user_id: string
   book_id: string
   title: string
   author: string
@@ -21,14 +23,14 @@ export type Purchase = {
   user_rated: boolean
   owner_rated: boolean
   cost: number
-  transfer_decision_pending: boolean  
-  ownership_transferred: boolean | null  
+  transfer_decision_pending: boolean
+  ownership_transferred: boolean | null
 }
 
-type PurchaseStatus = 
-  | 'pending' 
-  | 'approved' 
-  | 'awaiting_pickup_confirmation' 
+type PurchaseStatus =
+  | 'pending'
+  | 'approved'
+  | 'awaiting_pickup_confirmation'
   | 'completed'
 
 type StatusBadge = {
@@ -69,6 +71,27 @@ export const useUserPurchases = () => {
     }
   }
 
+  const fetchUserCompletedPurchases = async (sortOrder: string, cardsPerPage: number, pageNumber: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $apiFetch<Purchase[]>(`${API_URL}/api/purchases/my-completed-purchases`, {
+        credentials: 'include',
+        query: {
+          sortOrder, cardsPerPage, pageNumber
+        }
+      })
+      purchases.value = Array.isArray(res) ? res : []
+
+      console.log(purchases.value)
+    } catch (e: any) {
+      purchases.value = []
+      console.log('No purchases found or error fetching purchases:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const statusBadge = computed(() => (status: string): StatusBadge => {
     const statusConfig: Record<string, StatusBadge> = {
       pending: { label: 'Pending Approval', color: 'bg-yellow-500', progress: 1 },
@@ -76,20 +99,20 @@ export const useUserPurchases = () => {
       awaiting_pickup_confirmation: { label: 'Ready for Pickup', color: 'bg-orange-500', progress: 3 },
       completed: { label: 'Completed', color: 'bg-green-500', progress: 4 }
     }
-    
+
     return statusConfig[status] || { label: status, color: 'bg-gray-500', progress: 0 }
   })
 
   const progressSteps = computed(() => (purchase: Purchase): ProgressStep[] => {
     const currentProgress = statusBadge.value(purchase.purchase_status).progress
-    
+
     const steps: { label: string; status: PurchaseStatus }[] = [
       { label: 'Requested', status: 'pending' },
       { label: 'Confirmed', status: 'approved' },
       { label: 'Pickup', status: 'awaiting_pickup_confirmation' },
       { label: 'Completed', status: 'completed' }
     ]
-    
+
     return steps.map((step, index) => ({
       ...step,
       completed: index + 1 < currentProgress,
@@ -111,6 +134,7 @@ export const useUserPurchases = () => {
     loading,
     error,
     fetchUserPurchases,
+    fetchUserCompletedPurchases,
     statusBadge,
     progressSteps,
     filteredPurchases,

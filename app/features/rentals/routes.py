@@ -20,6 +20,8 @@ def get_my_rentals() -> tuple[Response, int]:
             {
                 "rental_id": str,
                 "rent_status": str,
+                "original_owner_id": str,
+                "user_id": str,
                 "book_id": str,
                 "title": str,
                 "author": str,
@@ -63,6 +65,8 @@ def get_my_completed_rentals() -> tuple[Response, int]:
             {
                 "rental_id": str,
                 "rent_status": str,
+                "original_owner_id": str,
+                "user_id": str,
                 "book_id": str,
                 "title": str,
                 "author": str,
@@ -121,6 +125,8 @@ def get_my_lendings() -> tuple[Response, int]:
             {
                 "rental_id": str,
                 "rent_status": str,
+                "original_owner_id": str,
+                "user_id": str,
                 "book_id": str,
                 "title": str,
                 "author": str,
@@ -160,6 +166,8 @@ def get_my_completed_lendings() -> tuple[Response, int]:
             {
                 "rental_id": str,
                 "rent_status": str,
+                "original_owner_id": str,
+                "user_id": str,
                 "book_id": str,
                 "title": str,
                 "author": str,

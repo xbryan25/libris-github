@@ -10,10 +10,10 @@ definePageMeta({
 const activeTab = ref<'lending' | 'renting'>('lending');
 const route = useRoute();
 
-const tab = route.query.activeTab;
-if (tab && !Array.isArray(tab)) {
-  if (tab === 'lending' || tab === 'renting') {
-    activeTab.value = tab;
+const currentTab = route.query.activeTab;
+if (currentTab && !Array.isArray(currentTab)) {
+  if (currentTab === 'lending' || currentTab === 'renting') {
+    activeTab.value = currentTab;
   }
 }
 
@@ -28,10 +28,16 @@ const headerText = computed(() => {
   return activeTab.value === 'lending' ? 'Lend Status' : 'Rent Status';
 });
 
-watch(activeTab, (val) => {
+const updateUrl = (newActiveTab: string) => {
   const url = new URL(window.location.href);
-  url.searchParams.set('activeTab', val);
+  url.searchParams.set('activeTab', newActiveTab);
   window.history.replaceState({}, '', url.toString());
+};
+
+updateUrl(activeTab.value);
+
+watch(activeTab, (val) => {
+  updateUrl(val);
 });
 </script>
 

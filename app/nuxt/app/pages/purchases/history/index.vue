@@ -6,12 +6,12 @@ definePageMeta({
   middleware: auth,
 });
 
-const activeTab = ref<'lending' | 'renting'>('lending');
+const activeTab = ref<'selling' | 'buying'>('buying');
 const route = useRoute();
 
 const currentTab = route.query.activeTab;
 if (currentTab && !Array.isArray(currentTab)) {
-  if (currentTab === 'lending' || currentTab === 'renting') {
+  if (currentTab === 'selling' || currentTab === 'buying') {
     activeTab.value = currentTab;
   }
 }
@@ -19,19 +19,17 @@ if (currentTab && !Array.isArray(currentTab)) {
 navigateTo({ query: { activeTab: activeTab.value } }, { replace: true });
 
 const tabs = [
-  { id: 'lending', label: "Books I've Lent", icon: 'lucide:trending-up' },
-  { id: 'renting', label: "Books I've Rented", icon: 'lucide:trending-down' },
+  { id: 'selling', label: 'Books I Sold', icon: 'lucide:trending-up' },
+  { id: 'buying', label: 'Books I Bought', icon: 'lucide:trending-down' },
 ] as const;
 
 const headerText = computed(() => {
-  return activeTab.value === 'lending' ? 'Lend History' : 'Rent History';
+  return activeTab.value === 'selling' ? 'Sell History' : 'Purchase History';
 });
 
-const sortByItems = ref(['Start date', 'End date']);
 const sortOrderItems = ref(['newest first', 'oldest first']);
 const cardsPerPageItems = ref([10, 25, 50]);
 
-const sortBy = ref('Start date');
 const sortOrder = ref('newest first');
 const cardsPerPage = ref(10);
 
@@ -54,9 +52,9 @@ watch(activeTab, (val) => {
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />
-          My Rental History
+          My Sell And Purchase History
         </h1>
-        <p class="text-muted">See your lending and renting activity</p>
+        <p class="text-muted">See your selling and buying activity</p>
       </div>
     </div>
 
@@ -88,13 +86,6 @@ watch(activeTab, (val) => {
 
       <div class="flex-[3] flex justify-center gap-2">
         <div class="flex items-center gap-2">
-          <p>Sort by</p>
-          <USelect v-model="sortBy" :items="sortByItems" class="w-45" />
-        </div>
-
-        <USeparator orientation="vertical" color="primary" size="sm" />
-
-        <div class="flex items-center gap-2">
           <p>Show</p>
           <USelect v-model="sortOrder" :items="sortOrderItems" class="w-45" />
         </div>
@@ -109,18 +100,17 @@ watch(activeTab, (val) => {
 
       <div class="flex-1 flex justify-end items-center">
         <NuxtLink
-          :to="{ path: '/rentals', query: { activeTab } }"
+          :to="{ path: '/purchases', query: { activeTab } }"
           class="text-foreground font-medium flex gap-1 cursor-pointer"
         >
-          Current {{ activeTab === 'lending' ? 'lendings' : 'rentals' }}
+          Current {{ activeTab === 'selling' ? 'sold' : 'purchases' }}
           <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
         </NuxtLink>
       </div>
     </div>
 
     <!-- Pass activeTab to RentalsHistorySection as prop -->
-    <RentalsHistorySection
-      :sort-by="sortBy"
+    <PurchasesHistorySection
       :sort-order="sortOrder"
       :cards-per-page="cardsPerPage"
       :active-tab="activeTab"
