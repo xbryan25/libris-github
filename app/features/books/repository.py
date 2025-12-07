@@ -360,9 +360,10 @@ class BookRepository:
             BookQueries.GET_MY_LIBRARY_BOOK_COUNT.format(search_by="title"),
             (
                 search_pattern,
-                genre,
                 availability,
                 user_id,
+                genre,
+                genre,
             ),
         )
 
