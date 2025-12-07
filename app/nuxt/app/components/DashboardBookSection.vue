@@ -84,12 +84,6 @@ onMounted(() => {
               <Icon :name="currentSection.icon" />
               <span class="text-3xl">{{ currentSection.label }}</span>
             </h2>
-            <button
-              v-if="currentBooks.length > 0"
-              class="px-4 py-2 bg-surface-hover hover:bg-accent hover:text-white rounded-md font-medium cursor-pointer transition-colors"
-            >
-              See more
-            </button>
           </div>
 
           <!-- Empty State -->

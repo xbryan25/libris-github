@@ -49,7 +49,6 @@ const showCompleteCard = computed(() => {
   return currentItem.value?.purchase_status === 'completed' && !showRating.value;
 });
 
-// NEW: Add computed property to show rating card
 const showRatingCard = computed(() => {
   return currentItem.value?.purchase_status === 'completed' && 
          showRating.value;
@@ -132,14 +131,14 @@ onMounted(() => {
 
     <!-- Content -->
     <div v-else class="space-y-6">
-      <!-- Book Info Card -->
+      <!-- Book Info Card (Hide when completed) -->
       <PurchaseBookInfoCard 
-        v-if="currentItem.purchase_status !== 'completed' || (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)"
+        v-if="currentItem.purchase_status !== 'completed'"
         :item="currentItem" 
         :from="from" 
       />
 
-      <!-- Progress Stepper -->
+      <!-- Progress Stepper (Use computed status) -->
       <PurchaseProgressStepper 
         v-if="currentItem.purchase_status !== 'pending'" 
         :status="currentStatus" 
@@ -149,44 +148,47 @@ onMounted(() => {
 
       <!-- Dates & Meetup Grid -->
       <PurchaseDetailsGrid 
-        v-if="currentItem.purchase_status !== 'completed' || (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)"
+        v-if="currentItem.purchase_status !== 'completed'"
         :item="currentItem"
         :from="from"
       />
 
       <!-- Cost Card -->
       <PurchaseCostCard 
-        v-if="currentItem.purchase_status !== 'completed' || (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)"
+        v-if="currentItem.purchase_status !== 'completed'"
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
         :from="from"
       />
 
-      <!-- Transfer Card (Only for buyers in awaiting_transfer_decision status) -->
-      <PurchaseTransferCard
-        v-if="showTransferCard"
-        :purchase-id="purchaseid"
-        :from="from"
-        @refresh="fetchPurchaseData"
-      />
+      <!-- Transfer Card, Complete Card, or Rating Card -->
+      <template v-if="currentItem.purchase_status === 'completed'">
+        <!-- Transfer Card (Only for buyers in awaiting_transfer_decision status) -->
+        <PurchaseTransferCard
+          v-if="showTransferCard"
+          :purchase-id="purchaseid"
+          :from="from"
+          @refresh="fetchPurchaseData"
+        />
 
-      <!-- Complete Card -->
-      <PurchaseCompleteCard
-        v-if="showCompleteCard"
-        :status="currentItem.purchase_status"
-        :from="from"
-        :item="currentItem"
-        @show-rating="handleShowRating"
-      />
-
-      <!-- Rating Card -->
-      <PurchaseRatingCard
-        v-if="showRatingCard"
-        :from="from"
-        :item="currentItem"
-        :purchase-id="purchaseid"
-        @back-to-complete="handleBackToComplete"
-      />
+        <!-- Complete Card -->
+        <PurchaseCompleteCard
+          v-else-if="!showRating"
+          :status="currentItem.purchase_status"
+          :from="from"
+          :item="currentItem"
+          @show-rating="handleShowRating"
+        />
+        
+        <!-- Rating Card -->
+        <PurchaseRatingCard
+          v-else
+          :from="from"
+          :item="currentItem"
+          :purchase-id="purchaseid"
+          @back-to-complete="handleBackToComplete"
+        />
+      </template>
 
       <!-- Confirmation Cards -->
       <PurchaseConfirmationCard
