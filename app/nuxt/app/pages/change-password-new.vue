@@ -21,7 +21,7 @@ const { validatePassword } = usePasswordValidation();
 
 if (!code.value) {
   console.log('[CHANGE PASSWORD] No code found, redirecting');
-  navigateTo('/users/me'); // FIXED: Changed from /profile/me to /users/me
+  navigateTo('/users/me');
 }
 
 const passwordValidation = computed(() => {
@@ -79,7 +79,7 @@ const onSubmitChangePassword = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    navigateTo('/users/me'); // FIXED: Changed from /profile/me to /users/me
+    navigateTo('/users/me');
   } catch (error: any) {
     console.error('[CHANGE PASSWORD] Error:', error);
     let errorMessage = 'An unexpected error occurred.';
@@ -101,25 +101,34 @@ const onSubmitChangePassword = async () => {
 </script>
 
 <template>
-  <div class="max-h-screen w-full flex overflow-hidden bg-background text-base">
-    <div class="flex-1 flex items-center justify-center">
-      <div class="flex flex-col gap-10 box-border px-[10%] pb-[10%] max-w-2xl w-full">
-        <div class="mr-auto"><ColorModeButton /></div>
+  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <!-- Back to profile link -->
+    <div class="w-full px-6 py-4">
+      <NuxtLink
+        to="/users/me"
+        class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
+      >
+        <Icon name="heroicons:arrow-left" class="w-5 h-5" />
+        Back to profile
+      </NuxtLink>
+    </div>
 
-        <div class="flex gap-3">
-          <Icon name="icons:logo" class="w-12 h-12" />
-          <h1 class="text-5xl font-extrabold">Libris</h1>
+    <!-- Main Content - Centered -->
+    <main class="flex-grow flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl">
+        <!-- Heading -->
+        <div class="mb-8 text-center">
+          <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">Change your password</h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400">
+            Enter your current password and choose a new strong password.
+          </p>
         </div>
 
-        <div class="flex flex-col gap-1">
-          <h2 class="text-3xl font-bold">Change your password</h2>
-          <h3>Enter your current password and choose a new strong password.</h3>
-        </div>
-
-        <form @submit.prevent="onSubmitChangePassword" class="w-100 flex flex-col gap-5">
+        <!-- Form -->
+        <form @submit.prevent="onSubmitChangePassword" class="space-y-5">
           <!-- Current Password -->
           <div class="space-y-2">
-            <label for="currentPassword" class="block text-sm font-medium">
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Current Password
             </label>
             <UInput
@@ -127,7 +136,7 @@ const onSubmitChangePassword = async () => {
               v-model="currentPassword"
               :type="showCurrentPassword ? 'text' : 'password'"
               placeholder="Enter current password"
-              class="w-100"
+              class="w-full"
               :disabled="isLoading"
               :ui="{ trailing: 'pe-1' }"
               required
@@ -147,7 +156,7 @@ const onSubmitChangePassword = async () => {
 
           <!-- New Password -->
           <div class="space-y-2">
-            <label for="newPassword" class="block text-sm font-medium">
+            <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               New Password
             </label>
             <UInput
@@ -155,7 +164,7 @@ const onSubmitChangePassword = async () => {
               v-model="newPassword"
               :type="showNewPassword ? 'text' : 'password'"
               placeholder="Enter new password"
-              class="w-100"
+              class="w-full"
               :disabled="isLoading"
               :ui="{ trailing: 'pe-1' }"
               required
@@ -183,7 +192,7 @@ const onSubmitChangePassword = async () => {
 
           <!-- Confirm Password -->
           <div class="space-y-2">
-            <label for="confirmPassword" class="block text-sm font-medium">
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Confirm New Password
             </label>
             <UInput
@@ -191,7 +200,7 @@ const onSubmitChangePassword = async () => {
               v-model="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               placeholder="Re-enter new password"
-              class="w-100"
+              class="w-full"
               :disabled="isLoading"
               :ui="{ trailing: 'pe-1' }"
               required
@@ -219,30 +228,27 @@ const onSubmitChangePassword = async () => {
             </div>
           </div>
 
+          <!-- Submit Button -->
           <UButton
             type="submit"
-            class="w-100 h-9 cursor-pointer justify-center text-lg font-bold"
+            class="w-full h-12 rounded-xl cursor-pointer justify-center text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
             :disabled="!canSubmit"
             :loading="isLoading"
           >
             {{ isLoading ? 'Changing Password...' : 'Change Password' }}
           </UButton>
 
-          <!-- FIXED: Changed from /profile/me to /users/me -->
-          <div class="flex gap-1 justify-center">
+          <!-- Cancel Link -->
+          <div class="text-center mt-4">
             <NuxtLink
               to="/users/me"
-              class="text-sm text-violet-700 dark:text-violet-500 cursor-pointer hover:text-violet-800 dark:hover:text-violet-400 transition-colors"
+              class="text-sm text-violet-700 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
             >
               Cancel and go back to profile
             </NuxtLink>
           </div>
         </form>
       </div>
-    </div>
-
-    <div class="flex-1">
-      <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />
-    </div>
+    </main>
   </div>
 </template>

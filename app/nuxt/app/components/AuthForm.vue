@@ -37,7 +37,7 @@ const passwordValidation = computed(() => {
 // Check if form can be submitted
 const canSubmitSignup = computed(() => {
   if (props.authType !== 'signup') return true;
-  
+
   return (
     state.username.length >= 3 &&
     state.emailAddress.length > 0 &&
@@ -66,12 +66,10 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
 <template>
   <div class="flex flex-col gap-10 box-border px-[10%] pb-[10%] max-w-2xl w-full">
     <div class="mr-auto"><ColorModeButton /></div>
-
     <div class="flex gap-3">
       <Icon name="icons:logo" class="w-12 h-12" />
       <h1 class="text-5xl font-extrabold">Libris</h1>
     </div>
-
     <div class="flex flex-col gap-1">
       <h2 class="text-3xl font-bold">{{ authType === 'login' ? 'Login' : 'Sign Up' }}</h2>
       <h3>
@@ -93,7 +91,6 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
           :loading="props.isLoadingGoogle"
           @click="emit('onSubmitGoogleLogin')"
         />
-
         <USeparator color="primary" size="sm" label="or" />
       </div>
 
@@ -108,7 +105,11 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         </UFormField>
 
         <UFormField label="Email Address" name="emailAddress">
-          <UInput v-model="state.emailAddress" class="w-100" :disabled="props.isLoading" />
+          <UInput
+            v-model="state.emailAddress"
+            class="w-100"
+            :disabled="props.isLoading"
+          />
         </UFormField>
 
         <UFormField label="Password" name="password">
@@ -136,7 +137,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
           <!-- Password Strength Meter for Signup -->
           <template v-if="authType === 'signup'">
             <PasswordStrengthMeter :password="state.password" :show-errors="false" />
-            
+
             <!-- Error Message when password is 8+ chars but invalid -->
             <div
               v-if="state.password.length >= 8 && !passwordValidation.valid"

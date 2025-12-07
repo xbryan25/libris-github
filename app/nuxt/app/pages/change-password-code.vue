@@ -178,17 +178,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-base font-sans">
-    <header class="w-full p-6 flex justify-between items-center">
-      <div class="flex gap-3 items-center">
-        <Icon name="icons:logo" class="w-12 h-12" />
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Libris</h1>
-      </div>
-      <ColorModeButton />
-    </header>
-
+  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
     <!-- Back to profile link -->
-    <div class="w-full px-6 mb-4">
+    <div class="w-full px-6 py-4">
       <NuxtLink
         to="/users/me"
         class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
@@ -198,18 +190,22 @@ onUnmounted(() => {
       </NuxtLink>
     </div>
 
+    <!-- Main Content - Centered -->
     <main class="flex-grow flex items-center justify-center p-4">
       <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl flex flex-col items-center text-center">
+        <!-- Shield Icon -->
         <div class="relative mb-6 inline-block">
           <Icon name="heroicons:shield-check" class="w-26 h-26 text-green-500" />
         </div>
 
+        <!-- Heading -->
         <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Enter security code</h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
           Please check your email for a message with your code.<br />
           Your code is 6 digits long.
         </p>
 
+        <!-- Code Input Fields -->
         <div class="flex gap-3 mb-8">
           <input
             v-for="(digit, index) in code"
@@ -227,6 +223,7 @@ onUnmounted(() => {
           />
         </div>
 
+        <!-- Verify Button -->
         <UButton
           @click="verifyCode"
           class="w-full h-12 rounded-xl cursor-pointer justify-center text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
@@ -236,6 +233,7 @@ onUnmounted(() => {
           {{ isLoading ? 'Verifying...' : 'Continue' }}
         </UButton>
 
+        <!-- Resend Code Link -->
         <div class="flex gap-1 text-base mt-6">
           <p class="text-gray-600 dark:text-gray-400">Didn't receive the code?</p>
           <button

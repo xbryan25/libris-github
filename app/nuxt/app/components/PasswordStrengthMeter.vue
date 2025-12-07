@@ -105,11 +105,11 @@ const barColorClass = computed(() => {
       </div>
       <div class="flex items-center gap-2">
         <Icon
-          :name="/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/\\~`]/.test(password) ? 'heroicons:check-circle-solid' : 'heroicons:x-circle-solid'"
-          :class="/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/\\~`]/.test(password) ? 'text-green-500' : 'text-gray-400'"
+          :name="/[!@#$%^&*()_+\-=\[\]{}\|;:,.<>?/\\~`]/.test(password) ? 'heroicons:check-circle-solid' : 'heroicons:x-circle-solid'"
+          :class="/[!@#$%^&*()_+\-=\[\]{}\|;:,.<>?/\\~`]/.test(password) ? 'text-green-500' : 'text-gray-400'"
           class="w-4 h-4"
         />
-        <span :class="/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/\\~`]/.test(password) ? 'text-green-500' : 'text-gray-500'">
+        <span :class="/[!@#$%^&*()_+\-=\[\]{}\|;:,.<>?/\\~`]/.test(password) ? 'text-green-500' : 'text-gray-500'">
           One special character
         </span>
       </div>

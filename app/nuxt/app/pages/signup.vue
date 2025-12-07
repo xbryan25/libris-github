@@ -76,7 +76,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
         :is-disabled="isDisabled"
         :is-loading="isLoading"
         @on-submit-signup="(username, email, password) => onSubmitSignup(username, email, password)"
-      />s
+      />
     </div>
 
     <div class="flex-1">
