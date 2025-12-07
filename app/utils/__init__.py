@@ -10,3 +10,4 @@ from .supabase import (  # noqa: F401
     upload_images_to_bucket_from_add_book_service,
     upload_images_to_bucket_from_edit_book_service,
 )
+from .password_validator import PasswordValidator  # noqa: F401

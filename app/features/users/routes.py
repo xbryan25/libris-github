@@ -188,3 +188,56 @@ def update_address() -> tuple[Response, int]:
 def get_library_details(user_id: str) -> tuple[Response, int]:
     """Retrieve book counts for a specific user."""
     return UserControllers.get_library_details_controller(user_id)
+
+
+@users_bp.route("/forgot-password", methods=["POST"])
+def request_password_reset() -> tuple[Response, int]:
+    """Request password reset by sending code to email."""
+    return UserControllers.request_password_reset_controller()
+
+
+@users_bp.route("/verify-reset-code", methods=["POST"])
+def verify_password_reset_code() -> tuple[Response, int]:
+    """Verify password reset code."""
+    return UserControllers.verify_password_reset_code_controller()
+
+
+@users_bp.route("/reset-password", methods=["POST"])
+def reset_password() -> tuple[Response, int]:
+    """Reset password with new password."""
+    return UserControllers.reset_password_controller()
+
+
+@users_bp.route("/resend-reset-code", methods=["POST"])
+def resend_password_reset_code() -> tuple[Response, int]:
+    """Resend password reset code to email."""
+    return UserControllers.resend_password_reset_code_controller()
+
+
+# Change Password Routes (for authenticated users)
+@users_bp.route("/change-password/request-code", methods=["POST"])
+@jwt_required()
+def request_change_password() -> tuple[Response, int]:
+    """Request verification code for password change."""
+    return UserControllers.request_change_password_controller()
+
+
+@users_bp.route("/change-password/verify-code", methods=["POST"])
+@jwt_required()
+def verify_change_password_code() -> tuple[Response, int]:
+    """Verify change password code."""
+    return UserControllers.verify_change_password_code_controller()
+
+
+@users_bp.route("/change-password", methods=["POST"])
+@jwt_required()
+def change_password() -> tuple[Response, int]:
+    """Change user password."""
+    return UserControllers.change_password_controller()
+
+
+@users_bp.route("/change-password/resend-code", methods=["POST"])
+@jwt_required()
+def resend_change_password_code() -> tuple[Response, int]:
+    """Resend change password verification code."""
+    return UserControllers.resend_change_password_code_controller()

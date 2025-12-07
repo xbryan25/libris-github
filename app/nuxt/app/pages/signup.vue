@@ -9,7 +9,6 @@ definePageMeta({
 
 const toast = useToast();
 const auth = useAuthStore();
-
 const isDisabled = ref(false);
 const isLoading = ref(false);
 
@@ -21,7 +20,6 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 
   try {
     const response = await auth.signup(username, emailAddress, password);
-
     console.log('Signup response:', response);
 
     toast.add({
@@ -45,14 +43,12 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
     console.log('Redirecting to verify-email...');
     navigateTo(`/verify-email?userId=${userId}`);
   } catch (error: any) {
     console.error('Signup error:', error);
 
     let errorMessage = 'An unexpected error occurred.';
-
     if (error.data?.error) {
       errorMessage = error.data.error;
     } else if (error.message) {
@@ -68,6 +64,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     isDisabled.value = false;
     isLoading.value = false;
   }
+  
 };
 </script>
 
@@ -76,10 +73,12 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     <div class="flex-1 flex items-center justify-center">
       <AuthForm
         auth-type="signup"
+        :is-disabled="isDisabled"
         :is-loading="isLoading"
         @on-submit-signup="(username, email, password) => onSubmitSignup(username, email, password)"
-      />
+      />s
     </div>
+
     <div class="flex-1">
       <NuxtImg src="/images/authImage1.jpg" class="w-full h-full object-cover" alt="Auth image" />
     </div>
