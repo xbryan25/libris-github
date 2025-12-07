@@ -33,8 +33,8 @@ const convertDateFormat = (dateString: string) => {
 <template>
   <NuxtLink
     :to="{
-      path: `/purchases/${props.purchase.purchase_id}`,
-      query: { from: 'rental' },
+      path: `/purchases/history/${props.purchase.purchase_id}`,
+      query: { from: 'purchase' },
     }"
     class="block"
   >

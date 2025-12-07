@@ -102,3 +102,26 @@ class RatingControllers:
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_ratings_from_purchase_for_user_controller(
+        purchase_id: str,
+    ) -> tuple[Response, int]:
+
+        try:
+            user_id = get_jwt_identity()
+
+            if not user_id:
+                return jsonify({"error": "Not authenticated"}), 401
+
+            ratings_with_comments = (
+                RatingServices.get_ratings_from_purchase_for_user_service(
+                    user_id, purchase_id
+                )
+            )
+
+            return jsonify(ratings_with_comments), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500

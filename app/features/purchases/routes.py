@@ -102,6 +102,46 @@ def get_my_purchases() -> tuple[Response, int]:
     return PurchasesController.get_user_purchases_controller()
 
 
+@purchases_bp.route("/completed/<string:purchase_id>", methods=["GET"])
+@jwt_required()
+def get_completed_purchase(purchase_id: str) -> tuple[Response, int]:
+    """
+    Retrieve a completed purchase for the authenticated user.
+
+    Response JSON:
+        {
+            "purchase_id": str,
+            "purchase_status": str,
+            "original_owner_id": str,
+            "user_id": str,
+            "book_id": str,
+            "title": str,
+            "author": str,
+            "image": str,
+            "from": str,
+            "all_fees_captured": bool,
+            "reserved_at": str,
+            "reservation_expires_at": str,
+            "meetup_location": str,
+            "meetup_time_window": str,
+            "meetup_time": str,
+            "meetup_date": str,
+            "pickup_confirmation_started_at": str,
+            "user_confirmed_pickup": bool,
+            "owner_confirmed_pickup": bool,
+            "user_rated": bool,
+            "owner_rated": bool,
+            "cost": int
+        }
+
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return PurchasesController.get_completed_purchase_controller(purchase_id)
+
+
 @purchases_bp.route("/my-completed-purchases", methods=["GET"])
 @jwt_required()
 def get_my_completed_purchases() -> tuple[Response, int]:

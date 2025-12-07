@@ -23,8 +23,8 @@ export const useRating = () => {
       // Determine endpoint based on transaction type
       const isRental = from === 'rental' || from === 'lending'
       const endpoint = isRental 
-        ? `${API_URL}/api/ratings/rental/${transactionId}/rate`
-        : `${API_URL}/api/ratings/purchase/${transactionId}/rate`
+        ? `${API_URL}/api/ratings/rental/${transactionId}`
+        : `${API_URL}/api/ratings/purchase/${transactionId}`
 
       await $apiFetch(endpoint, {
         method: 'POST',

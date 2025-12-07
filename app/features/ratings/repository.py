@@ -87,3 +87,26 @@ class RatingRepository:
             RatingQueries.CHECK_EXISTING_RATING_PURCHASE, (purchase_id, rater_id)
         )
         return result.get("exists") if result else False
+
+    @staticmethod
+    def get_ratings_from_purchase_from_rater(
+        purchase_id: str, rater_id: str
+    ) -> dict[str, int | str] | None:
+        """Get rating score and comment from purchase_id and rater_id"""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            RatingQueries.GET_RATINGS_FROM_PURCHASE_FROM_RATER, (purchase_id, rater_id)
+        )
+
+    @staticmethod
+    def get_ratings_from_purchase_from_rated_user(
+        purchase_id: str, rated_user_id: str
+    ) -> dict[str, int | str] | None:
+        """Get rating score and comment from purchase_id and rated_user_id"""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            RatingQueries.GET_RATINGS_FROM_PURCHASE_FROM_RATED_USER,
+            (purchase_id, rated_user_id),
+        )

@@ -104,6 +104,70 @@ class PurchasesServices:
         return formatted_purchases
 
     @staticmethod
+    def get_completed_purchase_service(
+        user_id: str, purchase_id: str
+    ) -> dict[str, Any] | None:
+
+        completed_purchase = PurchasesRepository.get_completed_purchase(
+            user_id, purchase_id
+        )
+
+        if completed_purchase:
+            formatted_purchase = {
+                "purchase_id": completed_purchase.get("purchase_id"),
+                "purchase_status": completed_purchase.get("purchase_status"),
+                "original_owner_id": completed_purchase.get("original_owner_id"),
+                "user_id": completed_purchase.get("user_id"),
+                "book_id": completed_purchase.get("book_id"),
+                "title": completed_purchase.get("title", ""),
+                "author": completed_purchase.get("author", ""),
+                "image": completed_purchase.get("image"),
+                "from": completed_purchase.get("from", ""),
+                "all_fees_captured": completed_purchase.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    completed_purchase.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    completed_purchase.get("reservation_expires_at")
+                ),
+                "meetup_location": completed_purchase.get("meetup_location", ""),
+                "meetup_time_window": completed_purchase.get("meetup_time_window", ""),
+                "meetup_time": completed_purchase.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_purchase.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": completed_purchase.get(
+                    "user_confirmed_pickup", False
+                ),
+                "owner_confirmed_pickup": completed_purchase.get(
+                    "owner_confirmed_pickup", False
+                ),
+                "user_rated": completed_purchase.get("user_rated", False),
+                "owner_rated": completed_purchase.get("owner_rated", False),
+                "transfer_decision_pending": completed_purchase.get(
+                    "transfer_decision_pending", False
+                ),
+                "ownership_transferred": completed_purchase.get(
+                    "ownership_transferred"
+                ),
+                "cost": (
+                    int(completed_purchase.get("cost", 0))
+                    if completed_purchase.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(completed_purchase.get("meetup_date"))
+                    if completed_purchase.get("meetup_date")
+                    else None
+                ),
+            }
+
+            return formatted_purchase
+
+        else:
+            return None
+
+    @staticmethod
     def get_user_completed_purchases_service(
         user_id: str, params: dict[str, Any]
     ) -> list[dict[str, Any]]:

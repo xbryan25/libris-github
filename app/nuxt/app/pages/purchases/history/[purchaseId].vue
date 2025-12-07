@@ -12,10 +12,10 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const purchaseid = route.params.purchaseId as string;
+const purchaseId = route.params.purchaseId as string;
 const from = route.query.from as string;
 
-const { purchases, fetchUserPurchases } = useUserPurchases();
+const { purchases, fetchUserCompletedPurchase } = useUserPurchases();
 const { sales, fetchUserSales } = useUserSales();
 
 const currentItem = ref<Purchase | Sale | null>(null);
@@ -62,11 +62,12 @@ const fetchPurchaseData = async () => {
   loading.value = true;
   try {
     if (from === 'purchase') {
-      await fetchUserPurchases();
-      currentItem.value = purchases.value.find((p) => p.purchase_id === purchaseid) || null;
+      console.log('reachh heree?');
+      await fetchUserCompletedPurchase(purchaseId);
+      currentItem.value = purchases.value[0] ?? null;
     } else if (from === 'sale') {
       await fetchUserSales();
-      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseid) || null;
+      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseId) || null;
     }
   } catch (error) {
     console.error('Error fetching purchase data:', error);
@@ -97,11 +98,11 @@ onMounted(() => {
     <!-- Header -->
     <div class="mb-6">
       <button
-        @click="router.back()"
         class="flex items-center gap-2 text-base pt-4 pb-4 hover:text-foreground mb-4 cursor-pointer"
+        @click="router.back()"
       >
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
-        <span>Back to Purchases</span>
+        <span>Back to Purchases History</span>
       </button>
 
       <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
@@ -136,93 +137,24 @@ onMounted(() => {
     <!-- Content -->
     <div v-else class="space-y-6">
       <!-- Book Info Card -->
-      <PurchaseBookInfoCard
-        v-if="
-          currentItem.purchase_status !== 'completed' ||
-          (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)
-        "
-        :item="currentItem"
-        :from="from"
-      />
-
-      <!-- Progress Stepper -->
-      <PurchaseProgressStepper
-        v-if="currentItem.purchase_status !== 'pending'"
-        :status="currentStatus"
-        :from="from"
-        :transfer-decision-pending="currentItem.transfer_decision_pending"
-      />
+      <PurchaseBookInfoCard :item="currentItem" :from="from" />
 
       <!-- Dates & Meetup Grid -->
-      <PurchaseDetailsGrid
-        v-if="
-          currentItem.purchase_status !== 'completed' ||
-          (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)
-        "
-        :item="currentItem"
-        :from="from"
-      />
+      <PurchaseDetailsGrid :item="currentItem" :from="from" />
 
       <!-- Cost Card -->
       <PurchaseCostCard
-        v-if="
-          currentItem.purchase_status !== 'completed' ||
-          (currentItem.purchase_status === 'completed' && currentItem.transfer_decision_pending)
-        "
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
         :from="from"
       />
 
-      <!-- Transfer Card (Only for buyers in awaiting_transfer_decision status) -->
-      <PurchaseTransferCard
-        v-if="showTransferCard"
-        :purchase-id="purchaseid"
-        :from="from"
-        @refresh="fetchPurchaseData"
-      />
-
-      <!-- Complete Card -->
-      <PurchaseCompleteCard
-        v-if="showCompleteCard"
-        :status="currentItem.purchase_status"
-        :from="from"
-        :item="currentItem"
-        @show-rating="handleShowRating"
-      />
-
       <!-- Rating Card -->
-      <PurchaseRatingCard
-        v-if="showRatingCard"
+      <PurchaseViewRatingCard
         :from="from"
         :item="currentItem"
-        :purchase-id="purchaseid"
+        :purchase-id="purchaseId"
         @back-to-complete="handleBackToComplete"
-      />
-
-      <!-- Confirmation Cards -->
-      <PurchaseConfirmationCard
-        v-if="
-          currentItem.purchase_status === 'approved' ||
-          currentItem.purchase_status === 'awaiting_pickup_confirmation'
-        "
-        :status="currentItem.purchase_status"
-        :from="from"
-        :purchase-id="purchaseid"
-        :meetup-date="currentItem.meetup_date"
-        :meetup-time="currentItem.meetup_time"
-        :user-confirmed-pickup="currentItem.user_confirmed_pickup"
-        :owner-confirmed-pickup="currentItem.owner_confirmed_pickup"
-        @refresh="fetchPurchaseData"
-      />
-
-      <!-- Pending Actions -->
-      <PurchasePendingActions
-        v-if="currentItem.purchase_status === 'pending'"
-        :from="from"
-        :purchase-id="purchaseid"
-        @approval-success="handleApprovalSuccess"
-        @refresh="fetchPurchaseData"
       />
     </div>
   </div>
