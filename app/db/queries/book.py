@@ -327,7 +327,7 @@ class BookQueries:
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE b.owner_id = %s AND rb.rent_status IN ('ongoing')
+        WHERE rb.original_owner_id = %s AND rb.rent_status IN ('ongoing')
     """
 
     GET_SOLD_BOOKS = """
@@ -342,7 +342,7 @@ class BookQueries:
         JOIN books b ON pb.book_id = b.book_id
         JOIN users u ON pb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE b.owner_id = %s
+        WHERE pb.original_owner_id = %s
         AND pb.purchase_status = 'completed'
         AND pb.ownership_transferred = TRUE
     """
