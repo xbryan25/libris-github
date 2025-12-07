@@ -2,9 +2,6 @@
 import auth from '~/middleware/auth';
 import { useUserPurchases, type Purchase } from '~/composables/useUserPurchases';
 import { useUserSales, type Sale } from '~/composables/useUserSales';
-import PurchaseCompleteCard from '~/components/PurchaseCompleteCard.vue';
-import PurchaseRatingCard from '~/components/PurchaseRatingCard.vue';
-import PurchaseTransferCard from '~/components/PurchaseTransferCard.vue';
 
 definePageMeta({
   middleware: auth,
@@ -22,47 +19,10 @@ const currentItem = ref<Purchase | Sale | null>(null);
 const loading = ref(true);
 const showRating = ref(false);
 
-const currentStatus = computed(() => {
-  if (!currentItem.value) return '';
-  if (showRating.value) return 'rate_user';
-
-  // Just return the actual purchase_status - don't modify it
-  return currentItem.value.purchase_status;
-});
-
-const showTransferCard = computed(() => {
-  return (
-    from === 'purchase' &&
-    currentItem.value?.purchase_status === 'completed' &&
-    currentItem.value?.transfer_decision_pending === true &&
-    !showRating.value
-  );
-});
-
-const showCompleteCard = computed(() => {
-  // For purchases: only show complete card if transfer decision is NOT pending
-  if (from === 'purchase') {
-    return (
-      currentItem.value?.purchase_status === 'completed' &&
-      currentItem.value?.transfer_decision_pending === false &&
-      !showRating.value
-    );
-  }
-
-  // For sales: show complete card normally
-  return currentItem.value?.purchase_status === 'completed' && !showRating.value;
-});
-
-// NEW: Add computed property to show rating card
-const showRatingCard = computed(() => {
-  return currentItem.value?.purchase_status === 'completed' && showRating.value;
-});
-
 const fetchPurchaseData = async () => {
   loading.value = true;
   try {
     if (from === 'purchase') {
-      console.log('reachh heree?');
       await fetchUserCompletedPurchase(purchaseId);
       currentItem.value = purchases.value[0] ?? null;
     } else if (from === 'sale') {
@@ -74,14 +34,6 @@ const fetchPurchaseData = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-const handleApprovalSuccess = async () => {
-  await fetchPurchaseData();
-};
-
-const handleShowRating = () => {
-  showRating.value = true;
 };
 
 const handleBackToComplete = () => {
