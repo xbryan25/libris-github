@@ -90,7 +90,7 @@ class PurchasesRepository:
             purchase_id (str): The ID of the completed purchase whose details are being fetched.
 
         Returns:
-            dict[str, Any]: A dictionary with book and owner details. Returns None if no completed purchases found.
+            dict[str, Any]: A dictionary with book and owner details. Returns None if completed purchase is not found.
         """
         db = current_app.extensions["db"]
 
@@ -177,6 +177,28 @@ class PurchasesRepository:
 
         result = db.fetch_all(PurchasesQueries.GET_USER_SALES_WITH_STATUS, params)
         return result if result else []
+
+    @staticmethod
+    def get_completed_sale(user_id: str, purchase_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve a completed sale for a user.
+
+        Args:
+            purchase_id (str): The ID of the completed sale whose details are being fetched.
+
+        Returns:
+            dict[str, Any]: A dictionary with book and owner details. Returns None if completed sale is not found.
+        """
+        db = current_app.extensions["db"]
+
+        query_params = (purchase_id, user_id)
+
+        result = db.fetch_one(
+            PurchasesQueries.GET_COMPLETED_SALE,
+            query_params,
+        )
+
+        return result
 
     @staticmethod
     def get_user_completed_sales(

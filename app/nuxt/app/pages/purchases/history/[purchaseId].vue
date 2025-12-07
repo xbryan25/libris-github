@@ -8,16 +8,14 @@ definePageMeta({
 });
 
 const route = useRoute();
-const router = useRouter();
 const purchaseId = route.params.purchaseId as string;
 const from = route.query.from as string;
 
 const { purchases, fetchUserCompletedPurchase } = useUserPurchases();
-const { sales, fetchUserSales } = useUserSales();
+const { sales, fetchUserCompletedSale } = useUserSales();
 
 const currentItem = ref<Purchase | Sale | null>(null);
 const loading = ref(true);
-const showRating = ref(false);
 
 const fetchPurchaseData = async () => {
   loading.value = true;
@@ -26,18 +24,14 @@ const fetchPurchaseData = async () => {
       await fetchUserCompletedPurchase(purchaseId);
       currentItem.value = purchases.value[0] ?? null;
     } else if (from === 'sale') {
-      await fetchUserSales();
-      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseId) || null;
+      await fetchUserCompletedSale(purchaseId);
+      currentItem.value = sales.value[0] ?? null;
     }
   } catch (error) {
     console.error('Error fetching purchase data:', error);
   } finally {
     loading.value = false;
   }
-};
-
-const handleBackToComplete = () => {
-  showRating.value = false;
 };
 
 onMounted(() => {
@@ -49,13 +43,13 @@ onMounted(() => {
   <div class="min-h-screen w-full pt-4 pb-6 px-4 md:px-8 lg:px-15">
     <!-- Header -->
     <div class="mb-6">
-      <button
+      <NuxtLink
+        :to="`/purchases/history?activeTab=${from === 'purchase' ? 'buying' : 'selling'}`"
         class="flex items-center gap-2 text-base pt-4 pb-4 hover:text-foreground mb-4 cursor-pointer"
-        @click="router.back()"
       >
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
-        <span>Back to Purchases History</span>
-      </button>
+        <span>Back to {{ from === 'purchase' ? 'Purchases' : 'Sales' }} History</span>
+      </NuxtLink>
 
       <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
         <Icon
@@ -89,7 +83,7 @@ onMounted(() => {
     <!-- Content -->
     <div v-else class="space-y-6">
       <!-- Book Info Card -->
-      <PurchaseBookInfoCard :item="currentItem" :from="from" />
+      <PurchaseBookInfoCard :item="currentItem" :from="from" :is-completed="true" />
 
       <!-- Dates & Meetup Grid -->
       <PurchaseDetailsGrid :item="currentItem" :from="from" />
@@ -102,12 +96,7 @@ onMounted(() => {
       />
 
       <!-- Rating Card -->
-      <PurchaseViewRatingCard
-        :from="from"
-        :item="currentItem"
-        :purchase-id="purchaseId"
-        @back-to-complete="handleBackToComplete"
-      />
+      <PurchaseViewRatingCard :from="from" :item="currentItem" :purchase-id="purchaseId" />
     </div>
   </div>
 </template>

@@ -5,6 +5,7 @@ import type { Sale } from '~/composables/useUserSales';
 interface Props {
   item: Purchase | Sale;
   from: string;
+  isCompleted?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -24,6 +25,8 @@ const getStatusBadge = (status: string) => {
 const userName = computed(() => {
   return props.from === 'purchase' ? (props.item as Purchase).from : (props.item as Sale).to;
 });
+
+console.log(props.item);
 </script>
 
 <template>
@@ -48,17 +51,22 @@ const userName = computed(() => {
 
         <div class="grid grid-cols-2 gap-4 mt-6">
           <div>
-            <p class="text-sm text-muted">
+            <p v-if="props.isCompleted" class="text-sm text-muted">
+              {{ from === 'purchase' ? 'Bought from' : 'Sold to' }}
+            </p>
+
+            <p v-else class="text-sm text-muted">
               {{ from === 'purchase' ? 'Buying from' : 'Selling to' }}
             </p>
+
             <NuxtLink
               v-if="from === 'purchase'"
-              :to="`/users/${item.original_owner_id}`"
+              :to="`/users/${item.user_id}`"
               class="font-medium text-lg"
               >{{ userName }}
             </NuxtLink>
 
-            <NuxtLink v-else :to="`/users/${item.user_id}`" class="font-medium text-lg">
+            <NuxtLink v-else :to="`/users/${item.original_owner_id}`" class="font-medium text-lg">
               {{ userName }}
             </NuxtLink>
           </div>
