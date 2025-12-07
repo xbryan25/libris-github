@@ -29,6 +29,23 @@ def submit_purchase_rating(purchase_id: str) -> tuple[Response, int]:
     return RatingControllers.submit_purchase_rating(purchase_id)
 
 
+@ratings_bp.route("/rental/<rental_id>", methods=["GET"])
+@jwt_required()
+def get_ratings_from_rental_for_user(rental_id: str) -> tuple[Response, int]:
+    """
+    Get both received and given ratings from a rental.
+
+    Response body:
+    {
+        "given_rating": int,
+        "given_comment": str,
+        "received_rating": int,
+        "received_comment": str,
+    }
+    """
+    return RatingControllers.get_ratings_from_rental_for_user_controller(rental_id)
+
+
 @ratings_bp.route("/purchase/<purchase_id>", methods=["GET"])
 @jwt_required()
 def get_ratings_from_purchase_for_user(purchase_id: str) -> tuple[Response, int]:

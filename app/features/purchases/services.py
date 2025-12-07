@@ -62,6 +62,8 @@ class PurchasesServices:
             formatted_purchase = {
                 "purchase_id": purchase.get("purchase_id"),
                 "purchase_status": purchase.get("purchase_status"),
+                "original_owner_id": purchase.get("original_owner_id"),
+                "user_id": purchase.get("user_id"),
                 "book_id": purchase.get("book_id"),
                 "title": purchase.get("title", ""),
                 "author": purchase.get("author", ""),

@@ -61,12 +61,12 @@ console.log(props.item);
 
             <NuxtLink
               v-if="from === 'purchase'"
-              :to="`/users/${item.user_id}`"
+              :to="`/users/${item.original_owner_id}`"
               class="font-medium text-lg"
               >{{ userName }}
             </NuxtLink>
 
-            <NuxtLink v-else :to="`/users/${item.original_owner_id}`" class="font-medium text-lg">
+            <NuxtLink v-else :to="`/users/${item.user_id}`" class="font-medium text-lg">
               {{ userName }}
             </NuxtLink>
           </div>

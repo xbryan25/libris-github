@@ -75,6 +75,82 @@ class RentalsServices:
         return formatted_rentals
 
     @staticmethod
+    def get_completed_rental_service(
+        user_id: str, rental_id: str
+    ) -> dict[str, Any] | None:
+
+        completed_rental = RentalsRepository.get_completed_rental(user_id, rental_id)
+
+        if completed_rental:
+            formatted_rental = {
+                "rental_id": completed_rental.get("rental_id"),
+                "rent_status": completed_rental.get("rent_status"),
+                "original_owner_id": completed_rental.get("original_owner_id"),
+                "user_id": completed_rental.get("user_id"),
+                "book_id": completed_rental.get("book_id"),
+                "title": completed_rental.get("title", ""),
+                "author": completed_rental.get("author", ""),
+                "image": completed_rental.get("image"),
+                "from": completed_rental.get("from", ""),
+                "actual_deposit": completed_rental.get("actual_deposit", 0),
+                "actual_rate": completed_rental.get("actual_rate", 0),
+                "all_fees_captured": completed_rental.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("reservation_expires_at")
+                ),
+                "rental_duration_days": completed_rental.get("rental_duration_days", 0),
+                "meetup_location": completed_rental.get("meetup_location", ""),
+                "meetup_time_window": completed_rental.get("meetup_time_window", ""),
+                "meetup_time": completed_rental.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": completed_rental.get(
+                    "user_confirmed_pickup", False
+                ),
+                "owner_confirmed_pickup": completed_rental.get(
+                    "owner_confirmed_pickup", False
+                ),
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("return_confirmation_started_at")
+                ),
+                "user_confirmed_return": completed_rental.get(
+                    "user_confirmed_return", False
+                ),
+                "owner_confirmed_return": completed_rental.get(
+                    "owner_confirmed_return", False
+                ),
+                "cost": (
+                    int(completed_rental.get("cost", 0))
+                    if completed_rental.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(completed_rental.get("meetup_date"))
+                    if completed_rental.get("meetup_date")
+                    else None
+                ),
+                "rent_start_date": (
+                    DateUtils.extract_date(completed_rental.get("rent_start_date"))
+                    if completed_rental.get("rent_start_date")
+                    else None
+                ),
+                "rent_end_date": (
+                    DateUtils.extract_date(completed_rental.get("rent_end_date"))
+                    if completed_rental.get("rent_end_date")
+                    else None
+                ),
+            }
+
+            return formatted_rental
+
+        else:
+            return None
+
+    @staticmethod
     def get_user_completed_rentals_service(
         user_id: str, params: dict[str, Any]
     ) -> list[dict[str, Any]]:
@@ -215,6 +291,84 @@ class RentalsServices:
             }
             formatted_lendings.append(formatted_lending)
         return formatted_lendings
+
+    @staticmethod
+    def get_completed_lending_service(
+        user_id: str, rental_id: str
+    ) -> dict[str, Any] | None:
+
+        completed_lending = RentalsRepository.get_completed_lending(user_id, rental_id)
+
+        if completed_lending:
+            formatted_lending = {
+                "rental_id": completed_lending.get("rental_id"),
+                "rent_status": completed_lending.get("rent_status"),
+                "original_owner_id": completed_lending.get("original_owner_id"),
+                "user_id": completed_lending.get("user_id"),
+                "book_id": completed_lending.get("book_id"),
+                "title": completed_lending.get("title", ""),
+                "author": completed_lending.get("author", ""),
+                "image": completed_lending.get("image"),
+                "to": completed_lending.get("to", ""),
+                "actual_deposit": completed_lending.get("actual_deposit", 0),
+                "actual_rate": completed_lending.get("actual_rate", 0),
+                "all_fees_captured": completed_lending.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("reservation_expires_at")
+                ),
+                "rental_duration_days": completed_lending.get(
+                    "rental_duration_days", 0
+                ),
+                "meetup_location": completed_lending.get("meetup_location", ""),
+                "meetup_time_window": completed_lending.get("meetup_time_window", ""),
+                "meetup_time": completed_lending.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": completed_lending.get(
+                    "user_confirmed_pickup", False
+                ),
+                "owner_confirmed_pickup": completed_lending.get(
+                    "owner_confirmed_pickup", False
+                ),
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("return_confirmation_started_at")
+                ),
+                "user_confirmed_return": completed_lending.get(
+                    "user_confirmed_return", False
+                ),
+                "owner_confirmed_return": completed_lending.get(
+                    "owner_confirmed_return", False
+                ),
+                "cost": (
+                    int(completed_lending.get("cost", 0))
+                    if completed_lending.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(completed_lending.get("meetup_date"))
+                    if completed_lending.get("meetup_date")
+                    else None
+                ),
+                "rent_start_date": (
+                    DateUtils.extract_date(completed_lending.get("rent_start_date"))
+                    if completed_lending.get("rent_start_date")
+                    else None
+                ),
+                "rent_end_date": (
+                    DateUtils.extract_date(completed_lending.get("rent_end_date"))
+                    if completed_lending.get("rent_end_date")
+                    else None
+                ),
+            }
+
+            return formatted_lending
+
+        else:
+            return None
 
     @staticmethod
     def get_user_completed_lendings_service(

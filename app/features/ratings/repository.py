@@ -89,6 +89,29 @@ class RatingRepository:
         return result.get("exists") if result else False
 
     @staticmethod
+    def get_ratings_from_rental_from_rater(
+        rental_id: str, rater_id: str
+    ) -> dict[str, int | str] | None:
+        """Get rating score and comment from rental_id and rater_id"""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            RatingQueries.GET_RATINGS_FROM_RENTAL_FROM_RATER, (rental_id, rater_id)
+        )
+
+    @staticmethod
+    def get_ratings_from_rental_from_rated_user(
+        rental_id: str, rated_user_id: str
+    ) -> dict[str, int | str] | None:
+        """Get rating score and comment from rental_id and rated_user_id"""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            RatingQueries.GET_RATINGS_FROM_RENTAL_FROM_RATED_USER,
+            (rental_id, rated_user_id),
+        )
+
+    @staticmethod
     def get_ratings_from_purchase_from_rater(
         purchase_id: str, rater_id: str
     ) -> dict[str, int | str] | None:

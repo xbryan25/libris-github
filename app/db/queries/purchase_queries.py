@@ -41,6 +41,8 @@ class PurchasesQueries:
         SELECT
             pb.purchase_id,
             pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -63,7 +65,7 @@ class PurchasesQueries:
             pb.ownership_transferred
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
-        JOIN users u ON b.owner_id = u.user_id
+        JOIN users u ON pb.original_owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.user_id = %s
         AND (
@@ -143,6 +145,7 @@ class PurchasesQueries:
         WHERE pb.user_id = %s
         AND pb.purchase_status = 'completed'
         AND pb.user_rated = true
+        AND pb.owner_rated = true
         ORDER BY meetup_date {sort_order}
         LIMIT %s OFFSET %s
     """
@@ -156,12 +159,15 @@ class PurchasesQueries:
         WHERE pb.user_id = %s
         AND pb.purchase_status = 'completed'
         AND pb.user_rated = true
+        AND pb.owner_rated = true
     """
 
     GET_USER_SALES_WITH_STATUS = """
         SELECT
             pb.purchase_id,
             pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -221,7 +227,7 @@ class PurchasesQueries:
             pb.ownership_transferred
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
-        JOIN users u ON pb.original_owner_id = u.user_id
+        JOIN users u ON pb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.purchase_id = %s
         AND pb.original_owner_id = %s
@@ -262,6 +268,7 @@ class PurchasesQueries:
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.original_owner_id = %s
         AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
         AND pb.owner_rated = true
         ORDER BY meetup_date {sort_order}
         LIMIT %s OFFSET %s
@@ -275,6 +282,7 @@ class PurchasesQueries:
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.original_owner_id = %s
         AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
         AND pb.owner_rated = true
     """
 

@@ -75,13 +75,10 @@ export const useUserPurchases = () => {
     loading.value = true
     error.value = null
     try {
-      console.log("even reach here?")
       const res = await $apiFetch<Purchase>(`${API_URL}/api/purchases/completed-purchase/${purchaseId}`, {
         credentials: 'include',
       })
       purchases.value = [res]
-
-      console.log(purchases.value)
     } catch (e: any) {
       purchases.value = []
       console.log('Completed purchase not found or error fetching completed purchase:', e)

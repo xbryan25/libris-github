@@ -76,8 +76,8 @@ class RentalsQueries:
             rb.owner_rated,
             rb.total_rent_cost AS cost
         FROM rented_books rb
-        JOIN books b ON rb.book_id = b.book_id
-        JOIN users u ON b.owner_id = u.user_id
+        JOIN books b ON rb.original_owner_id = b.book_id
+        JOIN users u ON rb.owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE rb.user_id = %s
         AND (
@@ -85,6 +85,49 @@ class RentalsQueries:
             'ongoing', 'awaiting_return_confirmation')
             OR (rb.rent_status = 'completed' AND rb.user_rated = false)
         );
+    """
+
+    GET_COMPLETED_RENTAL = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            rb.original_owner_id,
+            rb.user_id,
+            b.book_id,
+            b.title,
+            b.author,
+            rb.actual_deposit,
+            rb.actual_rate,
+            bi.image_url AS image,
+            u.username AS "from",
+            rb.all_fees_captured,
+            rb.reserved_at,
+            rb.reservation_expires_at,
+            rb.rent_start_date,
+            rb.rent_end_date,
+            rb.rental_duration_days,
+            rb.meetup_location,
+            rb.meetup_time_window,
+            rb.meetup_time,
+            rb.meetup_date,
+            rb.pickup_confirmation_started_at,
+            rb.user_confirmed_pickup,
+            rb.owner_confirmed_pickup,
+            rb.return_confirmation_started_at,
+            rb.user_confirmed_return,
+            rb.owner_confirmed_return,
+            rb.user_rated,
+            rb.owner_rated,
+            rb.total_rent_cost AS cost
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.original_owner_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE rb.rental_id = %s
+        AND rb.user_id = %s
+        AND rb.rent_status = 'completed'
+        AND rb.user_rated = true
+        AND rb.owner_rated = true
     """
 
     GET_USER_COMPLETED_RENTALS = """
@@ -126,6 +169,7 @@ class RentalsQueries:
         WHERE rb.user_id = %s
         AND rb.rent_status = 'completed'
         AND rb.user_rated = true
+        AND rb.owner_rated = true
         ORDER BY {sort_by} {sort_order}
         LIMIT %s OFFSET %s
     """
@@ -139,6 +183,7 @@ class RentalsQueries:
         WHERE rb.user_id = %s
         AND rb.rent_status = 'completed'
         AND rb.user_rated = true
+        AND rb.owner_rated = true
     """
 
     GET_USER_LENDINGS_WITH_STATUS = """
@@ -177,12 +222,55 @@ class RentalsQueries:
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE b.owner_id = %s
+        WHERE rb.original_owner_id = %s
         AND (
             rb.rent_status IN ('pending', 'approved', 'awaiting_pickup_confirmation',
             'ongoing', 'awaiting_return_confirmation')
             OR (rb.rent_status = 'completed' AND rb.owner_rated = false)
         );
+    """
+
+    GET_COMPLETED_LENDING = """
+        SELECT
+            rb.rental_id,
+            rb.rent_status,
+            rb.original_owner_id,
+            rb.user_id,
+            b.book_id,
+            b.title,
+            b.author,
+            rb.actual_deposit,
+            rb.actual_rate,
+            bi.image_url AS image,
+            u.username AS "to",
+            rb.all_fees_captured,
+            rb.reserved_at,
+            rb.reservation_expires_at,
+            rb.rent_start_date,
+            rb.rent_end_date,
+            rb.rental_duration_days,
+            rb.meetup_location,
+            rb.meetup_time_window,
+            rb.meetup_time,
+            rb.meetup_date,
+            rb.pickup_confirmation_started_at,
+            rb.user_confirmed_pickup,
+            rb.owner_confirmed_pickup,
+            rb.return_confirmation_started_at,
+            rb.user_confirmed_return,
+            rb.owner_confirmed_return,
+            rb.user_rated,
+            rb.owner_rated,
+            rb.total_rent_cost AS cost
+        FROM rented_books rb
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.user_id  = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE rb.rental_id = %s
+        AND rb.original_owner_id = %s
+        AND rb.rent_status = 'completed'
+        AND rb.user_rated = true
+        AND rb.owner_rated = true
     """
 
     GET_USER_COMPLETED_LENDINGS = """
@@ -221,8 +309,9 @@ class RentalsQueries:
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE rb.original_owner_id = %s
+        WHERE rb.original_owner_id  = %s
         AND rb.rent_status = 'completed'
+        AND rb.user_rated = true
         AND rb.owner_rated = true
         ORDER BY {sort_by} {sort_order}
         LIMIT %s OFFSET %s
@@ -234,8 +323,9 @@ class RentalsQueries:
         JOIN books b ON rb.book_id = b.book_id
         JOIN users u ON rb.user_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
-        WHERE  rb.original_owner_id = %s
+        WHERE rb.original_owner_id  = %s
         AND rb.rent_status = 'completed'
+        AND rb.user_rated = true
         AND rb.owner_rated = true
     """
 
