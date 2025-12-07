@@ -59,6 +59,18 @@ class UserRepository:
         )
 
     @staticmethod
+    def get_is_email_verified(user_id: str) -> dict[str, str] | None:
+        """Retrieve email verification status by user_id."""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.GET_COLUMN_BY_FIELD.format(
+                column="is_email_verified", table="users", field="user_id"
+            ),
+            (user_id,),
+        )
+
+    @staticmethod
     def check_if_username_is_taken(username: str) -> dict[str, bool]:
         """
         add later

@@ -2,8 +2,8 @@ type UserGoogleLoginResponse = {
     messageTitle: string
     message: string
     username: string
-    user_id: string
-    accessTokenExpiresAt: number
+    userId: string
+    isEmailVerified: boolean
 }
 
 export function useUserGoogleLogin(code: string){

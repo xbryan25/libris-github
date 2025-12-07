@@ -14,11 +14,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.username = response.username
         auth.userId = response.userId
         auth.isAuthenticated = true
+        auth.isEmailVerified = response.isEmailVerified
 
-        // --- Debug logging ---
-        // console.log('Route path:', to.path)
-        // console.log('Route params:', to.params)
-        // console.log('Logged-in user_id:', auth.userId)
+        console.log("================= " + auth.isEmailVerified)
 
         // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {
@@ -30,10 +28,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
             }
         }
 
+        if (!auth.isEmailVerified) {
+            console.log('reach here?')
+            return navigateTo(`/verify-email?userId=${auth.userId}`);
+        }
+
     } catch {
         auth.username = null
         auth.userId = null
         auth.isAuthenticated = false
+        auth.isEmailVerified = false
 
         if (to.path !== '/login') return navigateTo('/login')
     }

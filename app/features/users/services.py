@@ -207,6 +207,13 @@ class UserServices:
         return username_dict["username"]
 
     @staticmethod
+    def get_is_email_verified_service(user_id) -> bool:
+        """Get the status of email verification of a user using the user_id."""
+        username_dict = UserRepository.get_is_email_verified(user_id)
+
+        return bool(username_dict["is_email_verified"]) if username_dict else False
+
+    @staticmethod
     def check_if_username_is_taken_service(username: str) -> bool:
         """
         Get the username of a user using the user_id.

@@ -46,7 +46,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    console.log('Redirecting to verify-email...');
+    // console.log('Redirecting to verify-email...');
     navigateTo(`/verify-email?userId=${userId}`);
   } catch (error: any) {
     console.error('Signup error:', error);

@@ -41,10 +41,11 @@ class UserControllers:
 
             resp = make_response(
                 {
-                    "user_id": user.user_id,
+                    "userId": user.user_id,
                     "username": user.username,
                     "messageTitle": "Login successful.",
                     "message": "Enjoy your session!",
+                    "isEmailVerified": user.is_email_verified,
                 }
             )
 
@@ -132,10 +133,11 @@ class UserControllers:
             # Set cookies
             resp = make_response(
                 {
-                    "user_id": user_id,
+                    "userId": user_id,
                     "username": username,
                     "messageTitle": "Login successful via Google.",
                     "message": "Enjoy your session!",
+                    "isEmailVerified": True,
                 }
             )
 
@@ -458,7 +460,18 @@ class UserControllers:
 
             username = UserServices.get_username_service(user_id)
 
-            return jsonify({"username": username, "userId": user_id}), 200
+            is_email_verified = UserServices.get_is_email_verified_service(user_id)
+
+            return (
+                jsonify(
+                    {
+                        "username": username,
+                        "userId": user_id,
+                        "isEmailVerified": is_email_verified,
+                    }
+                ),
+                200,
+            )
 
         except Exception as e:
             traceback.print_exc()

@@ -2,9 +2,10 @@ type UserLoginResponse = {
     messageTitle: string
     message: string
     username: string
-    user_id: string
-    accessTokenExpiresAt: number
+    userId: string
+    isEmailVerified: boolean
 }
+
 
 export function useUserLogin(emailAddress: string, password: string){
   const baseURL = import.meta.env.VITE_API_URL;
