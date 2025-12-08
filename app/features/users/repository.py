@@ -136,21 +136,10 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         try:
-            print(
-                "[REPOSITORY] Deleting old verification codes for " f"user: {user_id}"
-            )
-
             # Delete old codes for this user first
             db.execute_query(
                 "DELETE FROM email_verifications WHERE user_id = %s",
                 (user_id,),
-            )
-
-            print("[REPOSITORY] Old codes deleted")
-
-            print(
-                f"[REPOSITORY] Inserting new verification code: {code}, "
-                f"expires at: {expires_at}"
             )
 
             # Insert new code
@@ -160,12 +149,9 @@ class UserRepository:
                 (user_id, code, expires_at),
             )
 
-            print("[REPOSITORY] New code inserted successfully")
-
             return True
 
-        except Exception as e:
-            print(f"[REPOSITORY] Error creating verification code: {e}")
+        except Exception:
             import traceback
 
             traceback.print_exc()
@@ -176,10 +162,6 @@ class UserRepository:
         """Verify if code is valid and not expired."""
         db = current_app.extensions["db"]
 
-        print("\n[REPOSITORY] ========== VERIFY EMAIL CODE ==========")
-        print(f"[REPOSITORY] User ID: {user_id}")
-        print(f"[REPOSITORY] Code to verify: {code}")
-
         try:
             # Query for matching code that hasn't expired
             result = db.fetch_one(
@@ -188,29 +170,18 @@ class UserRepository:
                 (user_id, code),
             )
 
-            print(f"[REPOSITORY] Query result: {result}")
-
             if result is None:
-                print(
-                    "[REPOSITORY] Code verification FAILED - "
-                    "no matching code or code expired"
-                )
-                print(
-                    "[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE ====="
-                    "======\n"
-                )
+
                 return False
 
-            print("[REPOSITORY] Code verification SUCCESSFUL")
-            print("[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE =====" "======\n")
             return True
 
-        except Exception as e:
-            print(f"[REPOSITORY] ERROR during code verification: {e}")
+        except Exception:
+
             import traceback
 
             traceback.print_exc()
-            print("[REPOSITORY] ========== VERIFY EMAIL CODE COMPLETE =====" "======\n")
+
             return False
 
     @staticmethod
@@ -219,28 +190,21 @@ class UserRepository:
         db = current_app.extensions["db"]
 
         try:
-            print(f"[REPOSITORY] Marking email as verified for " f"user: {user_id}")
 
             db.execute_query(
                 "UPDATE users SET is_email_verified = TRUE " "WHERE user_id = %s",
                 (user_id,),
             )
 
-            print("[REPOSITORY] Email marked as verified")
-
-            print(f"[REPOSITORY] Deleting verification codes for " f"user: {user_id}")
-
             db.execute_query(
                 "DELETE FROM email_verifications WHERE user_id = %s",
                 (user_id,),
             )
 
-            print("[REPOSITORY] Verification codes deleted")
-
             return True
 
-        except Exception as e:
-            print(f"[REPOSITORY] Error marking email as verified: {e}")
+        except Exception:
+
             import traceback
 
             traceback.print_exc()

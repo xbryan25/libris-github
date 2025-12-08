@@ -131,8 +131,8 @@ const verifyCode = async () => {
       color: 'success',
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    navigateTo('/login');
+    // await new Promise((resolve) => setTimeout(resolve, 1500));
+    navigateTo('/dashboard');
   } catch (error: any) {
     console.error('[VERIFY-EMAIL] Verification error:', error);
 
@@ -152,7 +152,7 @@ const verifyCode = async () => {
 
     code.value = ['', '', '', '', '', ''];
     focusInput(0);
-  } finally {
+
     isLoading.value = false;
   }
 };
@@ -318,10 +318,10 @@ onUnmounted(() => {
 
         <!-- Verify Button -->
         <UButton
-          @click="verifyCode"
           class="w-full h-12 rounded-xl cursor-pointer justify-center text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
           :disabled="isLoading"
           :loading="isLoading"
+          @click="verifyCode"
         >
           {{ isLoading ? 'Verifying...' : 'Verify' }}
         </UButton>
@@ -330,9 +330,9 @@ onUnmounted(() => {
         <div class="flex gap-1 text-base mt-6">
           <p class="text-gray-600 dark:text-gray-400">Didn't Receive it?</p>
           <button
-            @click="resendCode"
             class="text-gray-900 dark:text-white font-bold underline hover:text-green-600 dark:hover:text-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="isResending || resendCooldown > 0"
+            @click="resendCode"
           >
             {{ getResendButtonText() }}
           </button>

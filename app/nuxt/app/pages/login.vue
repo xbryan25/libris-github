@@ -32,13 +32,22 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
 
       navigateTo('/dashboard');
     } else {
+      const userId = auth.userId;
+
+      if (!userId) {
+        console.error('No userId in response!');
+        return;
+      }
+
+      await useSendVerificationEmail(userId);
+
       toast.add({
         title: 'Login successful',
         description: 'However, to continue to Libris, please verify your email.',
         color: 'success',
       });
 
-      navigateTo('/dashboard');
+      navigateTo(`/verify-email?userId=${userId}`);
     }
   } catch (error) {
     toast.add({

@@ -37,10 +37,6 @@ class UserServices:
         username: str, email_address: str, password: str
     ) -> dict | None:
         """Create new user account and initialize wallet."""
-        print(
-            f"[SIGNUP SERVICE] Starting signup for username: {username}, "
-            f"email: {email_address}"
-        )
 
         existing_user_by_email = UserRepository.get_user_by_email_address(email_address)
         if existing_user_by_email:
@@ -54,78 +50,57 @@ class UserServices:
 
         existing_user_by_username = UserRepository.get_user_by_username(username)
         if existing_user_by_username:
-            print("[SIGNUP SERVICE] Username already exists!")
+
             return {"error": "Username already exists.", "type": "username"}
 
         user_id = UserRepository.create_user(username, email_address, password)
-        print(f"[SIGNUP SERVICE] User created with ID: {user_id}")
 
         UserRepository.initialize_wallet(user_id)
-        print("[SIGNUP SERVICE] Wallet initialized")
+
         return {"success": True, "user_id": user_id}
 
     @staticmethod
     def generate_verification_code() -> str:
         """Generate random 6-digit verification code."""
         code = str(random.randint(100000, 999999))
-        print(f"[SERVICE] Generated verification code: {code}")
+
         return code
 
     @staticmethod
     def send_verification_email_service(user_id: str) -> dict:
         """Generate verification code, store it, and send email."""
         try:
-            print(
-                "[VERIFY SERVICE] Starting email verification for " f"user: {user_id}"
-            )
-
             user_data = UserRepository.get_user_email_and_username(user_id)
-            print(f"[VERIFY SERVICE] Got user data: {user_data}")
 
             if not user_data:
-                print("[VERIFY SERVICE] User not found!")
                 return {"error": "User not found."}
 
             # Generate new code
             code = UserServices.generate_verification_code()
-            print(f"[VERIFY SERVICE] Generated code: {code}")
 
             # Set expiration time (10 minutes from now)
             expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
-            print(f"[VERIFY SERVICE] Code expires at: {expires_at}")
 
             # Store code in database (old codes are deleted automatically)
             success = UserRepository.create_verification_code(user_id, code, expires_at)
-            print(f"[VERIFY SERVICE] Code stored in DB: {success}")
 
             if not success:
-                print("[VERIFY SERVICE] Failed to store code in database!")
                 return {"error": "Failed to create verification code."}
 
-            # Send email with the new code
-            print(
-                f"[VERIFY SERVICE] Calling "
-                f"EmailService.send_verification_email to "
-                f"{user_data['email_address']}..."
-            )
             email_sent = EmailService.send_verification_email(
                 user_data["email_address"], code, user_data["username"]
             )
 
-            print(f"[VERIFY SERVICE] Email sent result: {email_sent}")
-
             if not email_sent:
-                print("[VERIFY SERVICE] Email sending failed!")
+
                 return {"error": "Failed to send verification email."}
 
-            print("[VERIFY SERVICE] Success! Email sent.")
             return {
                 "success": True,
                 "message": "Verification email sent successfully.",
             }
 
-        except Exception as e:
-            print(f"[VERIFY SERVICE] ERROR: {str(e)}")
+        except Exception:
             import traceback
 
             traceback.print_exc()
@@ -135,37 +110,29 @@ class UserServices:
     def verify_email_code_service(user_id: str, code: str) -> dict:
         """Verify the email verification code."""
         try:
-            print(
-                f"[VERIFY CODE SERVICE] Verifying code for user: "
-                f"{user_id}, code: {code}"
-            )
 
             if UserRepository.is_email_verified(user_id):
-                print("[VERIFY CODE SERVICE] Email already verified!")
                 return {"error": "Email is already verified."}
 
             is_valid = UserRepository.verify_email_code(user_id, code)
-            print(f"[VERIFY CODE SERVICE] Code valid: {is_valid}")
 
             if not is_valid:
-                print("[VERIFY CODE SERVICE] Invalid or expired code!")
+
                 return {"error": "Invalid or expired verification code."}
 
             success = UserRepository.mark_email_as_verified(user_id)
-            print(f"[VERIFY CODE SERVICE] Email marked as verified: {success}")
 
             if not success:
-                print("[VERIFY CODE SERVICE] Failed to mark email as verified!")
+
                 return {"error": "Failed to verify email."}
 
-            print("[VERIFY CODE SERVICE] Success! Email verified.")
             return {
                 "success": True,
                 "message": "Email verified successfully!",
             }
 
-        except Exception as e:
-            print(f"[VERIFY CODE SERVICE] ERROR: {str(e)}")
+        except Exception:
+
             import traceback
 
             traceback.print_exc()
@@ -273,8 +240,7 @@ class UserServices:
 
             return UserRepository.update_user_profile(user_id, merged_data)
 
-        except Exception as e:
-            print(f"Error updating user profile: {e}")
+        except Exception:
             return False
 
     @staticmethod
