@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const isEmailVerified = ref(false)
 
-  const login = async (email: string, password: string): Promise<{messageTitle: string, message: string}> => {
+  const login = async (email: string, password: string): Promise<{messageTitle: string, message: string, isEmailVerified: boolean}> => {
     try {
       const response = await useUserLogin(email, password);
 
@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
       return {
         messageTitle: response.messageTitle,
         message: response.message,
+        isEmailVerified: response.isEmailVerified
       };
     } catch (error: any) {
       console.error('Login failed in store:', error);

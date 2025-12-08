@@ -22,8 +22,6 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
   try {
     const response = await auth.signup(username, emailAddress, password);
 
-    console.log('Signup response:', response);
-
     toast.add({
       title: response.messageTitle,
       description: response.message,

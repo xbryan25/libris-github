@@ -252,12 +252,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-base font-sans">
+  <div class="w-full min-h-screen flex flex-col bg-background text-base">
     <!-- Header -->
     <header class="w-full p-6 flex justify-between items-center">
       <div class="flex gap-3 items-center">
         <Icon name="icons:logo" class="w-12 h-12" />
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Libris</h1>
+        <!-- <h1 class="text-5xl font-extrabold">Libris</h1> -->
       </div>
       <ColorModeButton />
     </header>
@@ -265,7 +266,7 @@ onUnmounted(() => {
     <!-- Back to login link -->
     <div class="w-full px-6 mb-4">
       <button
-        class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
+        class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
         @click="goToLoginPage"
       >
         <Icon name="heroicons:arrow-left" class="w-5 h-5" />
@@ -275,14 +276,12 @@ onUnmounted(() => {
 
     <!-- Main Content -->
     <main class="flex-grow flex items-center justify-center p-4">
-      <div
-        class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl flex flex-col items-center text-center"
-      >
+      <div class="rounded-3xl p-10 w-full max-w-xl flex flex-col items-center text-center">
         <!-- Envelope Icon with Check -->
         <div class="relative mb-6 inline-block">
           <Icon name="heroicons:envelope" class="w-26 h-26 text-gray-900 dark:text-white" />
           <div
-            class="absolute -top-2 -right-2 bg-white dark:bg-gray-800 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center"
+            class="absolute -top-2 -right-2 bg-white dark:bg-neutral-900 rounded-full border-4 border-white dark:border-neutral-900 flex items-center justify-center"
           >
             <Icon name="heroicons:check-circle-solid" class="w-10 h-10 text-green-500" />
           </div>

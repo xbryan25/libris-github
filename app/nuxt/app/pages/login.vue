@@ -21,15 +21,25 @@ const onSubmitLogin = async (emailAddress: string, password: string) => {
   isLoading.value = true;
 
   try {
-    const { messageTitle, message } = await auth.login(emailAddress, password);
+    const { messageTitle, message, isEmailVerified } = await auth.login(emailAddress, password);
 
-    toast.add({
-      title: messageTitle,
-      description: message,
-      color: 'success',
-    });
+    if (isEmailVerified) {
+      toast.add({
+        title: messageTitle,
+        description: message,
+        color: 'success',
+      });
 
-    navigateTo('/dashboard');
+      navigateTo('/dashboard');
+    } else {
+      toast.add({
+        title: 'Login successful',
+        description: 'However, to continue to Libris, please verify your email.',
+        color: 'success',
+      });
+
+      navigateTo('/dashboard');
+    }
   } catch (error) {
     toast.add({
       title: 'Login failed.',
