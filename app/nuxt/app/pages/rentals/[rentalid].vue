@@ -11,7 +11,7 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const rentalid = route.params.rentalid as string;
+const rentalId = route.params.rentalId as string;
 const from = route.query.from as string;
 
 const { rentals, fetchUserRentals } = useUserRentals();
@@ -32,29 +32,29 @@ const fetchRentalData = async () => {
   try {
     if (from === 'rental') {
       await fetchUserRentals();
-      currentItem.value = rentals.value.find(r => r.rental_id === rentalid) || null;
+      currentItem.value = rentals.value.find((r) => r.rental_id === rentalId) || null;
     } else if (from === 'lending') {
       await fetchUserLendings();
-      currentItem.value = lendings.value.find(l => l.rental_id === rentalid) || null;
+      currentItem.value = lendings.value.find((l) => l.rental_id === rentalId) || null;
     }
   } catch (error) {
     console.error('Error fetching rental data:', error);
   } finally {
     loading.value = false;
   }
-}
+};
 
 const handleApprovalSuccess = async () => {
   await fetchRentalData();
-}
+};
 
 const handleShowRating = () => {
   showRating.value = true;
-}
+};
 
 const handleBackToComplete = () => {
   showRating.value = false;
-}
+};
 
 onMounted(() => {
   fetchRentalData();
@@ -65,18 +65,18 @@ onMounted(() => {
   <div class="min-h-screen w-full pt-4 pb-6 px-4 md:px-8 lg:px-15">
     <!-- Header -->
     <div class="mb-6">
-      <button 
+      <button
         @click="router.back()"
         class="flex items-center gap-2 text-base pt-4 pb-4 hover:text-foreground mb-4 cursor-pointer"
       >
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
         <span>Back to Rentals</span>
       </button>
-      
+
       <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
-        <Icon 
-          :name="from === 'rental' ? 'lucide:trending-down' : 'lucide:trending-up'" 
-          class="w-8 h-8 text-orange-500" 
+        <Icon
+          :name="from === 'rental' ? 'lucide:trending-down' : 'lucide:trending-up'"
+          class="w-8 h-8 text-orange-500"
         />
         {{ from === 'rental' ? 'Rental Details' : 'Lending Details' }}
       </h1>
@@ -105,35 +105,35 @@ onMounted(() => {
     <!-- Content -->
     <div v-else class="space-y-6">
       <!-- Book Info Card (Hide when completed) -->
-      <RentalBookInfoCard 
+      <RentalBookInfoCard
         v-if="currentItem.rent_status !== 'completed'"
-        :item="currentItem" 
-        :from="from" 
+        :item="currentItem"
+        :from="from"
       />
 
       <!-- Progress Stepper (Show for all statuses, use computed status) -->
-      <RentalProgressStepper 
-        v-if="currentItem.rent_status !== 'pending'" 
-        :status="currentStatus" 
-        :from="from" 
+      <RentalProgressStepper
+        v-if="currentItem.rent_status !== 'pending'"
+        :status="currentStatus"
+        :from="from"
       />
 
       <!-- Active Rental Alert -->
-      <RentalActiveAlert 
-        v-if="currentItem.rent_status === 'ongoing'" 
+      <RentalActiveAlert
+        v-if="currentItem.rent_status === 'ongoing'"
         :from="from"
         :rent-end-date="currentItem.rent_end_date"
       />
 
       <!-- Dates & Meetup Grid -->
-      <RentalDetailsGrid 
+      <RentalDetailsGrid
         v-if="currentItem.rent_status !== 'completed'"
         :item="currentItem"
         :from="from"
       />
 
       <!-- Cost Card -->
-      <RentalCostCard 
+      <RentalCostCard
         v-if="currentItem.rent_status !== 'completed'"
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
@@ -153,22 +153,27 @@ onMounted(() => {
           :item="currentItem"
           @show-rating="handleShowRating"
         />
-        
+
         <RentalRatingCard
           v-else
           :from="from"
           :item="currentItem"
-          :rental-id="rentalid"
+          :rental-id="rentalId"
           @back-to-complete="handleBackToComplete"
         />
       </template>
 
       <!-- Confirmation Cards (for approved and ongoing) -->
       <RentalConfirmationCard
-        v-if="currentItem.rent_status === 'approved' || currentItem.rent_status === 'ongoing' || currentItem.rent_status === 'awaiting_pickup_confirmation' || currentItem.rent_status === 'awaiting_return_confirmation'"
+        v-if="
+          currentItem.rent_status === 'approved' ||
+          currentItem.rent_status === 'ongoing' ||
+          currentItem.rent_status === 'awaiting_pickup_confirmation' ||
+          currentItem.rent_status === 'awaiting_return_confirmation'
+        "
         :status="currentItem.rent_status"
         :from="from"
-        :rental-id="rentalid"
+        :rental-id="rentalId"
         :meetup-date="currentItem.meetup_date"
         :meetup-time="currentItem.meetup_time"
         :rent-end-date="currentItem.rent_end_date"
@@ -183,7 +188,7 @@ onMounted(() => {
       <RentalPendingActions
         v-if="currentItem.rent_status === 'pending'"
         :from="from"
-        :rental-id="rentalid"
+        :rental-id="rentalId"
         @approval-success="handleApprovalSuccess"
         @refresh="fetchRentalData"
       />

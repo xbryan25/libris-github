@@ -12,7 +12,7 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const purchaseid = route.params.purchaseid as string;
+const purchaseid = route.params.purchaseId as string;
 const from = route.query.from as string;
 
 const { purchases, fetchUserPurchases } = useUserPurchases();
@@ -25,33 +25,36 @@ const showRating = ref(false);
 const currentStatus = computed(() => {
   if (!currentItem.value) return '';
   if (showRating.value) return 'rate_user';
-  
+
   // Just return the actual purchase_status - don't modify it
   return currentItem.value.purchase_status;
 });
 
 const showTransferCard = computed(() => {
-  return from === 'purchase' && 
-         currentItem.value?.purchase_status === 'completed' &&
-         currentItem.value?.transfer_decision_pending === true && 
-         !showRating.value;
+  return (
+    from === 'purchase' &&
+    currentItem.value?.purchase_status === 'completed' &&
+    currentItem.value?.transfer_decision_pending === true &&
+    !showRating.value
+  );
 });
 
 const showCompleteCard = computed(() => {
   // For purchases: only show complete card if transfer decision is NOT pending
   if (from === 'purchase') {
-    return currentItem.value?.purchase_status === 'completed' && 
-           currentItem.value?.transfer_decision_pending === false && 
-           !showRating.value;
+    return (
+      currentItem.value?.purchase_status === 'completed' &&
+      currentItem.value?.transfer_decision_pending === false &&
+      !showRating.value
+    );
   }
-  
+
   // For sales: show complete card normally
   return currentItem.value?.purchase_status === 'completed' && !showRating.value;
 });
 
 const showRatingCard = computed(() => {
-  return currentItem.value?.purchase_status === 'completed' && 
-         showRating.value;
+  return currentItem.value?.purchase_status === 'completed' && showRating.value;
 });
 
 const fetchPurchaseData = async () => {
@@ -59,29 +62,29 @@ const fetchPurchaseData = async () => {
   try {
     if (from === 'purchase') {
       await fetchUserPurchases();
-      currentItem.value = purchases.value.find(p => p.purchase_id === purchaseid) || null;
+      currentItem.value = purchases.value.find((p) => p.purchase_id === purchaseid) || null;
     } else if (from === 'sale') {
       await fetchUserSales();
-      currentItem.value = sales.value.find(s => s.purchase_id === purchaseid) || null;
+      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseid) || null;
     }
   } catch (error) {
     console.error('Error fetching purchase data:', error);
   } finally {
     loading.value = false;
   }
-}
+};
 
 const handleApprovalSuccess = async () => {
   await fetchPurchaseData();
-}
+};
 
 const handleShowRating = () => {
   showRating.value = true;
-}
+};
 
 const handleBackToComplete = () => {
   showRating.value = false;
-}
+};
 
 onMounted(() => {
   fetchPurchaseData();
@@ -92,18 +95,18 @@ onMounted(() => {
   <div class="min-h-screen w-full pt-4 pb-6 px-4 md:px-8 lg:px-15">
     <!-- Header -->
     <div class="mb-6">
-      <button 
+      <button
         @click="router.back()"
         class="flex items-center gap-2 text-base pt-4 pb-4 hover:text-foreground mb-4 cursor-pointer"
       >
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
         <span>Back to Purchases</span>
       </button>
-      
+
       <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
-        <Icon 
-          :name="from === 'purchase' ? 'lucide:trending-down' : 'lucide:trending-up'" 
-          class="w-8 h-8 text-orange-500" 
+        <Icon
+          :name="from === 'purchase' ? 'lucide:trending-down' : 'lucide:trending-up'"
+          class="w-8 h-8 text-orange-500"
         />
         {{ from === 'purchase' ? 'Purchase Details' : 'Sale Details' }}
       </h1>
@@ -132,29 +135,29 @@ onMounted(() => {
     <!-- Content -->
     <div v-else class="space-y-6">
       <!-- Book Info Card (Hide when completed) -->
-      <PurchaseBookInfoCard 
+      <PurchaseBookInfoCard
         v-if="currentItem.purchase_status !== 'completed'"
-        :item="currentItem" 
-        :from="from" 
+        :item="currentItem"
+        :from="from"
       />
 
       <!-- Progress Stepper (Use computed status) -->
-      <PurchaseProgressStepper 
-        v-if="currentItem.purchase_status !== 'pending'" 
-        :status="currentStatus" 
+      <PurchaseProgressStepper
+        v-if="currentItem.purchase_status !== 'pending'"
+        :status="currentStatus"
         :from="from"
         :transfer-decision-pending="currentItem.transfer_decision_pending"
       />
 
       <!-- Dates & Meetup Grid -->
-      <PurchaseDetailsGrid 
+      <PurchaseDetailsGrid
         v-if="currentItem.purchase_status !== 'completed'"
         :item="currentItem"
         :from="from"
       />
 
       <!-- Cost Card -->
-      <PurchaseCostCard 
+      <PurchaseCostCard
         v-if="currentItem.purchase_status !== 'completed'"
         :cost="currentItem.cost"
         :all-fees-captured="currentItem.all_fees_captured"
@@ -179,7 +182,7 @@ onMounted(() => {
           :item="currentItem"
           @show-rating="handleShowRating"
         />
-        
+
         <!-- Rating Card -->
         <PurchaseRatingCard
           v-else
@@ -192,7 +195,10 @@ onMounted(() => {
 
       <!-- Confirmation Cards -->
       <PurchaseConfirmationCard
-        v-if="currentItem.purchase_status === 'approved' || currentItem.purchase_status === 'awaiting_pickup_confirmation'"
+        v-if="
+          currentItem.purchase_status === 'approved' ||
+          currentItem.purchase_status === 'awaiting_pickup_confirmation'
+        "
         :status="currentItem.purchase_status"
         :from="from"
         :purchase-id="purchaseid"

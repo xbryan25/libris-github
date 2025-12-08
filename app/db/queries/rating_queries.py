@@ -89,3 +89,35 @@ class RatingQueries:
         FROM purchased_books pb
         WHERE pb.purchase_id = %s
     """
+
+    GET_RATINGS_FROM_RENTAL_FROM_RATER = """
+        SELECT
+            score AS given_rating,
+            comment AS given_comment
+        FROM user_ratings
+        WHERE rental_id = %s AND rater_id = %s
+    """
+
+    GET_RATINGS_FROM_RENTAL_FROM_RATED_USER = """
+        SELECT
+            score AS received_rating,
+            comment AS received_comment
+        FROM user_ratings
+        WHERE rental_id = %s AND rated_user_id = %s
+    """
+
+    GET_RATINGS_FROM_PURCHASE_FROM_RATER = """
+        SELECT
+            score AS given_rating,
+            comment AS given_comment
+        FROM user_ratings
+        WHERE purchase_id = %s AND rater_id = %s
+    """
+
+    GET_RATINGS_FROM_PURCHASE_FROM_RATED_USER = """
+        SELECT
+            score AS received_rating,
+            comment AS received_comment
+        FROM user_ratings
+        WHERE purchase_id = %s AND rated_user_id = %s
+    """

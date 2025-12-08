@@ -1,5 +1,7 @@
 from .repository import RatingRepository
 
+from typing import Any
+
 
 class RatingServices:
 
@@ -204,3 +206,49 @@ class RatingServices:
         multiplier = 0.5 + (rater_score / 2000)
 
         return int(base * multiplier)
+
+    @staticmethod
+    def get_ratings_from_rental_for_user_service(
+        rental_id: str, user_id
+    ) -> dict[str, Any] | None:
+
+        ratings_with_comments = None
+
+        rater_ratings_with_comments = (
+            RatingRepository.get_ratings_from_rental_from_rater(user_id, rental_id)
+        )
+
+        rated_user_ratings_with_comments = (
+            RatingRepository.get_ratings_from_rental_from_rated_user(user_id, rental_id)
+        )
+
+        if rater_ratings_with_comments and rated_user_ratings_with_comments:
+            ratings_with_comments = (
+                rater_ratings_with_comments | rated_user_ratings_with_comments
+            )
+
+        return ratings_with_comments
+
+    @staticmethod
+    def get_ratings_from_purchase_for_user_service(
+        purchase_id: str, user_id
+    ) -> dict[str, Any] | None:
+
+        ratings_with_comments = None
+
+        rater_ratings_with_comments = (
+            RatingRepository.get_ratings_from_purchase_from_rater(user_id, purchase_id)
+        )
+
+        rated_user_ratings_with_comments = (
+            RatingRepository.get_ratings_from_purchase_from_rated_user(
+                user_id, purchase_id
+            )
+        )
+
+        if rater_ratings_with_comments and rated_user_ratings_with_comments:
+            ratings_with_comments = (
+                rater_ratings_with_comments | rated_user_ratings_with_comments
+            )
+
+        return ratings_with_comments

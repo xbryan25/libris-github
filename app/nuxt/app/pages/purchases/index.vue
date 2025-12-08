@@ -80,7 +80,7 @@ watch(activeTab, (val) => {
         :to="{ path: '/purchases/history', query: { activeTab } }"
         class="text-foreground font-medium flex items-center gap-1 cursor-pointer"
       >
-        {{ activeTab === 'selling' ? 'Sell' : 'Purchase' }} history
+        {{ activeTab === 'selling' ? 'Sale' : 'Purchase' }} history
         <Icon name="lucide:move-right" class="w-6 h-6 text-foreground" />
       </NuxtLink>
     </div>

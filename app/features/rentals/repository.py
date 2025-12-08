@@ -26,6 +26,28 @@ class RentalsRepository:
         return result if result else []
 
     @staticmethod
+    def get_completed_rental(user_id: str, rental_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve a completed rental for a user.
+
+        Args:
+            rental_id (str): The ID of the completed rental whose details are being fetched.
+
+        Returns:
+            dict[str, Any]: A dictionary with book and owner details. Returns None if completed rental is not found.
+        """
+        db = current_app.extensions["db"]
+
+        query_params = (rental_id, user_id)
+
+        result = db.fetch_one(
+            RentalsQueries.GET_COMPLETED_RENTAL,
+            query_params,
+        )
+
+        return result
+
+    @staticmethod
     def get_user_completed_rentals(
         user_id: str, params: dict[str, Any]
     ) -> list[dict[str, Any]]:
@@ -99,6 +121,28 @@ class RentalsRepository:
 
         result = db.fetch_all(RentalsQueries.GET_USER_LENDINGS_WITH_STATUS, params)
         return result if result else []
+
+    @staticmethod
+    def get_completed_lending(user_id: str, rental_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve a completed lending for a user.
+
+        Args:
+            rental_id (str): The ID of the completed kebdubg whose details are being fetched.
+
+        Returns:
+            dict[str, Any]: A dictionary with book and owner details. Returns None if completed lending is not found.
+        """
+        db = current_app.extensions["db"]
+
+        query_params = (rental_id, user_id)
+
+        result = db.fetch_one(
+            RentalsQueries.GET_COMPLETED_LENDING,
+            query_params,
+        )
+
+        return result
 
     @staticmethod
     def get_user_completed_lendings(

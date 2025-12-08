@@ -191,6 +191,23 @@ class RentalsController:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def get_completed_rental_controller(rental_id: str) -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_rental = RentalsServices.get_completed_rental_service(
+                user_id, rental_id
+            )
+
+            return jsonify(completed_rental), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def get_user_completed_rentals_controller() -> tuple[Response, int]:
         try:
             user_id = get_jwt_identity()
@@ -242,6 +259,23 @@ class RentalsController:
             lendings = RentalsServices.get_user_lendings_with_status(user_id)
 
             return jsonify(lendings), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_completed_lending_controller(rental_id: str) -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_lending = RentalsServices.get_completed_lending_service(
+                user_id, rental_id
+            )
+
+            return jsonify(completed_lending), 200
 
         except Exception as e:
             traceback.print_exc()

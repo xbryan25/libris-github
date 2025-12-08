@@ -10,6 +10,7 @@ from flask_jwt_extended import (
 import traceback
 import uuid
 import requests
+import datetime
 
 from .services import UserServices
 from app.utils.camel_case_converter import dict_keys_to_camel
@@ -41,10 +42,11 @@ class UserControllers:
 
             resp = make_response(
                 {
-                    "user_id": user.user_id,
+                    "userId": user.user_id,
                     "username": user.username,
                     "messageTitle": "Login successful.",
                     "message": "Enjoy your session!",
+                    "isEmailVerified": user.is_email_verified,
                 }
             )
 
@@ -114,13 +116,18 @@ class UserControllers:
 
             user_id = user["user_id"] if user else None
             auth_provider = user["auth_provider"] if user else None
+            account_activated_at = datetime.datetime.now(datetime.timezone.utc)
 
             if user_id and auth_provider and auth_provider == "local":
                 return jsonify({"error": "Email address is already in use."}), 400
 
             elif not user_id:
                 user_id = UserServices.user_google_signup_service(
-                    email_address, first_name, last_name, profile_image_url
+                    email_address,
+                    first_name,
+                    last_name,
+                    profile_image_url,
+                    account_activated_at,
                 )
 
             username = UserServices.get_username_service(user_id)
@@ -132,10 +139,11 @@ class UserControllers:
             # Set cookies
             resp = make_response(
                 {
-                    "user_id": user_id,
+                    "userId": user_id,
                     "username": username,
                     "messageTitle": "Login successful via Google.",
                     "message": "Enjoy your session!",
+                    "isEmailVerified": True,
                 }
             )
 
@@ -250,9 +258,7 @@ class UserControllers:
                 {
                     "userId": user_id,
                     "messageTitle": "Account created successfully!",
-                    "message": (
-                        "Welcome to Libris! " "Please verify your email to continue."
-                    ),
+                    "message": "Welcome to Libris! Login and verify your email to continue.",
                 }
             )
 
@@ -266,47 +272,26 @@ class UserControllers:
     def send_verification_email_controller() -> tuple[Response, int]:
         """Send verification email to user."""
         try:
-            print(
-                "\n[CONTROLLER] ========== SEND VERIFICATION " "EMAIL CALLED =========="
-            )
-
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
-            print(f"[CONTROLLER] User ID: {user_id}")
 
             if not user_id:
-                print("[CONTROLLER] ERROR: User ID is missing!")
                 return jsonify({"error": "User ID is required."}), 400
 
-            print(
-                "[CONTROLLER] Calling "
-                "UserServices.send_verification_email_service..."
-            )
             result = UserServices.send_verification_email_service(user_id)
 
-            print(f"[CONTROLLER] Service result: {result}")
-
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Returning response")
             response = {
                 "messageTitle": "Email Sent!",
-                "message": ("Please check your inbox for the verification code."),
+                "message": "Please check your inbox for the verification code.",
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print(
-                "[CONTROLLER] ========== SEND VERIFICATION "
-                "EMAIL COMPLETE ==========\n"
-            )
 
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -314,118 +299,67 @@ class UserControllers:
     def verify_email_code_controller() -> tuple[Response, int]:
         """Verify the email verification code."""
         try:
-            print("\n[CONTROLLER] ========== VERIFY EMAIL CODE " "CALLED ==========")
 
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
-
-            print(f"[CONTROLLER] User ID: {user_id}")
-            print(f"[CONTROLLER] Code: {code}")
+            account_activated_at = datetime.datetime.now(datetime.timezone.utc)
 
             if not user_id or not code:
-                print("[CONTROLLER] ERROR: User ID or code is missing!")
                 error_response = {"error": "User ID and code are required."}
-                print(f"[CONTROLLER] Returning error: {error_response}")
-                print(
-                    "[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n"
-                )
                 return jsonify(error_response), 400
 
-            print("[CONTROLLER] Calling " "UserServices.verify_email_code_service...")
-            result = UserServices.verify_email_code_service(user_id, code)
-
-            print(f"[CONTROLLER] Service result: {result}")
+            result = UserServices.verify_email_code_service(
+                user_id, code, account_activated_at
+            )
 
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
                 error_response = {"error": result["error"]}
-                print(f"[CONTROLLER] Returning error response: " f"{error_response}")
-                print(
-                    "[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n"
-                )
                 return jsonify(error_response), 400
 
-            print("[CONTROLLER] Success! Email verified")
             response = {
                 "messageTitle": "Email Verified!",
-                "message": ("Your email has been successfully verified."),
+                "message": "Your email has been successfully verified.",
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print("[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n")
 
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
             traceback.print_exc()
             error_response = {"error": str(e)}
-            print(f"[CONTROLLER] Returning exception error: " f"{error_response}")
-            print("[CONTROLLER] ========== VERIFY EMAIL CODE " "COMPLETE ==========\n")
             return jsonify(error_response), 500
 
     @staticmethod
     def resend_verification_code_controller() -> tuple[Response, int]:
         """Resend verification email to user."""
         try:
-            print(
-                "\n[CONTROLLER] ========== RESEND VERIFICATION "
-                "CODE CALLED =========="
-            )
 
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
-            print(f"[CONTROLLER] User ID: {user_id}")
 
             if not user_id:
-                print("[CONTROLLER] ERROR: User ID is missing!")
-                print(
-                    "[CONTROLLER] ========== RESEND VERIFICATION "
-                    "CODE COMPLETE ==========\n"
-                )
+
                 return jsonify({"error": "User ID is required."}), 400
 
-            print(
-                "[CONTROLLER] Calling "
-                "UserServices.send_verification_email_service "
-                "for resend..."
-            )
             result = UserServices.send_verification_email_service(user_id)
 
-            print(f"[CONTROLLER] Service result: {result}")
-
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: " f"{result['error']}")
-                print(
-                    "[CONTROLLER] ========== RESEND VERIFICATION "
-                    "CODE COMPLETE ==========\n"
-                )
+
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Code resent")
             response = {
                 "messageTitle": "Code Resent!",
                 "message": ("A new verification code has been sent to your email."),
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print(
-                "[CONTROLLER] ========== RESEND VERIFICATION "
-                "CODE COMPLETE ==========\n"
-            )
 
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
-            print(
-                "[CONTROLLER] ========== RESEND VERIFICATION "
-                "CODE COMPLETE ==========\n"
-            )
+
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
@@ -458,7 +392,18 @@ class UserControllers:
 
             username = UserServices.get_username_service(user_id)
 
-            return jsonify({"username": username, "userId": user_id}), 200
+            is_email_verified = UserServices.get_is_email_verified_service(user_id)
+
+            return (
+                jsonify(
+                    {
+                        "username": username,
+                        "userId": user_id,
+                        "isEmailVerified": is_email_verified,
+                    }
+                ),
+                200,
+            )
 
         except Exception as e:
             traceback.print_exc()

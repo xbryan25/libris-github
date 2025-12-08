@@ -41,6 +41,8 @@ class PurchasesQueries:
         SELECT
             pb.purchase_id,
             pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -63,7 +65,7 @@ class PurchasesQueries:
             pb.ownership_transferred
         FROM purchased_books pb
         JOIN books b ON pb.book_id = b.book_id
-        JOIN users u ON b.owner_id = u.user_id
+        JOIN users u ON pb.original_owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.user_id = %s
         AND (
@@ -71,6 +73,43 @@ class PurchasesQueries:
             OR (pb.purchase_status = 'completed' AND pb.transfer_decision_pending = TRUE)
             OR (pb.purchase_status = 'completed' AND pb.user_rated = FALSE)
         );
+    """
+
+    GET_COMPLETED_PURCHASE = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
+            b.book_id,
+            b.title,
+            b.author,
+            bi.image_url AS image,
+            u.username AS "from",
+            pb.all_fees_captured,
+            pb.reserved_at,
+            pb.reservation_expires_at,
+            pb.meetup_location,
+            pb.meetup_time_window,
+            pb.meetup_time,
+            pb.meetup_date,
+            pb.pickup_confirmation_started_at,
+            pb.user_confirmed_pickup,
+            pb.owner_confirmed_pickup,
+            pb.user_rated,
+            pb.owner_rated,
+            pb.total_buy_cost AS cost,
+            pb.transfer_decision_pending,
+            pb.ownership_transferred
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        JOIN users u ON pb.original_owner_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE pb.purchase_id = %s
+        AND pb.user_id = %s
+        AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
+        AND pb.owner_rated = true
     """
 
     GET_USER_COMPLETED_PURCHASES = """
@@ -106,6 +145,7 @@ class PurchasesQueries:
         WHERE pb.user_id = %s
         AND pb.purchase_status = 'completed'
         AND pb.user_rated = true
+        AND pb.owner_rated = true
         ORDER BY meetup_date {sort_order}
         LIMIT %s OFFSET %s
     """
@@ -119,12 +159,15 @@ class PurchasesQueries:
         WHERE pb.user_id = %s
         AND pb.purchase_status = 'completed'
         AND pb.user_rated = true
+        AND pb.owner_rated = true
     """
 
     GET_USER_SALES_WITH_STATUS = """
         SELECT
             pb.purchase_id,
             pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
             b.book_id,
             b.title,
             b.author,
@@ -154,6 +197,43 @@ class PurchasesQueries:
             pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
             OR (pb.purchase_status = 'completed' AND pb.owner_rated = FALSE)
         );
+    """
+
+    GET_COMPLETED_SALE = """
+        SELECT
+            pb.purchase_id,
+            pb.purchase_status,
+            pb.original_owner_id,
+            pb.user_id,
+            b.book_id,
+            b.title,
+            b.author,
+            bi.image_url AS image,
+            u.username AS "to",
+            pb.all_fees_captured,
+            pb.reserved_at,
+            pb.reservation_expires_at,
+            pb.meetup_location,
+            pb.meetup_time_window,
+            pb.meetup_time,
+            pb.meetup_date,
+            pb.pickup_confirmation_started_at,
+            pb.user_confirmed_pickup,
+            pb.owner_confirmed_pickup,
+            pb.user_rated,
+            pb.owner_rated,
+            pb.total_buy_cost AS cost,
+            pb.transfer_decision_pending,
+            pb.ownership_transferred
+        FROM purchased_books pb
+        JOIN books b ON pb.book_id = b.book_id
+        JOIN users u ON pb.user_id = u.user_id
+        LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
+        WHERE pb.purchase_id = %s
+        AND pb.original_owner_id = %s
+        AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
+        AND pb.owner_rated = true
     """
 
     GET_USER_COMPLETED_SALES = """
@@ -188,6 +268,7 @@ class PurchasesQueries:
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.original_owner_id = %s
         AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
         AND pb.owner_rated = true
         ORDER BY meetup_date {sort_order}
         LIMIT %s OFFSET %s
@@ -201,6 +282,7 @@ class PurchasesQueries:
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE pb.original_owner_id = %s
         AND pb.purchase_status = 'completed'
+        AND pb.user_rated = true
         AND pb.owner_rated = true
     """
 

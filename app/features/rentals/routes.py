@@ -54,6 +54,50 @@ def get_my_rentals() -> tuple[Response, int]:
     return RentalsController.get_user_rentals_controller()
 
 
+@rentals_bp.route("/completed-rental/<string:rental_id>", methods=["GET"])
+@jwt_required()
+def get_completed_rental(rental_id: str) -> tuple[Response, int]:
+    """
+    Retrieve a completed rental for the authenticated user.
+
+    Response JSON:
+        {
+            "rental_id": str,
+            "rent_status": str,
+            "original_owner_id": str,
+            "user_id": str,
+            "book_id": str,
+            "title": str,
+            "author": str,
+            "image": str,
+            "from": str,
+            "all_fees_captured": bool,
+            "reserved_at": str,
+            "reservation_expires_at": str,
+            "rental_duration_days": int,
+            "meetup_location": str,
+            "meetup_time_window": str,
+            "pickup_confirmation_started_at": str,
+            "user_confirmed_pickup": bool,
+            "owner_confirmed_pickup": bool,
+            "return_confirmation_started_at": str,
+            "user_confirmed_return": bool,
+            "owner_confirmed_return": bool,
+            "cost": int,
+            "meetup_date": str,
+            "meetup_time": str,
+            "rent_start_date": str,
+            "rent_end_date": str
+        }
+
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return RentalsController.get_completed_rental_controller(rental_id)
+
+
 @rentals_bp.route("/my-completed-rentals", methods=["GET"])
 @jwt_required()
 def get_my_completed_rentals() -> tuple[Response, int]:
@@ -153,6 +197,50 @@ def get_my_lendings() -> tuple[Response, int]:
         ]
     """
     return RentalsController.get_user_lendings_controller()
+
+
+@rentals_bp.route("/completed-lending/<string:rental_id>", methods=["GET"])
+@jwt_required()
+def get_completed_lending(rental_id: str) -> tuple[Response, int]:
+    """
+    Retrieve a completed lending for the authenticated user.
+
+    Response JSON:
+        {
+            "rental_id": str,
+            "rent_status": str,
+            "original_owner_id": str,
+            "user_id": str,
+            "book_id": str,
+            "title": str,
+            "author": str,
+            "image": str,
+            "to": str,
+            "all_fees_captured": bool,
+            "reserved_at": str,
+            "reservation_expires_at": str,
+            "rental_duration_days": int,
+            "meetup_location": str,
+            "meetup_time_window": str,
+            "pickup_confirmation_started_at": str,
+            "user_confirmed_pickup": bool,
+            "owner_confirmed_pickup": bool,
+            "return_confirmation_started_at": str,
+            "user_confirmed_return": bool,
+            "owner_confirmed_return": bool,
+            "cost": int,
+            "meetup_date": str,
+            "meetup_time": str,
+            "rent_start_date": str,
+            "rent_end_date": str
+        }
+
+
+    Possible errors:
+        401 if the user is not authenticated
+        500 if an unexpected error occurs
+    """
+    return RentalsController.get_completed_lending_controller(rental_id)
 
 
 @rentals_bp.route("/my-completed-lendings", methods=["GET"])

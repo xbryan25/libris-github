@@ -24,15 +24,13 @@ const convertDateFormat = (dateString: string) => {
 
   return formatted;
 };
-
-console.log(props);
 </script>
 
 <template>
   <NuxtLink
     :to="{
       path: `/purchases/history/${props.sale.purchase_id}`,
-      query: { from: 'lending' },
+      query: { from: 'sale' },
     }"
     class="block"
   >

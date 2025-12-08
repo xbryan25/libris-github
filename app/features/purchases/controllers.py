@@ -172,6 +172,23 @@ class PurchasesController:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
+    def get_completed_purchase_controller(purchase_id: str) -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_purchase = PurchasesServices.get_completed_purchase_service(
+                user_id, purchase_id
+            )
+
+            return jsonify(completed_purchase), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
     def get_user_completed_purchases_controller() -> tuple[Response, int]:
         try:
             user_id = get_jwt_identity()
@@ -222,6 +239,23 @@ class PurchasesController:
             sales = PurchasesServices.get_user_sales_with_status(user_id)
 
             return jsonify(sales), 200
+
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def get_completed_sale_controller(purchase_id: str) -> tuple[Response, int]:
+        try:
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
+
+            completed_sale = PurchasesServices.get_completed_sale_service(
+                user_id, purchase_id
+            )
+
+            return jsonify(completed_sale), 200
 
         except Exception as e:
             traceback.print_exc()

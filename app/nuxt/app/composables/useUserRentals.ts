@@ -79,6 +79,23 @@ export const useUserRentals = () => {
     }
   }
 
+  const fetchUserCompletedRental = async (rentalId: string) => {
+    loading.value = true
+    error.value = null
+    try {
+
+      const res = await $apiFetch<Rental>(`${API_URL}/api/rentals/completed-rental/${rentalId}`, {
+        credentials: 'include',
+      })
+      rentals.value = [res]
+    } catch (e: any) {
+      rentals.value = []
+      console.log('Completed rental not found or error fetching completed rental:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const fetchUserCompletedRentals = async (sortBy: string, sortOrder: string, cardsPerPage: number, pageNumber: number) => {
     loading.value = true
     error.value = null
@@ -146,6 +163,7 @@ export const useUserRentals = () => {
     loading,
     error,
     fetchUserRentals,
+    fetchUserCompletedRental,
     fetchUserCompletedRentals,
     statusBadge,
     progressSteps,

@@ -71,6 +71,22 @@ export const useUserPurchases = () => {
     }
   }
 
+  const fetchUserCompletedPurchase = async (purchaseId: string) => {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $apiFetch<Purchase>(`${API_URL}/api/purchases/completed-purchase/${purchaseId}`, {
+        credentials: 'include',
+      })
+      purchases.value = [res]
+    } catch (e: any) {
+      purchases.value = []
+      console.log('Completed purchase not found or error fetching completed purchase:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+
   const fetchUserCompletedPurchases = async (sortOrder: string, cardsPerPage: number, pageNumber: number) => {
     loading.value = true
     error.value = null
@@ -134,6 +150,7 @@ export const useUserPurchases = () => {
     loading,
     error,
     fetchUserPurchases,
+    fetchUserCompletedPurchase,
     fetchUserCompletedPurchases,
     statusBadge,
     progressSteps,

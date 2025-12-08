@@ -24,7 +24,7 @@ const tabs = [
 ] as const;
 
 const headerText = computed(() => {
-  return activeTab.value === 'selling' ? 'Sell History' : 'Purchase History';
+  return activeTab.value === 'selling' ? 'Sale History' : 'Purchase History';
 });
 
 const sortOrderItems = ref(['newest first', 'oldest first']);
