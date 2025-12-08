@@ -59,7 +59,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="pt-5">
+        <div v-if="givenComment !== ''" class="mt-5 p-5 bg-background rounded-xl">
           <p class="text-justify">{{ givenComment }}</p>
         </div>
       </div>
@@ -88,7 +88,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="pt-5">
+        <div v-if="receivedComment !== ''" class="mt-5 p-5 bg-background rounded-xl">
           <p class="text-justify">{{ receivedComment }}</p>
         </div>
       </div>
