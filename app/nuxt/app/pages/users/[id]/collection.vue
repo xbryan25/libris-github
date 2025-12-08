@@ -1,5 +1,3 @@
-<!--NOTE: This collection is copied FROM 'browse.vue' for testing purposes. Replace or modify this page collection with proper filters - Sam-->
-
 <script setup lang="ts">
 import auth from '~/middleware/auth';
 
@@ -7,10 +5,22 @@ definePageMeta({
   middleware: auth,
 });
 
+interface PriceRange {
+  minPrice: number | null;
+  maxPrice: number | null;
+}
+
 const headerState = reactive({
   searchValue: '',
   selectedBookGenre: 'All Genres',
   selectedBookAvailability: 'All',
+  selectedPriceRange: { 
+      minPrice: null, 
+      maxPrice: null 
+  } as PriceRange,
+  kmRadius: null as number | null,
+  userLat: null as number | null, 
+  userLng: null as number | null, 
 });
 
 const route = useRoute();
@@ -31,6 +41,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col items-center w-full min-h-screen pt-4 px-4 md:px-8 lg:px-15">
+    
     <div class="flex w-full pt-5 pb-5">
       <USkeleton v-if="isFetching" class="h-6 w-60" />
 
@@ -53,16 +64,26 @@ onMounted(async () => {
 
     <BookListHeader
       :header-state="headerState"
+      is-library-mode
       @update:search-value="(newSearchValue) => (headerState.searchValue = newSearchValue)"
       @update:selected-book-genre="
-        (newSelectedBookAvailability) =>
-          (headerState.selectedBookGenre = newSelectedBookAvailability)
+        (newGenre) => (headerState.selectedBookGenre = newGenre)
       "
       @update:selected-book-availability="
-        (newSelectedBookAvailability) =>
-          (headerState.selectedBookAvailability = newSelectedBookAvailability)
+        (newAvailability) => (headerState.selectedBookAvailability = newAvailability)
+      "
+      @update:selected-price-range="
+        (newPriceRange) => (headerState.selectedPriceRange = newPriceRange)
+      "
+      @update:km-radius="
+        (newRadius) => (headerState.kmRadius = newRadius)
       "
     />
-    <BookList book-list-variant="default" :header-state="headerState" :user-id="userId" />
+
+    <BookList 
+        book-list-variant="default" 
+        :header-state="headerState" 
+        :user-id="userId" 
+    />
   </div>
 </template>
