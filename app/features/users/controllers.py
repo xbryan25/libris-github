@@ -10,6 +10,7 @@ from flask_jwt_extended import (
 import traceback
 import uuid
 import datetime
+import requests
 
 from .services import UserServices
 from app.utils.camel_case_converter import dict_keys_to_camel
@@ -84,7 +85,7 @@ class UserControllers:
             if not code:
                 return jsonify({"error": "Missing Google authorization code"}), 400
 
-            token_resp = request.post(
+            token_resp = requests.post(
                 "https://oauth2.googleapis.com/token",
                 data={
                     "code": code,
@@ -99,7 +100,7 @@ class UserControllers:
             tokens = token_resp.json()
             id_token = tokens.get("id_token")
 
-            user_info_resp = request.get(
+            user_info_resp = requests.get(
                 f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
             )
             user_info_resp.raise_for_status()
