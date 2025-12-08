@@ -49,7 +49,7 @@ onMounted(() => {
     <!-- Header -->
     <div class="mb-6">
       <NuxtLink
-        :to="`/rentals/history?activeTab=${from === 'purchase' ? 'buying' : 'selling'}`"
+        :to="`/rentals/history?activeTab=${from === 'rental' ? 'renting' : 'lending'}`"
         class="flex items-center gap-2 text-base pt-4 pb-4 hover:text-foreground mb-4 cursor-pointer"
       >
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
