@@ -92,7 +92,7 @@ class UserRepository:
 
         result = db.fetch_one(
             "INSERT INTO users (username, email_address, password_hash, "
-            "trust_score) VALUES (%s, %s, %s, 0) RETURNING user_id",
+            "trust_score) VALUES (%s, %s, %s, 500) RETURNING user_id",
             (username, email_address, hashed_password),
         )
 
@@ -114,7 +114,7 @@ class UserRepository:
         result = db.fetch_one(
             """INSERT INTO users
             (email_address, first_name, last_name, profile_image_url, auth_provider, is_email_verified, trust_score)
-            VALUES (%s, %s, %s, %s, %s, %s, 0) RETURNING user_id""",
+            VALUES (%s, %s, %s, %s, %s, %s, 500) RETURNING user_id""",
             (email_address, first_name, last_name, profile_image_url, "google", True),
         )
 
