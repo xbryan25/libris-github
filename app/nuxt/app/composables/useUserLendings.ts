@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 export type Lending = {
   rental_id: string
   rent_status: string
+  original_owner_id: string
+  user_id: string
   book_id: string
   title: string
   author: string
@@ -77,6 +79,24 @@ export const useUserLendings = () => {
     }
   }
 
+  const fetchUserCompletedLending = async (rentalId: string) => {
+    loading.value = true
+    error.value = null
+    try {
+
+      const res = await $apiFetch<Lending>(`${API_URL}/api/rentals/completed-lending/${rentalId}`, {
+        credentials: 'include',
+      })
+      lendings.value = [res]
+    } catch (e: any) {
+      lendings.value = []
+      console.log('Completed lending not found or error fetching completed lending:', e)
+    } finally {
+      loading.value = false
+    }
+  }
+  
+
   const fetchUserCompletedLendings = async (sortBy: string, sortOrder: string, cardsPerPage: number, pageNumber: number) => {
     loading.value = true
     error.value = null
@@ -140,6 +160,7 @@ export const useUserLendings = () => {
     loading,
     error,
     fetchUserLendings,
+    fetchUserCompletedLending,
     fetchUserCompletedLendings,
     statusBadge,
     progressSteps,

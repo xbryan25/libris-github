@@ -2,13 +2,7 @@ import { ref } from 'vue'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-/**
- * Composable for handling user ratings
- * 
- * Simple rating system that:
- * - Posts rating to user_ratings table
- * - Updates user_rated or owner_rated flag in rented_books
- */
+type RatingType = 'rental' | 'lending' | 'purchase' | 'sale'
 
 export const useRating = () => {
   const loading = ref(false)
@@ -17,33 +11,39 @@ export const useRating = () => {
   const { $apiFetch } = useNuxtApp()
 
   const submitRating = async (
-    rentalId: string,
+    transactionId: string,
     rating: number,
     review: string,
-    from: 'rental' | 'lending'
+    from: RatingType
   ): Promise<{ success: boolean; error?: string }> => {
     loading.value = true
     error.value = null
 
     try {
-      await $apiFetch(`${API_URL}/api/ratings/${rentalId}/rate`, {
+      // Determine endpoint based on transaction type
+      const isRental = from === 'rental' || from === 'lending'
+      const endpoint = isRental 
+        ? `${API_URL}/api/ratings/rental/${transactionId}`
+        : `${API_URL}/api/ratings/purchase/${transactionId}`
+
+      await $apiFetch(endpoint, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body:{
           rating,
           review,
           from,
-        }),
+        },
       })
 
       return { success: true }
     } catch (e: any) {
       console.error('Error submitting rating:', e)
       
-      let errorMessage = 'Failed to submit rating'
+      let errorMessage = e.data?.error || e.message || 'Failed to submit rating'
       
       if (e?.error) {
         errorMessage = e.error

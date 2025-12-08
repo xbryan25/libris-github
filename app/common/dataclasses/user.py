@@ -19,7 +19,6 @@ class User:
     username: str
     password_hash: str
     trust_score: int
-    profile_completed: datetime | None
     profile_image_url: str | None
     auth_provider: AuthProviderEnum
     is_email_verified: bool

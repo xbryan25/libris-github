@@ -2,14 +2,24 @@
 import type { Book } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
+interface PriceRange {
+  minPrice: number | null;
+  maxPrice: number | null;
+}
+
 const props = defineProps<{
   headerState: {
     searchValue: string;
     selectedBookGenre: string;
     selectedBookAvailability: string;
+    selectedPriceRange: PriceRange;
+    kmRadius: number | null;
+    userLat: number | null;
+    userLng: number | null;
   };
   userId?: string;
 }>();
+
 
 const booksData = ref<Book[]>([]);
 
@@ -51,6 +61,11 @@ const loadBooks = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
+    kmRadius: props.headerState.kmRadius,
+    userLat: props.headerState.userLat,
+    userLng: props.headerState.userLng,
   };
 
   const data = await useBooksForBookList(options);
@@ -63,6 +78,11 @@ const getTotalBookCount = async () => {
     bookGenre: props.headerState.selectedBookGenre,
     bookAvailability: props.headerState.selectedBookAvailability,
     userId: props.userId,
+    minPrice: props.headerState.selectedPriceRange.minPrice,
+    maxPrice: props.headerState.selectedPriceRange.maxPrice,
+    kmRadius: props.headerState.kmRadius,
+    userLat: props.headerState.userLat,
+    userLng: props.headerState.userLng,
   };
 
   const { totalCount }: { totalCount: number } = await useTotalBookCountForBookList(options);
@@ -97,7 +117,6 @@ const debouncedLoadBookCount = useDebounceFn(async () => {
 let lastCapacity = 0;
 
 const handleResize = useDebounceFn(async () => {
-  // Wait for layout to stabilize
   await nextTick();
   await new Promise((resolve) => requestAnimationFrame(resolve));
   await new Promise((resolve) => setTimeout(resolve, 80));
@@ -116,37 +135,49 @@ const handleResize = useDebounceFn(async () => {
   }
 }, 400);
 
-watch(
-  () => pageNumber.value,
-  async () => {
-    isFetching.value = true;
-
-    try {
-      await debouncedLoadBooks();
-    } finally {
-      isFetching.value = false;
-    }
-  },
-);
+const refreshBooksData = useDebounceFn(async () => {
+  try {
+    await loadBooks();
+    await getTotalBookCount();
+  } catch (err) {
+    console.error('Error loading books:', err);
+  } finally {
+    isFetching.value = false;
+  }
+}, 700);
 
 watch(
   [
     () => props.headerState.searchValue,
     () => props.headerState.selectedBookAvailability,
     () => props.headerState.selectedBookGenre,
+    () => props.headerState.selectedPriceRange,
+    () => props.headerState.kmRadius, 
+    () => props.headerState.userLat,
+    () => props.headerState.userLng, 
   ],
+  () => {
+    isFetching.value = true; 
+    pageNumber.value = 1; 
+    
+    refreshBooksData(); 
+  },
+  { deep: true },
+);
+
+watch(
+  () => pageNumber.value,
   async () => {
     isFetching.value = true;
+
     try {
-      await debouncedLoadBooks();
-      await debouncedLoadBookCount();
+      await loadBooks(); 
     } catch (err) {
-      console.error('Error loading books:', err);
+      console.error('Error changing page:', err);
     } finally {
       isFetching.value = false;
     }
   },
-  { deep: true },
 );
 
 onMounted(async () => {

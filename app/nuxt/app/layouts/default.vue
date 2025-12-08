@@ -10,11 +10,17 @@ const { paymentSuccess } = useSocket(auth.userId as string);
 const currentWalletBalance = ref(0);
 const isFetching = ref(true);
 
+const isOpenNotificationPopover = ref(false);
+
 const isActive = (path: string) => {
   if (route.path === path) return true;
 
   if (path === '/rentals') {
     return route.path.startsWith('/rentals');
+  }
+
+  if (path === '/purchases') {
+    return route.path.startsWith('/purchases');
   }
 
   if (route.path.startsWith('/books/') && route.query.from) {
@@ -27,7 +33,7 @@ const isActive = (path: string) => {
 watch(
   () => paymentSuccess.value,
   (amount) => {
-    if (amount) {
+    if (amount !== null && amount !== undefined) {
       currentWalletBalance.value = currentWalletBalance.value + amount;
     }
   },
@@ -154,11 +160,8 @@ onMounted(async () => {
           </NuxtLink>
 
           <!-- Notifications -->
-          <button
-            class="flex items-center rounded-md p-2 hover:bg-surface-hover hover:text-accent text-base cursor-pointer transition-colors"
-          >
-            <Icon name="mdi:bell-outline" class="w-5 h-5" />
-          </button>
+
+          <NotificationsPopover v-model:is-open="isOpenNotificationPopover" />
 
           <!-- Color Mode Toggle -->
           <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors" />

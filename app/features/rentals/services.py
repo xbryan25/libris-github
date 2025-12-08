@@ -19,6 +19,8 @@ class RentalsServices:
             formatted_rental = {
                 "rental_id": rental.get("rental_id"),
                 "rent_status": rental.get("rent_status"),
+                "original_owner_id": rental.get("original_owner_id"),
+                "user_id": rental.get("user_id"),
                 "book_id": rental.get("book_id"),
                 "title": rental.get("title", ""),
                 "author": rental.get("author", ""),
@@ -73,6 +75,82 @@ class RentalsServices:
         return formatted_rentals
 
     @staticmethod
+    def get_completed_rental_service(
+        user_id: str, rental_id: str
+    ) -> dict[str, Any] | None:
+
+        completed_rental = RentalsRepository.get_completed_rental(user_id, rental_id)
+
+        if completed_rental:
+            formatted_rental = {
+                "rental_id": completed_rental.get("rental_id"),
+                "rent_status": completed_rental.get("rent_status"),
+                "original_owner_id": completed_rental.get("original_owner_id"),
+                "user_id": completed_rental.get("user_id"),
+                "book_id": completed_rental.get("book_id"),
+                "title": completed_rental.get("title", ""),
+                "author": completed_rental.get("author", ""),
+                "image": completed_rental.get("image"),
+                "from": completed_rental.get("from", ""),
+                "actual_deposit": completed_rental.get("actual_deposit", 0),
+                "actual_rate": completed_rental.get("actual_rate", 0),
+                "all_fees_captured": completed_rental.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("reservation_expires_at")
+                ),
+                "rental_duration_days": completed_rental.get("rental_duration_days", 0),
+                "meetup_location": completed_rental.get("meetup_location", ""),
+                "meetup_time_window": completed_rental.get("meetup_time_window", ""),
+                "meetup_time": completed_rental.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": completed_rental.get(
+                    "user_confirmed_pickup", False
+                ),
+                "owner_confirmed_pickup": completed_rental.get(
+                    "owner_confirmed_pickup", False
+                ),
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_rental.get("return_confirmation_started_at")
+                ),
+                "user_confirmed_return": completed_rental.get(
+                    "user_confirmed_return", False
+                ),
+                "owner_confirmed_return": completed_rental.get(
+                    "owner_confirmed_return", False
+                ),
+                "cost": (
+                    int(completed_rental.get("cost", 0))
+                    if completed_rental.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(completed_rental.get("meetup_date"))
+                    if completed_rental.get("meetup_date")
+                    else None
+                ),
+                "rent_start_date": (
+                    DateUtils.extract_date(completed_rental.get("rent_start_date"))
+                    if completed_rental.get("rent_start_date")
+                    else None
+                ),
+                "rent_end_date": (
+                    DateUtils.extract_date(completed_rental.get("rent_end_date"))
+                    if completed_rental.get("rent_end_date")
+                    else None
+                ),
+            }
+
+            return formatted_rental
+
+        else:
+            return None
+
+    @staticmethod
     def get_user_completed_rentals_service(
         user_id: str, params: dict[str, Any]
     ) -> list[dict[str, Any]]:
@@ -91,6 +169,8 @@ class RentalsServices:
             formatted_rental = {
                 "rental_id": rental.get("rental_id"),
                 "rent_status": rental.get("rent_status"),
+                "original_owner_id": rental.get("original_owner_id"),
+                "user_id": rental.get("user_id"),
                 "book_id": rental.get("book_id"),
                 "title": rental.get("title", ""),
                 "author": rental.get("author", ""),
@@ -158,6 +238,8 @@ class RentalsServices:
             formatted_lending = {
                 "rental_id": lending.get("rental_id"),
                 "rent_status": lending.get("rent_status"),
+                "original_owner_id": lending.get("original_owner_id"),
+                "user_id": lending.get("user_id"),
                 "book_id": lending.get("book_id"),
                 "title": lending.get("title", ""),
                 "author": lending.get("author", ""),
@@ -211,6 +293,84 @@ class RentalsServices:
         return formatted_lendings
 
     @staticmethod
+    def get_completed_lending_service(
+        user_id: str, rental_id: str
+    ) -> dict[str, Any] | None:
+
+        completed_lending = RentalsRepository.get_completed_lending(user_id, rental_id)
+
+        if completed_lending:
+            formatted_lending = {
+                "rental_id": completed_lending.get("rental_id"),
+                "rent_status": completed_lending.get("rent_status"),
+                "original_owner_id": completed_lending.get("original_owner_id"),
+                "user_id": completed_lending.get("user_id"),
+                "book_id": completed_lending.get("book_id"),
+                "title": completed_lending.get("title", ""),
+                "author": completed_lending.get("author", ""),
+                "image": completed_lending.get("image"),
+                "to": completed_lending.get("to", ""),
+                "actual_deposit": completed_lending.get("actual_deposit", 0),
+                "actual_rate": completed_lending.get("actual_rate", 0),
+                "all_fees_captured": completed_lending.get("all_fees_captured", False),
+                "reserved_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("reserved_at")
+                ),
+                "reservation_expires_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("reservation_expires_at")
+                ),
+                "rental_duration_days": completed_lending.get(
+                    "rental_duration_days", 0
+                ),
+                "meetup_location": completed_lending.get("meetup_location", ""),
+                "meetup_time_window": completed_lending.get("meetup_time_window", ""),
+                "meetup_time": completed_lending.get("meetup_time"),
+                "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("pickup_confirmation_started_at")
+                ),
+                "user_confirmed_pickup": completed_lending.get(
+                    "user_confirmed_pickup", False
+                ),
+                "owner_confirmed_pickup": completed_lending.get(
+                    "owner_confirmed_pickup", False
+                ),
+                "return_confirmation_started_at": DateUtils.format_datetime_to_iso(
+                    completed_lending.get("return_confirmation_started_at")
+                ),
+                "user_confirmed_return": completed_lending.get(
+                    "user_confirmed_return", False
+                ),
+                "owner_confirmed_return": completed_lending.get(
+                    "owner_confirmed_return", False
+                ),
+                "cost": (
+                    int(completed_lending.get("cost", 0))
+                    if completed_lending.get("cost") not in (None, "")
+                    else 0
+                ),
+                "meetup_date": (
+                    DateUtils.extract_date(completed_lending.get("meetup_date"))
+                    if completed_lending.get("meetup_date")
+                    else None
+                ),
+                "rent_start_date": (
+                    DateUtils.extract_date(completed_lending.get("rent_start_date"))
+                    if completed_lending.get("rent_start_date")
+                    else None
+                ),
+                "rent_end_date": (
+                    DateUtils.extract_date(completed_lending.get("rent_end_date"))
+                    if completed_lending.get("rent_end_date")
+                    else None
+                ),
+            }
+
+            return formatted_lending
+
+        else:
+            return None
+
+    @staticmethod
     def get_user_completed_lendings_service(
         user_id: str, params: dict[str, Any]
     ) -> list[dict[str, Any]]:
@@ -229,6 +389,8 @@ class RentalsServices:
             formatted_lending = {
                 "rental_id": lending.get("rental_id"),
                 "rent_status": lending.get("rent_status"),
+                "original_owner_id": lending.get("original_owner_id"),
+                "user_id": lending.get("user_id"),
                 "book_id": lending.get("book_id"),
                 "title": lending.get("title", ""),
                 "author": lending.get("author", ""),
@@ -324,7 +486,7 @@ class RentalsServices:
     @staticmethod
     def approve_rental_request(
         rental_id: str, meetup_time: str, approver_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Approve a rental request with meetup time.
         This will:
@@ -336,7 +498,7 @@ class RentalsServices:
         """
         try:
             if not meetup_time:
-                return None, "Meetup time is required"
+                return None, "Meetup time is required", None, None
 
             # Convert 24-hour format to 12-hour format
             meetup_time_12hour = DateUtils.convert_to_12_hour_format(meetup_time)
@@ -345,7 +507,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None, None
 
             owner_id = rental.get("owner_id")
             rent_status = rental.get("rent_status")
@@ -355,11 +517,21 @@ class RentalsServices:
 
             # Verify the approver is the owner
             if str(owner_id) != str(approver_user_id):
-                return None, "Unauthorized: Only the book owner can approve this rental"
+                return (
+                    None,
+                    "Unauthorized: Only the book owner can approve this rental",
+                    None,
+                    None,
+                )
 
             # Check if rental is in pending status
             if rent_status != "pending":
-                return None, f"Rental cannot be approved. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Rental cannot be approved. Current status: {rent_status}",
+                    None,
+                    None,
+                )
 
             book_id = RentalsRepository.get_book_id_from_rental(rental_id)
             if book_id:
@@ -371,6 +543,8 @@ class RentalsServices:
                     return (
                         None,
                         f"This book is already approved for rental to {renter_name}. Please reject other pending requests first.",
+                        None,
+                        None,
                     )
 
             # Validate meetup time against time window
@@ -379,11 +553,11 @@ class RentalsServices:
             )
 
             if not is_valid:
-                return None, error_msg
+                return None, error_msg, None, None
 
             # Ensure renter_user_id is a string
             if not renter_user_id:
-                return None, "Renter user ID not found"
+                return None, "Renter user ID not found", None, None
             renter_user_id_str = str(renter_user_id)
             owner_user_id_str = str(owner_id)
 
@@ -393,13 +567,13 @@ class RentalsServices:
             )
 
             if not wallet_result:
-                return None, "Insufficient funds or wallet not found"
+                return None, "Insufficient funds or wallet not found", None, None
 
             renter_wallet_id = wallet_result.get("wallet_id")
 
             # Ensure wallet_id is a string
             if not renter_wallet_id:
-                return None, "Wallet ID not found after deduction"
+                return None, "Wallet ID not found after deduction", None, None
             renter_wallet_id_str = str(renter_wallet_id)
 
             # Add rental fee to owner's wallet
@@ -411,7 +585,7 @@ class RentalsServices:
                 logger.error(
                     f"Failed to add rental fee to owner wallet for rental {rental_id}"
                 )
-                return None, "Failed to credit owner's wallet"
+                return None, "Failed to credit owner's wallet", None, None
 
             owner_wallet_id = str(owner_wallet_result.get("wallet_id"))
 
@@ -443,7 +617,7 @@ class RentalsServices:
             result = RentalsRepository.approve_rental(rental_id, meetup_time_12hour)
 
             if not result:
-                return None, "Failed to update rental status"
+                return None, "Failed to update rental status", None, None
 
             logger.info(
                 f"Rental {rental_id} approved. "
@@ -453,17 +627,17 @@ class RentalsServices:
                 f"Owner transaction: {owner_transaction.get('transaction_id') if owner_transaction else 'N/A'}"
             )
 
-            return result, None
+            return result, None, book_id, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in approve_rental_request: {str(e)}")
             traceback.print_exc()
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
 
     @staticmethod
     def reject_rental_request(
         rental_id: str, reason: str, rejecter_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None]:
         """
         Reject a rental request.
         This will:
@@ -474,7 +648,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None
 
             owner_id = rental.get("owner_id")
             rent_status = rental.get("rent_status")
@@ -483,13 +657,21 @@ class RentalsServices:
 
             # Verify the rejecter is the owner
             if str(owner_id) != str(rejecter_user_id):
-                return None, "Unauthorized: Only the book owner can reject this rental"
+                return (
+                    None,
+                    "Unauthorized: Only the book owner can reject this rental",
+                    None,
+                )
 
             if rent_status != "pending":
-                return None, f"Rental cannot be rejected. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Rental cannot be rejected. Current status: {rent_status}",
+                    None,
+                )
 
             if not renter_user_id:
-                return None, "Renter user ID not found"
+                return None, "Renter user ID not found", None
             renter_user_id_str = str(renter_user_id)
 
             wallet_result = WalletRepository.deduct_from_reserved_amount(
@@ -503,12 +685,6 @@ class RentalsServices:
                 )
                 # Continue with deletion even if wallet update fails
 
-            # Delete the rental entry
-            delete_result = RentalsRepository.delete_rental(rental_id)
-
-            if not delete_result:
-                return None, "Failed to delete rental entry"
-
             logger.info(
                 f"Rental {rental_id} rejected by owner {rejecter_user_id}. "
                 f"Reason: {reason}. "
@@ -516,15 +692,19 @@ class RentalsServices:
                 f"Rental entry deleted."
             )
 
-            return {
-                "rental_id": rental_id,
-                "reason": reason,
-                "released_amount": total_cost,
-            }, None
+            return (
+                {
+                    "rental_id": rental_id,
+                    "reason": reason,
+                    "released_amount": total_cost,
+                },
+                None,
+                renter_user_id,
+            )
 
         except Exception as e:
             logger.error(f"Error in reject_rental_request: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None
 
     @staticmethod
     def cancel_rental_request(
@@ -571,11 +751,6 @@ class RentalsServices:
                 )
                 # Continue with deletion even if wallet update fails
 
-            delete_result = RentalsRepository.delete_rental(rental_id)
-
-            if not delete_result:
-                return None, "Failed to delete rental entry"
-
             logger.info(
                 f"Rental {rental_id} cancelled by renter {canceller_user_id}. "
                 f"Released {total_cost} from reserved_amount for user {renter_user_id_str}. "
@@ -607,6 +782,7 @@ class RentalsServices:
             - meetup_time_window
             - meetup_location
             - meetup_date
+            - original_user_id
 
         Returns:
             dict: The inserted rental record if successful, None otherwise.
@@ -637,7 +813,7 @@ class RentalsServices:
     @staticmethod
     def confirm_pickup(
         rental_id: str, confirmer_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Confirm book pickup by either the renter or owner.
         When both confirm, move to 'ongoing' status and set rent_start_date.
@@ -646,7 +822,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id_full(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None, None
 
             owner_id = rental.get("owner_id")
             renter_user_id = rental.get("user_id")
@@ -657,20 +833,30 @@ class RentalsServices:
 
             # Check if rental is in correct status
             if rent_status != "awaiting_pickup_confirmation":
-                return None, f"Cannot confirm pickup. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Cannot confirm pickup. Current status: {rent_status}",
+                    None,
+                    None,
+                )
 
             # Determine if confirmer is owner or renter
             is_owner = str(owner_id) == str(confirmer_user_id)
             is_renter = str(renter_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_renter:
-                return None, "Unauthorized: Only the renter or owner can confirm pickup"
+                return (
+                    None,
+                    "Unauthorized: Only the renter or owner can confirm pickup",
+                    None,
+                    None,
+                )
 
             # Update confirmation status
             if is_owner and owner_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
             if is_renter and user_confirmed:
-                return None, "You have already confirmed pickup"
+                return None, "You have already confirmed pickup", None, None
 
             # Confirm pickup
             result = RentalsRepository.confirm_pickup(
@@ -678,23 +864,23 @@ class RentalsServices:
             )
 
             if not result:
-                return None, "Failed to confirm pickup"
+                return None, "Failed to confirm pickup", None, None
 
             logger.info(
                 f"Pickup confirmed for rental {rental_id} by "
                 f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
             )
 
-            return result, None
+            return result, None, owner_id, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in confirm_pickup: {str(e)}")
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
 
     @staticmethod
     def confirm_return(
         rental_id: str, confirmer_user_id: str
-    ) -> tuple[dict[str, Any] | None, str | None]:
+    ) -> tuple[dict[str, Any] | None, str | None, str | None, str | None]:
         """
         Confirm book return by either the renter or owner.
         When both confirm, move to 'completed' status and return security deposit.
@@ -703,7 +889,7 @@ class RentalsServices:
             rental = RentalsRepository.get_rental_by_id_full_return(rental_id)
 
             if not rental:
-                return None, "Rental not found"
+                return None, "Rental not found", None, None
 
             owner_id = rental.get("owner_id")
             renter_user_id = rental.get("user_id")
@@ -713,26 +899,36 @@ class RentalsServices:
 
             # Check if rental is in correct status
             if rent_status != "awaiting_return_confirmation":
-                return None, f"Cannot confirm return. Current status: {rent_status}"
+                return (
+                    None,
+                    f"Cannot confirm return. Current status: {rent_status}",
+                    None,
+                    None,
+                )
 
             # Determine if confirmer is owner or renter
             is_owner = str(owner_id) == str(confirmer_user_id)
             is_renter = str(renter_user_id) == str(confirmer_user_id)
 
             if not is_owner and not is_renter:
-                return None, "Unauthorized: Only the renter or owner can confirm return"
+                return (
+                    None,
+                    "Unauthorized: Only the renter or owner can confirm return",
+                    None,
+                    None,
+                )
 
             # Update confirmation status
             if is_owner and owner_confirmed:
-                return None, "You have already confirmed return"
+                return None, "You have already confirmed return", None, None
             if is_renter and user_confirmed:
-                return None, "You have already confirmed return"
+                return None, "You have already confirmed return", None, None
 
             # Confirm return
             result = RentalsRepository.confirm_return(rental_id, is_owner, is_renter)
 
             if not result:
-                return None, "Failed to confirm return"
+                return None, "Failed to confirm return", None, None
 
             # Check if both users have now confirmed (status changed to 'rate_user')
             new_status = result.get("rent_status")
@@ -759,6 +955,8 @@ class RentalsServices:
                         return (
                             None,
                             "Failed to return security deposit. Owner may have insufficient funds.",
+                            None,
+                            None,
                         )
 
                     # Create transaction logs
@@ -795,9 +993,15 @@ class RentalsServices:
                 f"{'owner' if is_owner else 'renter'} {confirmer_user_id}"
             )
 
-            return result, None
+            return result, None, owner_id, renter_user_id
 
         except Exception as e:
             logger.error(f"Error in confirm_return: {str(e)}")
             traceback.print_exc()
-            return None, f"Error: {str(e)}"
+            return None, f"Error: {str(e)}", None, None
+
+    @staticmethod
+    def get_rental_details_for_pickup(rental_id: str) -> dict[str, Any] | None:
+        """Get the details of a rental from a rental_id"""
+
+        return RentalsRepository.get_rental_by_id_full(rental_id)

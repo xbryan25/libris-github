@@ -39,8 +39,6 @@ def user_signup() -> tuple[Response, int]:
 def send_verification_email() -> tuple[Response, int]:
     """Send email verification code to user."""
 
-    print("===========================================REACH HERE")
-
     return UserControllers.send_verification_email_controller()
 
 
@@ -53,8 +51,6 @@ def verify_email() -> tuple[Response, int]:
 @users_bp.route("/resend-verification-code", methods=["POST"])
 def resend_verification_code() -> tuple[Response, int]:
     """Resend verification code to user email."""
-    print("\n[ROUTES] ========== RESEND VERIFICATION CODE ROUTE HIT ==========")
-    print("[ROUTES] Routing to resend_verification_code_controller")
     return UserControllers.resend_verification_code_controller()
 
 

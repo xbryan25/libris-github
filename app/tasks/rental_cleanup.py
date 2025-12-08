@@ -2,6 +2,14 @@ from flask import current_app
 from datetime import datetime, timezone
 import logging
 
+from ..features.notifications.services import NotificationServices
+
+from ..features.books.services import BookServices
+
+from ..features.users.services import UserServices
+
+from app.common.constants import NotificationMessages
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,6 +36,7 @@ class RentalCleanupTask:
                 SELECT
                     rb.rental_id,
                     rb.user_id,
+                    rb.book_id,
                     rb.total_rent_cost,
                     rb.reservation_expires_at
                 FROM rented_books rb
@@ -36,10 +45,6 @@ class RentalCleanupTask:
             """
 
             expired_rentals = db.fetch_all(query, ())
-
-            print(
-                f"Found {len(expired_rentals) if expired_rentals else 0} expired rentals"
-            )
 
             if expired_rentals:
                 for r in expired_rentals:
@@ -90,6 +95,34 @@ class RentalCleanupTask:
                     """
 
                     delete_result = db.fetch_one(delete_query, (rental_id,))
+
+                    book_details = BookServices.get_book_details_service(
+                        rental.get("book_id")
+                    )
+
+                    owner_id = (
+                        str(book_details["owner_user_id"]) if book_details else None
+                    )
+
+                    owner_username = UserServices.get_username_service(owner_id)
+
+                    notification_header = (
+                        NotificationMessages.RENTAL_REQUEST_EXPIRED_HEADER
+                    )
+                    notification_message = (
+                        NotificationMessages.RENTAL_REQUEST_EXPIRED_MESSAGE.format(
+                            title=f"{book_details['title'] if book_details else None}",
+                            username=owner_username,
+                        )
+                    )
+
+                    NotificationServices.add_notification_service(
+                        owner_id,
+                        user_id,
+                        "rent",
+                        notification_header,
+                        notification_message,
+                    )
 
                     if delete_result:
                         cleaned_count += 1

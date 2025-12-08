@@ -23,14 +23,15 @@ export const useCreateRental = () => {
   }
 
   const createRental = async (payload: {
-    book_id: string
-    total_rent_cost: number
-    rental_duration_days: number
-    meetup_time_window: string
-    meetup_location: string
-    meetup_date: string
-    actual_rate: number
-    actual_deposit: number
+    bookId: string
+    totalRentCost: number
+    rentalDurationDays: number
+    meetupTimeWindow: string
+    meetupLocation: string
+    meetupDate: string
+    actualRate: number
+    actualDeposit: number
+    ownerUserId: string
   }) => {
     loading.value = true
     error.value = null
@@ -38,7 +39,7 @@ export const useCreateRental = () => {
     try {
       await $apiFetch(`${API_URL}/api/wallets/update-reserved-amount`, {
         method: 'PATCH',
-        body: { amount_to_reserve: payload.total_rent_cost },
+        body: { amount_to_reserve: payload.totalRentCost },
         credentials: 'include'
       })
 

@@ -20,7 +20,10 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 
   try {
     const response = await auth.signup(username, emailAddress, password);
+<<<<<<< HEAD
     console.log('Signup response:', response);
+=======
+>>>>>>> 6899760db396c3d8a06062e5c677e72468f0b7df
 
     toast.add({
       title: response.messageTitle,
@@ -28,23 +31,7 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
       color: 'success',
     });
 
-    const userId = response.userId;
-    console.log('User ID:', userId);
-
-    if (!userId) {
-      console.error('No userId in response!');
-      return;
-    }
-
-    try {
-      await useSendVerificationEmail(userId);
-    } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log('Redirecting to verify-email...');
-    navigateTo(`/verify-email?userId=${userId}`);
+    navigateTo('/login');
   } catch (error: any) {
     console.error('Signup error:', error);
 
