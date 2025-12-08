@@ -151,6 +151,7 @@ class UserServices:
         first_name: str,
         last_name: str,
         profile_image_url: str | None,
+        account_activated_at: datetime,
     ) -> str | None:
         """
         add later
@@ -161,6 +162,8 @@ class UserServices:
         )
 
         UserRepository.initialize_wallet(user_id)
+
+        UserRepository.update_account_activated_at(user_id, account_activated_at)
 
         return user_id
 

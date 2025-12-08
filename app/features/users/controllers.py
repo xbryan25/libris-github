@@ -116,13 +116,18 @@ class UserControllers:
 
             user_id = user["user_id"] if user else None
             auth_provider = user["auth_provider"] if user else None
+            account_activated_at = datetime.datetime.now()
 
             if user_id and auth_provider and auth_provider == "local":
                 return jsonify({"error": "Email address is already in use."}), 400
 
             elif not user_id:
                 user_id = UserServices.user_google_signup_service(
-                    email_address, first_name, last_name, profile_image_url
+                    email_address,
+                    first_name,
+                    last_name,
+                    profile_image_url,
+                    account_activated_at,
                 )
 
             username = UserServices.get_username_service(user_id)
@@ -299,13 +304,15 @@ class UserControllers:
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
-            reserved_at = datetime.datetime.now()
+            account_activated_at = datetime.datetime.now()
 
             if not user_id or not code:
                 error_response = {"error": "User ID and code are required."}
                 return jsonify(error_response), 400
 
-            result = UserServices.verify_email_code_service(user_id, code, reserved_at)
+            result = UserServices.verify_email_code_service(
+                user_id, code, account_activated_at
+            )
 
             if "error" in result:
                 error_response = {"error": result["error"]}
