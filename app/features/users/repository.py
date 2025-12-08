@@ -211,6 +211,20 @@ class UserRepository:
             return False
 
     @staticmethod
+    def update_account_activated_at(
+        user_id: str, account_activated_at: datetime
+    ) -> None:
+        """Update account_activated_at column of a user."""
+        db = current_app.extensions["db"]
+
+        db.execute_query(
+            CommonQueries.UPDATE_BY_ID.format(
+                table="users", set_clause="account_activated_at = %s", pk="user_id"
+            ),
+            (account_activated_at, user_id),
+        )
+
+    @staticmethod
     def get_user_email_and_username(user_id: str) -> dict | None:
         """Get user email and username for verification email."""
         db = current_app.extensions["db"]

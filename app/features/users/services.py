@@ -107,7 +107,9 @@ class UserServices:
             return {"error": "An unexpected error occurred."}
 
     @staticmethod
-    def verify_email_code_service(user_id: str, code: str) -> dict:
+    def verify_email_code_service(
+        user_id: str, code: str, account_activated_at: datetime
+    ) -> dict:
         """Verify the email verification code."""
         try:
 
@@ -126,10 +128,15 @@ class UserServices:
 
                 return {"error": "Failed to verify email."}
 
-            return {
-                "success": True,
-                "message": "Email verified successfully!",
-            }
+            else:
+                UserRepository.update_account_activated_at(
+                    user_id, account_activated_at
+                )
+
+                return {
+                    "success": True,
+                    "message": "Email verified successfully!",
+                }
 
         except Exception:
 

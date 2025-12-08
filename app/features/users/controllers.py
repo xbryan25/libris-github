@@ -10,6 +10,7 @@ from flask_jwt_extended import (
 import traceback
 import uuid
 import requests
+import datetime
 
 from .services import UserServices
 from app.utils.camel_case_converter import dict_keys_to_camel
@@ -298,12 +299,13 @@ class UserControllers:
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
+            reserved_at = datetime.datetime.now()
 
             if not user_id or not code:
                 error_response = {"error": "User ID and code are required."}
                 return jsonify(error_response), 400
 
-            result = UserServices.verify_email_code_service(user_id, code)
+            result = UserServices.verify_email_code_service(user_id, code, reserved_at)
 
             if "error" in result:
                 error_response = {"error": result["error"]}

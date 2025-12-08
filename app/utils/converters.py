@@ -38,12 +38,6 @@ def convert_user_dict(user: dict) -> User:
         trust_score=(
             int(user["trust_score"]) if user.get("trust_score") is not None else 0
         ),
-        profile_completed=(
-            user["profile_completed"]
-            if isinstance(user.get("profile_completed"), datetime)
-            or user.get("profile_completed") is None
-            else datetime.fromisoformat(user["profile_completed"])
-        ),
         profile_image_url=user.get("profile_image_url"),
         auth_provider=AuthProviderEnum(user["auth_provider"]),
         is_email_verified=user["is_email_verified"],
