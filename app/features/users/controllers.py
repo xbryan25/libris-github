@@ -116,7 +116,7 @@ class UserControllers:
 
             user_id = user["user_id"] if user else None
             auth_provider = user["auth_provider"] if user else None
-            account_activated_at = datetime.datetime.now()
+            account_activated_at = datetime.datetime.now(datetime.timezone.utc)
 
             if user_id and auth_provider and auth_provider == "local":
                 return jsonify({"error": "Email address is already in use."}), 400
@@ -304,7 +304,7 @@ class UserControllers:
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
-            account_activated_at = datetime.datetime.now()
+            account_activated_at = datetime.datetime.now(datetime.timezone.utc)
 
             if not user_id or not code:
                 error_response = {"error": "User ID and code are required."}
