@@ -5,23 +5,25 @@ import { useProfile } from '~/composables/UseProfile'
 import { useProfileEdit } from '~/composables/useProfileEdit'
 import ProfileMainSection from '~/components/ProfileMainSection.vue'
 import ProfileAdditionalInfo from '~/components/ProfileAdditionalInfo.vue'
+import ProfileChangePasswordSection from '~/components/ProfileChangePasswordSection.vue'
 
 definePageMeta({
   middleware: auth,
 });
 
 const { profile, fetchProfile, loading, error } = useProfile()
-const { 
-  isEditingPersonal, 
+
+const {
+  isEditingPersonal,
   isEditingAddress,
   savingPersonal,
   savingAddress,
-  startEditingPersonal, 
+  startEditingPersonal,
   startEditingAddress,
-  savePersonalInfo, 
+  savePersonalInfo,
   saveAddress,
-  cancelEditingPersonal, 
-  cancelEditingAddress, 
+  cancelEditingPersonal,
+  cancelEditingAddress,
   editForm,
   isEditing // Legacy prop for ProfileMainSection
 } = useProfileEdit()
@@ -76,20 +78,21 @@ onMounted(() => {
 <template>
   <div class="min-h-screen w-full pt-4 px-4 md:px-8 lg:px-15">
     <div class="mt-20 gap-10 flex flex-col justify-center items-center">
-      <ProfileMainSection 
-        :profile="profile" 
-        :loading="loading" 
-        :error="error" 
+      <ProfileMainSection
+        :profile="profile"
+        :loading="loading"
+        :error="error"
         :is-current-user="true"
         :is-editing="isEditing"
         :edit-form="editForm"
         @profile-updated="handleProfileUpdate"
         @image-updated="handleImageUpdate"
       />
-      <ProfileAdditionalInfo 
-        :profile="profile" 
-        :loading="loading" 
-        :error="error" 
+
+      <ProfileAdditionalInfo
+        :profile="profile"
+        :loading="loading"
+        :error="error"
         :is-current-user="true"
         :is-editing-personal="isEditingPersonal"
         :is-editing-address="isEditingAddress"
@@ -103,7 +106,9 @@ onMounted(() => {
         @cancel-personal="handleCancelPersonal"
         @cancel-address="handleCancelAddress"
       />
+
+      <!-- NEW: Change Password Section -->
+      <ProfileChangePasswordSection />
     </div>
   </div>
 </template>
-

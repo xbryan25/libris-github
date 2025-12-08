@@ -65,6 +65,8 @@ export function validateAuthForm (state: any, authType: string): FormError[] {
                 message: 'Password must not exceed 64 characters.',
             });
         }
+        // REMOVED: Strong password validation from here
+        // The PasswordStrengthMeter component and backend will handle it
 
         if (!state.confirmPassword || whitespaceRegex.test(state.confirmPassword)) {
             errors.push({ name: 'confirmPassword', message: 'Confirm password is required.' });
