@@ -12,7 +12,7 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const purchaseid = route.params.purchaseId as string;
+const purchaseId = route.params.purchaseId as string;
 const from = route.query.from as string;
 
 const { purchases, fetchUserPurchases } = useUserPurchases();
@@ -62,10 +62,10 @@ const fetchPurchaseData = async () => {
   try {
     if (from === 'purchase') {
       await fetchUserPurchases();
-      currentItem.value = purchases.value.find((p) => p.purchase_id === purchaseid) || null;
+      currentItem.value = purchases.value.find((p) => p.purchase_id === purchaseId) || null;
     } else if (from === 'sale') {
       await fetchUserSales();
-      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseid) || null;
+      currentItem.value = sales.value.find((s) => s.purchase_id === purchaseId) || null;
     }
   } catch (error) {
     console.error('Error fetching purchase data:', error);
@@ -169,7 +169,7 @@ onMounted(() => {
         <!-- Transfer Card (Only for buyers in awaiting_transfer_decision status) -->
         <PurchaseTransferCard
           v-if="showTransferCard"
-          :purchase-id="purchaseid"
+          :purchase-id="purchaseId"
           :from="from"
           @refresh="fetchPurchaseData"
         />
@@ -188,7 +188,7 @@ onMounted(() => {
           v-else
           :from="from"
           :item="currentItem"
-          :purchase-id="purchaseid"
+          :purchase-id="purchaseId"
           @back-to-complete="handleBackToComplete"
         />
       </template>
@@ -201,7 +201,7 @@ onMounted(() => {
         "
         :status="currentItem.purchase_status"
         :from="from"
-        :purchase-id="purchaseid"
+        :purchase-id="purchaseId"
         :meetup-date="currentItem.meetup_date"
         :meetup-time="currentItem.meetup_time"
         :user-confirmed-pickup="currentItem.user_confirmed_pickup"
@@ -213,7 +213,7 @@ onMounted(() => {
       <PurchasePendingActions
         v-if="currentItem.purchase_status === 'pending'"
         :from="from"
-        :purchase-id="purchaseid"
+        :purchase-id="purchaseId"
         @approval-success="handleApprovalSuccess"
         @refresh="fetchPurchaseData"
       />

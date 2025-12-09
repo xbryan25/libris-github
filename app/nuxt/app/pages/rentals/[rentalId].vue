@@ -35,7 +35,16 @@ const fetchRentalData = async () => {
       currentItem.value = rentals.value.find((r) => r.rental_id === rentalId) || null;
     } else if (from === 'lending') {
       await fetchUserLendings();
-      currentItem.value = lendings.value.find((l) => l.rental_id === rentalId) || null;
+
+      console.log(lendings.value);
+      // currentItem.value = lendings.value.find((l) => l.rental_id === rentalId) || null;
+
+      currentItem.value =
+        lendings.value.find((l) => {
+          console.log('Checking:', l.rental_id, '==', rentalId);
+          return l.rental_id === rentalId;
+        }) || null;
+      console.log(currentItem.value);
     }
   } catch (error) {
     console.error('Error fetching rental data:', error);
