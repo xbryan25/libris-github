@@ -1,171 +1,190 @@
-  <script setup lang="ts">
-  import { computed, ref, watch, toRef, onMounted } from 'vue';
-  import type { Profile } from '~/composables/UseProfile';
-  import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
-  import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
+<script setup lang="ts">
+import { computed, ref, watch, toRef, onMounted } from 'vue';
+import type { Profile } from '~/composables/UseProfile';
+import { validatePersonalInfo, validateAddress } from '@/utils/validateProfileEdit';
+import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 
-  const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
+const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
 
-  const { addressQuery, suggestions, fetchSuggestions, selectSuggestion } = useAddressAutocomplete(LOCATIONIQ_API_KEY);
+const { addressQuery, suggestions, fetchSuggestions, selectSuggestion } =
+  useAddressAutocomplete(LOCATIONIQ_API_KEY);
 
-  const errorMapPersonal = ref<Record<string, string>>({});
-  const errorMapAddress = ref<Record<string, string>>({});
+const errorMapPersonal = ref<Record<string, string>>({});
+const errorMapAddress = ref<Record<string, string>>({});
 
-  interface Props {
-    profile: Profile | null;
-    loading: boolean;
-    error: string | null;
-    isCurrentUser?: boolean; // Whether this is the current user's profile
-    isEditingPersonal?: boolean; // Whether personal info is in edit mode
-    isEditingAddress?: boolean; // Whether address is in edit mode
-    editForm?: any; // The edit form data
-    savingPersonal?: boolean; // Loading state for personal info save
-    savingAddress?: boolean; // Loading state for address save
-  }
+interface Props {
+  profile: Profile | null;
+  loading: boolean;
+  error: string | null;
+  isCurrentUser?: boolean; // Whether this is the current user's profile
+  isEditingPersonal?: boolean; // Whether personal info is in edit mode
+  isEditingAddress?: boolean; // Whether address is in edit mode
+  editForm?: any; // The edit form data
+  savingPersonal?: boolean; // Loading state for personal info save
+  savingAddress?: boolean; // Loading state for address save
+}
 
-  const props = defineProps<Props>();
+const props = defineProps<Props>();
 
-  const emit = defineEmits<{
-    startEditPersonal: [];
-    startEditAddress: [];
-    savePersonal: [];
-    saveAddress: [];
-    cancelPersonal: [];
-    cancelAddress: [];
-  }>();
+const emit = defineEmits<{
+  startEditPersonal: [];
+  startEditAddress: [];
+  savePersonal: [];
+  saveAddress: [];
+  cancelPersonal: [];
+  cancelAddress: [];
+}>();
 
-  const editForm = computed(() => props.editForm || {});
+const editForm = computed(() => props.editForm || {});
 
-  const isEditingPersonalRef = toRef(props, 'isEditingPersonal');
-  const isEditingAddressRef = toRef(props, 'isEditingAddress');
+const isEditingPersonalRef = toRef(props, 'isEditingPersonal');
+const isEditingAddressRef = toRef(props, 'isEditingAddress');
 
-  const hasClickedSavePersonal = ref(false);
-  const hasClickedSaveAddress = ref(false);
+const hasClickedSavePersonal = ref(false);
+const hasClickedSaveAddress = ref(false);
 
-  // Clear errors when editing is cancelled or when editing starts
-  watch(isEditingPersonalRef, (isEditing) => {
-    if (!isEditing) {
-      errorMapPersonal.value = {};
-    } else {
+watch(
+  () => props.savingPersonal,
+  (newVal) => {
+    if (!newVal) {
       hasClickedSavePersonal.value = false;
-      errorMapPersonal.value = {};
     }
-  });
+  },
+);
 
-  watch(isEditingAddressRef, (isEditing) => {
-    if (!isEditing) {
-      errorMapAddress.value = {};
-    } else {
+watch(
+  () => props.savingAddress,
+  (newVal) => {
+    if (!newVal) {
       hasClickedSaveAddress.value = false;
-      errorMapAddress.value = {};
     }
-  });
+  },
+);
 
-  // Real-time validation for personal info fields
-  watch(
-    () => editForm.value.first_name,
-    () => {
-      if (props.isEditingPersonal) {
-        validatePersonalField('first_name');
-      }
-    },
-  );
+// Clear errors when editing is cancelled or when editing starts
+watch(isEditingPersonalRef, (isEditing) => {
+  if (!isEditing) {
+    errorMapPersonal.value = {};
+  } else {
+    hasClickedSavePersonal.value = false;
+    errorMapPersonal.value = {};
+  }
+});
 
-  watch(
-    () => editForm.value.middle_name,
-    () => {
-      if (props.isEditingPersonal) {
-        validatePersonalField('middle_name');
-      }
-    },
-  );
+watch(isEditingAddressRef, (isEditing) => {
+  if (!isEditing) {
+    errorMapAddress.value = {};
+  } else {
+    hasClickedSaveAddress.value = false;
+    errorMapAddress.value = {};
+  }
+});
 
-  watch(
-    () => editForm.value.last_name,
-    () => {
-      if (props.isEditingPersonal) {
-        validatePersonalField('last_name');
-      }
-    },
-  );
+// Real-time validation for personal info fields
+watch(
+  () => editForm.value.first_name,
+  () => {
+    if (props.isEditingPersonal) {
+      validatePersonalField('first_name');
+    }
+  },
+);
 
-  watch(
-    () => editForm.value.phone_number,
-    () => {
-      if (props.isEditingPersonal) {
-        validatePersonalField('phone_number');
-      }
-    },
-  );
+watch(
+  () => editForm.value.middle_name,
+  () => {
+    if (props.isEditingPersonal) {
+      validatePersonalField('middle_name');
+    }
+  },
+);
 
-  // Real-time validation for address fields
-  watch(
-    () => editForm.value.address?.country,
-    () => {
-      if (props.isEditingAddress) {
-        validateAddressField('address.country');
-      }
-    },
-  );
-  
-  watch(addressQuery, (val) => {
+watch(
+  () => editForm.value.last_name,
+  () => {
+    if (props.isEditingPersonal) {
+      validatePersonalField('last_name');
+    }
+  },
+);
+
+watch(
+  () => editForm.value.phone_number,
+  () => {
+    if (props.isEditingPersonal) {
+      validatePersonalField('phone_number');
+    }
+  },
+);
+
+// Real-time validation for address fields
+watch(
+  () => editForm.value.address?.country,
+  () => {
+    if (props.isEditingAddress) {
+      validateAddressField('address.country');
+    }
+  },
+);
+
+watch(addressQuery, (val) => {
   if (props.isEditingAddress && val) fetchSuggestions();
-  });
+});
 
-  function handleSelectSuggestion(item: any) {
-  selectSuggestion(item, editForm.value.address); 
-  addressQuery.value = item.display_name; 
+function handleSelectSuggestion(item: any) {
+  selectSuggestion(item, editForm.value.address);
+  addressQuery.value = item.display_name;
   suggestions.value = [];
 }
 
-  function validatePersonalField(field: string) {
-    const tempState = {
-      first_name: editForm.value.first_name,
-      middle_name: editForm.value.middle_name,
-      last_name: editForm.value.last_name,
-      phone_number: editForm.value.phone_number,
-    };
-    const allErrors = validatePersonalInfo(tempState);
-    const fieldError = allErrors.find((e) => e.name === field);
-    if (fieldError) errorMapPersonal.value[field] = fieldError.message;
-    else delete errorMapPersonal.value[field];
-  }
+function validatePersonalField(field: string) {
+  const tempState = {
+    first_name: editForm.value.first_name,
+    middle_name: editForm.value.middle_name,
+    last_name: editForm.value.last_name,
+    phone_number: editForm.value.phone_number,
+  };
+  const allErrors = validatePersonalInfo(tempState);
+  const fieldError = allErrors.find((e) => e.name === field);
+  if (fieldError) errorMapPersonal.value[field] = fieldError.message;
+  else delete errorMapPersonal.value[field];
+}
 
-  function validateAddressField(field: string) {
-    const tempState = editForm.value.address || {};
-    const allErrors = validateAddress(tempState);
-    const fieldError = allErrors.find((e) => e.name === field);
-    if (fieldError) errorMapAddress.value[field] = fieldError.message;
-    else delete errorMapAddress.value[field];
-  }
+function validateAddressField(field: string) {
+  const tempState = editForm.value.address || {};
+  const allErrors = validateAddress(tempState);
+  const fieldError = allErrors.find((e) => e.name === field);
+  if (fieldError) errorMapAddress.value[field] = fieldError.message;
+  else delete errorMapAddress.value[field];
+}
 
-  function onSavePersonal() {
-    hasClickedSavePersonal.value = true;
+function onSavePersonal() {
+  hasClickedSavePersonal.value = true;
 
-    const errors = validatePersonalInfo({
-      first_name: editForm.value.first_name,
-      middle_name: editForm.value.middle_name,
-      last_name: editForm.value.last_name,
-      phone_number: editForm.value.phone_number,
-    });
-    errorMapPersonal.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
-    if (errors.length === 0) emit('savePersonal');
-  }
+  const errors = validatePersonalInfo({
+    first_name: editForm.value.first_name,
+    middle_name: editForm.value.middle_name,
+    last_name: editForm.value.last_name,
+    phone_number: editForm.value.phone_number,
+  });
+  errorMapPersonal.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+  if (errors.length === 0) emit('savePersonal');
+}
 
-  function onSaveAddress() {
-    hasClickedSaveAddress.value = true;
+function onSaveAddress() {
+  hasClickedSaveAddress.value = true;
 
-    const errors = validateAddress(editForm.value.address || {});
-    errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
-    if (errors.length === 0) emit('saveAddress');
-  }
+  const errors = validateAddress(editForm.value.address || {});
+  errorMapAddress.value = Object.fromEntries(errors.map((e) => [e.name, e.message]));
+  if (errors.length === 0) emit('saveAddress');
+}
 
-  onMounted(() => {
+onMounted(() => {
   if (editForm.value.address?.display_name) {
     addressQuery.value = editForm.value.address.display_name;
   }
-  });
-  </script>
+});
+</script>
 
 <template>
   <UCard

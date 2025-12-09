@@ -250,6 +250,9 @@ class UserRepository:
     def update_user_profile(user_id: str, profile_data: dict) -> bool:
         """Update user profile information."""
         db = current_app.extensions["db"]
+
+        date_of_birth = profile_data.get("date_of_birth") or None
+
         try:
             db.execute_query(
                 UserQueries.UPDATE_USER_PROFILE,
@@ -257,12 +260,13 @@ class UserRepository:
                     profile_data.get("first_name"),
                     profile_data.get("middle_name"),
                     profile_data.get("last_name"),
-                    profile_data.get("date_of_birth"),
+                    date_of_birth,
                     profile_data.get("phone_number"),
                     profile_data.get("profile_image_url"),
                     user_id,
                 ),
             )
+
             return True
 
         except Exception:
