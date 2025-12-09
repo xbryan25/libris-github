@@ -42,36 +42,21 @@ class UserRepository:
         )
 
     @staticmethod
+    def get_user_info(user_id: str) -> dict[str, str | bool] | None:
+        """Retrieve username, email verification status, and auth provider by user_id."""
+        db = current_app.extensions["db"]
+        return db.fetch_one(
+            UserQueries.GET_USER_INFO,
+            (user_id,),
+        )
+
+    @staticmethod
     def get_username(user_id: str) -> dict[str, str] | None:
         """Retrieve username by user_id."""
         db = current_app.extensions["db"]
         return db.fetch_one(
             CommonQueries.GET_COLUMN_BY_FIELD.format(
                 column="username", table="users", field="user_id"
-            ),
-            (user_id,),
-        )
-
-    @staticmethod
-    def get_is_email_verified(user_id: str) -> dict[str, str] | None:
-        """Retrieve email verification status by user_id."""
-        db = current_app.extensions["db"]
-
-        return db.fetch_one(
-            CommonQueries.GET_COLUMN_BY_FIELD.format(
-                column="is_email_verified", table="users", field="user_id"
-            ),
-            (user_id,),
-        )
-
-    @staticmethod
-    def get_auth_provider(user_id: str) -> dict[str, str] | None:
-        """Retrieve auth provider status by user_id."""
-        db = current_app.extensions["db"]
-
-        return db.fetch_one(
-            CommonQueries.GET_COLUMN_BY_FIELD.format(
-                column="auth_provider", table="users", field="user_id"
             ),
             (user_id,),
         )

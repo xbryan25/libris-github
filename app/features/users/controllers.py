@@ -389,18 +389,15 @@ class UserControllers:
             if not user_id:
                 return jsonify({"message": "Not authenticated"}), 401
 
-            username = UserServices.get_username_service(user_id)
-
-            is_email_verified = UserServices.get_is_email_verified_service(user_id)
-            auth_provider = UserServices.get_auth_provider_service(user_id)
+            user_details = UserServices.get_user_info_service(user_id)
 
             return (
                 jsonify(
                     {
-                        "username": username,
+                        "username": user_details["username"],
                         "userId": user_id,
-                        "isEmailVerified": is_email_verified,
-                        "authProvider": auth_provider,
+                        "isEmailVerified": user_details["is_email_verified"],
+                        "authProvider": user_details["auth_provider"],
                     }
                 ),
                 200,

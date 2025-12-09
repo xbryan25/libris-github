@@ -7,6 +7,11 @@ class UserQueries:
         "LEFT JOIN user_address a ON u.user_id = a.user_id "
         "WHERE u.user_id = %s"
     )
+    GET_USER_INFO = (
+        "SELECT username, is_email_verified, auth_provider "
+        "FROM users "
+        "WHERE user_id = %s"
+    )
     GET_USER_ADDRESS = (
         "SELECT country, city, barangay, street, "
         "postal_code, latitude, longitude FROM user_address WHERE user_id = %s LIMIT 1"
