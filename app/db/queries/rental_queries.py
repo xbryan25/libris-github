@@ -76,8 +76,8 @@ class RentalsQueries:
             rb.owner_rated,
             rb.total_rent_cost AS cost
         FROM rented_books rb
-        JOIN books b ON rb.original_owner_id = b.book_id
-        JOIN users u ON rb.owner_id = u.user_id
+        JOIN books b ON rb.book_id = b.book_id
+        JOIN users u ON rb.original_owner_id = u.user_id
         LEFT JOIN book_images bi ON b.book_id = bi.book_id AND bi.order_num = 1
         WHERE rb.user_id = %s
         AND (
