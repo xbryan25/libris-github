@@ -12,7 +12,7 @@ const showCurrentPassword = ref(false);
 const showNewPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const code = ref(route.query.code as string || '');
+const code = ref((route.query.code as string) || '');
 const currentPassword = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
@@ -101,34 +101,28 @@ const onSubmitChangePassword = async () => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-    <!-- Back to profile link -->
-    <div class="w-full px-6 py-4">
-      <NuxtLink
-        to="/users/me"
-        class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
-      >
-        <Icon name="heroicons:arrow-left" class="w-5 h-5" />
-        Back to profile
-      </NuxtLink>
-    </div>
-
+  <div class="flex-1 w-full flex flex-col bg-background">
     <!-- Main Content - Centered -->
     <main class="flex-grow flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl">
+      <div class="p-10 w-full max-w-xl">
         <!-- Heading -->
         <div class="mb-8 text-center">
-          <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">Change your password</h2>
+          <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-3">
+            Change your password
+          </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400">
             Enter your current password and choose a new strong password.
           </p>
         </div>
 
         <!-- Form -->
-        <form @submit.prevent="onSubmitChangePassword" class="space-y-5">
+        <form class="space-y-5" @submit.prevent="onSubmitChangePassword">
           <!-- Current Password -->
           <div class="space-y-2">
-            <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="currentPassword"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Current Password
             </label>
             <UInput
@@ -156,7 +150,10 @@ const onSubmitChangePassword = async () => {
 
           <!-- New Password -->
           <div class="space-y-2">
-            <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="newPassword"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               New Password
             </label>
             <UInput
@@ -192,7 +189,10 @@ const onSubmitChangePassword = async () => {
 
           <!-- Confirm Password -->
           <div class="space-y-2">
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="confirmPassword"
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Confirm New Password
             </label>
             <UInput
@@ -252,3 +252,9 @@ const onSubmitChangePassword = async () => {
     </main>
   </div>
 </template>
+
+<style>
+::-ms-reveal {
+  display: none;
+}
+</style>

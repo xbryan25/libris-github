@@ -110,7 +110,10 @@ onMounted(() => {
         @cancel-address="handleCancelAddress"
       />
 
-      <ProfileChangePasswordSection v-if="authStore.isGoogleLogin == false" />
+      <div class="flex gap-2">
+        <LogoutButton />
+        <ProfileChangePasswordSection v-if="authStore.isGoogleLogin == false" />
+      </div>
     </div>
   </div>
 </template>

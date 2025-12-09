@@ -165,14 +165,12 @@ onMounted(async () => {
 
           <!-- Color Mode Toggle -->
           <ColorModeButton class="hover:text-accent hover:bg-surface-hover transition-colors" />
-
-          <LogoutButton />
         </div>
       </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 justify-center items-center bg-background">
+    <main class="flex-1 flex justify-center items-center bg-background">
       <NuxtPage />
     </main>
   </div>

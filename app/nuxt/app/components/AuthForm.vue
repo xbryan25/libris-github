@@ -105,11 +105,7 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
         </UFormField>
 
         <UFormField label="Email Address" name="emailAddress">
-          <UInput
-            v-model="state.emailAddress"
-            class="w-100"
-            :disabled="props.isLoading"
-          />
+          <UInput v-model="state.emailAddress" class="w-100" :disabled="props.isLoading" />
         </UFormField>
 
         <UFormField label="Password" name="password">
@@ -172,9 +168,9 @@ const onSubmit = async (event: FormSubmitEvent<typeof state>) => {
           </UInput>
         </UFormField>
 
-        <!-- Forgot Password Link for Login -->
         <div v-if="authType === 'login'" class="w-full">
           <NuxtLink
+            :disabled="!isLoading"
             to="/forgot-password"
             class="text-sm inline-block text-violet-700 dark:text-violet-500 hover:text-violet-800 dark:hover:text-violet-400 cursor-pointer transition-colors"
           >
