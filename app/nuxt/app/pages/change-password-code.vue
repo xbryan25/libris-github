@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   middleware: auth,
 });
 
 const toast = useToast();
+const authStore = useAuthStore();
+
 const isLoading = ref(false);
 const isResending = ref(false);
 const resendCooldown = ref(0);
@@ -103,13 +106,19 @@ const verifyCode = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    authStore.allowedChangePassword = true;
+
     navigateTo(`/change-password-new?code=${fullCode}`);
   } catch (error: any) {
     let errorMessage = 'An unexpected error occurred.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({

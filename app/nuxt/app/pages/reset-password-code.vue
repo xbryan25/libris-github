@@ -125,10 +125,13 @@ const verifyCode = async () => {
     console.error('[RESET CODE] Verification error:', error);
 
     let errorMessage = 'An unexpected error occurred.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({
@@ -182,10 +185,13 @@ const resendCode = async () => {
     console.error('[RESET CODE] Resend error:', error);
 
     let errorMessage = 'Failed to resend code.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({

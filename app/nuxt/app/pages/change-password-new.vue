@@ -7,6 +7,7 @@ definePageMeta({
 
 const route = useRoute();
 const toast = useToast();
+
 const isLoading = ref(false);
 const showCurrentPassword = ref(false);
 const showNewPassword = ref(false);
@@ -20,7 +21,6 @@ const confirmPassword = ref('');
 const { validatePassword } = usePasswordValidation();
 
 if (!code.value) {
-  console.log('[CHANGE PASSWORD] No code found, redirecting');
   navigateTo('/users/me');
 }
 
@@ -79,14 +79,18 @@ const onSubmitChangePassword = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
+
     navigateTo('/users/me');
   } catch (error: any) {
     console.error('[CHANGE PASSWORD] Error:', error);
     let errorMessage = 'An unexpected error occurred.';
-    if (error.data?.error) {
+
+    if (error?.data?.error) {
       errorMessage = error.data.error;
-    } else if (error.message) {
+    } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({
@@ -94,7 +98,7 @@ const onSubmitChangePassword = async () => {
       description: errorMessage,
       color: 'error',
     });
-  } finally {
+
     isLoading.value = false;
   }
 };
@@ -243,6 +247,7 @@ const onSubmitChangePassword = async () => {
             <NuxtLink
               to="/users/me"
               class="text-sm text-violet-700 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
+              :class="isLoading ? 'pointer-events-none opacity-50' : ''"
             >
               Cancel and go back to profile
             </NuxtLink>

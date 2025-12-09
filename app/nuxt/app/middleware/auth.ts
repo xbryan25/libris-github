@@ -15,6 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.userId = response.userId
         auth.isAuthenticated = true
         auth.isEmailVerified = response.isEmailVerified
+        
 
         if (response.authProvider === 'google') {
             auth.isGoogleLogin = true
@@ -31,9 +32,28 @@ export default defineNuxtRouteMiddleware(async (to) => {
         }
 
         if (!auth.isEmailVerified) {
-            console.log('reach here?')
             return navigateTo(`/verify-email?userId=${auth.userId}`);
         }
+
+        console.log(to)
+        console.log(auth.allowedInputChangePasswordCode)
+
+        if (to.path.includes('/change-password-code')) {
+            if (!auth.allowedInputChangePasswordCode) {
+                return navigateTo('/users/me')
+            }
+
+            auth.allowedInputChangePasswordCode = false
+        }
+
+        if (to.path.includes('/change-password-new')) {
+            if (!auth.allowedChangePassword) {
+                return navigateTo('/users/me')
+            }
+
+            auth.allowedChangePassword = false
+        }
+
 
     } catch {
         auth.username = null

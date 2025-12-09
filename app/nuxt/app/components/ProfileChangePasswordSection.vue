@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/useAuthStore';
+
 const toast = useToast();
 const isRequesting = ref(false);
+
+const auth = useAuthStore();
 
 const handleChangePassword = async () => {
   if (isRequesting.value) return;
@@ -17,6 +21,9 @@ const handleChangePassword = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    auth.allowedInputChangePasswordCode = true;
+
     navigateTo('/change-password-code');
   } catch (error: any) {
     let errorMessage = 'An unexpected error occurred.';
