@@ -38,6 +38,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.userId = null
         auth.isAuthenticated = false
         auth.isEmailVerified = false
+        auth.isGoogleLogin = false;
 
         if (to.path !== '/login') return navigateTo('/login')
     }

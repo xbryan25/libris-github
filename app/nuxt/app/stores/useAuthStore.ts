@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const username = ref<string | null>(null)
   const isAuthenticated = ref(false)
   const isEmailVerified = ref(false)
+  const isGoogleLogin = ref(false)
 
   const login = async (email: string, password: string): Promise<{messageTitle: string, message: string, isEmailVerified: boolean}> => {
     try {
@@ -17,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
       username.value = response.username;
       isAuthenticated.value = true;
       isEmailVerified.value = response.isEmailVerified
+      isGoogleLogin.value = false;
 
       return {
         messageTitle: response.messageTitle,
@@ -46,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
       username.value = response.username;
       isAuthenticated.value = true;
       isEmailVerified.value = response.isEmailVerified
+      isGoogleLogin.value = true;
 
       return {
         messageTitle: response.messageTitle,
@@ -75,5 +78,5 @@ export const useAuthStore = defineStore('auth', () => {
     return {messageTitle: response.messageTitle, message: response.message}
   }
 
-  return { userId, username, isAuthenticated, isEmailVerified, login, googleLogin, signup, logout }
+  return { userId, username, isAuthenticated, isEmailVerified, isGoogleLogin, login, googleLogin, signup, logout }
 })

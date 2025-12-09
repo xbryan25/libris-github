@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
-import { onMounted } from 'vue'
-import { useProfile } from '~/composables/UseProfile'
-import { useProfileEdit } from '~/composables/useProfileEdit'
-import ProfileMainSection from '~/components/ProfileMainSection.vue'
-import ProfileAdditionalInfo from '~/components/ProfileAdditionalInfo.vue'
-import ProfileChangePasswordSection from '~/components/ProfileChangePasswordSection.vue'
+import { onMounted } from 'vue';
+import { useProfile } from '~/composables/UseProfile';
+import { useProfileEdit } from '~/composables/useProfileEdit';
+import ProfileMainSection from '~/components/ProfileMainSection.vue';
+import ProfileAdditionalInfo from '~/components/ProfileAdditionalInfo.vue';
+import ProfileChangePasswordSection from '~/components/ProfileChangePasswordSection.vue';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   middleware: auth,
 });
 
-const { profile, fetchProfile, loading, error } = useProfile()
+const { profile, fetchProfile, loading, error } = useProfile();
+
+const authStore = useAuthStore();
 
 const {
   isEditingPersonal,
@@ -25,54 +28,54 @@ const {
   cancelEditingPersonal,
   cancelEditingAddress,
   editForm,
-  isEditing // Legacy prop for ProfileMainSection
-} = useProfileEdit()
+  isEditing, // Legacy prop for ProfileMainSection
+} = useProfileEdit();
 
 const handleStartEditPersonal = () => {
-  startEditingPersonal(profile.value)
-}
+  startEditingPersonal(profile.value);
+};
 
 const handleStartEditAddress = () => {
-  startEditingAddress(profile.value)
-}
+  startEditingAddress(profile.value);
+};
 
 const handleSavePersonal = async () => {
   try {
-    await savePersonalInfo()
-    await fetchProfile()
+    await savePersonalInfo();
+    await fetchProfile();
   } catch (e) {
     // Error is already handled in the composable
   }
-}
+};
 
 const handleSaveAddress = async () => {
   try {
-    await saveAddress()
-    await fetchProfile()
+    await saveAddress();
+    await fetchProfile();
   } catch (e) {
     // Error is already handled in the composable
   }
-}
+};
 
 const handleCancelPersonal = () => {
-  cancelEditingPersonal()
-}
+  cancelEditingPersonal();
+};
 
 const handleCancelAddress = () => {
-  cancelEditingAddress()
-}
+  cancelEditingAddress();
+};
 
 const handleProfileUpdate = async (updatedData: any) => {
-  await fetchProfile()
-}
+  await fetchProfile();
+};
 
 const handleImageUpdate = async (imageUrl: string) => {
-  await fetchProfile()
-}
+  await fetchProfile();
+};
 
 onMounted(() => {
-  fetchProfile()
-})
+  fetchProfile();
+});
 </script>
 
 <template>
@@ -107,8 +110,7 @@ onMounted(() => {
         @cancel-address="handleCancelAddress"
       />
 
-      <!-- NEW: Change Password Section -->
-      <ProfileChangePasswordSection />
+      <ProfileChangePasswordSection v-if="authStore.isGoogleLogin == false" />
     </div>
   </div>
 </template>
