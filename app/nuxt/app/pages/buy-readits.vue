@@ -43,10 +43,6 @@ onMounted(async () => {
 <template>
   <div class="h-auto w-full overflow-hidden bg-background text-base mb-15">
     <div v-if="isFetching" class="w-full flex flex-col items-center gap-10 mt-10">
-      <div class="w-full max-w-[1364px]">
-        <USkeleton class="w-37 h-6" />
-      </div>
-
       <USkeleton class="h-39 max-w-[1364px] w-full" />
 
       <div class="flex-1 flex flex-col items-center justify-center gap-5">
@@ -63,13 +59,6 @@ onMounted(async () => {
     </div>
 
     <div v-else class="w-full flex flex-col items-center gap-10 mt-10">
-      <div class="flex w-full max-w-[1364px]">
-        <NuxtLink :to="`/browse`" class="flex gap-2 cursor-pointer">
-          <Icon name="material-symbols:arrow-back-rounded" class="w-5 h-5" />
-          <span>Back to Browse</span>
-        </NuxtLink>
-      </div>
-
       <div class="flex justify-center max-w-[1364px] w-full">
         <UCard class="w-full bg-surface">
           <div class="flex items-center">

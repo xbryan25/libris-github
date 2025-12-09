@@ -21,22 +21,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
             auth.isGoogleLogin = true
         }
 
-        // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {
             if (to.params.id === auth.userId) {
-                console.log('Redirecting to /users/me')
                 return navigateTo('/users/me')
-            } else {
-                console.log('Viewing another user profile:', to.params.id)
             }
         }
 
         if (!auth.isEmailVerified) {
             return navigateTo(`/verify-email?userId=${auth.userId}`);
         }
-
-        console.log(to)
-        console.log(auth.allowedInputChangePasswordCode)
 
         if (to.path.includes('/change-password-code')) {
             if (!auth.allowedInputChangePasswordCode) {

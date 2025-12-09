@@ -170,7 +170,7 @@ onMounted(async () => {
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 flex justify-center items-center bg-background">
+    <main class="flex-1 flex bg-background">
       <NuxtPage />
     </main>
   </div>

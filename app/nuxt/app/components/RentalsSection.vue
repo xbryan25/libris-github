@@ -56,7 +56,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
-            <p class="text-muted mt-4 text-lg">No active Lendings</p>
+            <p class="text-muted mt-4 text-lg">No active lendings</p>
           </div>
         </div>
       </div>
