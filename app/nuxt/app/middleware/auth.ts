@@ -16,7 +16,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.isAuthenticated = true
         auth.isEmailVerified = response.isEmailVerified
 
-        console.log("================= " + auth.isEmailVerified)
+        if (response.authProvider === 'google') {
+            auth.isGoogleLogin = true
+        }
 
         // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {

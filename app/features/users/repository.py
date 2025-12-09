@@ -65,6 +65,18 @@ class UserRepository:
         )
 
     @staticmethod
+    def get_auth_provider(user_id: str) -> dict[str, str] | None:
+        """Retrieve auth provider status by user_id."""
+        db = current_app.extensions["db"]
+
+        return db.fetch_one(
+            CommonQueries.GET_COLUMN_BY_FIELD.format(
+                column="auth_provider", table="users", field="user_id"
+            ),
+            (user_id,),
+        )
+
+    @staticmethod
     def check_if_username_is_taken(username: str) -> dict[str, bool]:
         """
         add later

@@ -392,6 +392,7 @@ class UserControllers:
             username = UserServices.get_username_service(user_id)
 
             is_email_verified = UserServices.get_is_email_verified_service(user_id)
+            auth_provider = UserServices.get_auth_provider_service(user_id)
 
             return (
                 jsonify(
@@ -399,6 +400,7 @@ class UserControllers:
                         "username": username,
                         "userId": user_id,
                         "isEmailVerified": is_email_verified,
+                        "authProvider": auth_provider,
                     }
                 ),
                 200,
@@ -717,39 +719,31 @@ class UserControllers:
     def request_password_reset_controller() -> tuple[Response, int]:
         """Request password reset by email."""
         try:
-            print("\n[CONTROLLER] ========== REQUEST PASSWORD RESET CALLED ==========")
+
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             email_address = data.get("emailAddress") if data else None
-            print(f"[CONTROLLER] Email: {email_address}")
 
             if not email_address:
-                print("[CONTROLLER] ERROR: Email is missing!")
+
                 return jsonify({"error": "Email address is required."}), 400
 
-            print("[CONTROLLER] Calling UserServices.request_password_reset_service...")
             result = UserServices.request_password_reset_service(email_address)
-            print(f"[CONTROLLER] Service result: {result}")
 
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: {result['error']}")
+
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Returning response")
             response = {
                 "userId": result.get("user_id"),
                 "messageTitle": "Reset Code Sent!",
                 "message": result["message"],
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print(
-                "[CONTROLLER] ========== REQUEST PASSWORD RESET COMPLETE ==========\n"
-            )
+
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -757,45 +751,31 @@ class UserControllers:
     def verify_password_reset_code_controller() -> tuple[Response, int]:
         """Verify password reset code."""
         try:
-            print(
-                "\n[CONTROLLER] ========== VERIFY PASSWORD RESET CODE CALLED =========="
-            )
+
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
 
-            print(f"[CONTROLLER] User ID: {user_id}")
-            print(f"[CONTROLLER] Code: {code}")
-
             if not user_id or not code:
-                print("[CONTROLLER] ERROR: User ID or code is missing!")
+
                 return jsonify({"error": "User ID and code are required."}), 400
 
-            print(
-                "[CONTROLLER] Calling UserServices.verify_password_reset_code_service..."
-            )
             result = UserServices.verify_password_reset_code_service(user_id, code)
-            print(f"[CONTROLLER] Service result: {result}")
 
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: {result['error']}")
+
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Code verified")
             response = {
                 "messageTitle": "Code Verified!",
                 "message": result["message"],
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print(
-                "[CONTROLLER] ========== VERIFY PASSWORD RESET CODE COMPLETE ==========\n"
-            )
+
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -803,43 +783,35 @@ class UserControllers:
     def reset_password_controller() -> tuple[Response, int]:
         """Reset user password with new password."""
         try:
-            print("\n[CONTROLLER] ========== RESET PASSWORD CALLED ==========")
+
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
             code = data.get("code") if data else None
             new_password = data.get("newPassword") if data else None
 
-            print(f"[CONTROLLER] User ID: {user_id}")
-            print(f"[CONTROLLER] Code: {code}")
-
             if not user_id or not code or not new_password:
-                print("[CONTROLLER] ERROR: Missing required fields!")
+
                 return (
                     jsonify({"error": "User ID, code, and new password are required."}),
                     400,
                 )
 
-            print("[CONTROLLER] Calling UserServices.reset_password_service...")
             result = UserServices.reset_password_service(user_id, code, new_password)
-            print(f"[CONTROLLER] Service result: {result}")
 
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: {result['error']}")
+
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Password reset")
             response = {
                 "messageTitle": "Password Reset Successfully!",
                 "message": result["message"],
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print("[CONTROLLER] ========== RESET PASSWORD COMPLETE ==========\n")
+
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -847,42 +819,30 @@ class UserControllers:
     def resend_password_reset_code_controller() -> tuple[Response, int]:
         """Resend password reset code."""
         try:
-            print(
-                "\n[CONTROLLER] ========== RESEND PASSWORD RESET CODE CALLED =========="
-            )
+
             data = request.get_json()
-            print(f"[CONTROLLER] Request body: {data}")
 
             user_id = data.get("userId") if data else None
-            print(f"[CONTROLLER] User ID: {user_id}")
 
             if not user_id:
-                print("[CONTROLLER] ERROR: User ID is missing!")
+
                 return jsonify({"error": "User ID is required."}), 400
 
-            print(
-                "[CONTROLLER] Calling UserServices.resend_password_reset_code_service..."
-            )
             result = UserServices.resend_password_reset_code_service(user_id)
-            print(f"[CONTROLLER] Service result: {result}")
 
             if "error" in result:
-                print(f"[CONTROLLER] Service returned error: {result['error']}")
+
                 return jsonify({"error": result["error"]}), 400
 
-            print("[CONTROLLER] Success! Code resent")
             response = {
                 "messageTitle": "Code Resent!",
                 "message": result["message"],
             }
-            print(f"[CONTROLLER] Response: {response}")
-            print(
-                "[CONTROLLER] ========== RESEND PASSWORD RESET CODE COMPLETE ==========\n"
-            )
+
             return jsonify(response), 200
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -890,13 +850,11 @@ class UserControllers:
     def request_change_password_controller() -> tuple[Response, int]:
         """Request password change verification code."""
         try:
-            print("\n[CONTROLLER] ========== REQUEST CHANGE PASSWORD CALLED ==========")
 
             user_id = get_jwt_identity()
             if not user_id:
                 return jsonify({"error": "Not authenticated"}), 401
 
-            print(f"[CONTROLLER] User ID: {user_id}")
             result = UserServices.request_change_password_code_service(user_id)
 
             if "error" in result:
@@ -913,7 +871,6 @@ class UserControllers:
             )
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -921,9 +878,6 @@ class UserControllers:
     def verify_change_password_code_controller() -> tuple[Response, int]:
         """Verify change password code."""
         try:
-            print(
-                "\n[CONTROLLER] ========== VERIFY CHANGE PASSWORD CODE CALLED =========="
-            )
 
             user_id = get_jwt_identity()
             if not user_id:
@@ -948,7 +902,7 @@ class UserControllers:
             )
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -956,7 +910,6 @@ class UserControllers:
     def change_password_controller() -> tuple[Response, int]:
         """Change user password."""
         try:
-            print("\n[CONTROLLER] ========== CHANGE PASSWORD CALLED ==========")
 
             user_id = get_jwt_identity()
             if not user_id:
@@ -992,7 +945,7 @@ class UserControllers:
             )
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
+
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
@@ -1000,9 +953,6 @@ class UserControllers:
     def resend_change_password_code_controller() -> tuple[Response, int]:
         """Resend change password verification code."""
         try:
-            print(
-                "\n[CONTROLLER] ========== RESEND CHANGE PASSWORD CODE CALLED =========="
-            )
 
             user_id = get_jwt_identity()
             if not user_id:
@@ -1019,6 +969,5 @@ class UserControllers:
             )
 
         except Exception as e:
-            print(f"[CONTROLLER] EXCEPTION: {str(e)}")
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500

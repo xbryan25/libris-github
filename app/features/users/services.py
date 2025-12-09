@@ -199,9 +199,16 @@ class UserServices:
     @staticmethod
     def get_is_email_verified_service(user_id) -> bool:
         """Get the status of email verification of a user using the user_id."""
-        username_dict = UserRepository.get_is_email_verified(user_id)
+        user_dict = UserRepository.get_is_email_verified(user_id)
 
-        return bool(username_dict["is_email_verified"]) if username_dict else False
+        return bool(user_dict["is_email_verified"]) if user_dict else False
+
+    @staticmethod
+    def get_auth_provider_service(user_id) -> str:
+        """Get the auth provider of a user using the user_id."""
+        user_dict = UserRepository.get_auth_provider(user_id)
+
+        return user_dict["auth_provider"] if user_dict else "local"
 
     @staticmethod
     def check_if_username_is_taken_service(username: str) -> bool:
