@@ -71,7 +71,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full bg-background">
+  <div class="w-full bg-background mb-6">
     <div v-if="activeTab === 'selling'">
       <!-- Sell content -->
       <div v-if="salesLoading" class="bg-surface rounded-lg p-6 w-full border border-base">

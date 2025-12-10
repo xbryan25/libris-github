@@ -5,6 +5,8 @@ import { useAuthStore } from '~/stores/useAuthStore'
 export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore()
 
+  console.log('test here')
+
   // If not authenticated → allow access
   if (!auth.isAuthenticated) {
     if (to.path.startsWith('/verify-email')){
@@ -31,6 +33,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     auth.userId = null;
     auth.isAuthenticated = false;
     auth.isEmailVerified = false;
+    auth.isGoogleLogin = false;
 
     return navigateTo('/login')
   }

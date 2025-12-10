@@ -28,7 +28,13 @@ const userLogout = async () => {
 </script>
 
 <template>
-  <UButton class="cursor-pointer" @click="openLogoutConfirmationModal = true">Logout?</UButton>
+  <div class="my-6">
+    <UButton
+      class="px-6 py-2 w-55 h-10 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-lg justify-center cursor-pointer"
+      @click="openLogoutConfirmationModal = true"
+      >Logout</UButton
+    >
+  </div>
 
   <UModal v-model:open="openLogoutConfirmationModal">
     <template #content>

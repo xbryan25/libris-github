@@ -20,10 +20,6 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
 
   try {
     const response = await auth.signup(username, emailAddress, password);
-<<<<<<< HEAD
-    console.log('Signup response:', response);
-=======
->>>>>>> 6899760db396c3d8a06062e5c677e72468f0b7df
 
     toast.add({
       title: response.messageTitle,
@@ -51,7 +47,6 @@ const onSubmitSignup = async (username: string, emailAddress: string, password: 
     isDisabled.value = false;
     isLoading.value = false;
   }
-  
 };
 </script>
 

@@ -15,29 +15,45 @@ export default defineNuxtRouteMiddleware(async (to) => {
         auth.userId = response.userId
         auth.isAuthenticated = true
         auth.isEmailVerified = response.isEmailVerified
+        
 
-        console.log("================= " + auth.isEmailVerified)
+        if (response.authProvider === 'google') {
+            auth.isGoogleLogin = true
+        }
 
-        // --- Redirect if user navigates to their own ID ---
         if (to.params.id) {
             if (to.params.id === auth.userId) {
-                console.log('Redirecting to /users/me')
                 return navigateTo('/users/me')
-            } else {
-                console.log('Viewing another user profile:', to.params.id)
             }
         }
 
         if (!auth.isEmailVerified) {
-            console.log('reach here?')
             return navigateTo(`/verify-email?userId=${auth.userId}`);
         }
+
+        if (to.path.includes('/change-password-code')) {
+            if (!auth.allowedInputChangePasswordCode) {
+                return navigateTo('/users/me')
+            }
+
+            auth.allowedInputChangePasswordCode = false
+        }
+
+        if (to.path.includes('/change-password-new')) {
+            if (!auth.allowedChangePassword) {
+                return navigateTo('/users/me')
+            }
+
+            auth.allowedChangePassword = false
+        }
+
 
     } catch {
         auth.username = null
         auth.userId = null
         auth.isAuthenticated = false
         auth.isEmailVerified = false
+        auth.isGoogleLogin = false;
 
         if (to.path !== '/login') return navigateTo('/login')
     }

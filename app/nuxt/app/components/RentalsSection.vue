@@ -28,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full bg-background">
+  <div class="w-full bg-background mb-6">
     <div v-if="activeTab === 'lending'">
       <!-- Lending content -->
       <div v-if="lendingsLoading" class="bg-surface rounded-lg p-6 w-full border border-base">
@@ -56,7 +56,7 @@ onMounted(() => {
         <div class="flex justify-center items-center">
           <div class="text-center">
             <UIcon name="bytesize:book" class="w-16 h-16 text-muted mx-auto" />
-            <p class="text-muted mt-4 text-lg">No active Lendings</p>
+            <p class="text-muted mt-4 text-lg">No active lendings</p>
           </div>
         </div>
       </div>

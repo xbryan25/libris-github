@@ -47,8 +47,8 @@ watch(activeTab, (val) => {
 </script>
 
 <template>
-  <div class="flex flex-col h-auto w-full pt-4 px-4 md:px-8 lg:px-15">
-    <div class="mb-6 flex justify-between items-start">
+  <div class="flex flex-col items-start h-auto w-full pt-4 px-4 md:px-8 lg:px-15">
+    <div class="mb-6 flex justify-between items-start px-10 pt-5">
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />
@@ -81,7 +81,7 @@ watch(activeTab, (val) => {
       </div>
     </div>
 
-    <div class="flex mb-6">
+    <div class="flex w-full mb-6 justify-center">
       <h2 class="flex-1 text-xl font-bold text-foreground">{{ headerText }}</h2>
 
       <div class="flex-[3] flex justify-center gap-2">

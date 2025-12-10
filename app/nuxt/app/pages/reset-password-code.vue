@@ -12,7 +12,7 @@ const isLoading = ref(false);
 const isResending = ref(false);
 const resendCooldown = ref(0);
 
-const userId = ref(route.query.userId as string || '');
+const userId = ref((route.query.userId as string) || '');
 const code = ref(['', '', '', '', '', '']);
 const codeInputs = ref<HTMLInputElement[]>([]);
 
@@ -125,10 +125,13 @@ const verifyCode = async () => {
     console.error('[RESET CODE] Verification error:', error);
 
     let errorMessage = 'An unexpected error occurred.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({
@@ -182,10 +185,13 @@ const resendCode = async () => {
     console.error('[RESET CODE] Resend error:', error);
 
     let errorMessage = 'Failed to resend code.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({
@@ -212,7 +218,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-base font-sans">
+  <div class="w-full min-h-screen flex flex-col bg-background text-base">
     <!-- Header -->
     <header class="w-full p-6 flex justify-between items-center">
       <div class="flex gap-3 items-center">
@@ -235,14 +241,18 @@ onUnmounted(() => {
 
     <!-- Main Content -->
     <main class="flex-grow flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl flex flex-col items-center text-center">
+      <div
+        class="bg-background rounded-3xl p-10 w-full max-w-xl flex flex-col items-center text-center"
+      >
         <!-- Shield Icon with Check (GREEN) -->
         <div class="relative mb-6 inline-block">
           <Icon name="heroicons:shield-check" class="w-26 h-26 text-green-500" />
         </div>
 
         <!-- Heading -->
-        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Enter security code</h2>
+        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+          Enter security code
+        </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
           Please check your email for a message with your code.<br />
           Your code is 6 digits long.
@@ -253,7 +263,11 @@ onUnmounted(() => {
           <input
             v-for="(digit, index) in code"
             :key="index"
-            :ref="(el) => { if (el) codeInputs[index] = el as HTMLInputElement }"
+            :ref="
+              (el) => {
+                if (el) codeInputs[index] = el as HTMLInputElement;
+              }
+            "
             v-model="code[index]"
             type="text"
             inputmode="numeric"
@@ -268,10 +282,10 @@ onUnmounted(() => {
 
         <!-- Verify Button (GREEN) -->
         <UButton
-          @click="verifyCode"
           class="w-full h-12 rounded-xl cursor-pointer justify-center text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
           :disabled="isLoading"
           :loading="isLoading"
+          @click="verifyCode"
         >
           {{ isLoading ? 'Verifying...' : 'Continue' }}
         </UButton>

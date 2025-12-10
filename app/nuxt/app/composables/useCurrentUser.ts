@@ -2,6 +2,7 @@ type CurrentUserResponse = {
     username: string
 	userId: string
 	isEmailVerified: boolean
+	authProvider: string
 }
 
 export function useCurrentUser() {

@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/useAuthStore';
+
 const toast = useToast();
 const isRequesting = ref(false);
+
+const auth = useAuthStore();
 
 const handleChangePassword = async () => {
   if (isRequesting.value) return;
@@ -17,10 +21,13 @@ const handleChangePassword = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    auth.allowedInputChangePasswordCode = true;
+
     navigateTo('/change-password-code');
   } catch (error: any) {
     let errorMessage = 'An unexpected error occurred.';
-    
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
@@ -35,20 +42,20 @@ const handleChangePassword = async () => {
       description: errorMessage,
       color: 'error',
     });
-  } finally {
+
     isRequesting.value = false;
   }
 };
 </script>
 
 <template>
-  <div class="mt-6">
-    <button
-      @click="handleChangePassword"
+  <div class="my-6">
+    <UButton
       :disabled="isRequesting"
-      class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="px-6 py-2 w-55 h-10 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed justify-center"
+      @click="handleChangePassword"
     >
       {{ isRequesting ? 'Sending Code...' : 'Change Password' }}
-    </button>
+    </UButton>
   </div>
 </template>

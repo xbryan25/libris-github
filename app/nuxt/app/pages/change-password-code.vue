@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import auth from '~/middleware/auth';
+import { useAuthStore } from '~/stores/useAuthStore';
 
 definePageMeta({
   middleware: auth,
 });
 
 const toast = useToast();
+const authStore = useAuthStore();
+
 const isLoading = ref(false);
 const isResending = ref(false);
 const resendCooldown = ref(0);
@@ -91,6 +94,7 @@ const verifyCode = async () => {
   }
 
   isLoading.value = true;
+  isResending.value = true;
 
   try {
     const response = await useVerifyChangePasswordCode(fullCode);
@@ -102,13 +106,19 @@ const verifyCode = async () => {
     });
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    authStore.allowedChangePassword = true;
+
     navigateTo(`/change-password-new?code=${fullCode}`);
   } catch (error: any) {
     let errorMessage = 'An unexpected error occurred.';
+
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({
@@ -119,8 +129,9 @@ const verifyCode = async () => {
 
     code.value = ['', '', '', '', '', ''];
     focusInput(0);
-  } finally {
+
     isLoading.value = false;
+    isResending.value = false;
   }
 };
 
@@ -136,6 +147,7 @@ const resendCode = async () => {
     return;
   }
 
+  isLoading.value = true;
   isResending.value = true;
 
   try {
@@ -161,7 +173,8 @@ const resendCode = async () => {
       description: errorMessage,
       color: 'error',
     });
-  } finally {
+
+    isLoading.value = false;
     isResending.value = false;
   }
 };
@@ -178,28 +191,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-    <!-- Back to profile link -->
-    <div class="w-full px-6 py-4">
-      <NuxtLink
-        to="/users/me"
-        class="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
-      >
-        <Icon name="heroicons:arrow-left" class="w-5 h-5" />
-        Back to profile
-      </NuxtLink>
-    </div>
-
+  <div class="flex-1 w-full h-full flex flex-col bg-background">
     <!-- Main Content - Centered -->
     <main class="flex-grow flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 w-full max-w-xl flex flex-col items-center text-center">
+      <div class="rounded-3xl p-10 w-full max-w-xl flex flex-col items-center text-center">
         <!-- Shield Icon -->
         <div class="relative mb-6 inline-block">
           <Icon name="heroicons:shield-check" class="w-26 h-26 text-green-500" />
         </div>
 
         <!-- Heading -->
-        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Enter security code</h2>
+        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+          Enter security code
+        </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
           Please check your email for a message with your code.<br />
           Your code is 6 digits long.
@@ -210,7 +214,11 @@ onUnmounted(() => {
           <input
             v-for="(digit, index) in code"
             :key="index"
-            :ref="(el) => { if (el) codeInputs[index] = el as HTMLInputElement }"
+            :ref="
+              (el) => {
+                if (el) codeInputs[index] = el as HTMLInputElement;
+              }
+            "
             v-model="code[index]"
             type="text"
             inputmode="numeric"
@@ -237,9 +245,9 @@ onUnmounted(() => {
         <div class="flex gap-1 text-base mt-6">
           <p class="text-gray-600 dark:text-gray-400">Didn't receive the code?</p>
           <button
-            @click="resendCode"
             class="text-gray-900 dark:text-white font-bold underline hover:text-green-600 dark:hover:text-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="isResending || resendCooldown > 0"
+            @click="resendCode"
           >
             {{ getResendButtonText() }}
           </button>

@@ -203,19 +203,14 @@ const resendCode = async () => {
     // Start 60-second cooldown
     startCooldown(60);
   } catch (error: any) {
-    console.error('[VERIFY-EMAIL] Resend error:', error);
-    console.error('[VERIFY-EMAIL] Error details:', {
-      message: error?.message,
-      data: error?.data,
-      status: error?.status,
-    });
-
     let errorMessage = 'Failed to resend code.';
 
     if (error?.data?.error) {
       errorMessage = error.data.error;
     } else if (error?.message) {
       errorMessage = error.message;
+    } else if (error?.error) {
+      errorMessage = error.error;
     }
 
     toast.add({

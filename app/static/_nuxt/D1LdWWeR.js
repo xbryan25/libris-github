@@ -1,1 +1,0 @@
-import{e as t,c as s,o as a,a as o}from"#entry";const r={class:"flex items-center justify-center w-full"},p=t({__name:"purchases",setup(n){return(c,e)=>(a(),s("div",r,[...e[0]||(e[0]=[o("h1",{class:"text-5xl font-bold text-primary"},"Purchases Page",-1)])]))}});export{p as default};

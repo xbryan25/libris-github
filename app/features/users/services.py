@@ -6,7 +6,10 @@ import random
 from datetime import datetime, timedelta, timezone
 from app.services.email_service import EmailService
 from app.utils.password_validator import PasswordValidator
-from app.exceptions.custom_exceptions import EmailInUseByGoogleError
+from app.exceptions.custom_exceptions import (
+    EmailInUseByGoogleError,
+    EntityNotFoundError,
+)
 
 
 class UserServices:
@@ -187,6 +190,16 @@ class UserServices:
         UserRepository.update_username_by_user_id(user_id, username)
 
     @staticmethod
+    def get_user_info_service(user_id) -> dict[str, str | bool]:
+        """Get the username, email verification status, and auth provider of a user using the user_id."""
+        user_dict = UserRepository.get_user_info(user_id)
+
+        if user_dict is None:
+            raise EntityNotFoundError("User not authorized.")
+
+        return user_dict
+
+    @staticmethod
     def get_username_service(user_id) -> str | None:
         """Get the username of a user using the user_id."""
         username_dict = UserRepository.get_username(user_id)
@@ -195,13 +208,6 @@ class UserServices:
             return None
 
         return username_dict["username"]
-
-    @staticmethod
-    def get_is_email_verified_service(user_id) -> bool:
-        """Get the status of email verification of a user using the user_id."""
-        username_dict = UserRepository.get_is_email_verified(user_id)
-
-        return bool(username_dict["is_email_verified"]) if username_dict else False
 
     @staticmethod
     def check_if_username_is_taken_service(username: str) -> bool:

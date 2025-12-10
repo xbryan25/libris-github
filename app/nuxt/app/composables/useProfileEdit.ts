@@ -134,6 +134,8 @@ export const useProfileEdit = () => {
 
       return editForm
     } catch (e: any) {
+      savingPersonal.value = false
+
       errorPersonal.value = e.message || 'Failed to update personal information'
       toast.add({
         title: 'Error',
@@ -141,8 +143,6 @@ export const useProfileEdit = () => {
         color: 'error',
       })
       throw e
-    } finally {
-      savingPersonal.value = false
     }
   }
 
@@ -179,6 +179,8 @@ export const useProfileEdit = () => {
 
       return editForm
     } catch (e: any) {
+      savingAddress.value = false
+
       errorAddress.value = e.message || 'Failed to update address'
       toast.add({
         title: 'Error',
@@ -186,8 +188,6 @@ export const useProfileEdit = () => {
         color: 'error',
       })
       throw e
-    } finally {
-      savingAddress.value = false
     }
   }
 

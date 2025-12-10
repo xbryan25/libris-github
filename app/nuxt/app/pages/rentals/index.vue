@@ -43,7 +43,7 @@ watch(activeTab, (val) => {
 
 <template>
   <div class="flex flex-col min-h-screen w-full pt-4 px-4 md:px-8 lg:px-15">
-    <div class="mb-6 flex justify-between items-start">
+    <div class="mb-6 flex justify-between items-start px-10 pt-5">
       <div class="text-base">
         <h1 class="font-bold text-3xl flex items-center gap-2 mb-1">
           <Icon name="fluent:calendar-24-regular" class="w-8 h-8 text-orange-500" />

@@ -42,24 +42,21 @@ class UserRepository:
         )
 
     @staticmethod
+    def get_user_info(user_id: str) -> dict[str, str | bool] | None:
+        """Retrieve username, email verification status, and auth provider by user_id."""
+        db = current_app.extensions["db"]
+        return db.fetch_one(
+            UserQueries.GET_USER_INFO,
+            (user_id,),
+        )
+
+    @staticmethod
     def get_username(user_id: str) -> dict[str, str] | None:
         """Retrieve username by user_id."""
         db = current_app.extensions["db"]
         return db.fetch_one(
             CommonQueries.GET_COLUMN_BY_FIELD.format(
                 column="username", table="users", field="user_id"
-            ),
-            (user_id,),
-        )
-
-    @staticmethod
-    def get_is_email_verified(user_id: str) -> dict[str, str] | None:
-        """Retrieve email verification status by user_id."""
-        db = current_app.extensions["db"]
-
-        return db.fetch_one(
-            CommonQueries.GET_COLUMN_BY_FIELD.format(
-                column="is_email_verified", table="users", field="user_id"
             ),
             (user_id,),
         )
@@ -250,6 +247,9 @@ class UserRepository:
     def update_user_profile(user_id: str, profile_data: dict) -> bool:
         """Update user profile information."""
         db = current_app.extensions["db"]
+
+        date_of_birth = profile_data.get("date_of_birth") or None
+
         try:
             db.execute_query(
                 UserQueries.UPDATE_USER_PROFILE,
@@ -257,12 +257,13 @@ class UserRepository:
                     profile_data.get("first_name"),
                     profile_data.get("middle_name"),
                     profile_data.get("last_name"),
-                    profile_data.get("date_of_birth"),
+                    date_of_birth,
                     profile_data.get("phone_number"),
                     profile_data.get("profile_image_url"),
                     user_id,
                 ),
             )
+
             return True
 
         except Exception:
