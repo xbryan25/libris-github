@@ -3,8 +3,8 @@ import type { MyLibraryBook } from '~/types';
 import { useDebounceFn } from '@vueuse/core';
 
 interface PriceRange {
-    minPrice: number | null;
-    maxPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
 }
 
 const props = defineProps<{
@@ -16,7 +16,6 @@ const props = defineProps<{
   };
   addBookRefreshTrigger: number;
   userId?: string;
-  
 }>();
 
 const emit = defineEmits<{
@@ -189,7 +188,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col items-center">
+  <div class="h-auto w-full flex flex-col items-center">
     <div class="flex-1 pt-5 w-full relative">
       <div
         v-if="isFetching"
