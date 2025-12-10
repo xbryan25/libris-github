@@ -235,7 +235,12 @@ class BookQueries:
             EXISTS(
                 SELECT 1 FROM rented_books rb2
                 WHERE rb2.book_id = b.book_id
-                AND rb2.rent_status = 'ongoing'
+                AND rb2.rent_status IN (
+                    'approved',
+                    'awaiting_pickup_confirmation',
+                    'ongoing',
+                    'awaiting_return_confirmation'
+                )
             ) AS is_rented,
             -- Check if book has an ACTIVE purchase from the CURRENT owner
             -- Exclude completed purchases where ownership was transferred (new owner scenario)
@@ -245,7 +250,7 @@ class BookQueries:
                 AND pb.original_owner_id = b.owner_id
                 AND (
                     -- Active purchase statuses
-                    pb.purchase_status IN ('pending', 'approved', 'awaiting_pickup_confirmation')
+                    pb.purchase_status IN ('approved', 'awaiting_pickup_confirmation')
                     -- OR completed but decision still pending
                     OR (pb.purchase_status = 'completed' AND pb.transfer_decision_pending = TRUE)
                 )
