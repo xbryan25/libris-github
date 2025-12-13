@@ -781,6 +781,8 @@ class RentalsServices:
             - rental_duration_days
             - meetup_time_window
             - meetup_location
+            - latitude
+            - longitude
             - meetup_date
             - original_user_id
 

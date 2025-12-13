@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const latitude = ref(null);
-const longitude = ref(null);
+const latitude = ref<number | null>(null);
+const longitude = ref<number | null>(null);
 const address = ref('');
 
 const props = defineProps<{ isOpenViewMapForTransaction: boolean }>();
@@ -23,6 +23,7 @@ const onMapClick = async (e) => {
   address.value = res.display_name;
 
   emit('update:selectedAddress', address.value);
+  emit('update:latitudeAndLongitude', latitude.value as number, longitude.value as number);
   emit('update:openViewMapForTransaction', false);
 };
 

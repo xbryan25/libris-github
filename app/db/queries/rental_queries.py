@@ -13,6 +13,8 @@ class RentalsQueries:
             all_fees_captured,
             meetup_time_window,
             meetup_location,
+            latitude,
+            longitude,
             meetup_date,
             actual_rate,
             actual_deposit
@@ -30,6 +32,8 @@ class RentalsQueries:
             false,  -- all_fees_captured
             %s,  -- meetup_time_window
             %s,  -- meetup_location
+            %s,  -- latitude
+            %s,  -- longitude
             %s,  -- meetup_date
             %s,  -- actual_rate
             %s   -- actual_deposit
