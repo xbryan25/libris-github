@@ -57,6 +57,8 @@ const meetupEndTime = ref<string | { HH: string; mm: string } | null>(null);
 const timeError = ref('');
 
 const isOpenMapForTransaction = ref(false);
+const removeMapMarker = ref(0);
+
 const selectedAddress = ref('');
 const selectedAddressLatitude = ref<number | null>(null);
 const selectedAddressLongitude = ref<number | null>(null);
@@ -295,13 +297,16 @@ async function sendRental() {
             >Open Map</UButton
           >
 
-          <UButton class="cursor-pointer justify-center" @click="selectedAddress = ''"
+          <UButton
+            class="cursor-pointer justify-center"
+            @click="((selectedAddress = ''), removeMapMarker++)"
             >Remove Location</UButton
           >
         </div>
 
         <ViewMapForTransaction
           :is-open-view-map-for-transaction="isOpenMapForTransaction"
+          :remove-map-marker="removeMapMarker"
           @update:open-view-map-for-transaction="
             (newVal: boolean) => (isOpenMapForTransaction = newVal)
           "

@@ -3,7 +3,7 @@ const latitude = ref<number | null>(null);
 const longitude = ref<number | null>(null);
 const address = ref('');
 
-const props = defineProps<{ isOpenViewMapForTransaction: boolean }>();
+const props = defineProps<{ isOpenViewMapForTransaction: boolean; removeMapMarker: number }>();
 
 const emit = defineEmits<{
   (e: 'update:openViewMapForTransaction', value: boolean): void;
@@ -33,6 +33,14 @@ const isOpenMapForTransaction = computed({
     emit('update:openViewMapForTransaction', val);
   },
 });
+
+watch(
+  () => props.removeMapMarker,
+  () => {
+    latitude.value = null;
+    longitude.value = null;
+  },
+);
 </script>
 
 <template>
@@ -42,7 +50,7 @@ const isOpenMapForTransaction = computed({
         <LMap
           ref="map"
           :zoom="12"
-          :center="[14.599512, 120.984222]"
+          :center="[latitude ? latitude : 14.599512, longitude ? longitude : 120.984222]"
           :use-global-leaflet="false"
           style="height: 90vh"
           @click="onMapClick"
