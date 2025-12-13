@@ -34,8 +34,6 @@ const formatDateTime = (dateString: string) => {
     timeZoneName: 'short',
   });
 };
-
-console.log(props.item);
 </script>
 
 <template>
