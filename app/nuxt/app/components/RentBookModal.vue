@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, shallowRef, computed, watch } from 'vue';
-import { useAddressAutocomplete } from '~/composables/useAddressAutocomplete';
 import { useCreateRental } from '~/composables/useCreateRental';
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import VueTimepicker from 'vue3-timepicker';
@@ -24,15 +23,6 @@ const formattedDate = computed(() => {
   if (!meetupDateCalendar.value) return '';
   return df.format(meetupDateCalendar.value.toDate(getLocalTimeZone()));
 });
-
-const LOCATIONIQ_API_KEY = import.meta.env.VITE_LOCATIONIQ_API_KEY;
-const meetupAddress = ref('');
-const {
-  addressQuery: meetupAddressQuery,
-  suggestions: meetupSuggestions,
-  fetchSuggestions: fetchMeetupSuggestions,
-  selectSuggestion: selectMeetupSuggestion,
-} = useAddressAutocomplete(LOCATIONIQ_API_KEY);
 
 const props = defineProps<{
   isOpenRentBookModal: boolean;
@@ -66,6 +56,11 @@ const meetupStartTime = ref<string | { HH: string; mm: string } | null>(null);
 const meetupEndTime = ref<string | { HH: string; mm: string } | null>(null);
 const timeError = ref('');
 
+const isOpenMapForTransaction = ref(false);
+const selectedAddress = ref('');
+const selectedAddressLatitude = ref<number | null>(null);
+const selectedAddressLongitude = ref<number | null>(null);
+
 function getTimeValue(val: any): string {
   if (!val) return '';
   if (typeof val === 'string') return val;
@@ -95,13 +90,6 @@ watch([meetupStartTime, meetupEndTime], () => {
   validateTimeWindow();
 });
 
-function handleSelectMeetupSuggestion(item: any) {
-  selectMeetupSuggestion(item, meetupAddress);
-  meetupAddressQuery.value = item.display_name;
-  meetupAddress.value = item.display_name;
-  meetupSuggestions.value = [];
-}
-
 watch(selected, (value) => {
   if (value !== 'Custom') {
     customDays.value = null;
@@ -127,15 +115,6 @@ watch(meetupDateCalendar, (val) => {
   }
   meetupDate.value = val ? df.format(val.toDate(getLocalTimeZone())) : null;
 });
-
-function onMeetupInput(event: Event) {
-  const target = event.target as HTMLInputElement;
-  if (!target.value) {
-    meetupSuggestions.value = [];
-    return;
-  }
-  fetchMeetupSuggestions();
-}
 
 const totalCost = computed(() => {
   if (!finalDays.value) return 0;
@@ -208,7 +187,9 @@ async function sendRental() {
       totalRentCost: totalCost.value,
       rentalDurationDays: finalDays.value!,
       meetupTimeWindow: `${startStr} - ${endStr}`,
-      meetupLocation: meetupAddressQuery.value,
+      meetupLocation: selectedAddress.value,
+      latitude: selectedAddressLatitude.value,
+      longitude: selectedAddressLongitude.value,
       meetupDate: meetupDate.value!,
       actualRate: props.dailyRentPrice ?? 0,
       actualDeposit: props.securityDeposit ?? 0,
@@ -305,30 +286,39 @@ async function sendRental() {
           @keydown="preventDecimal"
         />
       </div>
-      <div class="mt-4">
-        <p class="font-semibold text-base mt-4">Meetup Location</p>
-        <div class="relative w-full">
-          <UInput
-            v-model="meetupAddressQuery"
-            placeholder="Enter meetup location..."
-            class="mt-1 w-full"
-            @input="onMeetupInput"
-          />
-          <ul
-            v-if="meetupSuggestions.length"
-            class="absolute z-50 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded w-full max-h-60 overflow-auto shadow-lg"
+
+      <div class="flex flex-col gap-2 mt-4">
+        <div class="flex w-full items-center gap-2">
+          <p class="flex-1 font-semibold text-base">Meetup Location</p>
+
+          <UButton class="cursor-pointer justify-center" @click="isOpenMapForTransaction = true"
+            >Open Map</UButton
           >
-            <li
-              v-for="(item, i) in meetupSuggestions"
-              :key="i"
-              @click="handleSelectMeetupSuggestion(item)"
-              class="p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700"
-            >
-              {{ item.display_name }}
-            </li>
-          </ul>
+
+          <UButton class="cursor-pointer justify-center" @click="selectedAddress = ''"
+            >Remove Location</UButton
+          >
         </div>
+
+        <ViewMapForTransaction
+          :is-open-view-map-for-transaction="isOpenMapForTransaction"
+          @update:open-view-map-for-transaction="
+            (newVal: boolean) => (isOpenMapForTransaction = newVal)
+          "
+          @update:selected-address="(newAddress: string) => (selectedAddress = newAddress)"
+          @update:latitude-and-longitude="
+            (newLatitude: number, newLongitude: number) => (
+              (selectedAddressLatitude = newLatitude),
+              (selectedAddressLongitude = newLongitude)
+            )
+          "
+        />
+
+        <p v-if="selectedAddress !== ''" class="text-justify">
+          Selected Address: {{ selectedAddress }}
+        </p>
       </div>
+
       <div class="mt-4">
         <p class="font-semibold text-base">Meetup Date</p>
         <UPopover>
@@ -369,19 +359,19 @@ async function sendRental() {
           <p>Cancel</p>
         </UButton>
         <UButton
-          @click.stop.prevent="sendRental"
           :disabled="
             !!timeError ||
             !meetupStartTime ||
             !meetupEndTime ||
             !finalDays ||
             !meetupDate ||
-            !meetupAddressQuery ||
+            !selectedAddress ||
             loading ||
             hasInsufficientFunds ||
             isSendingRental
           "
           class="bg-slate-800 hover:bg-slate-700 text-white dark:bg-slate-700 dark:hover:bg-slate-600 px-4 py-2 rounded disabled:bg-slate-600 disabled:dark:bg-slate-500 disabled:cursor-not-allowed"
+          @click.stop.prevent="sendRental"
         >
           <p v-if="!loading && !isSendingRental">Send Rental Request</p>
           <p v-else>Sending...</p>

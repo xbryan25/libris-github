@@ -37,7 +37,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxtjs/color-mode',
-    '@nuxt/image'
+    '@nuxt/image',
+    '@nuxtjs/leaflet'
   ],
   devServer: {
     host: '127.0.0.1',
