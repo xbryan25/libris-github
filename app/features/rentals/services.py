@@ -37,6 +37,8 @@ class RentalsServices:
                 ),
                 "rental_duration_days": rental.get("rental_duration_days", 0),
                 "meetup_location": rental.get("meetup_location", ""),
+                "latitude": rental.get("latitude", 0),
+                "longitude": rental.get("longitude", 0),
                 "meetup_time_window": rental.get("meetup_time_window", ""),
                 "meetup_time": rental.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
@@ -256,6 +258,8 @@ class RentalsServices:
                 ),
                 "rental_duration_days": lending.get("rental_duration_days", 0),
                 "meetup_location": lending.get("meetup_location", ""),
+                "latitude": lending.get("latitude", 0),
+                "longitude": lending.get("longitude", 0),
                 "meetup_time_window": lending.get("meetup_time_window", ""),
                 "meetup_time": lending.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(

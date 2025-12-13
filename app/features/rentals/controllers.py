@@ -58,8 +58,6 @@ class RentalsController:
             current_user_id = get_jwt_identity()
             rental_data_json = request.get_json()
 
-            print(rental_data_json)
-
             if not rental_data_json:
                 return jsonify({"error": "Request body is required."}), 400
 
@@ -109,8 +107,6 @@ class RentalsController:
                 "actual_deposit": rental_data_json["actualDeposit"],
                 "original_owner_id": rental_data_json["ownerUserId"],
             }
-
-            print(rental_data)
 
             result = RentalsServices.create_rental_service(rental_data)
 
