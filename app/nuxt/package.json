@@ -26,6 +26,7 @@
     "@vueuse/core": "^13.9.0",
     "date-fns": "^4.1.0",
     "eslint": "^9.34.0",
+    "leaflet-control-geocoder": "^3.3.1",
     "lodash": "^4.17.21",
     "nuxt": "^4.1.0",
     "pinia": "^3.0.3",
