@@ -12,6 +12,8 @@ class PurchasesQueries:
             all_fees_captured,
             meetup_time_window,
             meetup_location,
+            latitude,
+            longitude,
             meetup_date
         )
         VALUES (
@@ -26,6 +28,8 @@ class PurchasesQueries:
             false,  -- all_fees_captured
             %s,  -- meetup_time_window
             %s,  -- meetup_location
+            %s,  -- latitude
+            %s,  -- longitude
             %s   -- meetup_date
         )
         RETURNING purchase_id;
@@ -52,6 +56,8 @@ class PurchasesQueries:
             pb.reserved_at,
             pb.reservation_expires_at,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.meetup_date,
@@ -90,6 +96,8 @@ class PurchasesQueries:
             pb.reserved_at,
             pb.reservation_expires_at,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.meetup_date,
@@ -127,6 +135,8 @@ class PurchasesQueries:
             pb.reserved_at,
             pb.reservation_expires_at,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.meetup_date,
@@ -178,6 +188,8 @@ class PurchasesQueries:
             pb.reservation_expires_at,
             pb.meetup_date,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.pickup_confirmation_started_at,
@@ -214,6 +226,8 @@ class PurchasesQueries:
             pb.reserved_at,
             pb.reservation_expires_at,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.meetup_date,
@@ -251,6 +265,8 @@ class PurchasesQueries:
             pb.reserved_at,
             pb.reservation_expires_at,
             pb.meetup_location,
+            pb.latitude,
+            pb.longitude,
             pb.meetup_time_window,
             pb.meetup_time,
             pb.meetup_date,

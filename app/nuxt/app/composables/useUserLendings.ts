@@ -17,6 +17,8 @@ export type Lending = {
   reservation_expires_at: string
   rental_duration_days: number
   meetup_location: string
+  latitude: number
+  longitude: number
   meetup_time_window: string
   pickup_confirmation_started_at: string
   user_confirmed_pickup: boolean

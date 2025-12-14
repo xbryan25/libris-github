@@ -28,6 +28,8 @@ export const useCreateRental = () => {
     rentalDurationDays: number
     meetupTimeWindow: string
     meetupLocation: string
+    latitude: number,
+    longitude: number,
     meetupDate: string
     actualRate: number
     actualDeposit: number

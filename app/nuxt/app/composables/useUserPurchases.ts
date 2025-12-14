@@ -14,6 +14,8 @@ export type Purchase = {
   reserved_at: string
   reservation_expires_at: string
   meetup_location: string
+  latitude: number
+  longitude: number
   meetup_time_window: string
   meetup_time: string
   meetup_date: string

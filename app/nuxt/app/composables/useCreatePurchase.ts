@@ -26,6 +26,8 @@ export const useCreatePurchase = () => {
     book_id: string
     total_buy_cost: number
     meetup_location: string
+    latitude: number
+    longitude: number
     meetup_date: string
     meetup_time_window: string
   }) => {

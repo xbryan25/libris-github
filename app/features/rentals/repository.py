@@ -264,6 +264,8 @@ class RentalsRepository:
                 - rental_duration_days
                 - meetup_time_window
                 - meetup_location
+                - latitude
+                - longitude
                 - meetup_date
                 - actual_rate
                 - actual_deposit
@@ -283,6 +285,8 @@ class RentalsRepository:
             rental_data["rental_duration_days"],
             rental_data["meetup_time_window"],
             rental_data["meetup_location"],
+            rental_data["latitude"],
+            rental_data["longitude"],
             rental_data["meetup_date"],
             rental_data["actual_rate"],
             rental_data["actual_deposit"],

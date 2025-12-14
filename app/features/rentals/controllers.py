@@ -32,6 +32,8 @@ class RentalsController:
             - rental_duration_days: Number of days to rent
             - meetup_time_window: Preferred time window for meetup
             - meetup_location: Location for meetup
+            - latitude: Latitude of the meetup location
+            - longitude: Longitude of the meetup location
             - meetup_date: Date for meetup (ISO 8601)
             - actual_rate: Daily rental rate at time of booking
             - actual_deposit: Security deposit at time of booking
@@ -56,9 +58,6 @@ class RentalsController:
             current_user_id = get_jwt_identity()
             rental_data_json = request.get_json()
 
-            print("\n\n\n--=====================")
-            print(rental_data_json)
-
             if not rental_data_json:
                 return jsonify({"error": "Request body is required."}), 400
 
@@ -68,6 +67,8 @@ class RentalsController:
                 "rentalDurationDays",
                 "meetupTimeWindow",
                 "meetupLocation",
+                "latitude",
+                "longitude",
                 "meetupDate",
                 "actualRate",
                 "actualDeposit",
@@ -99,6 +100,8 @@ class RentalsController:
                 "rental_duration_days": rental_data_json["rentalDurationDays"],
                 "meetup_time_window": rental_data_json["meetupTimeWindow"],
                 "meetup_location": rental_data_json["meetupLocation"],
+                "latitude": float(rental_data_json["latitude"]),
+                "longitude": float(rental_data_json["longitude"]),
                 "meetup_date": rental_data_json["meetupDate"],
                 "actual_rate": rental_data_json["actualRate"],
                 "actual_deposit": rental_data_json["actualDeposit"],
