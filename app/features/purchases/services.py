@@ -25,6 +25,8 @@ class PurchasesServices:
                 - total_buy_cost
                 - meetup_time_window
                 - meetup_location
+                - latitude
+                - longitude
                 - meetup_date
 
         Returns:
@@ -77,6 +79,8 @@ class PurchasesServices:
                     purchase.get("reservation_expires_at")
                 ),
                 "meetup_location": purchase.get("meetup_location", ""),
+                "latitude": purchase.get("latitude", 0),
+                "longitude": purchase.get("longitude", 0),
                 "meetup_time_window": purchase.get("meetup_time_window", ""),
                 "meetup_time": purchase.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
@@ -133,6 +137,8 @@ class PurchasesServices:
                     completed_purchase.get("reservation_expires_at")
                 ),
                 "meetup_location": completed_purchase.get("meetup_location", ""),
+                "latitude": completed_purchase.get("latitude", 0),
+                "longitude": completed_purchase.get("longitude", 0),
                 "meetup_time_window": completed_purchase.get("meetup_time_window", ""),
                 "meetup_time": completed_purchase.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
@@ -255,6 +261,8 @@ class PurchasesServices:
                     sale.get("reservation_expires_at")
                 ),
                 "meetup_location": sale.get("meetup_location", ""),
+                "latitude": sale.get("latitude", 0),
+                "longitude": sale.get("longitude", 0),
                 "meetup_time_window": sale.get("meetup_time_window", ""),
                 "meetup_time": sale.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(
@@ -308,6 +316,8 @@ class PurchasesServices:
                     completed_sale.get("reservation_expires_at")
                 ),
                 "meetup_location": completed_sale.get("meetup_location", ""),
+                "latitude": completed_sale.get("latitude", 0),
+                "longitude": completed_sale.get("longitude", 0),
                 "meetup_time_window": completed_sale.get("meetup_time_window", ""),
                 "meetup_time": completed_sale.get("meetup_time"),
                 "pickup_confirmation_started_at": DateUtils.format_datetime_to_iso(

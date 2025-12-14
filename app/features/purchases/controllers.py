@@ -31,6 +31,8 @@ class PurchasesController:
             - total_buy_cost: Total cost of purchase
             - meetup_time_window: Preferred time window for meetup
             - meetup_location: Meetup location
+            - meetup_location: Latitude of the meetup location
+            - meetup_location: Longitude of the meetup location
             - meetup_date: Date of meetup (ISO 8601)
 
         Backend defaults:
@@ -61,12 +63,15 @@ class PurchasesController:
                 "total_buy_cost",
                 "meetup_time_window",
                 "meetup_location",
+                "latitude",
+                "longitude",
                 "meetup_date",
             ]
 
             missing_fields = [
                 field for field in required_fields if not purchase_data_json.get(field)
             ]
+
             if missing_fields:
                 return (
                     jsonify(
@@ -88,6 +93,8 @@ class PurchasesController:
                 "total_buy_cost": purchase_data_json["total_buy_cost"],
                 "meetup_time_window": purchase_data_json["meetup_time_window"],
                 "meetup_location": purchase_data_json["meetup_location"],
+                "latitude": float(purchase_data_json["latitude"]),
+                "longitude": float(purchase_data_json["longitude"]),
                 "meetup_date": purchase_data_json["meetup_date"],
             }
 

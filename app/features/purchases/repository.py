@@ -22,6 +22,8 @@ class PurchasesRepository:
                 - total_buy_cost
                 - meetup_time_window
                 - meetup_location
+                - latitude
+                - longitude
                 - meetup_date
 
         Returns:
@@ -38,6 +40,8 @@ class PurchasesRepository:
             purchase_data["total_buy_cost"],
             purchase_data["meetup_time_window"],
             purchase_data["meetup_location"],
+            purchase_data["latitude"],
+            purchase_data["longitude"],
             purchase_data["meetup_date"],
         )
 
