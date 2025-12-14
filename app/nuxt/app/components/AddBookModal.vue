@@ -377,10 +377,13 @@ onMounted(async () => {
           label="Rental Duration (days)"
           name="rentalDuration"
           class="flex-1"
+          hint="Duration must be between 1 and 60 days"
         >
           <UInput
             v-model="state.rentalDuration"
             type="number"
+            min="1"
+            max="60"
             placeholder="Enter rental duration in days (e.g., 7, 14, 30)"
             class="w-full"
           />

@@ -562,6 +562,8 @@ onMounted(async () => {
             v-else
             v-model="state.rentalDuration"
             type="number"
+            min="1"
+            max="60"
             placeholder="Enter rental duration in days (e.g., 7, 14, 30)"
             class="w-full"
           />
