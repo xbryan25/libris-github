@@ -1,0 +1,1 @@
+import{_ as t}from"./Cft8twBv.js";import{_ as o}from"./DlAUqK2U.js";import{c,o as n,b as _}from"#entry";const r={},s={class:"h-screen"};function a(m,f){const e=t;return n(),c("div",s,[_(e)])}const u=o(r,[["render",a]]);export{u as default};
