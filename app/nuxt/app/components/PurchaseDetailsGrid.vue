@@ -9,19 +9,21 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const isOpenMeetupLocationOnMap = ref(false);
+
 const formatDate = (dateString: string) => {
   if (!dateString) return 'N/A';
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
-}
+};
 
 const formatDateTime = (dateString: string) => {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
-  
+
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -29,9 +31,9 @@ const formatDateTime = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'UTC',
-    timeZoneName: 'short'
+    timeZoneName: 'short',
   });
-}
+};
 </script>
 
 <template>
@@ -79,8 +81,25 @@ const formatDateTime = (dateString: string) => {
           </div>
         </div>
 
-        <div>
-          <p class="text-sm text-muted">Meetup Location</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex w-full items-center">
+            <p class="text-sm text-muted flex-1">Meetup Location</p>
+            <UButton
+              class="text-sm cursor-pointer"
+              size="sm"
+              @click="isOpenMeetupLocationOnMap = true"
+              >View on map</UButton
+            >
+          </div>
+
+          <ViewMeetupLocationOnMap
+            :is-open-view-meetup-location-on-map="isOpenMeetupLocationOnMap"
+            :latitude="props.item.latitude"
+            :longitude="props.item.longitude"
+            @update:open-view-meetup-location-on-map="
+              (newVal: boolean) => (isOpenMeetupLocationOnMap = newVal)
+            "
+          />
           <p class="font-medium">{{ item.meetup_location || 'Not set' }}</p>
         </div>
       </div>
