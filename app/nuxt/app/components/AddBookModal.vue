@@ -24,6 +24,7 @@ const state = reactive({
   dailyRentPrice: 0,
   securityDeposit: 0,
   purchasePrice: 0,
+  rentalDuration: 0,
 });
 
 const toast = useToast();
@@ -51,6 +52,7 @@ const resetState = () => {
     dailyRentPrice: 0,
     securityDeposit: 0,
     purchasePrice: 0,
+    rentalDuration: 0,
   });
 };
 
@@ -81,14 +83,17 @@ const onSubmit = async () => {
     if (state.availability === 'For Rent') {
       bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
       bookFormData.append('securityDeposit', state.securityDeposit.toString());
+      bookFormData.append('rentalDuration', state.rentalDuration.toString());
       bookFormData.append('purchasePrice', (0).toString());
     } else if (state.availability === 'For Sale') {
       bookFormData.append('dailyRentPrice', (0).toString());
       bookFormData.append('securityDeposit', (0).toString());
+      bookFormData.append('rentalDuration', (0).toString());
       bookFormData.append('purchasePrice', state.purchasePrice.toString());
     } else {
       bookFormData.append('dailyRentPrice', state.dailyRentPrice.toString());
       bookFormData.append('securityDeposit', state.securityDeposit.toString());
+      bookFormData.append('rentalDuration', state.rentalDuration.toString());
       bookFormData.append('purchasePrice', state.purchasePrice.toString());
     }
 
@@ -335,7 +340,7 @@ onMounted(async () => {
             name="purchasePrice"
             class="flex-1"
           >
-            <UInput v-model="state.purchasePrice" placeholder="Add purchase price" class="w-full" />
+            <UInput v-model="state.purchasePrice" type="number" placeholder="Add purchase price" class="w-full" />
           </UFormField>
 
           <UFormField
@@ -346,6 +351,7 @@ onMounted(async () => {
           >
             <UInput
               v-model="state.dailyRentPrice"
+              type="number"
               placeholder="Add daily rent price"
               class="w-full"
             />
@@ -359,11 +365,26 @@ onMounted(async () => {
           >
             <UInput
               v-model="state.securityDeposit"
+              type="number"
               placeholder="Add security deposit"
               class="w-full"
             />
           </UFormField>
         </div>
+
+        <UFormField
+          v-if="state.availability === 'For Rent' || state.availability === 'Both'"
+          label="Rental Duration (days)"
+          name="rentalDuration"
+          class="flex-1"
+        >
+          <UInput
+            v-model="state.rentalDuration"
+            type="number"
+            placeholder="Enter rental duration in days (e.g., 7, 14, 30)"
+            class="w-full"
+          />
+        </UFormField>
 
         <div class="flex justify-end gap-2 w-full pt-5">
           <UButton

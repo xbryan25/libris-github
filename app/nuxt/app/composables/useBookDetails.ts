@@ -11,6 +11,7 @@ type BookDetails = {
   daily_rent_price: number
   security_deposit: number
   purchase_price: number
+  rental_duration: number
   owner_user_id: string
   owner_username: string
   owner_profile_picture: string
