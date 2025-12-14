@@ -218,6 +218,7 @@ class BookQueries:
             b.daily_rent_price,
             b.security_deposit,
             b.purchase_price,
+            b.rental_duration,
             u.user_id as owner_user_id,
             u.username AS owner_username,
             u.profile_image_url AS owner_profile_picture,
@@ -362,18 +363,11 @@ class BookQueries:
             daily_rent_price,
             security_deposit,
             purchase_price,
+            rental_duration,
             owner_id
         )
         VALUES (
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s,
-            %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         ) RETURNING book_id
     """
 
@@ -387,7 +381,8 @@ class BookQueries:
             availability = %s,
             daily_rent_price = %s,
             security_deposit = %s,
-            purchase_price = %s
+            purchase_price = %s,
+            rental_duration = %s
         WHERE book_id = %s;
     """
 

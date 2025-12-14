@@ -538,6 +538,7 @@ class BookControllers:
                 "daily_rent_price": int(request.form.get("dailyRentPrice", 0) or 0),
                 "security_deposit": int(request.form.get("securityDeposit", 0) or 0),
                 "purchase_price": int(request.form.get("purchasePrice", 0) or 0),
+                "rental_duration": int(request.form.get("rentalDuration", 0) or 0),
             }
 
             book_images = request.files
@@ -580,6 +581,7 @@ class BookControllers:
                 "daily_rent_price": int(request.form.get("dailyRentPrice", 0) or 0),
                 "security_deposit": int(request.form.get("securityDeposit", 0) or 0),
                 "purchase_price": int(request.form.get("purchasePrice", 0) or 0),
+                "rental_duration": int(request.form.get("rentalDuration", 0) or 0),
             }
 
             book_images = request.files

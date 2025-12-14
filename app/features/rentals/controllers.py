@@ -64,7 +64,6 @@ class RentalsController:
             required_fields = [
                 "bookId",
                 "totalRentCost",
-                "rentalDurationDays",
                 "meetupTimeWindow",
                 "meetupLocation",
                 "latitude",
@@ -97,7 +96,6 @@ class RentalsController:
                 "reserved_at": reserved_at,
                 "reservation_expires_at": reservation_expires_at,
                 "total_rent_cost": rental_data_json["totalRentCost"],
-                "rental_duration_days": rental_data_json["rentalDurationDays"],
                 "meetup_time_window": rental_data_json["meetupTimeWindow"],
                 "meetup_location": rental_data_json["meetupLocation"],
                 "latitude": float(rental_data_json["latitude"]),
