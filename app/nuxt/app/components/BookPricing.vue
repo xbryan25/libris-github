@@ -8,6 +8,7 @@ interface Props {
   dailyRentPrice?: number
   securityDeposit?: number
   purchasePrice?: number
+  rentalDuration?: number
   bookId: string
   rentalExists: boolean
   purchaseExists: boolean
@@ -31,11 +32,9 @@ onMounted(async () => {
   }
 })
 
-
 const openRentBookModal = () => {
   emit('rent')
 };
-
 
 const openPurchaseBookModal = () => {
   emit('purchase')
@@ -82,6 +81,15 @@ const openPurchaseBookModal = () => {
             <span class="flex items-center font-bold text-accent">
                 <UIcon name="fluent:book-coins-20-regular" class="w-5 h-5"/>
                 {{ securityDeposit }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="flex items-center gap-1 text-base">
+              <UIcon name="i-heroicons-clock" class="text-base w-5 h-5" />
+              Duration
+            </span>
+            <span class="font-bold text-accent">
+              {{ rentalDuration }} {{ rentalDuration === 1 ? 'day' : 'days' }}
             </span>
           </div>
         </div>

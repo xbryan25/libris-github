@@ -271,6 +271,9 @@ class BookServices:
             "purchase_price": (
                 int(book["purchase_price"]) if book["purchase_price"] else 0
             ),
+            "rental_duration": (
+                int(book["rental_duration"]) if book["rental_duration"] else 0
+            ),
             "owner_user_id": book["owner_user_id"],
             "owner_username": book["owner_username"],
             "owner_profile_picture": book["owner_profile_picture"],

@@ -25,7 +25,6 @@ export const useCreateRental = () => {
   const createRental = async (payload: {
     bookId: string
     totalRentCost: number
-    rentalDurationDays: number
     meetupTimeWindow: string
     meetupLocation: string
     latitude: number,

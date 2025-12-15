@@ -30,6 +30,7 @@ const props = defineProps<{
   bookTitle?: string;
   dailyRentPrice?: number;
   securityDeposit?: number;
+  rentalDuration?: number;
   rentalExists: boolean;
   currentWalletBalance?: number;
   reservedAmount?: number;
@@ -47,10 +48,6 @@ const isOpenRentBookModal = computed({
   set: (val: boolean) => emit('update:openRentBookModal', val),
 });
 
-const rentOptions = ['1 day', '3 days', '5 days', '7 days', '14 days', 'Custom'];
-const selected = ref('');
-const customDays = ref<number | null>(null);
-const finalDays = ref<number | null>(null);
 const meetupDate = ref<string | null>(null);
 const meetupStartTime = ref<string | { HH: string; mm: string } | null>(null);
 const meetupEndTime = ref<string | { HH: string; mm: string } | null>(null);
@@ -92,25 +89,6 @@ watch([meetupStartTime, meetupEndTime], () => {
   validateTimeWindow();
 });
 
-watch(selected, (value) => {
-  if (value !== 'Custom') {
-    customDays.value = null;
-    finalDays.value = Number(value.split(' ')[0]);
-  }
-});
-
-function preventDecimal(event: KeyboardEvent) {
-  if (['.', 'e', '-', '+'].includes(event.key)) {
-    event.preventDefault();
-  }
-}
-
-watch(customDays, (value) => {
-  if (selected.value === 'Custom' && value) {
-    finalDays.value = Math.floor(value);
-  }
-});
-
 watch(meetupDateCalendar, (val) => {
   if (val && val < minDate) {
     meetupDateCalendar.value = minDate;
@@ -119,10 +97,10 @@ watch(meetupDateCalendar, (val) => {
 });
 
 const totalCost = computed(() => {
-  if (!finalDays.value) return 0;
   const rent = props.dailyRentPrice ?? 0;
   const deposit = props.securityDeposit ?? 0;
-  return rent * finalDays.value + deposit;
+  const days = props.rentalDuration ?? 0;
+  return rent * days + deposit;
 });
 
 const availableBalance = computed(() => {
@@ -187,7 +165,7 @@ async function sendRental() {
     await createRental({
       bookId: props.bookId,
       totalRentCost: totalCost.value,
-      rentalDurationDays: finalDays.value!,
+      // rentalDurationDays removed - comes from book now
       meetupTimeWindow: `${startStr} - ${endStr}`,
       meetupLocation: selectedAddress.value,
       latitude: selectedAddressLatitude.value as number,
@@ -236,8 +214,8 @@ async function sendRental() {
         </div>
 
         <div class="flex items-center justify-between text-sm text-base">
-          <span>Rental Period:</span>
-          <span>{{ finalDays ?? '-' }}</span>
+          <span>Rental Duration:</span>
+          <span class="font-semibold">{{ props.rentalDuration }} {{ props.rentalDuration === 1 ? 'day' : 'days' }}</span>
         </div>
 
         <USeparator orientation="horizontal" class="my-2 bg-slate-400" />
@@ -272,21 +250,8 @@ async function sendRental() {
           class="flex items-center gap-2 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm"
         >
           <Icon name="i-heroicons-exclamation-circle" class="w-5 h-5 shrink-0" />
-          <span>Insufficient wallet balance for this rental duration.</span>
+          <span>Insufficient wallet balance for this rental.</span>
         </div>
-      </div>
-      <p class="font-semibold text-base mt-4">Rental Duration</p>
-      <USelect v-model="selected" :items="rentOptions" class="w-full mt-2" />
-      <div v-if="selected === 'Custom'" class="mt-2">
-        <p class="text-sm text-gray-600">Enter custom number of days:</p>
-        <UInput
-          type="number"
-          v-model="customDays"
-          min="1"
-          placeholder="e.g., 12"
-          class="mt-1 w-full"
-          @keydown="preventDecimal"
-        />
       </div>
 
       <div class="flex flex-col gap-2 mt-4">
@@ -368,7 +333,6 @@ async function sendRental() {
             !!timeError ||
             !meetupStartTime ||
             !meetupEndTime ||
-            !finalDays ||
             !meetupDate ||
             !selectedAddress ||
             loading ||

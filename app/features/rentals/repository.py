@@ -275,6 +275,16 @@ class RentalsRepository:
         """
         db = current_app.extensions["db"]
 
+        book_duration = db.fetch_one(
+            "SELECT rental_duration FROM books WHERE book_id = %s",
+            (rental_data["book_id"],),
+        )
+
+        if not book_duration:
+            return None
+
+        rental_duration_days = book_duration["rental_duration"]
+
         params = (
             rental_data["user_id"],
             rental_data["original_owner_id"],
@@ -282,7 +292,7 @@ class RentalsRepository:
             rental_data["reserved_at"],
             rental_data["reservation_expires_at"],
             rental_data["total_rent_cost"],
-            rental_data["rental_duration_days"],
+            rental_duration_days,
             rental_data["meetup_time_window"],
             rental_data["meetup_location"],
             rental_data["latitude"],

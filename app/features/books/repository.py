@@ -554,6 +554,7 @@ class BookRepository:
             book_data["daily_rent_price"],
             book_data["security_deposit"],
             book_data["purchase_price"],
+            book_data["rental_duration"],
             user_id,
         )
 
@@ -576,6 +577,7 @@ class BookRepository:
             book_data["daily_rent_price"],
             book_data["security_deposit"],
             book_data["purchase_price"],
+            book_data["rental_duration"],
             book_id,
         )
 
